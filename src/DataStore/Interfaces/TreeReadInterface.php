@@ -7,9 +7,9 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore\Interfaces;
+namespace rollun\datastore\DataStore\Interfaces;
 
-use rolluncom\datastore\DataStore\Interfaces\ReadInterface;
+use rollun\datastore\DataStore\Interfaces\ReadInterface;
 
 /**
  * TreeRead Interface for DataStores

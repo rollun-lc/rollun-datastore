@@ -6,7 +6,7 @@
  * Time: 10:40
  */
 
-namespace rolluncom\datastore\Rql\Node;
+namespace rollun\datastore\Rql\Node;
 
 use Xiag\Rql\Parser\Node\SelectNode as StdSelectNode;
 

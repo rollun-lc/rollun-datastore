@@ -6,12 +6,12 @@
  * Time: 11:46
  */
 
-namespace rolluncom\datastore\DataStore;
+namespace rollun\datastore\DataStore;
 
 use Xiag\Rql\Parser\Query;
-use rolluncom\datastore\DataStore\Interfaces\DataSourceInterface;
-use rolluncom\datastore\DataStore\Interfaces\RefreshableInterface;
-use rolluncom\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataSourceInterface;
+use rollun\datastore\DataStore\Interfaces\RefreshableInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 
 class Cacheable implements DataStoresInterface, RefreshableInterface
 {

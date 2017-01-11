@@ -7,10 +7,10 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\TableGateway;
+namespace rollun\datastore\TableGateway;
 
-use rolluncom\datastore\DataStore\DataStoreException;
-use rolluncom\datastore\RestException;
+use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\RestException;
 use Zend\Db\Adapter;
 use Zend\Db\Metadata\Source;
 use Zend\Db\Metadata\Source\Factory;

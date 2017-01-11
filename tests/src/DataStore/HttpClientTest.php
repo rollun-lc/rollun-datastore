@@ -7,9 +7,9 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\test\datastore\DataStore;
+namespace rollun\test\datastore\DataStore;
 
-use rolluncom\test\datastore\DataStore\AbstractTest;
+use rollun\test\datastore\DataStore\AbstractTest;
 use Zend\Db\TableGateway\TableGateway;
 
 /**

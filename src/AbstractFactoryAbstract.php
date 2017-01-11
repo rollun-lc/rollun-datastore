@@ -7,11 +7,11 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore;
+namespace rollun\datastore;
 
 //use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 //uncomment it ^^ for Zend\ServiceManager V3
-use rolluncom\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 //comment it ^^ for Zend\ServiceManager V3
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -26,7 +26,7 @@ use Interop\Container\ContainerInterface;
  * <code>
  * 'DataStore' => [
  *     'TheStore' => [
- *         'class' => 'zaboy\rest\DataStore\ClassName',
+ *         'class' => 'rollun\datastore\DataStore\ClassName',
  *     ]
  * ]
  * </code>

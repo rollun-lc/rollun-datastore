@@ -6,11 +6,11 @@
  * Date: 04.07.16
  * Time: 12:51
  */
-namespace rolluncom\datastore\DataSource;
+namespace rollun\datastore\DataSource;
 
 use Xiag\Rql\Parser\Query;
-use rolluncom\datastore\DataStore\DbTable;
-use rolluncom\datastore\DataStore\Interfaces\DataSourceInterface;
+use rollun\datastore\DataStore\DbTable;
+use rollun\datastore\DataStore\Interfaces\DataSourceInterface;
 
 class DbTableDataSource extends DbTable implements DataSourceInterface
 {

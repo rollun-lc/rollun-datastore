@@ -7,14 +7,14 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore;
+namespace rollun\datastore\DataStore;
 
-use rolluncom\datastore\DataStore\DataStoreAbstract;
-use rolluncom\datastore\DataStore\DataStoreException;
-use rolluncom\datastore\DataStore\ConditionBuilder\RqlConditionBuilder;
+use rollun\datastore\DataStore\DataStoreAbstract;
+use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\ConditionBuilder\RqlConditionBuilder;
 use Xiag\Rql\Parser\Query;
 use Xiag\Rql\Parser\Node\SortNode;
-use rolluncom\datastore\Rql\RqlParser;
+use rollun\datastore\Rql\RqlParser;
 use Zend\Http\Client;
 use Zend\Http\Request;
 use Zend\Json\Json;
@@ -22,7 +22,7 @@ use Zend\Json\Json;
 /**
  * DataStores as http Client
  *
- * @uses Zend\Http\Client
+ * @uses Client
  * @see https://github.com/zendframework/zend-db
  * @see http://en.wikipedia.org/wiki/Create,_read,_update_and_delete
  * @category   rest
@@ -77,7 +77,7 @@ class HttpClient extends DataStoreAbstract
         $this->conditionBuilder = new RqlConditionBuilder;
     }
 
-//** Interface "zaboy\rest\DataStore\Interfaces\ReadInterface" **/
+//** Interface "rollun\datastore\DataStore\Interfaces\ReadInterface" **/
 
     /**
      * {@inheritdoc}
@@ -120,7 +120,7 @@ class HttpClient extends DataStoreAbstract
         return $result;
     }
 
-// ** Interface "zaboy\rest\DataStore\Interfaces\DataStoresInterface"  **/
+// ** Interface "rollun\datastore\DataStore\Interfaces\DataStoresInterface"  **/
 
     /**
      * {@inheritdoc}

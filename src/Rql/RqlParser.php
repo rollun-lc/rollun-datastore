@@ -6,7 +6,7 @@
  * Time: 16:34
  */
 
-namespace rolluncom\datastore\Rql;
+namespace rollun\datastore\Rql;
 
 use Xiag\Rql\Parser\ExpressionParser;
 use Xiag\Rql\Parser\Lexer;
@@ -16,12 +16,12 @@ use Xiag\Rql\Parser\Query;
 use Xiag\Rql\Parser\TokenParser;
 use Xiag\Rql\Parser\TokenParserGroup;
 use Xiag\Rql\Parser\TypeCaster;
-use rolluncom\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
-use rolluncom\datastore\DataStore\ConditionBuilder\RqlConditionBuilder;
-use rolluncom\datastore\DataStore\DataStoreAbstract;
-use rolluncom\datastore\Rql\TokenParser\Query\Basic\ScalarOperator\MatchTokenParser as BasicMatchTokenParser;
-use rolluncom\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\MatchTokenParser as FiqlMatchTokenParser;
-use rolluncom\datastore\Rql\TokenParser\SelectTokenParser;
+use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
+use rollun\datastore\DataStore\ConditionBuilder\RqlConditionBuilder;
+use rollun\datastore\DataStore\DataStoreAbstract;
+use rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator\MatchTokenParser as BasicMatchTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\MatchTokenParser as FiqlMatchTokenParser;
+use rollun\datastore\Rql\TokenParser\SelectTokenParser;
 
 class RqlParser
 {

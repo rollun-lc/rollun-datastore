@@ -6,7 +6,7 @@
  * Time: 11:43 AM
  */
 
-namespace rolluncom\datastore\Rql;
+namespace rollun\datastore\Rql;
 
 use Xiag\Rql\Parser\Query;
 

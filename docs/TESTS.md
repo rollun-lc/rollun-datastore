@@ -12,7 +12,7 @@
 	return [
 	  "dataStore" => [
 	      'testHttpClient' => [
-	          'class' => 'zaboy\rest\DataStore\HttpClient',
+	          'class' => 'rollun\datastore\DataStore\HttpClient',
 	          'tableName' => 'test_res_http',
 	          'url' => 'http://localhost/api/rest/test_res_http',
 	          'options' => ['timeout' => 30]

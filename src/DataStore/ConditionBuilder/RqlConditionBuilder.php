@@ -7,9 +7,9 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore\ConditionBuilder;
+namespace rollun\datastore\DataStore\ConditionBuilder;
 
-use rolluncom\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
+use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
 use Xiag\Rql\Parser\DataType\Glob;
 
 /**

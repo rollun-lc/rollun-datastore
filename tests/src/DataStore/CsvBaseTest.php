@@ -1,10 +1,10 @@
 <?php
 
-namespace rolluncom\test\datastore\DataStore;
+namespace rollun\test\datastore\DataStore;
 
 use Symfony\Component\Filesystem\LockHandler;
-use rolluncom\datastore\DataStore\CsvBase;
-use rolluncom\test\datastore\DataStore\AbstractTest;
+use rollun\datastore\DataStore\CsvBase;
+use rollun\test\datastore\DataStore\AbstractTest;
 
 class CsvBaseTest extends AbstractTest
 {

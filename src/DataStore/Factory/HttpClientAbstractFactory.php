@@ -7,11 +7,11 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore\Factory;
+namespace rollun\datastore\DataStore\Factory;
 
 use Interop\Container\ContainerInterface;
-use rolluncom\datastore\DataStore\DataStoreException;
-use rolluncom\datastore\DataStore\HttpClient;
+use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\HttpClient;
 
 /**
  * Create and return an instance of the DataStore which based on Http Client
@@ -21,7 +21,7 @@ use rolluncom\datastore\DataStore\HttpClient;
  * 'DataStore' => [
  *
  *     'HttpClient' => [
- *         'class' => 'zaboy\rest\DataStore\HttpDatastoreClassname',
+ *         'class' => 'rollun\datastore\DataStore\HttpDatastoreClassname',
  *          'url' => 'http://site.com/api/resource-name',
  *          'options' => ['timeout' => 30]
  *     ]

@@ -6,7 +6,7 @@
  * Time: 14:08
  */
 
-namespace rolluncom\test\datastore\DataStore\Factory;
+namespace rollun\test\datastore\DataStore\Factory;
 
 class CacheableStoreAbstractFactoryTest extends \PHPUnit_Framework_TestCase
 {
@@ -38,7 +38,7 @@ class CacheableStoreAbstractFactoryTest extends \PHPUnit_Framework_TestCase
         $container = include 'config/container.php';
         $this->object = $container->get('testCacheable');
         $this->assertSame(
-            get_class($returnedResponse = $this->object), 'rolluncom\datastore\DataStore\Cacheable'
+            get_class($returnedResponse = $this->object), 'rollun\datastore\DataStore\Cacheable'
         );
     }
 }

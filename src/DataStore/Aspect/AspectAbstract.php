@@ -1,9 +1,9 @@
 <?php
 
-namespace rolluncom\datastore\DataStore\Aspect;
+namespace rollun\datastore\DataStore\Aspect;
 
 use Xiag\Rql\Parser\Query;
-use rolluncom\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 
 /**
  * Class AspectAbstract
@@ -14,8 +14,8 @@ use rolluncom\datastore\DataStore\Interfaces\DataStoresInterface;
  * The class is NOT abstract. It is so named because in this view it does nothing and have no difference at work
  * with usual datastore any type.
  *
- * @see zaboy\rest\DataStore\Aspect\Factory\AspectAbstractFactory
- * @package zaboy\rest\DataStore\Aspect
+ * @see AspectAbstractFactory
+ * @package rollun\datastore\DataStore\Aspect
  */
 class AspectAbstract implements DataStoresInterface
 {

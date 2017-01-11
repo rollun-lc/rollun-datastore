@@ -6,7 +6,7 @@
  * Time: 2:16 PM
  */
 
-namespace rolluncom\test\datastore\DataStore\Eav;
+namespace rollun\test\datastore\DataStore\Eav;
 
 use Interop\Container\ContainerInterface;
 use Xiag\Rql\Parser\DataType\DateTime;
@@ -15,12 +15,12 @@ use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
-use rolluncom\datastore\DataStore\DataStoreException;
-use rolluncom\datastore\DataStore\Eav\Entity;
-use rolluncom\datastore\DataStore\Eav\Example\StoreCatalog;
-use rolluncom\datastore\DataStore\Eav\Prop;
-use rolluncom\datastore\DataStore\Eav\SysEntities;
-use rolluncom\datastore\Rql\Node\AggregateFunctionNode;
+use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\Eav\Entity;
+use rollun\datastore\DataStore\Eav\Example\StoreCatalog;
+use rollun\datastore\DataStore\Eav\Prop;
+use rollun\datastore\DataStore\Eav\SysEntities;
+use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use Zend\Db\TableGateway\TableGateway;
 
 abstract class EntityTestAbstract extends \PHPUnit_Framework_TestCase

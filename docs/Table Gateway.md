@@ -4,7 +4,7 @@
 Пример:
 ```php
     'test_res_tablle' => [
-            'sql' => 'zaboy\rest\TableGateway\DbSql\MultiInsertSql',
+            'sql' => 'rollun\datastore\TableGateway\DbSql\MultiInsertSql',
             'adapter' => 'db'
         ],
 ```

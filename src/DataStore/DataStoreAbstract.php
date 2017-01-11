@@ -7,16 +7,16 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore;
+namespace rollun\datastore\DataStore;
 
-use rolluncom\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
+use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
 use Xiag\Rql\Parser\Node;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
-use rolluncom\datastore\DataStore\Interfaces\DataStoresInterface;
-use rolluncom\datastore\DataStore\Iterators\DataStoreIterator;
-use rolluncom\datastore\Rql\Node\AggregateFunctionNode;
+use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Iterators\DataStoreIterator;
+use rollun\datastore\Rql\Node\AggregateFunctionNode;
 
 /**
  * Abstract class for DataStores
@@ -39,7 +39,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
      */
     protected $conditionBuilder;
 
-//** Interface "zaboy\rest\DataStore\Interfaces\ReadInterface" **/
+//** Interface "rollun\datastore\DataStore\Interfaces\ReadInterface" **/
 
     /**
      * {@inheritdoc}
@@ -96,7 +96,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
         }
     }
 
-// ** Interface "zaboy\rest\DataStore\Interfaces\DataStoresInterface"  **/
+// ** Interface "rollun\datastore\DataStore\Interfaces\DataStoresInterface"  **/
 
     /**
      * {@inheritdoc}

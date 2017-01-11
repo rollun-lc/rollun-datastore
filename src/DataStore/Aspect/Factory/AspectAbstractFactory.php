@@ -1,12 +1,12 @@
 <?php
 
-namespace rolluncom\datastore\DataStore\Aspect\Factory;
+namespace rollun\datastore\DataStore\Aspect\Factory;
 
 use Interop\Container\ContainerInterface;
-use rolluncom\datastore\AbstractFactoryAbstract;
-use rolluncom\datastore\DataStore\Aspect\AspectAbstract;
-use rolluncom\datastore\DataStore\DataStoreException;
-use rolluncom\datastore\DataStore\Factory\AbstractDataStoreFactory;
+use rollun\datastore\AbstractFactoryAbstract;
+use rollun\datastore\DataStore\Aspect\AspectAbstract;
+use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\Factory\AbstractDataStoreFactory;
 
 /**
  * Create and return an instance of the DataStore which based on AspectAbstract
@@ -16,7 +16,7 @@ use rolluncom\datastore\DataStore\Factory\AbstractDataStoreFactory;
  * 'DataStore' => [
  *
  *     'real_service_name_for_aspect_datastore' => [
- *         'class' => 'zaboy\rest\DataStore\Aspect\AspectAbstract',
+ *         'class' => 'rollun\datastore\DataStore\Aspect\AspectAbstract',
  *         'dataStore' => 'real_service_name_of_any_type_of_datastore'  // this service must be exist
  *     ]
  * ]

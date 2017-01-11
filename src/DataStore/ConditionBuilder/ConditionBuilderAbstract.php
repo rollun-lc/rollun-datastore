@@ -7,14 +7,14 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore\ConditionBuilder;
+namespace rollun\datastore\DataStore\ConditionBuilder;
 
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node\AbstractQueryNode;
 use Xiag\Rql\Parser\Node\Query\AbstractArrayOperatorNode;
 use Xiag\Rql\Parser\Node\Query\AbstractLogicOperatorNode;
 use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
-use rolluncom\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\DataStoreException;
 
 /**
  * Make string with conditions for Query
@@ -22,9 +22,9 @@ use rolluncom\datastore\DataStore\DataStoreException;
  * Format of this string depends on implementation
  *
  * @todo Data type fore Xiag\Rql\Parser\DataType\DateTime
- * @see zaboy\rest\DataStore\ConditionBuilder\PhpConditionBuilder
- * @see zaboy\rest\DataStore\ConditionBuilder\PhpConditionBuilder
- * @see zaboy\rest\DataStore\ConditionBuilder\SqlConditionBuilder
+ * @see PhpConditionBuilder
+ * @see PhpConditionBuilder
+ * @see SqlConditionBuilder
  * @category   rest
  * @package    zaboy
  */
@@ -149,7 +149,7 @@ abstract class ConditionBuilderAbstract
      * I have no idea why, but Xiag\Rql\Parser\DataType\Glob
      * have not method getValue(). We fix it/
      *
-     * @see Xiag\Rql\Parser\DataType\Glob
+     * @see Glob
      * @param Glob $globNode
      * @return string
      */

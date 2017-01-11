@@ -6,7 +6,7 @@
  * Time: 13:39
  */
 
-namespace rolluncom\datastore\TableGateway\DbSql;
+namespace rollun\datastore\TableGateway\DbSql;
 
 use Zend\Db\Sql\Exception\InvalidArgumentException;
 use Zend\Db\Sql\Sql;

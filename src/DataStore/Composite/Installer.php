@@ -6,16 +6,16 @@
  * Time: 1:16 PM
  */
 
-namespace rolluncom\datastore\DataStore\Composite;
+namespace rollun\datastore\DataStore\Composite;
 
 use Composer\IO\IOInterface;
 use Interop\Container\ContainerInterface;
-use rolluncom\installer\Install\InstallerAbstract;
-use rolluncom\datastore\DataStore\Composite\Example\Store;
-use rolluncom\datastore\DataStore\DbTable;
-use rolluncom\datastore\TableGateway\DbSql\MultiInsertSql;
+use rollun\datastore\DataStore\Composite\Example\Store;
+use rollun\datastore\DataStore\DbTable;
+use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
+use rollun\installer\Install\InstallerAbstract;
 use Zend\Db\Adapter\AdapterInterface;
-use rolluncom\datastore\TableGateway\TableManagerMysql as TableManager;
+use rollun\datastore\TableGateway\TableManagerMysql as TableManager;
 use Zend\Db\TableGateway\TableGateway;
 
 class Installer extends InstallerAbstract

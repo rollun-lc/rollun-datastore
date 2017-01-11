@@ -30,18 +30,18 @@
     return [
         "dataStore" => [
             'testHttpClient' => [
-                'class' => 'zaboy\rest\DataStore\HttpClient',
+                'class' => 'rollun\datastore\DataStore\HttpClient',
                 'tableName' => 'test_res_http',
                 'url' => 'http://localhost/api/rest/test_res_http',
                 'options' => ['timeout' => 30]
             ],
             'testEavOverHttpClient' => [
-                'class' => 'zaboy\rest\DataStore\HttpClient',
+                'class' => 'rollun\datastore\DataStore\HttpClient',
                  'url' => 'http://localhost/api/rest/entity_product',
                  'options' => ['timeout' => 30]
             ],
             'testEavOverHttpDbClient' => [
-                        'class' => 'zaboy\rest\DataStore\HttpClient',
+                        'class' => 'rollun\datastore\DataStore\HttpClient',
                         'url' => 'http://localhost:9090/api/rest/db'. EavAbstractFactory::DB_NAME_DELIMITER . 'entity_product',
                         'options' => ['timeout' => 30]
                    ],

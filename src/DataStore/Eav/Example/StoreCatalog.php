@@ -7,12 +7,12 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore\Eav\Example;
+namespace rollun\datastore\DataStore\Eav\Example;
 
-use rolluncom\datastore\DataStore\DbTable;
-use rolluncom\datastore\DataStore\Eav\SysEntities;
-use rolluncom\datastore\DataStore\Eav\Entity;
-use rolluncom\datastore\TableGateway\TableManagerMysql as TableManager;
+use rollun\datastore\DataStore\DbTable;
+use rollun\datastore\DataStore\Eav\SysEntities;
+use rollun\datastore\DataStore\Eav\Entity;
+use rollun\datastore\TableGateway\TableManagerMysql as TableManager;
 
 /**
  *

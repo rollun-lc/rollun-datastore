@@ -7,10 +7,10 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\TableGateway\Factory;
+namespace rollun\datastore\TableGateway\Factory;
 
 use Interop\Container\ContainerInterface;
-use rolluncom\datastore\AbstractFactoryAbstract;
+use rollun\datastore\AbstractFactoryAbstract;
 use Zend\Db\Metadata\Metadata;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -97,7 +97,7 @@ class TableGatewayAbstractFactory extends AbstractFactoryAbstract
      * @param  ContainerInterface $container
      * @param  string $requestedName
      * @param  array $options
-     * @return \zaboy\rest\DataStore\Interfaces\DataStoresInterface|TableGateway
+     * @return \rollun\datastore\DataStore\Interfaces\DataStoresInterface|TableGateway
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {

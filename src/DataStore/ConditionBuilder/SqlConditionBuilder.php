@@ -7,11 +7,11 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore\ConditionBuilder;
+namespace rollun\datastore\DataStore\ConditionBuilder;
 
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
-use rolluncom\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\DataStoreException;
 use Zend\Db\Adapter\AdapterInterface;
 
 /**

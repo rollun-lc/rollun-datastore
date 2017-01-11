@@ -7,13 +7,13 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\Middleware\Factory;
+namespace rollun\datastore\Middleware\Factory;
 
-use rolluncom\datastore\DataStore\DataStoreException;
-use rolluncom\datastore\Middleware\DataStoreAbstract;
+use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\Middleware\DataStoreAbstract;
 use Zend\Stratigility\MiddlewareInterface;
 use Interop\Container\ContainerInterface;
-use rolluncom\datastore\AbstractFactoryAbstract;
+use rollun\datastore\AbstractFactoryAbstract;
 
 /**
  * Factory for middleware which contane DataStore
@@ -22,12 +22,12 @@ use rolluncom\datastore\AbstractFactoryAbstract;
  * <code>
  *  'middleware' => [
  *      'MiddlewareName' => [
- *          'class' =>'zaboy\rest\MiddlewareType',
- *          'dataStore' => 'zaboy\rest\DataStore\Type'
+ *          'class' =>'rollun\datastore\MiddlewareType',
+ *          'dataStore' => 'rollun\datastore\DataStore\Type'
  *      ],
  *      'MiddlewareAnotherName' => [
- *          'class' =>'zaboy\rest\MiddlewareAnotherType',
- *          'dataStore' => 'zaboy\rest\DataStore\AnotherType'
+ *          'class' =>'rollun\datastore\MiddlewareAnotherType',
+ *          'dataStore' => 'rollun\datastore\DataStore\AnotherType'
  *      ],
  *  ...
  *  ],

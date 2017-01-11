@@ -7,15 +7,15 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\Middleware;
+namespace rollun\datastore\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Xiag\Rql\Parser\TokenParser;
 use Xiag\Rql\Parser\TokenParser\Query;
 use Xiag\Rql\Parser\TypeCaster;
-use rolluncom\datastore\RestException;
-use rolluncom\datastore\Rql\RqlParser;
+use rollun\datastore\RestException;
+use rollun\datastore\Rql\RqlParser;
 use Zend\Stratigility\MiddlewareInterface;
 
 /**

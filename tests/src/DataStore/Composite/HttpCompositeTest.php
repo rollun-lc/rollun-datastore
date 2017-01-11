@@ -6,7 +6,7 @@
  * Time: 10:15 AM
  */
 
-namespace rolluncom\test\datastore\DataStore\Composite;
+namespace rollun\test\datastore\DataStore\Composite;
 
 class HttpCompositeTest
 {

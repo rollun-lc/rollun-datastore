@@ -1,6 +1,6 @@
 <?php
 
-namespace rolluncom\datastore\DataStore;
+namespace rollun\datastore\DataStore;
 
 use Symfony\Component\Filesystem\LockHandler;
 
@@ -89,7 +89,7 @@ class CsvIntId extends CsvBase
     /**
      * Checks integrity data
      * @return bool
-     * @throws \zaboy\rest\DataStore\DataStoreException
+     * @throws \rollun\datastore\DataStore\DataStoreException
      */
     public function checkIntegrityData()
     {

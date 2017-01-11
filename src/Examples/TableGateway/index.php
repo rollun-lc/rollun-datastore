@@ -7,7 +7,7 @@ chdir(dirname(__DIR__));
 // Setup autoloading
 require 'vendor/autoload.php';
 
-use rolluncom\datastore\TableGateway\TableManagerMysql;
+use rollun\datastore\TableGateway\TableManagerMysql;
 
 $container = include 'config/container.php';
 $tableName = 'test_create_table';

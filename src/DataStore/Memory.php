@@ -7,11 +7,11 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore;
+namespace rollun\datastore\DataStore;
 
-use rolluncom\datastore\DataStore\DataStoreAbstract;
-use rolluncom\datastore\DataStore\DataStoreException;
-use rolluncom\datastore\DataStore\ConditionBuilder\PhpConditionBuilder;
+use rollun\datastore\DataStore\DataStoreAbstract;
+use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\ConditionBuilder\PhpConditionBuilder;
 
 /**
  * DataStores as array
@@ -34,7 +34,7 @@ class Memory extends DataStoreAbstract
         $this->conditionBuilder = new PhpConditionBuilder;
     }
 
-//** Interface "zaboy\rest\DataStore\Interfaces\ReadInterface" **/
+//** Interface "rollun\datastore\DataStore\Interfaces\ReadInterface" **/
 
     /**
      * {@inheritdoc}
@@ -51,7 +51,7 @@ class Memory extends DataStoreAbstract
         }
     }
 
-// ** Interface "zaboy\rest\DataStore\Interfaces\DataStoresInterface"  **/
+// ** Interface "rollun\datastore\DataStore\Interfaces\DataStoresInterface"  **/
 
     /**
      * {@inheritdoc}

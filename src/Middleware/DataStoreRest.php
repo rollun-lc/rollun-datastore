@@ -8,18 +8,18 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\Middleware;
+namespace rollun\datastore\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Query;
-use rolluncom\datastore\DataStore\DataStoreException;
-use rolluncom\datastore\DataStore\Interfaces\RefreshableInterface;
-use rolluncom\datastore\Middleware;
-use rolluncom\datastore\RestException;
-use rolluncom\datastore\Rql\Node\AggregateFunctionNode;
-use rolluncom\datastore\Rql\Node\AggregateSelectNode;
+use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\Interfaces\RefreshableInterface;
+use rollun\datastore\Middleware;
+use rollun\datastore\RestException;
+use rollun\datastore\Rql\Node\AggregateFunctionNode;
+use rollun\datastore\Rql\Node\AggregateSelectNode;
 use Zend\Diactoros\Response\JsonResponse;
 
 /**
@@ -114,7 +114,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      * @return ResponseInterface
-     * @throws \zaboy\rest\RestException
+     * @throws \rollun\datastore\RestException
      * @internal param callable|null $next
      */
     public function methodGetWithoutId(ServerRequestInterface $request, ResponseInterface $response)
@@ -193,7 +193,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      * @return ResponseInterface
-     * @throws \zaboy\rest\RestException
+     * @throws \rollun\datastore\RestException
      * @internal param callable|null $next
      */
     public function methodPutWithId(ServerRequestInterface $request, ResponseInterface $response)
@@ -224,7 +224,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      * @return ResponseInterface
-     * @throws \zaboy\rest\RestException
+     * @throws \rollun\datastore\RestException
      * @internal param callable|null $next
      */
     public function methodPostWithId(ServerRequestInterface $request, ResponseInterface $response)
@@ -263,7 +263,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      * @return ResponseInterface
-     * @throws \zaboy\rest\RestException
+     * @throws \rollun\datastore\RestException
      * @internal param callable|null $next
      */
     public function methodPostWithoutId(ServerRequestInterface $request, ResponseInterface $response)

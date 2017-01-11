@@ -6,7 +6,7 @@
  * Time: 12:18 PM
  */
 
-namespace rolluncom\datastore\Middleware;
+namespace rollun\datastore\Middleware;
 
 
 use Psr\Http\Message\ResponseInterface as Response;

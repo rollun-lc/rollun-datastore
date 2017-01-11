@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "0597b4937b382674d640adca6d7d11cc",
-    "content-hash": "296260757e93d6315509af91f38f6875",
+    "hash": "a84d82a87cde999246c52590257c0f75",
+    "content-hash": "cb8074aa338a064aea19522382bee07d",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -1142,17 +1142,17 @@
             "time": "2016-10-10 12:19:37"
         },
         {
-            "name": "rollun-com/installer",
+            "name": "rollun-com/rollun-installer",
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/rollun-com/installer.git",
-                "reference": "491ffb9ae2d21bc96b2f5bb03361b2253d87be2a"
+                "url": "https://github.com/rollun-com/rollun-installer.git",
+                "reference": "f18945e9d008ed58f100f449bfa0592d622f71b1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rollun-com/installer/zipball/491ffb9ae2d21bc96b2f5bb03361b2253d87be2a",
-                "reference": "491ffb9ae2d21bc96b2f5bb03361b2253d87be2a",
+                "url": "https://api.github.com/repos/rollun-com/rollun-installer/zipball/f18945e9d008ed58f100f449bfa0592d622f71b1",
+                "reference": "f18945e9d008ed58f100f449bfa0592d622f71b1",
                 "shasum": ""
             },
             "require": {
@@ -1172,7 +1172,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "rolluncom\\installer\\": "src/"
+                    "rollun\\installer\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1190,7 +1190,7 @@
                 }
             ],
             "description": "Installer",
-            "time": "2017-01-10 15:13:03"
+            "time": "2017-01-11 09:44:07"
         },
         {
             "name": "sebastian/comparator",
@@ -2809,7 +2809,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "rollun-com/installer": 20
+        "rollun-com/rollun-installer": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

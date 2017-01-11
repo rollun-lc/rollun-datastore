@@ -7,18 +7,18 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore\Eav;
+namespace rollun\datastore\DataStore\Eav;
 
 use Composer\IO\IOInterface;
 use Interop\Container\ContainerInterface;
-use rolluncom\installer\Install\InstallerAbstract;
-use rolluncom\datastore\DataStore\DbTable;
-use rolluncom\datastore\TableGateway\DbSql\MultiInsertSql;
+use rollun\installer\Install\InstallerAbstract;
+use rollun\datastore\DataStore\DbTable;
+use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use Zend\Db\Adapter\AdapterInterface;
-use rolluncom\datastore\TableGateway\TableManagerMysql as TableManager;
-use rolluncom\datastore\DataStore\Eav\SysEntities;
-use rolluncom\datastore\DataStore\Eav\Example\StoreCatalog;
-use rolluncom\datastore\DataStore\Eav\EavAbstractFactory;
+use rollun\datastore\TableGateway\TableManagerMysql as TableManager;
+use rollun\datastore\DataStore\Eav\SysEntities;
+use rollun\datastore\DataStore\Eav\Example\StoreCatalog;
+use rollun\datastore\DataStore\Eav\EavAbstractFactory;
 use Zend\Db\TableGateway\TableGateway;
 
 /**

@@ -6,7 +6,7 @@
  * Time: 2:21 PM
  */
 
-namespace rolluncom\test\datastore\DataStore\Eav;
+namespace rollun\test\datastore\DataStore\Eav;
 
 
 class EntityHttpTest extends EntityTestAbstract

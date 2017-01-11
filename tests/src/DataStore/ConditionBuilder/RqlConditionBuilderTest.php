@@ -6,12 +6,12 @@
  * Time: 12:59
  */
 
-namespace rolluncom\test\datastore\DataStore\ConditionBuilder;
+namespace rollun\test\datastore\DataStore\ConditionBuilder;
 
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node;
 use Xiag\Rql\Parser\QueryBuilder;
-use rolluncom\datastore\DataStore\ConditionBuilder\RqlConditionBuilder;
+use rollun\datastore\DataStore\ConditionBuilder\RqlConditionBuilder;
 
 class RqlConditionBuilderTest extends ConditionBuilderTest
 {

@@ -1,9 +1,9 @@
 <?php
 
-namespace rolluncom\datastore\rest\Middleware;
+namespace rollun\datastore\rest\Middleware;
 
-use rolluncom\datastore\DataStore\Memory;
-use rolluncom\datastore\Examples\Middleware\DataStoreMemory;
+use rollun\datastore\DataStore\Memory;
+use rollun\datastore\Examples\Middleware\DataStoreMemory;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
 

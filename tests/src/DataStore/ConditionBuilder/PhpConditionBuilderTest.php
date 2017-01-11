@@ -7,12 +7,12 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\test\datastore\DataStore\ConditionBuilder;
+namespace rollun\test\datastore\DataStore\ConditionBuilder;
 
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node;
 use Xiag\Rql\Parser\QueryBuilder;
-use rolluncom\datastore\DataStore\ConditionBuilder\PhpConditionBuilder;
+use rollun\datastore\DataStore\ConditionBuilder\PhpConditionBuilder;
 
 class PhpConditionBuilderTest extends ConditionBuilderTest
 {

@@ -7,11 +7,11 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\Middleware;
+namespace rollun\datastore\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use rolluncom\datastore\RestException;
+use rollun\datastore\RestException;
 use Zend\Stratigility\MiddlewareInterface;
 use Zend\Diactoros\Response\JsonResponse;
 use Zend\Escaper\Escaper;
@@ -35,7 +35,7 @@ class ResponseEncoder implements MiddlewareInterface
      * @param ResponseInterface $response
      * @param callable|null $next
      * @return ResponseInterface
-     * @throws \zaboy\rest\RestException
+     * @throws \rollun\datastore\RestException
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
     {

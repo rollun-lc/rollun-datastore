@@ -1,5 +1,5 @@
 {
-  "name": "rollun-com/datastore",
+  "name": "rollun-com/rollun-datastore",
   "description": "Datastore",
   "license": "proprietary",
   "authors": [
@@ -27,24 +27,24 @@
     "symfony/filesystem": ">=2.7",
     "phpunit/phpunit": "^4.0",
     "psr/log": "^1.0",
-    "rollun-com/installer": "dev-master"
+    "rollun-com/rollun-installer": "dev-master"
   },
   "require-dev": {
     "phpunit/phpunit": "^4.0"
   },
   "autoload": {
     "psr-4": {
-      "rolluncom\\datastore\\": "src/"
+      "rollun\\datastore\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "rolluncom\\test\\datastore\\": "tests/src"
+      "rollun\\test\\datastore\\": "tests/src"
     }
   },
   "scripts": {
-    "lib-install": "rolluncom\\installer\\Command::install",
-    "lib-uninstall": "rolluncom\\installer\\Command::uninstall",
-    "lib-reinstall": "rolluncom\\installer\\Command::reinstall"
+    "lib-install": "rollun\\installer\\Command::install",
+    "lib-uninstall": "rollun\\installer\\Command::uninstall",
+    "lib-reinstall": "rollun\\installer\\Command::reinstall"
   }
 }

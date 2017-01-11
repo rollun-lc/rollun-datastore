@@ -7,7 +7,7 @@
  * Time: 13:36
  */
 
-namespace rolluncom\datastore\TableGateway\DbSql;
+namespace rollun\datastore\TableGateway\DbSql;
 
 use Zend\Db\Adapter\Driver\DriverInterface;
 use Zend\Db\Adapter\ParameterContainer;

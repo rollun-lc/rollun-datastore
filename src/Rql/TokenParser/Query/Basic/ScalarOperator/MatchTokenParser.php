@@ -6,7 +6,7 @@
  * Date: 14.07.16
  * Time: 14:53
  */
-namespace rolluncom\datastore\Rql\TokenParser\Query\Basic\ScalarOperator;
+namespace rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator;
 
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\LikeNode;
 use Xiag\Rql\Parser\TokenParser\Query\Basic\AbstractScalarOperatorTokenParser;

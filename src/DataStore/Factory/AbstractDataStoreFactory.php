@@ -7,12 +7,12 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore\Factory;
+namespace rollun\datastore\DataStore\Factory;
 
 use Interop\Container\ContainerInterface;
-use rolluncom\datastore\AbstractFactoryAbstract;
-use rolluncom\datastore\DataStore\DataStoreAbstract;
-use rolluncom\datastore\DataStore\DataStoreException;
+use rollun\datastore\AbstractFactoryAbstract;
+use rollun\datastore\DataStore\DataStoreAbstract;
+use rollun\datastore\DataStore\DataStoreException;
 
 abstract class AbstractDataStoreFactory extends AbstractFactoryAbstract
 {

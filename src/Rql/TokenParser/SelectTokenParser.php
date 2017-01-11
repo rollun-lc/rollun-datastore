@@ -7,15 +7,15 @@
  * Time: 10:29
  */
 
-namespace rolluncom\datastore\Rql\TokenParser;
+namespace rollun\datastore\Rql\TokenParser;
 
 use Xiag\Rql\Parser\AbstractNode;
 use Xiag\Rql\Parser\AbstractTokenParser;
 use Xiag\Rql\Parser\Exception\SyntaxErrorException;
 use Xiag\Rql\Parser\Token;
 use Xiag\Rql\Parser\TokenStream;
-use rolluncom\datastore\Rql\Node\AggregateFunctionNode;
-use rolluncom\datastore\Rql\Node\AggregateSelectNode;
+use rollun\datastore\Rql\Node\AggregateFunctionNode;
+use rollun\datastore\Rql\Node\AggregateSelectNode;
 
 
 class SelectTokenParser extends AbstractTokenParser

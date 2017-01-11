@@ -7,11 +7,11 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore\Factory;
+namespace rollun\datastore\DataStore\Factory;
 
 use Interop\Container\ContainerInterface;
-use rolluncom\datastore\DataStore\Cacheable;
-use rolluncom\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\Cacheable;
+use rollun\datastore\DataStore\DataStoreException;
 
 class CacheableAbstractFactory extends AbstractDataStoreFactory
 {

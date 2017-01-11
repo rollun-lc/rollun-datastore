@@ -7,13 +7,13 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore;
+namespace rollun\datastore\DataStore;
 
 use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
-use rolluncom\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
-use rolluncom\datastore\DataStore\Interfaces\SqlQueryGetterInterface;
-use rolluncom\datastore\Rql\Node\AggregateFunctionNode;
+use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
+use rollun\datastore\DataStore\Interfaces\SqlQueryGetterInterface;
+use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Predicate\Expression;
@@ -48,7 +48,7 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         $this->dbTable = $dbTable;
     }
 
-//** Interface "zaboy\rest\DataStore\Interfaces\ReadInterface" **/
+//** Interface "rollun\datastore\DataStore\Interfaces\ReadInterface" **/
 
     /**
      * {@inheritdoc}
@@ -238,7 +238,7 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         }
     }
 
-// ** Interface "zaboy\rest\DataStore\Interfaces\DataStoresInterface"  **/
+// ** Interface "rollun\datastore\DataStore\Interfaces\DataStoresInterface"  **/
 
     /**
      * {@inheritdoc}

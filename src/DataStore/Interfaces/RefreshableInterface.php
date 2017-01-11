@@ -6,9 +6,9 @@
  * Time: 11:42
  */
 
-namespace rolluncom\datastore\DataStore\Interfaces;
+namespace rollun\datastore\DataStore\Interfaces;
 
-use rolluncom\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\DataStoreException;
 
 interface RefreshableInterface
 {

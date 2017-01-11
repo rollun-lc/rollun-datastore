@@ -1,16 +1,16 @@
 <?php
 
-use rolluncom\datastore\DataStore\Eav\EavAbstractFactory;
-use rolluncom\datastore\TableGateway\Factory\TableManagerMysqlFactory;
-use rolluncom\datastore\DataStore\Aspect\Factory\AspectAbstractFactory;
-use rolluncom\datastore\Middleware\Factory\DataStoreAbstractFactory as MiddlewareDataStoreAbstractFactory;
-use rolluncom\datastore\DataStore\Factory\HttpClientAbstractFactory;
-use rolluncom\datastore\DataStore\Factory\DbTableAbstractFactory;
-use rolluncom\datastore\DataStore\Factory\CsvAbstractFactory;
-use rolluncom\datastore\DataStore\Factory\MemoryAbstractFactory;
-use rolluncom\datastore\DataStore\Factory\CacheableAbstractFactory;
+use rollun\datastore\DataStore\Eav\EavAbstractFactory;
+use rollun\datastore\TableGateway\Factory\TableManagerMysqlFactory;
+use rollun\datastore\DataStore\Aspect\Factory\AspectAbstractFactory;
+use rollun\datastore\Middleware\Factory\DataStoreAbstractFactory as MiddlewareDataStoreAbstractFactory;
+use rollun\datastore\DataStore\Factory\HttpClientAbstractFactory;
+use rollun\datastore\DataStore\Factory\DbTableAbstractFactory;
+use rollun\datastore\DataStore\Factory\CsvAbstractFactory;
+use rollun\datastore\DataStore\Factory\MemoryAbstractFactory;
+use rollun\datastore\DataStore\Factory\CacheableAbstractFactory;
 use Zend\Db\Adapter\AdapterAbstractServiceFactory;
-use rolluncom\datastore\TableGateway\Factory\TableGatewayAbstractFactory;
+use rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory;
 
 return [
 

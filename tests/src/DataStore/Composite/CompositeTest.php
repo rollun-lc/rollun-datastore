@@ -6,12 +6,12 @@
  * Time: 1:35 PM
  */
 
-namespace rolluncom\test\datastore\DataStore\Composite;
+namespace rollun\test\datastore\DataStore\Composite;
 
 use Interop\Container\ContainerInterface;
 use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Query;
-use rolluncom\datastore\DataStore\Composite\Composite;
+use rollun\datastore\DataStore\Composite\Composite;
 
 class CompositeTest
 {

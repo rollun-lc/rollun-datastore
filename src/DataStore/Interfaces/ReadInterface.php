@@ -7,7 +7,7 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore\Interfaces;
+namespace rollun\datastore\DataStore\Interfaces;
 
 use Xiag\Rql\Parser\Query;
 

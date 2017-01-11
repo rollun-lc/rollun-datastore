@@ -6,7 +6,7 @@
  * Time: 10:51 AM
  */
 
-namespace rolluncom\test\datastore\RqlParser;
+namespace rollun\test\datastore\RqlParser;
 
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;
@@ -17,8 +17,8 @@ use Xiag\Rql\Parser\Node\Query\ScalarOperator\LtNode;
 use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
-use rolluncom\datastore\Rql\Node\AggregateSelectNode;
-use rolluncom\datastore\Rql\RqlQuery;
+use rollun\datastore\Rql\Node\AggregateSelectNode;
+use rollun\datastore\Rql\RqlQuery;
 use Zend\Db\Adapter\Platform\Oracle;
 
 

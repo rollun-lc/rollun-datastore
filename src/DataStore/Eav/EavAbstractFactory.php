@@ -7,12 +7,12 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore\Eav;
+namespace rollun\datastore\DataStore\Eav;
 
 use Interop\Container\ContainerInterface;
-use rolluncom\datastore\DataStore\DataStoreException;
-use rolluncom\datastore\DataStore\Factory\AbstractDataStoreFactory;
-use rolluncom\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\Factory\AbstractDataStoreFactory;
+use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use Zend\Db\Adapter\AdapterInterface;
 use Zend\Db\TableGateway\TableGateway;
 

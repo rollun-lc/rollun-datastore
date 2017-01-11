@@ -7,7 +7,7 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\Pipe;
+namespace rollun\datastore\Pipe;
 
 use Zend\Stratigility\MiddlewarePipe;
 

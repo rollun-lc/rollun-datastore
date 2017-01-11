@@ -8,8 +8,8 @@ require 'vendor/autoload.php';
 require_once 'config/env_configurator.php';
 
 use Zend\Diactoros\Server;
-use rolluncom\datastore\Pipe\MiddlewarePipeOptions;
-use rolluncom\datastore\Pipe\Factory\RestRqlFactory;
+use rollun\datastore\Pipe\MiddlewarePipeOptions;
+use rollun\datastore\Pipe\Factory\RestRqlFactory;
 use Zend\Stratigility\Middleware\ErrorHandler;
 use Zend\Stratigility\Middleware\NotFoundHandler;
 use Zend\Stratigility\NoopFinalHandler;

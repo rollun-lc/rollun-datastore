@@ -7,11 +7,11 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore\Eav;
+namespace rollun\datastore\DataStore\Eav;
 
-use rolluncom\datastore\DataStore\DataStoreException;
-use rolluncom\datastore\DataStore\DbTable;
-use rolluncom\datastore\TableGateway\TableManagerMysql;
+use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\DbTable;
+use rollun\datastore\TableGateway\TableManagerMysql;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Metadata\Source\Factory;
 

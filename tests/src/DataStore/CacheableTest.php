@@ -6,11 +6,11 @@
  * Time: 12:32
  */
 
-namespace rolluncom\test\datastore\DataStore;
+namespace rollun\test\datastore\DataStore;
 
-use rolluncom\datastore\DataSource\DbTableDataSource;
-use rolluncom\datastore\DataStore\Cacheable;
-use rolluncom\datastore\DataStore\DbTable;
+use rollun\datastore\DataSource\DbTableDataSource;
+use rollun\datastore\DataStore\Cacheable;
+use rollun\datastore\DataStore\DbTable;
 use Zend\Db\TableGateway\TableGateway;
 
 class CacheableTest extends AbstractTest

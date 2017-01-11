@@ -6,7 +6,7 @@
  * Time: 13:56
  */
 
-namespace rolluncom\test\datastore\DataStore;
+namespace rollun\test\datastore\DataStore;
 
 use Zend\Db\TableGateway\TableGateway;
 

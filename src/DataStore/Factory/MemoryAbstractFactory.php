@@ -7,13 +7,13 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore\Factory;
+namespace rollun\datastore\DataStore\Factory;
 
 use Interop\Container\ContainerInterface;
-use rolluncom\datastore\AbstractFactoryAbstract;
-use rolluncom\datastore\DataStore\DataStoreException;
-use rolluncom\datastore\DataStore\Interfaces\DataStoresInterface;
-use rolluncom\datastore\DataStore\Memory;
+use rollun\datastore\AbstractFactoryAbstract;
+use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Memory;
 
 /**
  * Create and return an instance of the array in Memory
@@ -24,7 +24,7 @@ use rolluncom\datastore\DataStore\Memory;
  * <code>
  * 'DataStore' => [
  *     'TheMemoryStore' => [
- *         'class' => 'zaboy\rest\DataStore\Memory',
+ *         'class' => 'rollun\datastore\DataStore\Memory',
  *     ]
  * ]
  * </code>

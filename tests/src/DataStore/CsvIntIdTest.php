@@ -1,8 +1,8 @@
 <?php
 
-namespace rolluncom\test\datastore\DataStore;
+namespace rollun\test\datastore\DataStore;
 
-use rolluncom\test\datastore\DataStore\CsvBaseTest;
+use rollun\test\datastore\DataStore\CsvBaseTest;
 
 class CsvIntIdTest extends CsvBaseTest
 {
@@ -69,7 +69,7 @@ class CsvIntIdTest extends CsvBaseTest
             'fString' => ''
         );
         $this->_initObject($itemData);
-        $this->setExpectedException('\rolluncom\datastore\DataStore\DataStoreException');
+        $this->setExpectedException('\rollun\datastore\DataStore\DataStoreException');
         $this->object->checkIntegrityData();
     }
 
@@ -82,7 +82,7 @@ class CsvIntIdTest extends CsvBaseTest
             'fFloat' => 1000.01,
             'fString' => ''
         );
-        $this->setExpectedException('\rolluncom\datastore\DataStore\DataStoreException');
+        $this->setExpectedException('\rollun\datastore\DataStore\DataStoreException');
         $this->object->create($itemData);
     }
 }

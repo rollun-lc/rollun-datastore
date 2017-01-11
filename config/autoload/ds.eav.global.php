@@ -6,7 +6,7 @@
  * Date: 19.10.16
  * Time: 17:19
  */
-use rolluncom\datastore\DataStore\Eav\EavAbstractFactory;
+use rollun\datastore\DataStore\Eav\EavAbstractFactory;
 
 return [
     'services' => [

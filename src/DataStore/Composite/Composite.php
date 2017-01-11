@@ -6,17 +6,17 @@
  * Time: 12:19 PM
  */
 
-namespace rolluncom\datastore\DataStore\Composite;
+namespace rollun\datastore\DataStore\Composite;
 
 
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Query;
-use rolluncom\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
-use rolluncom\datastore\DataStore\DataStoreException;
-use rolluncom\datastore\DataStore\DbTable;
-use rolluncom\datastore\Rql\Node\AggregateFunctionNode;
-use rolluncom\datastore\TableGateway\TableManagerMysql;
+use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
+use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\DbTable;
+use rollun\datastore\Rql\Node\AggregateFunctionNode;
+use rollun\datastore\TableGateway\TableManagerMysql;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Metadata\Source\Factory;
 use Zend\Db\Sql\Select;

@@ -7,12 +7,12 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\Examples\Middleware;
+namespace rollun\datastore\Examples\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use rolluncom\datastore\Middleware;
-use rolluncom\datastore\DataStore;
+use rollun\datastore\Middleware;
+use rollun\datastore\DataStore;
 
 /**
  * Middleware which contane Memory Store

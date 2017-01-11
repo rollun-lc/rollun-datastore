@@ -7,13 +7,13 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\test\datastore\DataStore\Eav;
+namespace rollun\test\datastore\DataStore\Eav;
 
-use rolluncom\datastore\DataStore\DbTable;
+use rollun\datastore\DataStore\DbTable;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\TableGateway\TableGateway;
 use Interop\Container\ContainerInterface;
-use rolluncom\datastore\DataStore\Eav\SysEntities;
+use rollun\datastore\DataStore\Eav\SysEntities;
 use Xiag\Rql\Parser\Query;
 
 /**

@@ -1,11 +1,11 @@
 <?php
 
-namespace rolluncom\datastore\DataStore\Factory;
+namespace rollun\datastore\DataStore\Factory;
 
 use Interop\Container\ContainerInterface;
-use rolluncom\datastore\DataStore\CsvBase;
+use rollun\datastore\DataStore\CsvBase;
 use Symfony\Component\Filesystem\LockHandler;
-use rolluncom\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\DataStoreException;
 
 class CsvAbstractFactory extends AbstractDataStoreFactory
 {

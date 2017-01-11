@@ -7,18 +7,18 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore\Eav;
+namespace rollun\datastore\DataStore\Eav;
 
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
-use rolluncom\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
-use rolluncom\datastore\DataStore\DataStoreException;
-use rolluncom\datastore\DataStore\DbTable;
-use rolluncom\datastore\DataStore\Interfaces\SqlQueryGetterInterface;
-use rolluncom\datastore\Rql\Node\AggregateFunctionNode;
-use rolluncom\datastore\TableGateway\TableManagerMysql;
+use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
+use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\DbTable;
+use rollun\datastore\DataStore\Interfaces\SqlQueryGetterInterface;
+use rollun\datastore\Rql\Node\AggregateFunctionNode;
+use rollun\datastore\TableGateway\TableManagerMysql;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Metadata\Source\Factory;
 use Zend\Db\Sql\Ddl\Column\Column;

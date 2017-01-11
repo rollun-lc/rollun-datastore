@@ -8,7 +8,7 @@
  * @license   https://github.com/zendframework/zend-stratigility/blob/master/LICENSE.md New BSD License
  */
 
-namespace rolluncom\datastore\Pipe;
+namespace rollun\datastore\Pipe;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -21,7 +21,7 @@ use Zend\Stratigility\Http;
  * Pipe supported options
  *
  * <code>
- * use zaboy\rest\Pipe\MiddlewarePipeOptions;
+ * use rollun\datastore\Pipe\MiddlewarePipeOptions;
  *
  * $app = new MiddlewarePipeOptions(['env' => 'develop']); //for show errors in browser
  * $app->pipe('/api', ...

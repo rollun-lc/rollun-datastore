@@ -6,7 +6,7 @@
  * Time: 11:44
  */
 
-namespace rolluncom\datastore\DataStore\Interfaces;
+namespace rollun\datastore\DataStore\Interfaces;
 
 interface DataSourceInterface
 {

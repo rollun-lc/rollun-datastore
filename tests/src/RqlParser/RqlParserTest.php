@@ -7,7 +7,7 @@
  * Time: 17:01
  */
 
-namespace rolluncom\test\datastore\RqlParser;
+namespace rollun\test\datastore\RqlParser;
 
 use phpDocumentor\Reflection\Types\Object_;
 use PHPUnit_Framework_TestCase;
@@ -23,9 +23,9 @@ use Xiag\Rql\Parser\Node\Query\ScalarOperator\LtNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\NeNode;
 use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
-use rolluncom\datastore\Rql\Node\AggregateFunctionNode;
-use rolluncom\datastore\Rql\Node\AggregateSelectNode;
-use rolluncom\datastore\Rql\RqlParser;
+use rollun\datastore\Rql\Node\AggregateFunctionNode;
+use rollun\datastore\Rql\Node\AggregateSelectNode;
+use rollun\datastore\Rql\RqlParser;
 
 class RqlParserTest extends PHPUnit_Framework_TestCase
 {

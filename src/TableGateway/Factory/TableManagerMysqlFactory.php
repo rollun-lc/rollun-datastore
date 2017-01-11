@@ -7,15 +7,15 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\TableGateway\Factory;
+namespace rollun\datastore\TableGateway\Factory;
 
-use rolluncom\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Db\Metadata\Metadata;
-use rolluncom\datastore\RestException;
+use rollun\datastore\RestException;
 use Interop\Container\ContainerInterface;
-use rolluncom\datastore\FactoryAbstract;
-use rolluncom\datastore\TableGateway\TableManagerMysql;
+use rollun\datastore\FactoryAbstract;
+use rollun\datastore\TableGateway\TableManagerMysql;
 
 /**
  * Create and return an instance of the TableManagerMysql

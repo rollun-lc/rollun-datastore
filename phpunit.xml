@@ -1,6 +1,6 @@
 <phpunit bootstrap="tests/bootstrap.php" colors="true">
     <testsuites>
-        <testsuite name="rolluncom\\test\\datastore\\">
+        <testsuite name="rollun\\test\\datastore\\">
             <directory>./tests/src/</directory>
         </testsuite>
     </testsuites>

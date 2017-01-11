@@ -6,9 +6,9 @@
  * Time: 1:04 PM
  */
 
-namespace rolluncom\datastore\DataStore\Composite\Example;
+namespace rollun\datastore\DataStore\Composite\Example;
 
-use rolluncom\datastore\TableGateway\TableManagerMysql as TableManager;
+use rollun\datastore\TableGateway\TableManagerMysql as TableManager;
 
 class Store
 {

@@ -7,18 +7,18 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\Pipe\Factory;
+namespace rollun\datastore\Pipe\Factory;
 
 //use Zend\ServiceManager\Factory\FactoryInterface;
 //uncomment it ^^ for Zend\ServiceManager V3
 use Zend\ServiceManager\FactoryInterface;
 //comment it ^^ for Zend\ServiceManager V3
 use Zend\ServiceManager\ServiceLocatorInterface;
-use rolluncom\datastore\RestException;
+use rollun\datastore\RestException;
 use Interop\Container\ContainerInterface;
-use rolluncom\datastore\Middleware;
-use rolluncom\datastore\Middleware\Factory\DataStoreDirectFactory;
-use rolluncom\datastore\Pipe\RestRql;
+use rollun\datastore\Middleware;
+use rollun\datastore\Middleware\Factory\DataStoreDirectFactory;
+use rollun\datastore\Pipe\RestRql;
 use Zend\Stratigility\MiddlewareInterface;
 
 /**
@@ -56,9 +56,9 @@ class RestRqlFactory implements FactoryInterface
      *  - it will use for create TableGateway for create DataStore for create StoreMiddleware
      * <br>
      * Add <br>
-     * zaboy\rest\TableGateway\Factory\TableGatewayAbstractFactory <br>
-     * zaboy\rest\DataStore\Factory\DbTableAbstractFactory <br>
-     * zaboy\rest\Middleware\Factory\DataStoreAbstractFactory <br>
+     * rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory <br>
+     * rollun\datastore\DataStore\Factory\DbTableAbstractFactory <br>
+     * rollun\datastore\Middleware\Factory\DataStoreAbstractFactory <br>
      * to config<br>
      *
      * @param  ContainerInterface $container

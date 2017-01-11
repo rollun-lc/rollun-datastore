@@ -1,8 +1,8 @@
 <?php
 
-namespace rolluncom\test\datastore\Middleware;
+namespace rollun\test\datastore\Middleware;
 
-use rolluncom\datastore\Middleware\ResponseEncoder;
+use rollun\datastore\Middleware\ResponseEncoder;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
 

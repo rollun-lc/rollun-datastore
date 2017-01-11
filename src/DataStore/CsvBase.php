@@ -1,12 +1,12 @@
 <?php
 
-namespace rolluncom\datastore\DataStore;
+namespace rollun\datastore\DataStore;
 
-use rolluncom\datastore\DataStore\DataStoreAbstract;
-use rolluncom\datastore\DataStore\DataStoreException;
-use rolluncom\datastore\DataStore\Interfaces\DataSourceInterface;
-use rolluncom\datastore\DataStore\Iterators\CsvIterator;
-use rolluncom\datastore\DataStore\ConditionBuilder\PhpConditionBuilder;
+use rollun\datastore\DataStore\DataStoreAbstract;
+use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\Interfaces\DataSourceInterface;
+use rollun\datastore\DataStore\Iterators\CsvIterator;
+use rollun\datastore\DataStore\ConditionBuilder\PhpConditionBuilder;
 use Symfony\Component\Filesystem\LockHandler;
 
 class CsvBase extends DataStoreAbstract implements DataSourceInterface
@@ -40,7 +40,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      * @param string $filename
      * @param string $delimiter - csv field delimiter
      * @param LockHandler $lockHandler
-     * @throws \zaboy\rest\DataStore\DataStoreException
+     * @throws \rollun\datastore\DataStore\DataStoreException
      */
     public function __construct($filename, $delimiter, LockHandler $lockHandler)
     {
@@ -206,7 +206,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      *
      * @param $item
      * @param bool|false $delete
-     * @throws \zaboy\rest\DataStore\DataStoreException
+     * @throws \rollun\datastore\DataStore\DataStoreException
      */
     protected function flush($item, $delete = false)
     {
@@ -250,7 +250,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      *
      * @param bool $seekFirstDataRow - the first row in csv-file contains the column headings; this parameter says,
      *     if it is need to pass it (row) after the opening the file.
-     * @throws \zaboy\rest\DataStore\DataStoreException
+     * @throws \rollun\datastore\DataStore\DataStoreException
      */
     protected function openFile($seekFirstDataRow = true)
     {
@@ -273,7 +273,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      *
      * @param int $nbTries - count of tries of locking queue
      * @return bool
-     * @throws \zaboy\rest\DataStore\DataStoreException
+     * @throws \rollun\datastore\DataStore\DataStoreException
      */
     protected function lockFile($nbTries = 0)
     {
@@ -316,7 +316,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
 
     /**
      * Sets the column headings
-     * @throws \zaboy\rest\DataStore\DataStoreException
+     * @throws \rollun\datastore\DataStore\DataStoreException
      */
     public function getHeaders()
     {

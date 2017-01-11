@@ -7,15 +7,15 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rolluncom\datastore\DataStore\Iterators;
+namespace rollun\datastore\DataStore\Iterators;
 
-use rolluncom\datastore\DataStore\Interfaces\ReadInterface;
+use rollun\datastore\DataStore\Interfaces\ReadInterface;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator;
 use Xiag\Rql\Parser\Query;
 use Xiag\Rql\Parser\Node;
 
 /**
- * Outer iterator for zaboy\rest\DataStore\Read\ReadInterface objects
+ * Outer iterator for rollun\datastore\DataStore\Read\ReadInterface objects
  *
  * @category   rest
  * @package    zaboy
