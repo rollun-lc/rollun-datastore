@@ -3,7 +3,7 @@
 # Структура таблиц
 
 Выполните 
-Запустите скрипт `script/install.php`, он [создаст таблицы](https://docs.google.com/spreadsheets/d/1k51Dtv1z-eK_ic5TXJMdJ9_jeLBtcrKQPQI9A0Jpts0/edit#gid=0) примера в базе.  
+Запустите команду `composer lib-install`, он [создаст таблицы](https://docs.google.com/spreadsheets/d/1k51Dtv1z-eK_ic5TXJMdJ9_jeLBtcrKQPQI9A0Jpts0/edit#gid=0) примера в базе.  
 
 ![](img/eav-example-1.png)  
 
@@ -11,7 +11,6 @@
 Для тог, что бы создать такую структуру с данными, выполните инструкции по  
 [установке библиотеки](INSTALL.md "установка библиотеки zaboy-rest") и по  
 [запуску тестов](TESTS.md "Подготовка к запуску тестов").
-Потом выполните скрипт `script/install.php`, он создаст таблицы с данными в базе.
 
 ## Теперь должно работать: ##
 

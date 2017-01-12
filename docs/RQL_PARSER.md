@@ -1,5 +1,5 @@
 #Rql
-##zaboy/rest/Rql/Query
+##rollun/datastore/Rql/Query
 
 Query наследник Xiag\Rql\Parser\Query.  
 Позволяет инициализировать обект с помощью rql строки.  
@@ -10,7 +10,7 @@ Query наследник Xiag\Rql\Parser\Query.
 * '$'
 * ' '
 
-##rollun\datastore\Rql/RqlParser
+##rollun/datastore/Rql/RqlParser
 Объект RqlParser позволяет енкодировать и декодировать rql строку в query объект и обратно.  
 Статический метод rqlDecode принимает на вход rql строку и возвращает Query объект.  
     Может принимать не rawurlencoded строку, но тогда спец-символы в строке должны быть екранированы.  

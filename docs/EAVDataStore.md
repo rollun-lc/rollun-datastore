@@ -253,7 +253,7 @@
 
 #Примеры работы с Entity DataStore.
 
-##[rollun\datastore\DataStore\Eav\Entity](https://github.com/avz-cmf/zaboy-rest/blob/master/src/DataStore/Eav/Entity.php 'Entity')
+##[rollun\datastore\DataStore\Eav\Entity](https://github.com/rollun-com /rollun-datastore/blob/master/src/DataStore/Eav/Entity.php 'Entity')
 
 `Entity` - `dataStore `для работы с `entity` таблицами сущностей.
 Являются наследниками `dbTable`.
@@ -392,7 +392,7 @@ $eq = new LtNode(SysEntity::TABLE_NAME . '.add_date', new \DateTime()->format('D
 ```
 
 # SysEntity DataStore
-##[rollun\datastore\DataStore\Eav\SysEntities](https://github.com/avz-cmf/zaboy-rest/blob/master/src/DataStore/Eav/SysEntities.php 'SysEntities')
+##[rollun\datastore\DataStore\Eav\SysEntities](https://github.com/rollun-com/rollun-datastore/blob/master/src/DataStore/Eav/SysEntities.php 'SysEntities')
 
 SysEntity позволяет нам напрямую рабоать с таблицей sys_entities.
 Так же объект дает нам ряд дополнительных методов и констант для работы с таблицей sys_entities.
@@ -404,7 +404,7 @@ SysEntity позволяет нам напрямую рабоать с табл�
 * SysEntity::ID_SUFFIX - Суфикс для полей связи.
 
 # Prop DataStore
-##[rollun\datastore\DataStore\Eav\Prop](https://github.com/avz-cmf/zaboy-rest/blob/master/src/DataStore/Eav/SysEntities.php 'Prop')
+##[rollun\datastore\DataStore\Eav\Prop](https://github.com/rollun-com/rollun-datastore/blob/master/src/DataStore/Eav/SysEntities.php 'Prop')
 
 SysEntity позволяет нам напрямую рабоать с prop таблицами.
 Так же объект дает нам ряд дополнительных методов для работы с prop таблицами.
