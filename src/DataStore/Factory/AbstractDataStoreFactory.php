@@ -26,7 +26,7 @@ abstract class AbstractDataStoreFactory extends AbstractFactoryAbstract
     /**
      * Can the factory create an instance for the service?
      * Use protection against circular dependencies (via static flags).
-     * read https://github.com/avz-cmf/zaboy-rest/tree/master/src/DataStore/Factory/README.md
+     * read https://github.com/rollun-com/rollun-datastore/tree/master/src/DataStore/Factory/README.md
      * For Service manager V3
      * Edit 'use' section if need:
      * Change:

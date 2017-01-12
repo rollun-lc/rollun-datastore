@@ -14,6 +14,9 @@ return [
         'test_res_tablle' => [
             'sql' => 'rollun\datastore\TableGateway\DbSql\MultiInsertSql',
         ],
+        'table_with_name_same_as_resource_name' => [],
+        'tbl_name_which_exist' => [],
+        'test_res_http' => []
     ],
 
     'dataStore' => [
