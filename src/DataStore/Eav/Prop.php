@@ -48,7 +48,7 @@ class Prop extends DbTable
         return $result;
     }
 
-    public function updateWithEntity($propData, $entityId, $entityName, $propColumn)
+    public function updateWithEntity(array $propData, $entityId, $entityName, $propColumn)
     {
         $linkedColumn = $this->getLinkedColumn($entityName, $propColumn);
         if (is_null($linkedColumn)) {

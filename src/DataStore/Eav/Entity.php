@@ -152,7 +152,6 @@ class Entity extends DbTable
             $itemData = $sysEntities->prepareEntityCreate($this->getEntityName(), $itemData, $rewriteIfExist);
 
             $itemInserted = $this->_create($itemData, $rewriteIfExist);
-
             $this->createProps($props, $propsData, $itemInserted);
             $adapter->getDriver()->getConnection()->commit();
         } catch (\Exception $e) {
@@ -172,11 +171,10 @@ class Entity extends DbTable
         extract($this->genItemProps($itemData));
         try {
             if ($createIfAbsent) {
-                throw new DataStoreException("This method dosn't work with flag $createIfAbsent = true");
+                throw new DataStoreException("This method dosn't work with flag createIfAbsent = true");
             }
 
             $itemInserted = $this->_update($itemData, $createIfAbsent);
-
             $this->updateProps($props, $propsData, $itemInserted);
             $adapter->getDriver()->getConnection()->commit();
         } catch (\Exception $e) {

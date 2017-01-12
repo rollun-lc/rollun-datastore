@@ -33,23 +33,22 @@ return [
             'class' => 'rollun\datastore\DataStore\DbTable',
             'tableGateway' => 'test_res_tablle',
         ],
-        /*'testHttpClient' => [
+        'testHttpClient' => [
             'class' => 'rollun\datastore\DataStore\HttpClient',
             'tableName' => 'test_res_http',
-            'url' => 'http://zaboy-rest.loc/api/rest/test_res_http',
+            'url' => 'http://'. constant("HOST") .'/api/rest/test_res_http',
             'options' => ['timeout' => 30]
         ],
         'testEavOverHttpClient' => [
             'class' => 'rollun\datastore\DataStore\HttpClient',
-            'url' => 'http://zaboy-rest.loc/api/rest/entity_product',
+            'url' => 'http://'. constant("HOST") .'/api/rest/entity_product',
             'options' => ['timeout' => 30]
         ],
-         'testEavOverHttpDbClient' => [
+        'testEavOverHttpDbClient' => [
             'class' => 'rollun\datastore\DataStore\HttpClient',
-            'url' => 'http://localhost:9090/api/rest/db~entity_product',
+            'url' => 'http://'. constant("HOST") .'/api/rest/db~entity_product',
             'options' => ['timeout' => 30]
         ],
-        */
         'testMemory' => [
             'class' => 'rollun\datastore\DataStore\Memory',
         ],
