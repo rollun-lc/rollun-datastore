@@ -56,14 +56,18 @@ class Installer extends InstallerAbstract
     public function __construct(ContainerInterface $container, IOInterface $ioComposer)
     {
         parent::__construct($container, $ioComposer);
-        $this->dbAdapter = $this->container->get(EavAbstractFactory::DB_SERVICE_NAME);
+        if ($this->container->has(EavAbstractFactory::DB_SERVICE_NAME)) {
+            $this->dbAdapter = $this->container->get(EavAbstractFactory::DB_SERVICE_NAME);
+        } else {
+            $this->io->write(EavAbstractFactory::DB_SERVICE_NAME . " not fount. It has did nothing");
+            exit;
+        }
     }
 
     public function uninstall()
     {
         if (constant('APP_ENV') !== 'dev') {
             $this->io->write('constant("APP_ENV") !== "dev" It has did nothing');
-            exit;
         }
 
         $tableManager = new TableManager($this->dbAdapter);
@@ -80,7 +84,7 @@ class Installer extends InstallerAbstract
 
     public function install()
     {
-        if (strcmp($this->io->ask("You wont create EAV tables ?(Need for test)[Yes/No]", "No"), 'Yes') === 0) {
+        if (isset($this->dbAdapter)) {
             if (constant('APP_ENV') === 'dev') {
                 //develop only
                 $tablesConfigDevelop = [
@@ -100,9 +104,7 @@ class Installer extends InstallerAbstract
                 $tableManager->rewriteTable(StoreCatalog::PROP_LINKED_URL_TABLE_NAME);
                 $tableManager->rewriteTable(StoreCatalog::PROP_PRODUCT_CATEGORY_TABLE_NAME);
                 $tableManager->rewriteTable(StoreCatalog::PROP_TAG_TABLE_NAME);
-                if (strcmp($this->io->ask("You wont add data in EAV tables (Need for test)[Yes/No] ?", "No"), "Yes") === 0) {
-                    $this->addData();
-                }
+                $this->addData();
             } else {
                 $tablesConfigProdaction = [
                     TableManager::KEY_TABLES_CONFIGS => SysEntities::getTableConfigProdaction()

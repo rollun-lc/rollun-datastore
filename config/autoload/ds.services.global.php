@@ -30,8 +30,5 @@ return [
             AdapterAbstractServiceFactory::class,
             TableGatewayAbstractFactory::class,
         ],
-        'aliases' => [
-            EavAbstractFactory::DB_SERVICE_NAME => constant('APP_ENV') === 'prod' ? 'db' : 'db',
-        ]
     ]
 ];

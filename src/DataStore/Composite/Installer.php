@@ -46,7 +46,11 @@ class Installer extends InstallerAbstract
     public function __construct(ContainerInterface $container, IOInterface $ioComposer)
     {
         parent::__construct($container, $ioComposer);
-        $this->dbAdapter = $this->container->get('db');
+        if ($this->container->has(Composite::DB_SERVICE_NAME)) {
+            $this->dbAdapter = $this->container->get(Composite::DB_SERVICE_NAME);
+        } else {
+            $this->io->write(Composite::DB_SERVICE_NAME . " not fount. It has did nothing");
+        }
     }
 
     public function uninstall()
@@ -65,9 +69,7 @@ class Installer extends InstallerAbstract
 
     public function install()
     {
-        if (constant('APP_ENV') === 'dev' &&
-            strcmp($this->io->ask("You wont create Composite tables ?(Need for test)[Yes/No]", "No"), 'Yes') == 0
-        ) {
+        if (isset($this->dbAdapter) && constant('APP_ENV') === 'dev') {
             //develop only
             $tablesConfigDevelop = [
                 TableManager::KEY_TABLES_CONFIGS => Store::$develop_tables_config
@@ -77,9 +79,7 @@ class Installer extends InstallerAbstract
             $tableManager->rewriteTable(Store::IMAGE_TABLE_NAME);
             $tableManager->rewriteTable(Store::CATEGORY_TABLE_NAME);
             $tableManager->rewriteTable(Store::CATEGORY_PRODUCT_TABLE_NAME);
-            if (strcmp($this->io->ask("You wont add data in Composite tables (Need for test)[Yes/No] ?", "No"), "Yes") === 0) {
-                $this->addData();
-            }
+            $this->addData();
         }
     }
 
