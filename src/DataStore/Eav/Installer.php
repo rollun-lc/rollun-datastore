@@ -80,7 +80,8 @@ class Installer extends InstallerAbstract
 
     public function install()
     {
-        if (constant('APP_ENV') === 'dev') {
+        if (constant('APP_ENV') === 'dev'
+            && $this->io->ask("You wont create EAV tables ?\n(Need for test)[No]", "No") === 'Yes') {
             //develop only
             $tablesConfigDevelop = [
                 TableManager::KEY_TABLES_CONFIGS => array_merge(
@@ -99,7 +100,9 @@ class Installer extends InstallerAbstract
             $tableManager->rewriteTable(StoreCatalog::PROP_LINKED_URL_TABLE_NAME);
             $tableManager->rewriteTable(StoreCatalog::PROP_PRODUCT_CATEGORY_TABLE_NAME);
             $tableManager->rewriteTable(StoreCatalog::PROP_TAG_TABLE_NAME);
-            $this->addData();
+            if ($this->io->ask("You wont add data in EAV tables (Need for test)[No] ?", "no") == "Yes") {
+                $this->addData();
+            }
         } else {
             $tablesConfigProdaction = [
                 TableManager::KEY_TABLES_CONFIGS => SysEntities::getTableConfigProdaction()
