@@ -6,6 +6,8 @@
  * Time: 1:29 PM
  */
 
+use rollun\datastore\DataStore\Composite\Composite;
+
 return [
     'dataStore' => [
         'product' => [
@@ -24,5 +26,13 @@ return [
             'class' => rollun\datastore\DataStore\Composite\Composite::class,
             'tableName' => 'category_products'
         ],
-    ]
+    ],
+    'service' => [
+        Composite::DB_SERVICE_NAME
+    ],
+    'services' => [
+        'aliases' => [
+            Composite::DB_SERVICE_NAME => getenv('APP_ENV') === 'prod' ? 'db' : 'db',
+        ],
+    ],
 ];

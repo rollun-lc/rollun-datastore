@@ -24,7 +24,7 @@ use Zend\Db\TableGateway\TableGateway;
 
 class Composite extends DbTable
 {
-
+    const DB_SERVICE_NAME = 'composite db';
     /**
      * @var array
      * [
