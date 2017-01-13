@@ -8,46 +8,28 @@
 Каркас для создания приложений. 
 
 * [Quickstart](https://github.com/avz-cmf/saas/blob/master/docs/Quickstart.md)
+
 * [Детальная документация](doc/)
-* [zaboy Rql](https://github.com/avz-cmf/zaboy-rest/blob/master/doc/RQL_PARSER.md)
-* [Запуск тестов](https://github.com/avz-cmf/zaboy-rest/blob/master/doc/TESTS.md)
-* [DataStore Абстрактные фабрики](https://github.com/avz-cmf/zaboy-rest/blob/master/doc/DataStore%20Abstract%20Factory.md)
-* [EAV](https://github.com/avz-cmf/zaboy-rest/blob/master/doc/EAVDataStore.md)
-* [EAV примеры](https://github.com/avz-cmf/zaboy-rest/blob/master/doc/EAV%20example.md)
-* [Composite](https://github.com/avz-cmf/zaboy-rest/blob/master/doc/Composite.md)
-* [Стандарты](https://github.com/avz-cmf/zaboy-skeleton/blob/master/docs/Standarts.md)
+
+* [zaboy Rql](https://github.com/rollun-com/rollun-datastore/blob/master/doc/RQL_PARSER.md)
+
+* [Запуск тестов](https://github.com/rollun-com/rollun-datastore/blob/master/doc/TESTS.md)
+
+* [DataStore Абстрактные фабрики](https://github.com/rollun-com/rollun-datastore/blob/master/doc/DataStore%20Abstract%20Factory.md)
+
+* [EAV](https://github.com/rollun-com/rollun-datastore/blob/master/doc/EAVDataStore.md)
+
+* [EAV примеры](https://github.com/rollun-com/rollun-datastore/blob/master/doc/EAV%20example.md)
+
+* [Composite](https://github.com/rollun-com/rollun-datastore/blob/master/doc/Composite.md)
+
+* [Стандарты](https://github.com/rollun-com/rollun-skeleton/blob/master/docs/Standarts.md)
 
 ## Запуск тестов
 
-Установите переменную окружения `'APP_ENV' = "dev"`;
-
-Перед тем как запускать тесты, создайте файл `test.local.php` в `config/autoload`
-и добавьте туда настройки для `httpDataStore` изменив localhost в параметре url так что бы по нему можно было получить доступ к веб-приложению.
-
-Пример:
-
- ```php
-    return [
-        "dataStore" => [
-            'testHttpClient' => [
-                'class' => 'rollun\datastore\DataStore\HttpClient',
-                'tableName' => 'test_res_http',
-                'url' => 'http://localhost/api/rest/test_res_http',
-                'options' => ['timeout' => 30]
-            ],
-            'testEavOverHttpClient' => [
-                'class' => 'rollun\datastore\DataStore\HttpClient',
-                 'url' => 'http://localhost/api/rest/entity_product',
-                 'options' => ['timeout' => 30]
-            ],
-            'testEavOverHttpDbClient' => [
-                        'class' => 'rollun\datastore\DataStore\HttpClient',
-                        'url' => 'http://localhost:9090/api/rest/db'. EavAbstractFactory::DB_NAME_DELIMITER . 'entity_product',
-                        'options' => ['timeout' => 30]
-                   ],
-        ]
-    ];
- ```
+Установите переменную окружения `'APP_ENV' = "dev"`.
+Так же добавте переменную окружение `HOST` в которую поместите ip или домен вашего приложения
+> Или добавте данные переменную в файл `env_config.php`.
 
 Скопируйте `index.php`и .htaccess из библиотеки в паблик директорию проекта.
 

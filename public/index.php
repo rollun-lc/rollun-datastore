@@ -1,5 +1,10 @@
 <?php
-
+// Delegate static file requests back to the PHP built-in webserver
+if (php_sapi_name() === 'cli-server'
+    && is_file(__DIR__ . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH))
+) {
+    return false;
+}
 // try http://__zaboy-rest/api/rest/index_StoreMiddleware?fNumberOfHours=8&fWeekday=Monday
 // Change to the project root, to simplify resolving paths
 chdir(dirname(__DIR__));
@@ -7,28 +12,15 @@ chdir(dirname(__DIR__));
 require 'vendor/autoload.php';
 require_once 'config/env_configurator.php';
 
-use Zend\Diactoros\Server;
-use rollun\datastore\Pipe\MiddlewarePipeOptions;
-use rollun\datastore\Pipe\Factory\RestRqlFactory;
-use Zend\Stratigility\Middleware\ErrorHandler;
-use Zend\Stratigility\Middleware\NotFoundHandler;
-use Zend\Stratigility\NoopFinalHandler;
-
 // Define application environment - 'dev' or 'prop'
-if (getenv('APP_ENV') === 'dev') {
+if (constant('APP_ENV') === 'dev') {
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
-    $env = 'develop';
 }
 
-$container = include 'config/container.php';
+/** @var \Interop\Container\ContainerInterface $container */
+$container = require 'config/container.php';
 
-$RestRqlFactory = new RestRqlFactory();
-$rest = $RestRqlFactory($container, '');
-
-$app = new MiddlewarePipeOptions(['env' => isset($env) ? $env : null]); //['env' => 'develop']
-$app->raiseThrowables();
-$app->pipe('/api/rest', $rest);
-
-$server = Server::createServer($app, $_SERVER, $_GET, $_POST, $_COOKIE, $_FILES);
-$server->listen();
+/** @var \Zend\Expressive\Application $app */
+$app = $container->get(\Zend\Expressive\Application::class);
+$app->run();
