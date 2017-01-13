@@ -80,36 +80,37 @@ class Installer extends InstallerAbstract
 
     public function install()
     {
-        if (constant('APP_ENV') === 'dev'
-            && strcmp($this->io->ask("You wont create EAV tables ?\n(Need for test)[No]", "No"), 'Yes')) {
-            //develop only
-            $tablesConfigDevelop = [
-                TableManager::KEY_TABLES_CONFIGS => array_merge(
-                    SysEntities::getTableConfigProdaction(),
-                    StoreCatalog::$develop_tables_config
-                )
-            ];
-            $tableManager = new TableManager($this->dbAdapter, $tablesConfigDevelop);
+        if (strcmp($this->io->ask("You wont create EAV tables ?(Need for test)[Yes/No]", "No"), 'Yes') === 0) {
+            if (constant('APP_ENV') === 'dev') {
+                //develop only
+                $tablesConfigDevelop = [
+                    TableManager::KEY_TABLES_CONFIGS => array_merge(
+                        SysEntities::getTableConfigProdaction(),
+                        StoreCatalog::$develop_tables_config
+                    )
+                ];
+                $tableManager = new TableManager($this->dbAdapter, $tablesConfigDevelop);
 
-            $tableManager->rewriteTable(SysEntities::TABLE_NAME);
-            $tableManager->rewriteTable(StoreCatalog::PRODUCT_TABLE_NAME);
-            $tableManager->rewriteTable(StoreCatalog::TAG_TABLE_NAME);
-            $tableManager->rewriteTable(StoreCatalog::MAINICON_TABLE_NAME);
-            $tableManager->rewriteTable(StoreCatalog::MAIN_SPECIFIC_TABLE_NAME);
-            $tableManager->rewriteTable(StoreCatalog::CATEGORY_TABLE_NAME);
-            $tableManager->rewriteTable(StoreCatalog::PROP_LINKED_URL_TABLE_NAME);
-            $tableManager->rewriteTable(StoreCatalog::PROP_PRODUCT_CATEGORY_TABLE_NAME);
-            $tableManager->rewriteTable(StoreCatalog::PROP_TAG_TABLE_NAME);
-            if (strcmp($this->io->ask("You wont add data in EAV tables (Need for test)[No] ?", "No"), "Yes")) {
-                $this->addData();
+                $tableManager->rewriteTable(SysEntities::TABLE_NAME);
+                $tableManager->rewriteTable(StoreCatalog::PRODUCT_TABLE_NAME);
+                $tableManager->rewriteTable(StoreCatalog::TAG_TABLE_NAME);
+                $tableManager->rewriteTable(StoreCatalog::MAINICON_TABLE_NAME);
+                $tableManager->rewriteTable(StoreCatalog::MAIN_SPECIFIC_TABLE_NAME);
+                $tableManager->rewriteTable(StoreCatalog::CATEGORY_TABLE_NAME);
+                $tableManager->rewriteTable(StoreCatalog::PROP_LINKED_URL_TABLE_NAME);
+                $tableManager->rewriteTable(StoreCatalog::PROP_PRODUCT_CATEGORY_TABLE_NAME);
+                $tableManager->rewriteTable(StoreCatalog::PROP_TAG_TABLE_NAME);
+                if (strcmp($this->io->ask("You wont add data in EAV tables (Need for test)[Yes/No] ?", "No"), "Yes") === 0) {
+                    $this->addData();
+                }
+            } else {
+                $tablesConfigProdaction = [
+                    TableManager::KEY_TABLES_CONFIGS => SysEntities::getTableConfigProdaction()
+                ];
+                $tableManager = new TableManager($this->dbAdapter, $tablesConfigProdaction);
+
+                $tableManager->createTable(SysEntities::TABLE_NAME);
             }
-        } else {
-            $tablesConfigProdaction = [
-                TableManager::KEY_TABLES_CONFIGS => SysEntities::getTableConfigProdaction()
-            ];
-            $tableManager = new TableManager($this->dbAdapter, $tablesConfigProdaction);
-
-            $tableManager->createTable(SysEntities::TABLE_NAME);
         }
     }
 
