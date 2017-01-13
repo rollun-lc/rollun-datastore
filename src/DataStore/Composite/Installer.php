@@ -66,7 +66,8 @@ class Installer extends InstallerAbstract
     public function install()
     {
         if (constant('APP_ENV') === 'dev' &&
-            $this->io->ask("You wont create Composite tables ?\n(Need for test)[No]", "No") === 'Yes') {
+            strcmp($this->io->ask("You wont create Composite tables ?\n(Need for test)[No]", "No"), 'Yes')
+        ) {
             //develop only
             $tablesConfigDevelop = [
                 TableManager::KEY_TABLES_CONFIGS => Store::$develop_tables_config
@@ -76,7 +77,7 @@ class Installer extends InstallerAbstract
             $tableManager->rewriteTable(Store::IMAGE_TABLE_NAME);
             $tableManager->rewriteTable(Store::CATEGORY_TABLE_NAME);
             $tableManager->rewriteTable(Store::CATEGORY_PRODUCT_TABLE_NAME);
-            if ($this->io->ask("You wont add data in Composite tables (Need for test)[No] ?", "no") == "Yes") {
+            if (strcmp($this->io->ask("You wont add data in Composite tables (Need for test)[No] ?", "no"), "Yes")) {
                 $this->addData();
             }
         }
