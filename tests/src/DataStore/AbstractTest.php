@@ -10,6 +10,7 @@
 namespace rollun\test\datastore\DataStore;
 
 use Interop\Container\ContainerInterface;
+use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node;
 use Xiag\Rql\Parser\Node\Query\ArrayOperator;
@@ -972,6 +973,34 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     protected function tearDown()
     {
 
+    }
+
+    /*######################### GROUP BY ################################*/
+    public function test_testGroupby(){
+        $this->_initObject($this->_itemsArrayDelault);
+
+        $result = $this->object->query(new RqlQuery("select(fString)&groupby(fString)"));
+        $this->assertEquals(2, count($result));
+        $this->assertEquals(['fString' => 'val1'], $result[0]);
+        $this->assertEquals(['fString' => 'val2'], $result[1]);
+    }
+
+    public function test_testGroupbyAgregate(){
+        $this->_initObject($this->_itemsArrayDelault);
+
+        $result = $this->object->query(new RqlQuery("select(count(id),fString)&groupby(fString)"));
+        $this->assertEquals(2, count($result));
+        $this->assertEquals(['fString' => 'val1', 'id->count' => 1], $result[0]);
+        $this->assertEquals(['fString' => 'val2', 'id->count' => 3], $result[1]);
+    }
+
+    public function test_testGroupbyDefaultAgregate(){
+        $this->_initObject($this->_itemsArrayDelault);
+
+        $result = $this->object->query(new RqlQuery("select(id,fString)&groupby(fString)"));
+        $this->assertEquals(2, count($result));
+        $this->assertEquals(['fString' => 'val1', 'id->count' => 1], $result[0]);
+        $this->assertEquals(['fString' => 'val2', 'id->count' => 3], $result[1]);
     }
 
 }

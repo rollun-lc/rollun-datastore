@@ -169,8 +169,29 @@ class RqlParser
         $rqlQueryString = $rqlQueryString . $this->makeLimit($query);
         $rqlQueryString = $rqlQueryString . $this->makeSort($query);
         $rqlQueryString = $rqlQueryString . $this->makeSelect($query);
+        if ($query instanceof RqlQuery) {
+            $rqlQueryString = $rqlQueryString . $this->makeGroupby($query);
+        }
         $rqlQueryString = rtrim($rqlQueryString, '&');
         return $rqlQueryString;
+    }
+
+
+    /**
+     * @param RqlQuery $query
+     * @return string
+     */
+    protected function makeGroupby(RqlQuery $query) {
+        $groupBy = '';
+        if ($query->getGroupby() != null) {
+            $fields = $query->getGroupby()->getFields();
+            $groupBy = '&groupby(';
+            foreach ($fields as $field ){
+                $groupBy .= $field . ',';
+            }
+            $groupBy = rtrim($groupBy, ',') . ')';
+        }
+        return $groupBy;
     }
 
     /**

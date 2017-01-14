@@ -10,13 +10,15 @@
 namespace rollun\datastore\DataStore;
 
 use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
+use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Iterators\DataStoreIterator;
+use rollun\datastore\Rql\Node\AggregateFunctionNode;
+use rollun\datastore\Rql\Node\AggregateSelectNode;
+use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\Node;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
-use rollun\datastore\DataStore\Iterators\DataStoreIterator;
-use rollun\datastore\Rql\Node\AggregateFunctionNode;
 
 /**
  * Abstract class for DataStores
@@ -116,7 +118,20 @@ abstract class DataStoreAbstract implements DataStoresInterface
             $data = $this->queryWhere($query, $limit, $offset);
             $result = $this->querySort($data, $query);
         }
-        $result = $this->querySelect($result, $query);
+        if ($query instanceof RqlQuery && $query->getGroupby() != null) {
+            $groups = $this->queryGroupBy($result, $query);
+            $result = [];
+            foreach ($groups as $group) {
+                $group = $this->querySelect($group, $query);
+                $union = [];
+                foreach ($group as $item) {
+                    $union = array_merge($union, $item);
+                }
+                $result = array_merge($result, [$union]);
+            }
+        } else {
+            $result = $this->querySelect($result, $query);
+        }
         //filled item unset field
         $itemFiled = [];
         foreach ($result as &$item) {
@@ -129,6 +144,25 @@ abstract class DataStoreAbstract implements DataStoresInterface
             }
         }
         return $result;
+    }
+
+    //TODO: Add group by more then one field
+    protected function queryGroupBy($result, RqlQuery $query)
+    {
+        $groupFields = $query->getGroupby()->getFields();
+        $selectionFields = $query->getSelect()->getFields();
+        foreach ($selectionFields as &$field) {
+            if (!in_array($field, $groupFields) && !($field instanceof AggregateFunctionNode)) {
+                $field = new AggregateFunctionNode('count', $field);
+            }
+        }
+        $query->setSelect(new AggregateSelectNode($selectionFields));
+
+        $groups = [];
+        foreach ($result as $item) {
+            $groups[$item[$groupFields[0]]][] = $item;
+        }
+        return $groups;
     }
 
     protected function queryWhere(Query $query, $limit, $offset)

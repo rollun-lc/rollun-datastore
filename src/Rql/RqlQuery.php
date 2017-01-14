@@ -33,6 +33,9 @@ class RqlQuery extends Query
             $this->limit = $query->limit;
             $this->select = $query->select;
         }
+        if ($query instanceof RqlQuery) {
+            $this->groupby = $query->groupby;
+        }
     }
 
     /**
