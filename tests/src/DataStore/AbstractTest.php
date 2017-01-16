@@ -1002,5 +1002,16 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(['fString' => 'val1', 'id->count' => 1], $result[0]);
         $this->assertEquals(['fString' => 'val2', 'id->count' => 3], $result[1]);
     }
+    public function test_testGroupByTwoColumns(){
+        $this->_initObject($this->_itemsArrayDelault);
+        $result = $this->object->query(new RqlQuery("select(id,fString)&groupby(fString,id)"));
+        $this->assertEquals(4, count($result));
+        $this->assertEquals([
+            array('id' => 1, 'fString' => 'val1'),
+            array('id' => 2, 'fString' => 'val2'),
+            array('id' => 3, 'fString' => 'val2'),
+            array('id' => 4, 'fString' => 'val2')
+        ], $result);
+    }
 
 }
