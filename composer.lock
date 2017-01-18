@@ -1367,16 +1367,16 @@
         },
         {
             "name": "rollun-com/rollun-installer",
-            "version": "v1.0.0",
+            "version": "v1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rollun-com/rollun-installer.git",
-                "reference": "d29fdafe01d5635742f3b8d2abd51848b04db3bf"
+                "reference": "128107076b56d87ed6b566ae7189a2b0aaf75e71"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rollun-com/rollun-installer/zipball/d29fdafe01d5635742f3b8d2abd51848b04db3bf",
-                "reference": "d29fdafe01d5635742f3b8d2abd51848b04db3bf",
+                "url": "https://api.github.com/repos/rollun-com/rollun-installer/zipball/128107076b56d87ed6b566ae7189a2b0aaf75e71",
+                "reference": "128107076b56d87ed6b566ae7189a2b0aaf75e71",
                 "shasum": ""
             },
             "require": {
@@ -1417,7 +1417,7 @@
                 }
             ],
             "description": "Installer",
-            "time": "2017-01-13 11:33:21"
+            "time": "2017-01-13 15:47:09"
         },
         {
             "name": "sebastian/comparator",

@@ -10,13 +10,15 @@
 namespace rollun\datastore\DataStore;
 
 use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
+use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Iterators\DataStoreIterator;
+use rollun\datastore\Rql\Node\AggregateFunctionNode;
+use rollun\datastore\Rql\Node\AggregateSelectNode;
+use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\Node;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
-use rollun\datastore\DataStore\Iterators\DataStoreIterator;
-use rollun\datastore\Rql\Node\AggregateFunctionNode;
 
 /**
  * Abstract class for DataStores
@@ -116,7 +118,11 @@ abstract class DataStoreAbstract implements DataStoresInterface
             $data = $this->queryWhere($query, $limit, $offset);
             $result = $this->querySort($data, $query);
         }
-        $result = $this->querySelect($result, $query);
+        if ($query instanceof RqlQuery && $query->getGroupby() != null) {
+            $result = $this->queryGroupBy($result, $query);
+        } else {
+            $result = $this->querySelect($result, $query);
+        }
         //filled item unset field
         $itemFiled = [];
         foreach ($result as &$item) {
@@ -130,7 +136,10 @@ abstract class DataStoreAbstract implements DataStoresInterface
         }
         return $result;
     }
-
+    /**
+     * @param $result
+     * @param RqlQuery $query
+     */
     protected function queryWhere(Query $query, $limit, $offset)
     {
         $conditionBuilder = $this->conditionBuilder;
@@ -181,6 +190,71 @@ abstract class DataStoreAbstract implements DataStoresInterface
         $sortFunction = create_function('$a,$b', $sortFunctionBody);
         usort($data, $sortFunction);
         return $data;
+    }
+
+    protected function groupBy(array $groups, $groupField)
+    {
+        $newGroup = [];
+        foreach ($groups as $group) {
+            foreach ($group as $item) {
+                $newGroup[$item[$groupField]][] = $item;
+            }
+        }
+        return $newGroup;
+    }
+
+    protected function queryGroupBy($result, RqlQuery $query)
+    {
+        $groupFields = $query->getGroupby()->getFields();
+        $selectionFields = $query->getSelect()->getFields();
+        foreach ($selectionFields as &$field) {
+            if (!in_array($field, $groupFields) && !($field instanceof AggregateFunctionNode)) {
+                $field = new AggregateFunctionNode('count', $field);
+            }
+        }
+        $query->setSelect(new AggregateSelectNode($selectionFields));
+
+        $a = [
+            'val1' => [
+                [
+                    'item' => 'val1',
+                    'id' => '2'
+                ]
+            ],
+            'val2' => [
+                '3' => [
+                    [
+                        'item' => 'val2',
+                        'id' => '3'
+                    ]
+                ],
+                '1' => [
+                    [
+                        'item' => 'val2',
+                        'id' => '1'
+                    ],
+                ]
+            ],
+        ];
+        $groups = [];
+        /*foreach ($result as $item) {
+            $groups[$groupFields[0]][] = $item;
+        }*/
+        $groups = [$result];
+        foreach ($groupFields as $groupField) {
+            $groups = $this->groupBy($groups, $groupField);
+        }
+
+        $result = [];
+        foreach ($groups as $group) {
+            $group = $this->querySelect($group, $query);
+            $union = [];
+            foreach ($group as $item) {
+                $union = array_merge($union, $item);
+            }
+            $result = array_merge($result, [$union]);
+        }
+        return $result;
     }
 
     protected function querySelect($data, Query $query)

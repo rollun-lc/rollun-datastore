@@ -9,11 +9,13 @@
 
 namespace rollun\datastore\DataStore;
 
-use Xiag\Rql\Parser\Node\SortNode;
-use Xiag\Rql\Parser\Query;
 use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
 use rollun\datastore\DataStore\Interfaces\SqlQueryGetterInterface;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
+use rollun\datastore\Rql\Node\AggregateSelectNode;
+use rollun\datastore\Rql\RqlQuery;
+use Xiag\Rql\Parser\Node\SortNode;
+use Xiag\Rql\Parser\Query;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Predicate\Expression;
@@ -218,6 +220,20 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         return $selectSQL;
     }
 
+    protected function setGroupby(Select $selectSQL, RqlQuery $query)
+    {
+        $groupByFields = $query->getGroupby()->getFields();
+        $selectionFields = $query->getSelect()->getFields();
+        foreach ($selectionFields as &$field) {
+            if (!in_array($field, $groupByFields) && !($field instanceof AggregateFunctionNode)) {
+                $field = new AggregateFunctionNode('count', $field);
+            }
+        }
+        $query->setSelect(new AggregateSelectNode($selectionFields));
+        $selectSQL->group($query->getGroupby()->getFields());
+        return $selectSQL;
+    }
+
     protected function makeExternalSql(Select $selectSQL)
     {
         //create new Select - for aggregate func query
@@ -227,6 +243,8 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         if ($hasAggregateFilds) {
             $externalSql = new Select();
             $externalSql->columns($selectSQL->getRawState(Select::COLUMNS));
+            $externalSql->group($selectSQL->getRawState(Select::GROUP));
+            $selectSQL->reset(Select::GROUP);
             //change select column to all
             $selectSQL->columns(['*']);
             //create sub query without aggreagate func and with all fields
@@ -435,6 +453,8 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         $selectSQL->where($conditionBuilder($query->getQuery()));
         $selectSQL = $this->setSelectOrder($selectSQL, $query);
         $selectSQL = $this->setSelectLimitOffset($selectSQL, $query);
+        $selectSQL = ($query instanceof RqlQuery && $query->getGroupby() != null) ?
+            $this->setGroupby($selectSQL, $query) : $selectSQL;
         $selectSQL = $this->setSelectColumns($selectSQL, $query);
         $selectSQL = $this->setSelectJoin($selectSQL, $query);
         $selectSQL = $this->makeExternalSql($selectSQL);

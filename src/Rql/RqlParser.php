@@ -8,6 +8,7 @@
 
 namespace rollun\datastore\Rql;
 
+use rollun\datastore\Rql\TokenParser\GroupbyTokenParser;
 use Xiag\Rql\Parser\ExpressionParser;
 use Xiag\Rql\Parser\Lexer;
 use Xiag\Rql\Parser\Node\SortNode;
@@ -96,7 +97,7 @@ class RqlParser
 
     /**
      * @param $rqlQueryString. Decode rql string with token and lexler.
-     * @return RqlQuery
+     * @return Query
      */
     public function decode($rqlQueryString)
     {
@@ -128,7 +129,7 @@ class RqlParser
             ->addTokenParser(new FiqlMatchTokenParser())
             ->addTokenParser(new BasicMatchTokenParser());
 
-        $parser = (new Parser((new ExpressionParser())
+        $parser = (new QueryParser((new ExpressionParser())
             ->registerTypeCaster('string', new TypeCaster\StringTypeCaster())
             ->registerTypeCaster('integer', new TypeCaster\IntegerTypeCaster())
             ->registerTypeCaster('float', new TypeCaster\FloatTypeCaster())
@@ -137,7 +138,8 @@ class RqlParser
             ->addTokenParser(new SelectTokenParser($this->allowedAggregateFunction))
             ->addTokenParser($queryTokenParser)
             ->addTokenParser(new TokenParser\SortTokenParser())
-            ->addTokenParser(new TokenParser\LimitTokenParser());
+            ->addTokenParser(new TokenParser\LimitTokenParser())
+            ->addTokenParser(new GroupbyTokenParser());
 
         $rqlQueryObject = $parser->parse((new Lexer())->tokenize($rqlQueryString));
 
@@ -157,7 +159,7 @@ class RqlParser
     }
 
     /**
-     * @param RqlQuery $query. Encode query obj with ConditionBuilder.
+     * @param Query $query. Encode query obj with ConditionBuilder.
      * @return string
      */
     public function encode(Query $query)
@@ -167,12 +169,33 @@ class RqlParser
         $rqlQueryString = $rqlQueryString . $this->makeLimit($query);
         $rqlQueryString = $rqlQueryString . $this->makeSort($query);
         $rqlQueryString = $rqlQueryString . $this->makeSelect($query);
+        if ($query instanceof RqlQuery) {
+            $rqlQueryString = $rqlQueryString . $this->makeGroupby($query);
+        }
         $rqlQueryString = rtrim($rqlQueryString, '&');
         return $rqlQueryString;
     }
 
+
     /**
      * @param RqlQuery $query
+     * @return string
+     */
+    protected function makeGroupby(RqlQuery $query) {
+        $groupBy = '';
+        if ($query->getGroupby() != null) {
+            $fields = $query->getGroupby()->getFields();
+            $groupBy = '&groupby(';
+            foreach ($fields as $field ){
+                $groupBy .= $field . ',';
+            }
+            $groupBy = rtrim($groupBy, ',') . ')';
+        }
+        return $groupBy;
+    }
+
+    /**
+     * @param Query $query
      * @return string
      */
     protected function makeLimit(Query $query)
@@ -188,7 +211,7 @@ class RqlParser
     }
 
     /**
-     * @param RqlQuery $query
+     * @param Query $query
      * @return string
      */
     protected function makeSort(Query $query)
@@ -208,7 +231,7 @@ class RqlParser
     }
 
     /**
-     * @param RqlQuery $query
+     * @param Query $query
      * @return string
      */
     protected function makeSelect(Query $query)

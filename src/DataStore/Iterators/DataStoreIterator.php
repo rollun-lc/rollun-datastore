@@ -64,7 +64,6 @@ class DataStoreIterator implements \Iterator
         $limitNode = new Node\LimitNode(1, 0);
         $query->setLimit($limitNode);
         $queryArray = $this->dataStore->query($query);
-        $this->index = $queryArray[0][$identifier];
         $this->index = $queryArray === [] ? null : $queryArray[0][$identifier];
     }
 
