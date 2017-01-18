@@ -20,4 +20,13 @@ Query наследник Xiag\Rql\Parser\Query.
 
 Нода для групировок 
 
-пример использование `groupby(id)`
+пример использование 
+* `groupby(id)`
+
+* `groupby(id,fString)`
+
+* `groupby(id,fString,fFloat)`
+
+* `select(id,fString)&groupby(id,fString)`
+
+* `and(gt(fFloat,99.003),lt(fFloat,101.003))&select(fFloat)&groupby(fFloat)`
