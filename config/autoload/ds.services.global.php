@@ -19,7 +19,6 @@ return [
             'TableManagerMysql' => TableManagerMysqlFactory::class
         ],
         'abstract_factories' => [
-            EavAbstractFactory::class,
             AspectAbstractFactory::class,
             MiddlewareDataStoreAbstractFactory::class,
             HttpClientAbstractFactory::class,
