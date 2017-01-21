@@ -9,10 +9,7 @@
 
 namespace rollun\datastore\Pipe\Factory;
 
-//use Zend\ServiceManager\Factory\FactoryInterface;
-//uncomment it ^^ for Zend\ServiceManager V3
-use Zend\ServiceManager\FactoryInterface;
-//comment it ^^ for Zend\ServiceManager V3
+use Zend\ServiceManager\Factory\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use rollun\datastore\RestException;
 use Interop\Container\ContainerInterface;
