@@ -21,6 +21,8 @@ if (constant('APP_ENV') === 'dev') {
 /** @var \Interop\Container\ContainerInterface $container */
 $container = require 'config/container.php';
 
+\rollun\dic\InsideConstruct::setContainer($container);
+
 /** @var \Zend\Expressive\Application $app */
 $app = $container->get(\Zend\Expressive\Application::class);
 $app->run();
