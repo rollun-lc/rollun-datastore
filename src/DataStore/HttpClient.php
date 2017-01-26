@@ -228,6 +228,7 @@ class HttpClient extends DataStoreAbstract
         $httpClient = new Client($url, $this->options);
         $headers['Content-Type'] = 'application/json';
         $headers['Accept'] = 'application/json';
+        $headers['APP_ENV'] = constant('APP_ENV');
         if ($ifMatch) {
             $headers['If-Match'] = '*';
         }
