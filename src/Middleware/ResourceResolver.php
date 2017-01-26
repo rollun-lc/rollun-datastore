@@ -18,16 +18,16 @@ use Zend\Stratigility\MiddlewareInterface;
  *
  * <b>Used request attributes: </b>
  * <ul>
- * <li>Resource-Name</li>
- * <li>Primary-Key-Value</li>
+ * <li>resourceName</li>
+ * <li>primaryKeyValue</li>
  * </ul>
  * If URL is </br>'site,com/api/rest/RESOURCE-NAME/ROWS-ID'</br>
- * request->getAttribute('Resource-Name') returns 'RESOURCE-NAME'</br>
- * request->getAttribute('Primary-Key-Value') returns 'ROWS-ID'</br>
+ * request->getAttribute('resourceName') returns 'RESOURCE-NAME'</br>
+ * request->getAttribute('primaryKeyValue') returns 'ROWS-ID'</br>
  * </br>
  * If URL is </br>'site,com/restapi/RESOURCE-NAME?a=1&limit(2,5)'
- * request->getAttribute('Resource-Name') returns 'RESOURCE-NAME'</br>
- * request->getAttribute('Primary-Key-Value') returns null</br>
+ * request->getAttribute('resourceName') returns 'RESOURCE-NAME'</br>
+ * request->getAttribute('primaryKeyValue') returns null</br>
  *
  * @category   rest
  * @package    zaboy
@@ -44,19 +44,19 @@ class ResourceResolver implements MiddlewareInterface
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
     {
-        if (null !== $request->getAttribute("Resource-Name")) {
+        if (null !== $request->getAttribute("resourceName")) {
             //Router have set "resourceName". It work in expressive.
             $id = empty($request->getAttribute("id")) ? null : $this->decodeString($request->getAttribute("id"));
-            $request = $request->withAttribute('Primary-Key-Value', $id);
+            $request = $request->withAttribute('primaryKeyValue', $id);
         } else {
             //"resourceName" isn't set. It work in stratigility.
             $path = $request->getUri()->getPath();
             preg_match('/^[\/]?([\w\~\-\_]+)([\/]([-%_A-Za-z0-9]+))?/', $path, $matches);
             $resourceName = isset($matches[1]) ? $matches[1] : null;
-            $request = $request->withAttribute('Resource-Name', $resourceName);
+            $request = $request->withAttribute('resourceName', $resourceName);
 
             $id = isset($matches[3]) ? $this->decodeString($matches[3]) : null;
-            $request = $request->withAttribute('Primary-Key-Value', $id);
+            $request = $request->withAttribute('primaryKeyValue', $id);
         }
 
         if ($next) {

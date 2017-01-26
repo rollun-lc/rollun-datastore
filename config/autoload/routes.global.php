@@ -13,8 +13,8 @@ return [
     'routes' => [
         [
             'name' => 'api.rest',
-            'path' => '/api/rest[/{Resource-Name}[/{id}]]',
-            'middleware' => \rollun\datastore\Pipe\RestRql::class,
+            'path' => '/api/rest[/{resourceName}[/{id}]]',
+            'middleware' => 'api-rest',
             'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
         ],
     ],

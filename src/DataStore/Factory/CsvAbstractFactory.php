@@ -7,7 +7,7 @@ use rollun\datastore\DataStore\CsvBase;
 use Symfony\Component\Filesystem\LockHandler;
 use rollun\datastore\DataStore\DataStoreException;
 
-class CsvAbstractFactory extends AbstractDataStoreFactory
+class CsvAbstractFactory extends DataStoreAbstractFactory
 {
 
     const KEY_FILENAME = 'filename';

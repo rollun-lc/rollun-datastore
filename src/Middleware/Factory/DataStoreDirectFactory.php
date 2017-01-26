@@ -58,7 +58,7 @@ class DataStoreDirectFactory implements FactoryInterface
         $resourceName = $requestedName;
         if (!$container->has($resourceName)) {
             throw new RestException(
-            'Can\'t make Middleware\DataStoreRest for resource: ' . $resourceName
+                'Can\'t make Middleware\DataStoreRest for resource: ' . $resourceName
             );
         }
         $resourceObject = $container->get($resourceName);
@@ -74,8 +74,8 @@ class DataStoreDirectFactory implements FactoryInterface
             default:
                 if (!isset($storeMiddleware)) {
                     throw new RestException(
-                    'Can\'t make Middleware\DataStoreRest'
-                    . ' for resource: ' . $resourceName
+                        'Can\'t make Middleware\DataStoreRest'
+                        . ' for resource: ' . $resourceName
                     );
                 }
         }
@@ -92,8 +92,8 @@ class DataStoreDirectFactory implements FactoryInterface
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
         throw new RestException(
-        'Don\'t use it as factory in config. ' . PHP_EOL
-        . 'Call __invoke directly with resource name as parameter'
+            'Don\'t use it as factory in config. ' . PHP_EOL
+            . 'Call __invoke directly with resource name as parameter'
         );
     }
 

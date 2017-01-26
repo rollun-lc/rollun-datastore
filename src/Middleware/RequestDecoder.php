@@ -23,10 +23,10 @@ use Zend\Stratigility\MiddlewareInterface;
  *
  * <b>Used request attributes: </b>
  * <ul>
- * <li>Overwrite-Mode</li>
+ * <li>overwriteMode</li>
  * <li>Put-Default-Position</li>
  * <li>Put-Before</li>
- * <li>Rql-Query-Object</li>*
+ * <li>rqlQueryObject</li>*
  * </ul>
  *
  * @category   rest
@@ -34,9 +34,6 @@ use Zend\Stratigility\MiddlewareInterface;
  */
 class RequestDecoder implements MiddlewareInterface
 {
-
-    private $allowedAggregateFunction = ['count', 'max', 'min'];
-
     /**                         Location: http://www.example.com/users/4/
      *
      * @todo positionHeaders = 'beforeId'  'Put-Default-Position'  'Put-Default-Position'
@@ -44,6 +41,7 @@ class RequestDecoder implements MiddlewareInterface
      * @param ResponseInterface $response
      * @param callable|null $next
      * @return ResponseInterface
+     * @throws RestException
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
     {
@@ -51,22 +49,22 @@ class RequestDecoder implements MiddlewareInterface
         // @see https://github.com/SitePen/dstore/blob/21129125823a29c6c18533e7b5a31432cf6e5c56/src/Rest.js
         $overwriteModeHeader = $request->getHeader('If-Match');
         $overwriteMode = isset($overwriteModeHeader[0]) && $overwriteModeHeader[0] === '*' ? true : false;
-        $request = $request->withAttribute('Overwrite-Mode', $overwriteMode);
+        $request = $request->withAttribute('overwriteMode', $overwriteMode);
 
         $putDefaultPosition = $request->getHeader('Put-Default-Position'); //'start' : 'end'
         if (isset($putDefaultPosition)) {
-            $request = $request->withAttribute('Put-Default-Position', $putDefaultPosition);
+            $request = $request->withAttribute('putDefaultPosition', $putDefaultPosition);
         }
         // @see https://github.com/SitePen/dstore/issues/42
         $putBeforeHeader = $request->getHeader('Put-Before');
         $putBefore = !empty($putBeforeHeader);
-        $request = $request->withAttribute('Put-Before', $putBefore);
+        $request = $request->withAttribute('putBefore', $putBefore);
 
         $rqlQueryStringWithXdebug = $request->getUri()->getQuery();
 
         $rqlQueryString = rtrim($rqlQueryStringWithXdebug, '&XDEBUG_SESSION_START=netbeans-xdebug');
         $rqlQueryObject = RqlParser::rqlDecode($rqlQueryString);
-        $request = $request->withAttribute('Rql-Query-Object', $rqlQueryObject);
+        $request = $request->withAttribute('rqlQueryObject', $rqlQueryObject);
 
         $headerLimit = $request->getHeader('Range');
         if (isset($headerLimit) && is_array($headerLimit) && count($headerLimit) > 0) {

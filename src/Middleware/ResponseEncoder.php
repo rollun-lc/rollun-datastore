@@ -19,7 +19,7 @@ use Zend\Escaper\Escaper;
 /**
  * Check Accept Header and encode Response to JSON
  *
- * Encode Response from $request->getAttribute('Response-Body')
+ * Encode Response from $request->getAttribute('responseData')
  *
  * @category   rest
  * @package    zaboy
@@ -39,7 +39,7 @@ class ResponseEncoder implements MiddlewareInterface
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
     {
-        $responseBody = $request->getAttribute('Response-Body');
+        $responseBody = $request->getAttribute('responseData');
         $accept = $request->getHeaderLine('Accept');
         if (isset($accept) && preg_match('#^application/([^+\s]+\+)?json#', $accept)) {
             $status = $response->getStatusCode();

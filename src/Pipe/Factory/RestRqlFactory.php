@@ -65,22 +65,22 @@ class RestRqlFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $storeMiddlewareLazy = function (
+        /*$storeMiddlewareLazy = function (
                 $request,
                 $response,
                 $next = null
                 ) use ($container) {
-            $resourceName = $request->getAttribute('Resource-Name');
+            $resourceName = $request->getAttribute('resourceName');
             $DataStoreDirectFactory = new DataStoreDirectFactory();
             $storeMiddleware = $DataStoreDirectFactory($container, $resourceName);
             return $storeMiddleware($request, $response, $next);
-        };
+        };*/
 
         $this->middlewares[100] = new Middleware\ResourceResolver();
         $this->middlewares[200] = new Middleware\RequestDecoder();
-        $this->middlewares[300] = $storeMiddlewareLazy;
-        $this->middlewares[400] = new Middleware\ResponseEncoder();
-        $this->middlewares[500] = new Middleware\ResponseReturner();
+        /*$this->middlewares[300] = $storeMiddlewareLazy;*/
+        //$this->middlewares[400] = new Middleware\ResponseEncoder();
+        //$this->middlewares[500] = new Middleware\ResponseReturner();
         //$middlewares[600] = new Middleware\$errorHandler();
 
         ksort($this->middlewares);

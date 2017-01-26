@@ -55,7 +55,7 @@ class ResponseEncoderTest extends \PHPUnit_Framework_TestCase {
     public function testResponseEncoder__invoke() {
         $rowset = [1=>'a', 2=>'b'];
          $contentRangeHeader = 'items 0-0/1';       
-        $request = $this->request->withAttribute('Response-Body', $rowset);
+        $request = $this->request->withAttribute('responseData', $rowset);
         $request = $request->withHeader('Accept', 'application/json');            
         $response = $this->response->withHeader('Content-Range', $contentRangeHeader);        
         $response = $response->withStatus(555);    

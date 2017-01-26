@@ -57,11 +57,11 @@ class ResourceResolverTest extends \PHPUnit_Framework_TestCase {
         $returnedResponse = $this->object
                 ->__invoke($this->request, $this->response, $this->next);        
         $this->assertSame(
-                $returnedResponse->getAttribute('Resource-Name'),
+                $returnedResponse->getAttribute('resourceName'),
                 'foo'
         );
         $this->assertSame(
-                $returnedResponse->getAttribute('Primary-Key-Value'),
+                $returnedResponse->getAttribute('primaryKeyValue'),
                 null
         );  
     }
@@ -74,11 +74,11 @@ class ResourceResolverTest extends \PHPUnit_Framework_TestCase {
         $returnedResponse = $this->object
                 ->__invoke($this->request, $this->response, $this->next);        
         $this->assertSame(
-                $returnedResponse->getAttribute('Resource-Name'),
+                $returnedResponse->getAttribute('resourceName'),
                 'foo-bar_baz'
         );
         $this->assertSame(
-                $returnedResponse->getAttribute('Primary-Key-Value'),
+                $returnedResponse->getAttribute('primaryKeyValue'),
                 '2'
         );  
     }
@@ -92,11 +92,11 @@ class ResourceResolverTest extends \PHPUnit_Framework_TestCase {
         $returnedResponse = $this->object
                 ->__invoke($this->request, $this->response, $this->next);        
         $this->assertSame(
-                $returnedResponse->getAttribute('Resource-Name'),
+                $returnedResponse->getAttribute('resourceName'),
                 '1foo-AbarD_baz3'
         );
         $this->assertSame(
-                $returnedResponse->getAttribute('Primary-Key-Value'),
+                $returnedResponse->getAttribute('primaryKeyValue'),
                 'a-b_C2'
         );  
     }
@@ -109,11 +109,11 @@ class ResourceResolverTest extends \PHPUnit_Framework_TestCase {
         $returnedResponse = $this->object
                 ->__invoke($this->request, $this->response, $this->next);        
         $this->assertSame(
-                $returnedResponse->getAttribute('Resource-Name'),
+                $returnedResponse->getAttribute('resourceName'),
                 '123'
         );
         $this->assertSame(
-                $returnedResponse->getAttribute('Primary-Key-Value'),
+                $returnedResponse->getAttribute('primaryKeyValue'),
                 null
         );  
     }
@@ -126,11 +126,11 @@ class ResourceResolverTest extends \PHPUnit_Framework_TestCase {
         $returnedResponse = $this->object
                 ->__invoke($this->request, $this->response, $this->next);        
         $this->assertSame(
-                $returnedResponse->getAttribute('Resource-Name'),
+                $returnedResponse->getAttribute('resourceName'),
                 null
         );
         $this->assertSame(
-                $returnedResponse->getAttribute('Primary-Key-Value'),
+                $returnedResponse->getAttribute('primaryKeyValue'),
                 null
         );  
     }

@@ -42,7 +42,7 @@ use Zend\Db\TableGateway\TableGateway;
  * @category   rest
  * @package    zaboy
  */
-class DbTableAbstractFactory extends AbstractDataStoreFactory
+class DbTableAbstractFactory extends DataStoreAbstractFactory
 {
 
     const KEY_TABLE_NAME = 'tableName';
