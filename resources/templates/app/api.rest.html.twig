@@ -1,0 +1,17 @@
+{% extends '@layout/default.html.twig' %}
+
+{% block title %}dataStore{% endblock %}
+
+{% block content %}
+    <div class="row">
+        {% if data is iterable %}
+            <ul>
+                {% for item in data %}
+                    <li> {{ dump(item) }} <li>
+                {% endfor %}
+            </ul>
+        {% else %}
+        {{ dump(item) }}
+        {% endif %}
+    </div>
+{% endblock %}
