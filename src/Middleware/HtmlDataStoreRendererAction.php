@@ -21,10 +21,11 @@ class HtmlDataStoreRendererAction extends HtmlRendererAction
     {
         $data = $request->getAttribute('responseData');
         $name = $request->getAttribute('templateName');
+        $status = $request->getAttribute('status') ?: 200;
 
         $request = $request->withAttribute(
             Response::class,
-            new HtmlResponse($this->templateRenderer->render($name, ['data' => $data]))
+            new HtmlResponse($this->templateRenderer->render($name, ['data' => $data]), $status)
         );
 
         if (isset($out)) {

@@ -31,6 +31,7 @@
     "rollun-com/rollun-installer": "^1.0",
     "mindplay/jsonfreeze": "0.3.3.x-dev",
     "rollun-com/rollun-logger": "^1.0",
+    "rollun-com/rollun-utils": "^1.0",
     "rollun-com/rollun-actionrender": "^2.0"
   },
   "require-dev": {

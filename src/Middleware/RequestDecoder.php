@@ -11,6 +11,7 @@ namespace rollun\datastore\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use rollun\utils\Json\Serializer;
 use Xiag\Rql\Parser\TokenParser;
 use Xiag\Rql\Parser\TokenParser\Query;
 use Xiag\Rql\Parser\TypeCaster;
@@ -84,9 +85,9 @@ class RequestDecoder implements MiddlewareInterface
 
         $contenttypeArray = $request->getHeader('Content-Type');
         $contenttype = isset($contenttypeArray[0]) ? $contenttypeArray[0] : 'text/html';
-
         if (false !== strpos($contenttype, 'json')) {
-            $body = !empty($request->getBody()->__toString()) ? $this->jsonDecode($request->getBody()->__toString()) : null;
+            $body = !empty($request->getBody()->__toString()) ?
+                Serializer::jsonUnserialize($request->getBody()->__toString()) : null;
             $request = $request->withParsedBody($body);
         } elseif ($contenttype === 'text/plain'
             or $contenttype === 'text/html'
@@ -108,21 +109,4 @@ class RequestDecoder implements MiddlewareInterface
 
         return $response;
     }
-
-    protected function jsonDecode($data)
-    {
-        // Clear json_last_error()
-        json_encode(null);
-        $result = json_decode($data, true);
-        if (JSON_ERROR_NONE !== json_last_error()) {
-            throw new RestException(
-                'Unable to decode data from JSON' .
-                json_last_error_msg()
-            );
-        }
-        json_encode(null);
-
-        return $result;
-    }
-
 }
