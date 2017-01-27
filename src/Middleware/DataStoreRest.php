@@ -47,7 +47,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
     {
-        $isPrimaryKeyValue = null !== $request->getAttribute('Primary-Key-Value');
+        $isPrimaryKeyValue = null !== $request->getAttribute('primaryKeyValue');
         $httpMethod = $request->getMethod();
         try {
             switch ($request->getMethod()) {
@@ -102,9 +102,9 @@ class DataStoreRest extends Middleware\DataStoreAbstract
      */
     public function methodGetWithId(ServerRequestInterface $request, ResponseInterface $response)
     {
-        $primaryKeyValue = $request->getAttribute('Primary-Key-Value');
+        $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $row = $this->dataStore->read($primaryKeyValue);
-        $this->request = $request->withAttribute('Response-Body', $row);
+        $this->request = $request->withAttribute('responseData', $row);
 
         $response = $response->withStatus(200);
         return $response;
@@ -120,7 +120,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
     public function methodGetWithoutId(ServerRequestInterface $request, ResponseInterface $response)
     {
         /** @var Query $rqlQueryObject */
-        $rqlQueryObject = $request->getAttribute('Rql-Query-Object');
+        $rqlQueryObject = $request->getAttribute('rqlQueryObject');
 
         $rqlLimitNode = $rqlQueryObject->getLimit();
         $headerLimit = $request->getAttribute('Limit');
@@ -167,7 +167,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
 
         //TODO: count aggregate fn can't work with limit and offset. Bug!!!
         $rowset = $this->dataStore->query($rqlQueryObject);
-        $this->request = $request->withAttribute('Response-Body', $rowset);
+        $this->request = $request->withAttribute('responseData', $rowset);
 
         $rowCountQuery = new Query();
         $rowCountQuery
@@ -198,14 +198,14 @@ class DataStoreRest extends Middleware\DataStoreAbstract
      */
     public function methodPutWithId(ServerRequestInterface $request, ResponseInterface $response)
     {
-        $primaryKeyValue = $request->getAttribute('Primary-Key-Value');
+        $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $primaryKeyIdentifier = $this->dataStore->getIdentifier();
         $row = $request->getParsedBody();
         if (!(isset($row) && is_array($row))) {
             throw new RestException('No body in PUT request');
         }
         $row = array_merge(array($primaryKeyIdentifier => $primaryKeyValue), $row);
-        $overwriteMode = $request->getAttribute('Overwrite-Mode');
+        $overwriteMode = $request->getAttribute('overwriteMode');
         $isIdExist = !empty($this->dataStore->read($primaryKeyValue));
 
         if ($overwriteMode && !$isIdExist) {
@@ -214,7 +214,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
             $response = $response->withStatus(200);
         }
         $newRow = $this->dataStore->update($row, $overwriteMode);
-        $this->request = $request->withAttribute('Response-Body', $newRow);
+        $this->request = $request->withAttribute('responseData', $newRow);
         return $response;
     }
 
@@ -229,7 +229,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
      */
     public function methodPostWithId(ServerRequestInterface $request, ResponseInterface $response)
     {
-        $primaryKeyValue = $request->getAttribute('Primary-Key-Value');
+        $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $primaryKeyIdentifier = $this->dataStore->getIdentifier();
 
         $row = $request->getParsedBody();
@@ -239,7 +239,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
 
         $row = array_merge(array($primaryKeyIdentifier => $primaryKeyValue), $row);
 
-        $overwriteMode = $request->getAttribute('Overwrite-Mode');
+        $overwriteMode = $request->getAttribute('overwriteMode');
 
         $existingRow = $this->dataStore->read($primaryKeyValue);
 
@@ -253,7 +253,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
             $response = $response->withHeader('Location', $location);
         }
         $newItem = $this->dataStore->create($row, $overwriteMode);
-        $this->request = $request->withAttribute('Response-Body', $newItem);
+        $this->request = $request->withAttribute('responseData', $newItem);
         return $response;
     }
 
@@ -276,7 +276,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
         $response = $response->withStatus(201);
         $newItem = $this->dataStore->create($row);
         $insertedPrimaryKeyValue = $newItem[$primaryKeyIdentifier];
-        $this->request = $request->withAttribute('Response-Body', $newItem);
+        $this->request = $request->withAttribute('responseData', $newItem);
         $location = $request->getUri()->getPath();
         $response = $response->withHeader('Location', rtrim($location, '/') . '/' . $insertedPrimaryKeyValue);
         return $response;
@@ -292,7 +292,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
      */
     public function methodDelete(ServerRequestInterface $request, ResponseInterface $response)
     {
-        $primaryKeyValue = $request->getAttribute('Primary-Key-Value');
+        $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $items = $this->dataStore->delete($primaryKeyValue);
 
         if (isset($items)) {
@@ -301,7 +301,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
             $response = $response->withStatus(204);
         }
 
-        $this->request = $request->withAttribute('Response-Body', $items);
+        $this->request = $request->withAttribute('responseData', $items);
 
         return $response;
     }

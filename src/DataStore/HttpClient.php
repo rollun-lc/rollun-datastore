@@ -12,6 +12,7 @@ namespace rollun\datastore\DataStore;
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\ConditionBuilder\RqlConditionBuilder;
+use rollun\utils\Json\Serializer;
 use Xiag\Rql\Parser\Query;
 use Xiag\Rql\Parser\Node\SortNode;
 use rollun\datastore\Rql\RqlParser;
@@ -56,7 +57,7 @@ class HttpClient extends DataStoreAbstract
 
     /**
      *
-     * @param string $url  'http://example.org'
+     * @param string $url 'http://example.org'
      * @param array $options
      */
     public function __construct($url, $options = null)
@@ -90,14 +91,57 @@ class HttpClient extends DataStoreAbstract
         $client = $this->initHttpClient(Request::METHOD_GET, null, $id);
         $response = $client->send();
         if ($response->isOk()) {
-            $result = $this->jsonDecode($response->getBody());
+            $result = Serializer::jsonUnserialize($response->getBody());
         } else {
             throw new DataStoreException(
-            'Status: ' . $response->getStatusCode()
-            . ' - ' . $response->getReasonPhrase()
+                'Status: ' . $response->getStatusCode()
+                . ' - ' . $response->getReasonPhrase()
             );
         }
         return $result;
+    }
+
+    /**
+     *
+     * @param string 'GET' 'HEAD' 'POST' 'PUT' 'DELETE';
+     * @param Query $query
+     * @param int|string $id
+     * @param bool see $ifMatch $rewriteIfExist and $createIfAbsent in {@see DataStoreAbstract}
+     * @return Client
+     */
+    protected function initHttpClient($method, Query $query = null, $id = null, $ifMatch = false)
+    {
+
+        $url = !$id ? $this->url : $this->url . '/' . $this->encodeString($id);
+        if (isset($query)) {
+            $rqlString = RqlParser::rqlEncode($query);
+            $url = $url . '?' . $rqlString;
+        }
+        $httpClient = new Client($url, $this->options);
+        $headers['Content-Type'] = 'application/json';
+        $headers['Accept'] = 'application/json';
+        $headers['APP_ENV'] = constant('APP_ENV');
+        if ($ifMatch) {
+            $headers['If-Match'] = '*';
+        }
+        $httpClient->setHeaders($headers);
+        if (isset($this->login) && isset($this->password)) {
+            $httpClient->setAuth($this->login, $this->password);
+        }
+        $httpClient->setMethod($method);
+        return $httpClient;
+    }
+
+// ** Interface "rollun\datastore\DataStore\Interfaces\DataStoresInterface"  **/
+
+    protected function encodeString($value)
+    {
+        return strtr(rawurlencode($value), [
+            '-' => '%2D',
+            '_' => '%5F',
+            '.' => '%2E',
+            '~' => '%7E',
+        ]);
     }
 
     /**
@@ -110,17 +154,15 @@ class HttpClient extends DataStoreAbstract
         $client = $this->initHttpClient(Request::METHOD_GET, $query);
         $response = $client->send();
         if ($response->isOk()) {
-            $result = $this->jsonDecode($response->getBody());
+            $result = Serializer::jsonUnserialize($response->getBody());
         } else {
             throw new DataStoreException(
-            'Status: ' . $response->getStatusCode()
-            . ' - ' . $response->getReasonPhrase()
+                'Status: ' . $response->getStatusCode()
+                . ' - ' . $response->getReasonPhrase()
             );
         }
         return $result;
     }
-
-// ** Interface "rollun\datastore\DataStore\Interfaces\DataStoresInterface"  **/
 
     /**
      * {@inheritdoc}
@@ -137,15 +179,15 @@ class HttpClient extends DataStoreAbstract
             $id = null;
         }
         $client = $this->initHttpClient(Request::METHOD_POST, null, $id, $rewriteIfExist);
-        $json = $this->jsonEncode($itemData);
+        $json = Serializer::jsonSerialize($itemData);
         $client->setRawBody($json);
         $response = $client->send();
         if ($response->isSuccess()) {
-            $result = $this->jsonDecode($response->getBody());
+            $result = Serializer::jsonUnserialize($response->getBody());
         } else {
             throw new DataStoreException(
-            'Status: ' . $response->getStatusCode()
-            . ' - ' . $response->getReasonPhrase()
+                'Status: ' . $response->getStatusCode()
+                . ' - ' . $response->getReasonPhrase()
             );
         }
         return $result;
@@ -164,15 +206,16 @@ class HttpClient extends DataStoreAbstract
         }
         $id = $itemData[$identifier];
         $this->checkIdentifierType($id);
+
         $client = $this->initHttpClient(Request::METHOD_PUT, null, $id, $createIfAbsent);
-        $client->setRawBody($this->jsonEncode($itemData));
+        $client->setRawBody(Serializer::jsonSerialize($itemData));
         $response = $client->send();
         if ($response->isSuccess()) {
-            $result = $this->jsonDecode($response->getBody());
+            $result = Serializer::jsonUnserialize($response->getBody());
         } else {
             throw new DataStoreException(
-            'Status: ' . $response->getStatusCode()
-            . ' - ' . $response->getReasonPhrase()
+                'Status: ' . $response->getStatusCode()
+                . ' - ' . $response->getReasonPhrase()
             );
         }
         return $result;
@@ -189,11 +232,11 @@ class HttpClient extends DataStoreAbstract
         $client = $this->initHttpClient(Request::METHOD_DELETE, null, $id);
         $response = $client->send();
         if ($response->isSuccess()) {
-            $result = !empty($response->getBody()) ? $this->jsonDecode($response->getBody()) : null;
+            $result = !empty($response->getBody()) ? Serializer::jsonUnserialize($response->getBody()) : null;
         } else {
             throw new DataStoreException(
-            'Status: ' . $response->getStatusCode()
-            . ' - ' . $response->getReasonPhrase()
+                'Status: ' . $response->getStatusCode()
+                . ' - ' . $response->getReasonPhrase()
             );
         }
         return $result;
@@ -207,74 +250,6 @@ class HttpClient extends DataStoreAbstract
     public function count()
     {
         return parent::count();
-    }
-
-    /**
-     *
-     * @param string  'GET' 'HEAD' 'POST' 'PUT' 'DELETE';
-     * @param Query $query
-     * @param int|string $id
-     * @param bool see $ifMatch $rewriteIfExist and $createIfAbsent in {@see DataStoreAbstract}
-     * @return Client
-     */
-    protected function initHttpClient($method, Query $query = null, $id = null, $ifMatch = false)
-    {
-
-        $url = !$id ? $this->url : $this->url . '/' . $this->encodeString($id);
-        if (isset($query)) {
-            $rqlString = RqlParser::rqlEncode($query);
-            $url = $url . '?' . $rqlString;
-        }
-        $httpClient = new Client($url, $this->options);
-        $headers['Content-Type'] = 'application/json';
-        $headers['Accept'] = 'application/json';
-        if ($ifMatch) {
-            $headers['If-Match'] = '*';
-        }
-        $httpClient->setHeaders($headers);
-        if (isset($this->login) && isset($this->password)) {
-            $httpClient->setAuth($this->login, $this->password);
-        }
-        $httpClient->setMethod($method);
-        return $httpClient;
-    }
-
-    protected function jsonDecode($data)
-    {
-        json_encode(null); // Clear json_last_error()
-        $result = Json::decode($data, Json::TYPE_ARRAY); //json_decode($data);
-        if (JSON_ERROR_NONE !== json_last_error()) {
-            $jsonErrorMsg = json_last_error_msg();
-            json_encode(null);  // Clear json_last_error()
-            throw new DataStoreException(
-            'Unable to decode data from JSON - ' . $jsonErrorMsg
-            );
-        }
-        return $result;
-    }
-
-    protected function jsonEncode($data)
-    {
-        json_encode(null); // Clear json_last_error()
-        $result = json_encode($data, 79);
-        if (JSON_ERROR_NONE !== json_last_error()) {
-            $jsonErrorMsg = json_last_error_msg();
-            json_encode(null);  // Clear json_last_error()
-            throw new DataStoreException(
-            'Unable to encode data to JSON - ' . $jsonErrorMsg
-            );
-        }
-        return $result;
-    }
-
-    protected function encodeString($value)
-    {
-        return strtr(rawurlencode($value), [
-            '-' => '%2D',
-            '_' => '%5F',
-            '.' => '%2E',
-            '~' => '%7E',
-        ]);
     }
 
 }

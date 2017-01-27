@@ -55,16 +55,17 @@ class Installer extends InstallerAbstract
 
     public function uninstall()
     {
-        if (constant('APP_ENV') !== 'dev') {
-            $this->io->write('constant("APP_ENV") !== "dev" It has did nothing');
-            exit;
+        if (isset($this->dbAdapter)) {
+            if (constant('APP_ENV') === 'dev') {
+                $tableManager = new TableManager($this->dbAdapter);
+                $tableManager->deleteTable(Store::IMAGE_TABLE_NAME);
+                $tableManager->deleteTable(Store::CATEGORY_PRODUCT_TABLE_NAME);
+                $tableManager->deleteTable(Store::PRODUCT_TABLE_NAME);
+                $tableManager->deleteTable(Store::CATEGORY_TABLE_NAME);
+            } else {
+                $this->io->write('constant("APP_ENV") !== "dev" It has did nothing');
+            }
         }
-        $tableManager = new TableManager($this->dbAdapter);
-        $tableManager->deleteTable(Store::IMAGE_TABLE_NAME);
-        $tableManager->deleteTable(Store::CATEGORY_PRODUCT_TABLE_NAME);
-        $tableManager->deleteTable(Store::PRODUCT_TABLE_NAME);
-        $tableManager->deleteTable(Store::CATEGORY_TABLE_NAME);
-
     }
 
     public function install()
@@ -85,18 +86,20 @@ class Installer extends InstallerAbstract
 
     public function addData()
     {
-        $data = array_merge(
-            Store::$product,
-            Store::$images,
-            Store::$category,
-            Store::$categoryProduct
-        );
+        if (isset($this->dbAdapter)) {
+            $data = array_merge(
+                Store::$product,
+                Store::$images,
+                Store::$category,
+                Store::$categoryProduct
+            );
 
-        foreach ($data as $key => $value) {
-            $sql = new MultiInsertSql($this->dbAdapter, $key);
-            $tableGateway = new TableGateway($key, $this->dbAdapter, null, null, $sql);
-            $dataStore = new DbTable($tableGateway);
-            $dataStore->create($value, true);
+            foreach ($data as $key => $value) {
+                $sql = new MultiInsertSql($this->dbAdapter, $key);
+                $tableGateway = new TableGateway($key, $this->dbAdapter, null, null, $sql);
+                $dataStore = new DbTable($tableGateway);
+                $dataStore->create($value, true);
+            }
         }
     }
 }

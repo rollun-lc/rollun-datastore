@@ -14,7 +14,7 @@ use rollun\datastore\AbstractFactoryAbstract;
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\DataStoreException;
 
-abstract class AbstractDataStoreFactory extends AbstractFactoryAbstract
+abstract class DataStoreAbstractFactory extends AbstractFactoryAbstract
 {
 
     const KEY_DATASTORE = 'dataStore';

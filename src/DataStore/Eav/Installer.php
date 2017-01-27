@@ -60,26 +60,27 @@ class Installer extends InstallerAbstract
             $this->dbAdapter = $this->container->get(EavAbstractFactory::DB_SERVICE_NAME);
         } else {
             $this->io->write(EavAbstractFactory::DB_SERVICE_NAME . " not fount. It has did nothing");
-            exit;
         }
     }
 
     public function uninstall()
     {
-        if (constant('APP_ENV') !== 'dev') {
-            $this->io->write('constant("APP_ENV") !== "dev" It has did nothing');
+        if (isset($this->dbAdapter)) {
+            if (constant('APP_ENV') === 'dev') {
+                $tableManager = new TableManager($this->dbAdapter);
+                $tableManager->deleteTable(StoreCatalog::PROP_LINKED_URL_TABLE_NAME);
+                $tableManager->deleteTable(StoreCatalog::PROP_PRODUCT_CATEGORY_TABLE_NAME);
+                $tableManager->deleteTable(StoreCatalog::PROP_TAG_TABLE_NAME);
+                $tableManager->deleteTable(StoreCatalog::MAIN_SPECIFIC_TABLE_NAME);
+                $tableManager->deleteTable(StoreCatalog::MAINICON_TABLE_NAME);
+                $tableManager->deleteTable(StoreCatalog::PRODUCT_TABLE_NAME);
+                $tableManager->deleteTable(StoreCatalog::CATEGORY_TABLE_NAME);
+                $tableManager->deleteTable(StoreCatalog::TAG_TABLE_NAME);
+                $tableManager->deleteTable(SysEntities::TABLE_NAME);
+            } else {
+                $this->io->write('constant("APP_ENV") !== "dev" It has did nothing');
+            }
         }
-
-        $tableManager = new TableManager($this->dbAdapter);
-        $tableManager->deleteTable(StoreCatalog::PROP_LINKED_URL_TABLE_NAME);
-        $tableManager->deleteTable(StoreCatalog::PROP_PRODUCT_CATEGORY_TABLE_NAME);
-        $tableManager->deleteTable(StoreCatalog::PROP_TAG_TABLE_NAME);
-        $tableManager->deleteTable(StoreCatalog::MAIN_SPECIFIC_TABLE_NAME);
-        $tableManager->deleteTable(StoreCatalog::MAINICON_TABLE_NAME);
-        $tableManager->deleteTable(StoreCatalog::PRODUCT_TABLE_NAME);
-        $tableManager->deleteTable(StoreCatalog::CATEGORY_TABLE_NAME);
-        $tableManager->deleteTable(StoreCatalog::TAG_TABLE_NAME);
-        $tableManager->deleteTable(SysEntities::TABLE_NAME);
     }
 
     public function install()
@@ -118,24 +119,26 @@ class Installer extends InstallerAbstract
 
     public function addData()
     {
-        $data = array_merge(
-            StoreCatalog::$sys_entities,
-            StoreCatalog::$entity_product,
-            StoreCatalog::$entity_category,
-            StoreCatalog::$entity_tag,
-            StoreCatalog::$entity_mainicon,
-            StoreCatalog::$entity_main_specific,
-            StoreCatalog::$prop_tag,
-            StoreCatalog::$prop_product_category,
-            StoreCatalog::$prop_linked_url
-        );
+        if (isset($this->dbAdapter)) {
+            $data = array_merge(
+                StoreCatalog::$sys_entities,
+                StoreCatalog::$entity_product,
+                StoreCatalog::$entity_category,
+                StoreCatalog::$entity_tag,
+                StoreCatalog::$entity_mainicon,
+                StoreCatalog::$entity_main_specific,
+                StoreCatalog::$prop_tag,
+                StoreCatalog::$prop_product_category,
+                StoreCatalog::$prop_linked_url
+            );
 
-        foreach ($data as $key => $value) {
-            $sql = new MultiInsertSql($this->dbAdapter, $key);
-            $tableGateway = new TableGateway($key, $this->dbAdapter, null, null, $sql);
-            $dataStore = new DbTable($tableGateway);
-            echo "create $key" . PHP_EOL;
-            $dataStore->create($value, true);
+            foreach ($data as $key => $value) {
+                $sql = new MultiInsertSql($this->dbAdapter, $key);
+                $tableGateway = new TableGateway($key, $this->dbAdapter, null, null, $sql);
+                $dataStore = new DbTable($tableGateway);
+                echo "create $key" . PHP_EOL;
+                $dataStore->create($value, true);
+            }
         }
     }
 }

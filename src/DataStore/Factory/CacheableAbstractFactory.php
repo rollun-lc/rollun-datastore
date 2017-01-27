@@ -13,7 +13,7 @@ use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\Cacheable;
 use rollun\datastore\DataStore\DataStoreException;
 
-class CacheableAbstractFactory extends AbstractDataStoreFactory
+class CacheableAbstractFactory extends DataStoreAbstractFactory
 {
 
     const KEY_DATASOURCE = 'dataSource';

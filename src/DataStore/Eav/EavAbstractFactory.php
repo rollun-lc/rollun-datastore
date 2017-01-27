@@ -11,7 +11,7 @@ namespace rollun\datastore\DataStore\Eav;
 
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStoreException;
-use rollun\datastore\DataStore\Factory\AbstractDataStoreFactory;
+use rollun\datastore\DataStore\Factory\DataStoreAbstractFactory;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use Zend\Db\Adapter\AdapterInterface;
 use Zend\Db\TableGateway\TableGateway;
@@ -43,7 +43,7 @@ use Zend\Db\TableGateway\TableGateway;
  * @category   rest
  * @package    zaboy
  */
-class EavAbstractFactory extends AbstractDataStoreFactory
+class EavAbstractFactory extends DataStoreAbstractFactory
 {
 
     const DB_SERVICE_NAME = 'eav db';

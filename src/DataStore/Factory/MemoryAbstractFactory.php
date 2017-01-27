@@ -32,7 +32,7 @@ use rollun\datastore\DataStore\Memory;
  * @category   rest
  * @package    zaboy
  */
-class MemoryAbstractFactory extends AbstractDataStoreFactory
+class MemoryAbstractFactory extends DataStoreAbstractFactory
 {
 
     public static $KEY_DATASTORE_CLASS = Memory::class;

@@ -27,12 +27,9 @@ return [
             'tableName' => 'category_products'
         ],
     ],
-    'service' => [
-        Composite::DB_SERVICE_NAME
-    ],
     'services' => [
         'aliases' => [
-            Composite::DB_SERVICE_NAME => getenv('APP_ENV') === 'prod' ? 'db' : 'db',
+            Composite::DB_SERVICE_NAME => 'db',
         ],
     ],
 ];

@@ -6,7 +6,7 @@ use Interop\Container\ContainerInterface;
 use rollun\datastore\AbstractFactoryAbstract;
 use rollun\datastore\DataStore\Aspect\AspectAbstract;
 use rollun\datastore\DataStore\DataStoreException;
-use rollun\datastore\DataStore\Factory\AbstractDataStoreFactory;
+use rollun\datastore\DataStore\Factory\DataStoreAbstractFactory;
 
 /**
  * Create and return an instance of the DataStore which based on AspectAbstract
@@ -25,7 +25,7 @@ use rollun\datastore\DataStore\Factory\AbstractDataStoreFactory;
  * @category   rest
  * @package    zaboy
  */
-class AspectAbstractFactory extends AbstractDataStoreFactory
+class AspectAbstractFactory extends DataStoreAbstractFactory
 {
 
     protected static $KEY_DATASTORE_CLASS = AspectAbstract::class;

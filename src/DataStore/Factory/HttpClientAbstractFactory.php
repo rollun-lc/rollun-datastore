@@ -31,7 +31,7 @@ use rollun\datastore\DataStore\HttpClient;
  * @category   rest
  * @package    zaboy
  */
-class HttpClientAbstractFactory extends AbstractDataStoreFactory
+class HttpClientAbstractFactory extends DataStoreAbstractFactory
 {
     const KEY_URL = 'url';
     const KEY_OPTIONS = 'options';
