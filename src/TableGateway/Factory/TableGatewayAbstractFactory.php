@@ -62,8 +62,8 @@ class TableGatewayAbstractFactory extends AbstractFactoryAbstract
         //is there table with same name (for static tables set)?
         //$tableNames = $this->getCachedTables($container);
         //is there table with same name (for non static tables set)?
-        $config = $container->get('config')[TableGatewayAbstractFactory::KEY_TABLE_GATEWAY];
-        if (!isset($config[$requestedName])) {
+        $config = $container->get('config');
+        if (!isset($config[TableGatewayAbstractFactory::KEY_TABLE_GATEWAY][$requestedName])) {
             return false;
         }
         if ($this->setDbAdapter($container, $requestedName)) {

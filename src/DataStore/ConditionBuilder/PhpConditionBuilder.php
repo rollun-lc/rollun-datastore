@@ -38,7 +38,9 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
             'gt' => ['before' => '(', 'between' => '>', 'after' => ')'],
             'le' => ['before' => '(', 'between' => '<=', 'after' => ')'],
             'lt' => ['before' => '(', 'between' => '<', 'after' => ')'],
-            'like' => ['before' => '( ($_field = ', 'between' => ") !=='' && preg_match(", 'after' => ', $_field) )'],
+            'like' => [
+                'before' => '( ($_field = ', 'between' => ") !=='' && preg_match('/' . trim(", 'after' => ',"\'"). \'/i\', $_field) )'
+            ],
         ]
     ];
 
@@ -62,7 +64,7 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
         $fieldValue = parent::prepareFieldValue($fieldValue);
         switch (true) {
             case is_bool($fieldValue):
-                $fieldValue = (bool) $fieldValue ? TRUE : FALSE;
+                $fieldValue = (bool)$fieldValue ? TRUE : FALSE;
                 return $fieldValue;
             case is_numeric($fieldValue):
                 return $fieldValue;
@@ -72,7 +74,7 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
                 return "'" . $fieldValue . "'";
             default:
                 throw new DataStoreException(
-                'Type ' . gettype($fieldValue) . ' is not supported'
+                    'Type ' . gettype($fieldValue) . ' is not supported'
                 );
         }
     }
@@ -99,7 +101,7 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
             $glob = rtrim($glob, '*');
         }
         $regex = strtr(
-                preg_quote(rawurldecode(strtr($glob, ['*' => $constStar, '?' => $constQuestion])), '/'), [$constStar => '.*', $constQuestion => '.']
+            preg_quote(rawurldecode(strtr($glob, ['*' => $constStar, '?' => $constQuestion])), '/'), [$constStar => '.*', $constQuestion => '.']
         );
         if ($anchorStart) {
             $regex = '^' . $regex;
@@ -107,7 +109,7 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
         if ($anchorEnd) {
             $regex = $regex . '$';
         }
-        return '/' . $regex . '/i';
+        return $regex;
     }
 
 }

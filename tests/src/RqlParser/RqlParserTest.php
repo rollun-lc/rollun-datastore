@@ -21,6 +21,7 @@ use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\GeNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\GtNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\LeNode;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\LikeNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\LtNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\NeNode;
 use Xiag\Rql\Parser\Node\SortNode;
@@ -102,6 +103,7 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals($query, $rqlString);
     }
+
     public function test__preparingQuery__inNode()
     {
         $rqlString = RqlParser::rqlDecode("in(email,(aaa@gmail.com,qwe,zxc))");
@@ -145,7 +147,7 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
         $query->setQuery(new EqNode('email', 'aaa@gmail.com'));
         $query->setSelect(new AggregateSelectNode(['name', 'age', 'email']));
         $query->setLimit(new LimitNode(10, 15));
-        $query->setSort(new SortNode(['name'=> -1]));
+        $query->setSort(new SortNode(['name' => -1]));
 
         $this->assertEquals($query, $rqlString);
     }
@@ -171,6 +173,22 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
             new NeNode('name', 'q1$3'),
         ]));
         $query->setGroupby(new GroupbyNode(['id']));
+        $this->assertEquals($query, $queryByString);
+    }
+
+    public function test__containsOnly()
+    {
+        $queryByString = RqlParser::rqlDecode("contains(id,1v23)");
+        $query = new RqlQuery();
+        $query->setQuery(new LikeNode("id", "1v23"));
+        $this->assertEquals($query, $queryByString);
+    }
+
+    public function test__matchOnly()
+    {
+        $queryByString = RqlParser::rqlDecode("match(id,1v23)");
+        $query = new RqlQuery();
+        $query->setQuery(new LikeNode("id", "1v23"));
         $this->assertEquals($query, $queryByString);
     }
 }
