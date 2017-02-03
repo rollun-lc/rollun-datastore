@@ -54,7 +54,7 @@ class RqlParser
     }
 
     /**
-     * @param $rqlQueryString. Static method for decode qrl string. Work without rawurlencode str.
+     * @param $rqlQueryString . Static method for decode qrl string. Work without rawurlencode str.
      * @return RqlQuery
      */
     public static function rqlDecode($rqlQueryString)
@@ -68,7 +68,7 @@ class RqlParser
     }
 
     /**
-     * @param $rqlQueryString. Prepare rlq string. Fix bug with scope(js Query aggregate). Add '+' char for sort.
+     * @param $rqlQueryString . Prepare rlq string. Fix bug with scope(js Query aggregate). Add '+' char for sort.
      * @return mixed
      */
     protected static function prepareStringRql($rqlQueryString)
@@ -92,11 +92,15 @@ class RqlParser
         if (isset($tempRql)) {
             $rqlQueryString = $tempRql;
         }
+        $tempRql = preg_replace('/contains\(|match\(/', 'like(', $rqlQueryString);
+        if (isset($tempRql)) {
+            $rqlQueryString = $tempRql;
+        }
         return $rqlQueryString;
     }
 
     /**
-     * @param $rqlQueryString. Decode rql string with token and lexler.
+     * @param $rqlQueryString . Decode rql string with token and lexler.
      * @return Query
      */
     public function decode($rqlQueryString)
@@ -147,7 +151,7 @@ class RqlParser
     }
 
     /**
-     * @param $query. Static method for encode rql obj.
+     * @param $query . Static method for encode rql obj.
      * @return string
      */
     public static function rqlEncode($query)
@@ -159,7 +163,7 @@ class RqlParser
     }
 
     /**
-     * @param Query $query. Encode query obj with ConditionBuilder.
+     * @param Query $query . Encode query obj with ConditionBuilder.
      * @return string
      */
     public function encode(Query $query)
@@ -181,12 +185,13 @@ class RqlParser
      * @param RqlQuery $query
      * @return string
      */
-    protected function makeGroupby(RqlQuery $query) {
+    protected function makeGroupby(RqlQuery $query)
+    {
         $groupBy = '';
         if ($query->getGroupby() != null) {
             $fields = $query->getGroupby()->getFields();
             $groupBy = '&groupby(';
-            foreach ($fields as $field ){
+            foreach ($fields as $field) {
                 $groupBy .= $field . ',';
             }
             $groupBy = rtrim($groupBy, ',') . ')';
@@ -250,7 +255,7 @@ class RqlParser
     }
 
     /**
-     * @param $rqlString. rawurlencode rql string.
+     * @param $rqlString . rawurlencode rql string.
      * @return string
      */
     protected static function encodedStrQuery($rqlString)

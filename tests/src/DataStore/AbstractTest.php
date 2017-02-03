@@ -10,6 +10,7 @@
 namespace rollun\test\datastore\DataStore;
 
 use Interop\Container\ContainerInterface;
+use rollun\datastore\Rql\RqlParser;
 use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node;
@@ -676,6 +677,28 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
             $count, count($queryArray)
         );
     }
+
+    /**
+     * @param $globString
+     * @param $arrayDelaultKeys
+     * @param $count
+     * @dataProvider provider_Query_Where_Like_True
+     */
+    public function testQuery_Where_contains_True($globString, $arrayDelaultKeys, $count)
+    {
+        $this->_initObject();
+        $strQuery = "like(fString,$globString)";
+        $query = new RqlQuery($strQuery);
+
+        $queryArray = $this->object->query($query);
+        $this->assertEquals(
+            $this->_itemsArrayDelault[$arrayDelaultKeys - 1], $queryArray[1 - 1]
+        );
+        $this->assertEquals(
+            $count, count($queryArray)
+        );
+    }
+
 
     public function provider_Query_Where_Like_False()
     {
