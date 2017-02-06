@@ -29,13 +29,13 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
     public function providerGetValueFromGlob()
     {
         return array(
-            array('abc', '^abc$'),
-            array('*abc', 'abc$'),
-            array('abc*', '^abc'),
-            array('a*b?c', '^a.*b.c$'),
-            array('?abc', '^.abc$'),
-            array('abc?', '^abc.$'),
-            array(rawurlencode('Шщ +-*._'), '^Шщ \+\-\*\._$'),
+            array('abc', '/^abc$/i'),
+            array('*abc', '/abc$/i'),
+            array('abc*', '/^abc/i'),
+            array('a*b?c', '/^a.*b.c$/i'),
+            array('?abc', '/^.abc$/i'),
+            array('abc?', '/^abc.$/i'),
+            array(rawurlencode('Шщ +-*._'), '/^Шщ \+\-\*\._$/i'),
         );
     }
 
@@ -59,7 +59,7 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
                     ->addQuery(new Node\Query\ScalarOperator\GeNode('f', 6))
                     ->addQuery(new Node\Query\ScalarOperator\LikeNode('g', new Glob('*abc?')))
                     ->getQuery()->getQuery(),
-                '(($item[\'a\']==1) && ($item[\'b\']!=2) && ($item[\'c\']<3) && ($item[\'d\']>4) && ($item[\'e\']<=5) && ($item[\'f\']>=6) && ( ($_field = $item[\'g\']) !==\'\' && preg_match(\'/\' . trim(\'abc.$\',"\'"). \'/i\', $_field) ))'
+                '(($item[\'a\']==1) && ($item[\'b\']!=2) && ($item[\'c\']<3) && ($item[\'d\']>4) && ($item[\'e\']<=5) && ($item[\'f\']>=6) && ( ($_field = $item[\'g\']) !==\'\' && preg_match(\'/abc.$/i\', $_field) ))'
             ),
             array(
                 (new QueryBuilder())

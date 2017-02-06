@@ -12,14 +12,14 @@ use rollun\datastore\Rql\Node\ContainsNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\LikeNode;
 use Xiag\Rql\Parser\TokenParser\Query\Basic\AbstractScalarOperatorTokenParser;
 
-class MatchTokenParser extends AbstractScalarOperatorTokenParser
+class ContainsTokenParser extends AbstractScalarOperatorTokenParser
 {
     /**
      * @inheritdoc
      */
     protected function getOperatorName()
     {
-        return 'match';
+        return 'contains';
     }
 
     /**

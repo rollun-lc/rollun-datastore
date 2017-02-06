@@ -11,6 +11,8 @@ namespace rollun\datastore\Rql;
 
 use rollun\datastore\Rql\Node\GroupbyNode;
 use Xiag\Rql\Parser\AbstractNode;
+use Xiag\Rql\Parser\DataType\Glob;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\LikeNode;
 use Xiag\Rql\Parser\QueryBuilder;
 
 class RqlQueryBuilder extends QueryBuilder
@@ -24,6 +26,10 @@ class RqlQueryBuilder extends QueryBuilder
     {
         if ($node instanceof GroupbyNode) {
             return $this->query->setGroupby($node);
+        } else if ($node instanceof LikeNode) {
+            if (!($node->getValue() instanceof Glob)) {
+                $node->setValue(new Glob($node->getValue()));
+            }
         }
         return parent::addNode($node);
     }

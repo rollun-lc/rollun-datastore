@@ -11,6 +11,7 @@ namespace rollun\test\datastore\RqlParser;
 
 use phpDocumentor\Reflection\Types\Object_;
 use PHPUnit_Framework_TestCase;
+use rollun\datastore\Rql\Node\ContainsNode;
 use rollun\datastore\Rql\Node\GroupbyNode;
 use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\Node\LimitNode;
@@ -180,7 +181,7 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
     {
         $queryByString = RqlParser::rqlDecode("contains(id,1v23)");
         $query = new RqlQuery();
-        $query->setQuery(new LikeNode("id", "1v23"));
+        $query->setQuery(new ContainsNode("id", "1v23"));
         $this->assertEquals($query, $queryByString);
     }
 
@@ -188,7 +189,7 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
     {
         $queryByString = RqlParser::rqlDecode("match(id,1v23)");
         $query = new RqlQuery();
-        $query->setQuery(new LikeNode("id", "1v23"));
+        $query->setQuery(new ContainsNode("id", "1v23"));
         $this->assertEquals($query, $queryByString);
     }
 }

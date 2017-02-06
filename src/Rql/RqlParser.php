@@ -21,7 +21,9 @@ use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
 use rollun\datastore\DataStore\ConditionBuilder\RqlConditionBuilder;
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator\MatchTokenParser as BasicMatchTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator\ContainsTokenParser as BasicContainsTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\MatchTokenParser as FiqlMatchTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\ContainsTokenParser as FiqlContainsTokenParser;
 use rollun\datastore\Rql\TokenParser\SelectTokenParser;
 
 class RqlParser
@@ -92,10 +94,6 @@ class RqlParser
         if (isset($tempRql)) {
             $rqlQueryString = $tempRql;
         }
-        $tempRql = preg_replace('/contains\(|match\(/', 'like(', $rqlQueryString);
-        if (isset($tempRql)) {
-            $rqlQueryString = $tempRql;
-        }
         return $rqlQueryString;
     }
 
@@ -131,6 +129,8 @@ class RqlParser
             ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\GeTokenParser())
             ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LikeTokenParser())
             ->addTokenParser(new FiqlMatchTokenParser())
+            ->addTokenParser(new BasicContainsTokenParser())
+            ->addTokenParser(new FiqlContainsTokenParser())
             ->addTokenParser(new BasicMatchTokenParser());
 
         $parser = (new QueryParser((new ExpressionParser())
