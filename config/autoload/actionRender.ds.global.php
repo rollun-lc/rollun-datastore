@@ -22,7 +22,7 @@ return [
         'factories' => [
             'dataStoreMiddleware' => \rollun\datastore\Middleware\Factory\StoreLazyLoadFactory::class,
             \rollun\datastore\Middleware\HtmlDataStoreRendererAction::class =>
-                \rollun\actionrender\Renderer\Html\HtmlRendererFactory::class
+                \rollun\datastore\Middleware\Factory\HtmlDataStoreRendererFactory::class
         ]
     ],
     ResponseRendererAbstractFactory::KEY_RESPONSE_RENDERER => [
