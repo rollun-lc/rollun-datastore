@@ -10,6 +10,7 @@ namespace rollun\datastore\Middleware;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use rollun\installer\Command;
 use Zend\Diactoros\Response\HtmlResponse;
 use Zend\Expressive\Template\TemplateRendererInterface;
 use Zend\Stratigility\MiddlewareInterface;
@@ -21,11 +22,24 @@ class HtmlDataStoreRendererAction extends HtmlRendererAction
     {
         $data = $request->getAttribute('responseData');
         $name = $request->getAttribute('templateName');
-        $status = $request->getAttribute('status') ?: 200;
 
+        /** @var Response $response */
+        $response = $request->getAttribute(Response::class) ?: null;
+        if (!isset($response)) {
+            $status = 200;
+            $headers = [];
+        } else {
+            $status = $response->getStatusCode();
+            $headers = $response->getHeaders();
+        }
+
+        $response = new HtmlResponse($this->templateRenderer->render($name, ['data' => $data]), $status);
+        foreach ($headers as $header => $value) {
+            $response = $response->withHeader($header, $value);
+        }
         $request = $request->withAttribute(
             Response::class,
-            new HtmlResponse($this->templateRenderer->render($name, ['data' => $data]), $status)
+            $response
         );
 
         if (isset($out)) {

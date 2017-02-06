@@ -7,11 +7,12 @@
         {% if data is iterable %}
             <ul>
                 {% for item in data %}
-                    <li> {{ dump(item) }} <li>
-                {% endfor %}
+                <li> {{ dump(item) }}
+                <li>
+                    {% endfor %}
             </ul>
         {% else %}
-        {{ dump(item) }}
+            {{ dump(data) }}
         {% endif %}
     </div>
 {% endblock %}

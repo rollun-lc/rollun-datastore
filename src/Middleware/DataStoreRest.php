@@ -10,7 +10,7 @@
 
 namespace rollun\datastore\Middleware;
 
-use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Query;
@@ -41,11 +41,11 @@ class DataStoreRest extends Middleware\DataStoreAbstract
 
     /**
      * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
+     * @param Response $response
      * @param callable|null $next
-     * @return ResponseInterface
+     * @return Response
      */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
+    public function __invoke(ServerRequestInterface $request, Response $response, callable $next = null)
     {
         $isPrimaryKeyValue = null !== $request->getAttribute('primaryKeyValue');
         $httpMethod = $request->getMethod();
@@ -87,7 +87,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
                 $ex->getMessage()
             ], 500);
         }
-
+        $this->request = $this->request->withAttribute(Response::class, $response);
         if ($next) {
             return $next($this->request, $response);
         }
@@ -96,11 +96,11 @@ class DataStoreRest extends Middleware\DataStoreAbstract
 
     /**
      * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @return ResponseInterface
+     * @param Response $response
+     * @return Response
      * @internal param callable|null $next
      */
-    public function methodGetWithId(ServerRequestInterface $request, ResponseInterface $response)
+    public function methodGetWithId(ServerRequestInterface $request, Response $response)
     {
         $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $row = $this->dataStore->read($primaryKeyValue);
@@ -112,12 +112,12 @@ class DataStoreRest extends Middleware\DataStoreAbstract
 
     /**
      * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @return ResponseInterface
+     * @param Response $response
+     * @return Response
      * @throws \rollun\datastore\RestException
      * @internal param callable|null $next
      */
-    public function methodGetWithoutId(ServerRequestInterface $request, ResponseInterface $response)
+    public function methodGetWithoutId(ServerRequestInterface $request, Response $response)
     {
         /** @var Query $rqlQueryObject */
         $rqlQueryObject = $request->getAttribute('rqlQueryObject');
@@ -182,6 +182,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
             $contentRange = 'items ' . $offset . '-' . ($offset + count($rowset) - 1) . '/' . $rowCount[0][$this->dataStore
                     ->getIdentifier() . '->count'];
             $response = $response->withHeader('Content-Range', $contentRange);
+
         }
 
 
@@ -191,12 +192,12 @@ class DataStoreRest extends Middleware\DataStoreAbstract
 
     /**
      * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @return ResponseInterface
+     * @param Response $response
+     * @return Response
      * @throws \rollun\datastore\RestException
      * @internal param callable|null $next
      */
-    public function methodPutWithId(ServerRequestInterface $request, ResponseInterface $response)
+    public function methodPutWithId(ServerRequestInterface $request, Response $response)
     {
         $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $primaryKeyIdentifier = $this->dataStore->getIdentifier();
@@ -222,12 +223,12 @@ class DataStoreRest extends Middleware\DataStoreAbstract
      * http://www.restapitutorial.com/lessons/httpmethods.html
      *
      * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @return ResponseInterface
+     * @param Response $response
+     * @return Response
      * @throws \rollun\datastore\RestException
      * @internal param callable|null $next
      */
-    public function methodPostWithId(ServerRequestInterface $request, ResponseInterface $response)
+    public function methodPostWithId(ServerRequestInterface $request, Response $response)
     {
         $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $primaryKeyIdentifier = $this->dataStore->getIdentifier();
@@ -261,12 +262,12 @@ class DataStoreRest extends Middleware\DataStoreAbstract
      * http://www.restapitutorial.com/lessons/httpmethods.html
      *
      * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @return ResponseInterface
+     * @param Response $response
+     * @return Response
      * @throws \rollun\datastore\RestException
      * @internal param callable|null $next
      */
-    public function methodPostWithoutId(ServerRequestInterface $request, ResponseInterface $response)
+    public function methodPostWithoutId(ServerRequestInterface $request, Response $response)
     {
         $row = $request->getParsedBody();
         if (!(isset($row) && is_array($row))) {
@@ -286,11 +287,11 @@ class DataStoreRest extends Middleware\DataStoreAbstract
      * http://www.restapitutorial.com/lessons/httpmethods.html
      *
      * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @return ResponseInterface
+     * @param Response $response
+     * @return Response
      * @internal param callable|null $next
      */
-    public function methodDelete(ServerRequestInterface $request, ResponseInterface $response)
+    public function methodDelete(ServerRequestInterface $request, Response $response)
     {
         $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $items = $this->dataStore->delete($primaryKeyValue);
@@ -306,7 +307,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
         return $response;
     }
 
-    public function methodRefresh(ServerRequestInterface $request, ResponseInterface $response)
+    public function methodRefresh(ServerRequestInterface $request, Response $response)
     {
         if ($this->dataStore instanceof RefreshableInterface) {
             $this->dataStore->refresh();
