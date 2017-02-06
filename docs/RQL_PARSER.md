@@ -20,12 +20,18 @@ RqlQuery наследник [`Xiag\Rql\Parser\Query`](https://github.com/xiag-ag
 Нода позволяет делать групировки в запросе.
 
 ## rollun\datastore\Rql\Node\AggregateSelectNode
-Нода которая перекрывает 
+Нода которая перекрывает `SelectNode` добавляя возможность использовать ноду `AggregateFunctionNode`
 
 ## rollun\datastore\Rql\Node\AggregateFunctionNode
+Нода которая дает возмождность делать агрегатные запросы.
 
+## rollun\datastore\Rql\Node\ContainsNode
+Нода которя позволяет исползовать 
+Contains который выберет все обьекты которые включают всебя переданое значение в указаном поле.
+> при rql запросе межно использовать ноду match она буедт восприниматься как Contains.
 
-Позволяет инициализировать обект с помощью rql строки.
+> Деталнее по поводу rql можно прочесть [тут](https://github.com/persvr/rql) и [тут](https://github.com/avz-cmf/zaboy-dojo/blob/master/doc/RQL.md)
+
 ##rollun/datastore/Rql/RqlParser
 Объект RqlParser позволяет енкодировать и декодировать rql строку в query объект и обратно.  
 Статический метод rqlDecode принимает на вход rql строку и возвращает Query объект.  

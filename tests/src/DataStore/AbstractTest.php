@@ -647,6 +647,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
             array('*l1', 1, 1),
             array('*1*', 1, 1),
             array('*2*', 2, 3),
+            array('v', 1, 0),
             array('val1', 1, 1),
             array('val2', 2, 3),
             array('?al1', 1, 1),
@@ -670,11 +671,26 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         );
         $query->setQuery($likeNode);
         $queryArray = $this->object->query($query);
-        $this->assertEquals(
-            $this->_itemsArrayDelault[$arrayDelaultKeys - 1], $queryArray[1 - 1]
-        );
+        if (!empty($queryArray) && $arrayDelaultKeys > 0) {
+            $this->assertEquals(
+                $this->_itemsArrayDelault[$arrayDelaultKeys - 1], $queryArray[1 - 1]
+            );
+        }
         $this->assertEquals(
             $count, count($queryArray)
+        );
+    }
+
+
+    public function provider_Query_Where_Contains_True()
+    {
+        return array(
+            array('l1', 1, 1),
+            array('1', 1, 1),
+            array('2', 2, 3),
+            array('v', 0, 4),
+            array('val1', 1, 1),
+            array('val2', 2, 3),
         );
     }
 
@@ -682,18 +698,20 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
      * @param $globString
      * @param $arrayDelaultKeys
      * @param $count
-     * @dataProvider provider_Query_Where_Like_True
+     * @dataProvider provider_Query_Where_Contains_True
      */
-    public function testQuery_Where_contains_True($globString, $arrayDelaultKeys, $count)
+    public function testQuery_Where_Contains_True($globString, $arrayDelaultKeys, $count)
     {
         $this->_initObject();
-        $strQuery = "like(fString,$globString)";
+        $strQuery = "contains(fString,$globString)";
         $query = new RqlQuery($strQuery);
 
         $queryArray = $this->object->query($query);
-        $this->assertEquals(
-            $this->_itemsArrayDelault[$arrayDelaultKeys - 1], $queryArray[1 - 1]
-        );
+        if (!empty($queryArray) && $arrayDelaultKeys > 0) {
+            $this->assertEquals(
+                $this->_itemsArrayDelault[$arrayDelaultKeys - 1], $queryArray[1 - 1]
+            );
+        }
         $this->assertEquals(
             $count, count($queryArray)
         );
@@ -936,7 +954,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $query->setSelect(new AggregateSelectNode([$aggregateCount]));
         $resp = $this->object->query($query);
         $this->assertEquals(1, count($resp));
-       // $this->assertEquals(4, $resp[0]['max(id)']);
+        // $this->assertEquals(4, $resp[0]['max(id)']);
         $this->assertEquals(4, $resp[0]['id->max']);
     }
 
@@ -979,6 +997,51 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         //$this->assertEquals(40, $resp[0]['anotherId']);
     }
 
+    public function test_testGroupby()
+    {
+        $this->_initObject($this->_itemsArrayDelault);
+
+        $result = $this->object->query(new RqlQuery("select(fString)&groupby(fString)"));
+        $this->assertEquals(2, count($result));
+        $this->assertEquals(['fString' => 'val1'], $result[0]);
+        $this->assertEquals(['fString' => 'val2'], $result[1]);
+    }
+
+    public function test_testGroupbyAgregate()
+    {
+        $this->_initObject($this->_itemsArrayDelault);
+
+        $result = $this->object->query(new RqlQuery("select(count(id),fString)&groupby(fString)"));
+        $this->assertEquals(2, count($result));
+        $this->assertEquals(['fString' => 'val1', 'id->count' => 1], $result[0]);
+        $this->assertEquals(['fString' => 'val2', 'id->count' => 3], $result[1]);
+    }
+
+    /*######################### GROUP BY ################################*/
+
+    public function test_testGroupbyDefaultAgregate()
+    {
+        $this->_initObject($this->_itemsArrayDelault);
+
+        $result = $this->object->query(new RqlQuery("select(id,fString)&groupby(fString)"));
+        $this->assertEquals(2, count($result));
+        $this->assertEquals(['fString' => 'val1', 'id->count' => 1], $result[0]);
+        $this->assertEquals(['fString' => 'val2', 'id->count' => 3], $result[1]);
+    }
+
+    public function test_testGroupByTwoColumns()
+    {
+        $this->_initObject($this->_itemsArrayDelault);
+        $result = $this->object->query(new RqlQuery("select(id,fString)&groupby(fString,id)"));
+        $this->assertEquals(4, count($result));
+        $this->assertEquals([
+            array('id' => 1, 'fString' => 'val1'),
+            array('id' => 2, 'fString' => 'val2'),
+            array('id' => 3, 'fString' => 'val2'),
+            array('id' => 4, 'fString' => 'val2')
+        ], $result);
+    }
+
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
@@ -996,45 +1059,6 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     protected function tearDown()
     {
 
-    }
-
-    /*######################### GROUP BY ################################*/
-    public function test_testGroupby(){
-        $this->_initObject($this->_itemsArrayDelault);
-
-        $result = $this->object->query(new RqlQuery("select(fString)&groupby(fString)"));
-        $this->assertEquals(2, count($result));
-        $this->assertEquals(['fString' => 'val1'], $result[0]);
-        $this->assertEquals(['fString' => 'val2'], $result[1]);
-    }
-
-    public function test_testGroupbyAgregate(){
-        $this->_initObject($this->_itemsArrayDelault);
-
-        $result = $this->object->query(new RqlQuery("select(count(id),fString)&groupby(fString)"));
-        $this->assertEquals(2, count($result));
-        $this->assertEquals(['fString' => 'val1', 'id->count' => 1], $result[0]);
-        $this->assertEquals(['fString' => 'val2', 'id->count' => 3], $result[1]);
-    }
-
-    public function test_testGroupbyDefaultAgregate(){
-        $this->_initObject($this->_itemsArrayDelault);
-
-        $result = $this->object->query(new RqlQuery("select(id,fString)&groupby(fString)"));
-        $this->assertEquals(2, count($result));
-        $this->assertEquals(['fString' => 'val1', 'id->count' => 1], $result[0]);
-        $this->assertEquals(['fString' => 'val2', 'id->count' => 3], $result[1]);
-    }
-    public function test_testGroupByTwoColumns(){
-        $this->_initObject($this->_itemsArrayDelault);
-        $result = $this->object->query(new RqlQuery("select(id,fString)&groupby(fString,id)"));
-        $this->assertEquals(4, count($result));
-        $this->assertEquals([
-            array('id' => 1, 'fString' => 'val1'),
-            array('id' => 2, 'fString' => 'val2'),
-            array('id' => 3, 'fString' => 'val2'),
-            array('id' => 4, 'fString' => 'val2')
-        ], $result);
     }
 
 }

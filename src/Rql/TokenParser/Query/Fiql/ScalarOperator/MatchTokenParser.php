@@ -8,6 +8,7 @@
  */
 namespace rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator;
 
+use rollun\datastore\Rql\Node\ContainsNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\LikeNode;
 use Xiag\Rql\Parser\TokenParser\Query\Fiql\AbstractScalarOperatorTokenParser;
 
@@ -26,6 +27,6 @@ class MatchTokenParser extends AbstractScalarOperatorTokenParser
      */
     protected function createNode($field, $value)
     {
-        return new LikeNode($field, $value);
+        return new ContainsNode($field, $value);
     }
 }

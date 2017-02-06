@@ -144,6 +144,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
     {
         $conditionBuilder = $this->conditionBuilder;
         $conditioon = $conditionBuilder($query->getQuery());
+
         $whereFunctionBody = PHP_EOL .
             '$result = ' . PHP_EOL
             . rtrim($conditioon, PHP_EOL) . ';' . PHP_EOL

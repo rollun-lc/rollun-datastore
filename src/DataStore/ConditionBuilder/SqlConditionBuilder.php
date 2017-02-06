@@ -40,6 +40,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
             'le' => ['before' => '(', 'between' => '<=', 'after' => ')'],
             'lt' => ['before' => '(', 'between' => '<', 'after' => ')'],
             'like' => ['before' => '(', 'between' => ' LIKE ', 'after' => ')'],
+            'contains' => ['before' => '(', 'between' => ' LIKE \'%', 'after' => '%\')'],
         ]
     ];
 
@@ -63,31 +64,6 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
             . ' = '
             . $this->prepareFieldValue(1);
         $this->tableName = $tableName;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * {@inheritdoc}
-     */
-    public function prepareFieldName($fieldName)
-    {
-        if (!strpos($fieldName, '.')) {
-            if ($fieldName == 'id'){
-                $fieldName = $this->db->platform->quoteIdentifier($this->tableName) .
-                    '.' .
-                    $this->db->platform->quoteIdentifier($fieldName);
-            }else {
-                $fieldName = $this->db->platform->quoteIdentifier($fieldName);
-            }
-        } else {
-            $name = explode('.', $fieldName);
-            $fieldName = $this->db->platform->quoteIdentifier($name[0]) .
-                '.' .
-                $this->db->platform->quoteIdentifier($name[1]);
-        }
-        return $fieldName;
-
     }
 
     /**
@@ -147,6 +123,9 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
             } else {
                 throw new DataStoreException("Can't use `null` for " . $nodeName . ". Only for `eq` or `ne`");
             }
+        } else if ($nodeName === 'contains') {
+            $strQuery .= $this->literals['ScalarOperator'][$nodeName]['between'] .
+                trim($this->prepareFieldValue($value), '\'');
         } else {
             $strQuery .= $this->literals['ScalarOperator'][$nodeName]['between']
                 . $this->prepareFieldValue($value);
@@ -157,4 +136,28 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         return $strQuery;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * {@inheritdoc}
+     */
+    public function prepareFieldName($fieldName)
+    {
+        if (!strpos($fieldName, '.')) {
+            if ($fieldName == 'id') {
+                $fieldName = $this->db->platform->quoteIdentifier($this->tableName) .
+                    '.' .
+                    $this->db->platform->quoteIdentifier($fieldName);
+            } else {
+                $fieldName = $this->db->platform->quoteIdentifier($fieldName);
+            }
+        } else {
+            $name = explode('.', $fieldName);
+            $fieldName = $this->db->platform->quoteIdentifier($name[0]) .
+                '.' .
+                $this->db->platform->quoteIdentifier($name[1]);
+        }
+        return $fieldName;
+
+    }
 }
