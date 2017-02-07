@@ -717,6 +717,71 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+   /* protected $_itemsArrayDelault = array(
+        array('id' => 1, 'anotherId' => 10, 'fString' => 'val1', 'fFloat' => 400.0004),
+        array('id' => 2, 'anotherId' => 20, 'fString' => 'val2', 'fFloat' => 300.003),
+        array('id' => 3, 'anotherId' => 40, 'fString' => 'val2', 'fFloat' => 300.003),
+        array('id' => 4, 'anotherId' => 30, 'fString' => 'val2', 'fFloat' => 100.1)
+    );*/
+
+    public function providerQuery_Where_Like_Combine()
+    {
+        return [
+            [
+                "or(like(id,1),like(fString,val))",
+                [
+                    array('id' => 1, 'anotherId' => 10, 'fString' => 'val1', 'fFloat' => 400.0004),
+                ]
+            ],
+            [
+                "and(like(id,1),like(fString,val*))",
+                [
+                    array('id' => 1, 'anotherId' => 10, 'fString' => 'val1', 'fFloat' => 400.0004),
+                ]
+            ],
+            [
+                "or(like(id,1),like(fString,val*))",
+                [
+                    array('id' => 1, 'anotherId' => 10, 'fString' => 'val1', 'fFloat' => 400.0004),
+                    array('id' => 2, 'anotherId' => 20, 'fString' => 'val2', 'fFloat' => 300.003),
+                    array('id' => 3, 'anotherId' => 40, 'fString' => 'val2', 'fFloat' => 300.003),
+                    array('id' => 4, 'anotherId' => 30, 'fString' => 'val2', 'fFloat' => 100.1)
+                ]
+            ],
+            [
+                "or(like(id,1),contains(fString,val))",
+                [
+                    array('id' => 1, 'anotherId' => 10, 'fString' => 'val1', 'fFloat' => 400.0004),
+                    array('id' => 2, 'anotherId' => 20, 'fString' => 'val2', 'fFloat' => 300.003),
+                    array('id' => 3, 'anotherId' => 40, 'fString' => 'val2', 'fFloat' => 300.003),
+                    array('id' => 4, 'anotherId' => 30, 'fString' => 'val2', 'fFloat' => 100.1)
+                ]
+            ],
+            [
+                "or(like(fString,*l2),eq(id,1))",
+                [
+                    array('id' => 1, 'anotherId' => 10, 'fString' => 'val1', 'fFloat' => 400.0004),
+                    array('id' => 2, 'anotherId' => 20, 'fString' => 'val2', 'fFloat' => 300.003),
+                    array('id' => 3, 'anotherId' => 40, 'fString' => 'val2', 'fFloat' => 300.003),
+                    array('id' => 4, 'anotherId' => 30, 'fString' => 'val2', 'fFloat' => 100.1)
+                ]
+            ],
+        ];
+    }
+
+    /**
+     * @param $queryString
+     * @param $resultExpected
+     * @dataProvider providerQuery_Where_Like_Combine()
+     */
+    public function testQuery_Where_Like_Combine($queryString, $resultExpected)
+    {
+        $this->_initObject();
+        $query = new RqlQuery($queryString);
+
+        $resultAccept = $this->object->query($query);
+        $this->assertEquals($resultExpected, $resultAccept);
+    }
 
     public function provider_Query_Where_Like_False()
     {
