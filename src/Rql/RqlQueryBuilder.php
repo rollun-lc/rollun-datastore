@@ -26,10 +26,6 @@ class RqlQueryBuilder extends QueryBuilder
     {
         if ($node instanceof GroupbyNode) {
             return $this->query->setGroupby($node);
-        } else if ($node instanceof LikeNode) {
-            if (!($node->getValue() instanceof Glob)) {
-                $node->setValue(new Glob($node->getValue()));
-            }
         }
         return parent::addNode($node);
     }

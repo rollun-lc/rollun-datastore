@@ -12,6 +12,8 @@ namespace rollun\datastore\Middleware;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface;
+use rollun\datastore\DataStore\Interfaces\ReadInterface;
+use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Query;
 use rollun\datastore\DataStore\DataStoreException;
@@ -123,7 +125,9 @@ class DataStoreRest extends Middleware\DataStoreAbstract
         $rqlQueryObject = $request->getAttribute('rqlQueryObject');
 
         $rqlLimitNode = $rqlQueryObject->getLimit();
-        $headerLimit = $request->getAttribute('Limit');
+
+
+        /*$headerLimit = $request->getAttribute('Limit');
 
         if (!is_null($rqlLimitNode)) {
             if (isset($headerLimit)) {
@@ -141,20 +145,17 @@ class DataStoreRest extends Middleware\DataStoreAbstract
                 }
                 $rqlQueryObject->setLimit($newLimitNode);
             }
-        } else {
-            if ($headerLimit) {
-                $limit = (int)$headerLimit['limit'];
-                if (isset($headerLimit['offset'])) {
-                    $offset = (int)$headerLimit['offset'];
-                    $newLimitNode = new LimitNode($limit, $offset);
-                } else {
-                    $newLimitNode = new LimitNode($limit);
-                }
-                $rqlQueryObject->setLimit($newLimitNode);
+        } elseif ($headerLimit) {
+            $limit = (int)$headerLimit['limit'];
+            if (isset($headerLimit['offset'])) {
+                $offset = (int)$headerLimit['offset'];
+                $newLimitNode = new LimitNode($limit, $offset);
+            } else {
+                $newLimitNode = new LimitNode($limit);
             }
-        }
-
-        $rowCountQuery = new Query();
+            $rqlQueryObject->setLimit($newLimitNode);
+        }*/
+        /*$rowCountQuery = new Query();
         $aggregate = new AggregateFunctionNode('count', $this->dataStore->getIdentifier());
         $rowCountQuery->setSelect(new AggregateSelectNode([$aggregate]));
 
@@ -163,12 +164,28 @@ class DataStoreRest extends Middleware\DataStoreAbstract
         }
         if ($rqlLimitNode) {
             $rowCountQuery->setLimit($rqlLimitNode);
-        }
+        }*/
 
         //TODO: count aggregate fn can't work with limit and offset. Bug!!!
         $rowset = $this->dataStore->query($rqlQueryObject);
         $this->request = $request->withAttribute('responseData', $rowset);
 
+        if ($rqlLimitNode) {
+            $rqlQueryObject->setLimit(new LimitNode(ReadInterface::LIMIT_INFINITY));
+            $count = count($this->dataStore->query($rqlQueryObject));
+            $offset = !is_null($rqlLimitNode->getOffset()) ? $rqlLimitNode->getOffset() : '0';
+            $limit = !is_null($rqlLimitNode->getLimit()) ?
+                ($rqlLimitNode->getLimit() == ReadInterface::LIMIT_INFINITY ? $count : $rqlLimitNode->getLimit()) :
+                $count;
+            $contentRange = "items $offset-$limit/$count";
+        } else {
+            $count = count($rowset);
+            $contentRange = "items 0-$count/$count";
+        }
+
+        $response = $response->withHeader('Content-Range', $contentRange);
+
+        /*
         $rowCountQuery = new Query();
         $rowCountQuery
             ->setSelect(new AggregateSelectNode([new AggregateFunctionNode('count', $this->dataStore->getIdentifier())]));
@@ -183,7 +200,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
                     ->getIdentifier() . '->count'];
             $response = $response->withHeader('Content-Range', $contentRange);
 
-        }
+        }*/
 
 
         $response = $response->withStatus(200);

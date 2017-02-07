@@ -22,8 +22,10 @@ use rollun\datastore\DataStore\ConditionBuilder\RqlConditionBuilder;
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator\MatchTokenParser as BasicMatchTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator\ContainsTokenParser as BasicContainsTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator\LikeGlobTokenParser as BasicLikeGlobTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\MatchTokenParser as FiqlMatchTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\ContainsTokenParser as FiqlContainsTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\LikeGlobTokenParser as FiqlLikeGlobTokenParser;
 use rollun\datastore\Rql\TokenParser\SelectTokenParser;
 
 class RqlParser
@@ -57,7 +59,7 @@ class RqlParser
 
     /**
      * @param $rqlQueryString . Static method for decode qrl string. Work without rawurlencode str.
-     * @return RqlQuery
+     * @return RqlQuery|Query
      */
     public static function rqlDecode($rqlQueryString)
     {
@@ -118,7 +120,8 @@ class RqlParser
             ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\GtTokenParser())
             ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LeTokenParser())
             ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\GeTokenParser())
-            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LikeTokenParser())
+            ->addTokenParser(new BasicLikeGlobTokenParser())
+            //->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LikeTokenParser())
             ->addTokenParser(new TokenParser\Query\Fiql\ArrayOperator\InTokenParser())
             ->addTokenParser(new TokenParser\Query\Fiql\ArrayOperator\OutTokenParser())
             ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\EqTokenParser())
@@ -127,7 +130,8 @@ class RqlParser
             ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\GtTokenParser())
             ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LeTokenParser())
             ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\GeTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LikeTokenParser())
+            ->addTokenParser(new FiqlLikeGlobTokenParser())
+            //->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LikeTokenParser())
             ->addTokenParser(new FiqlMatchTokenParser())
             ->addTokenParser(new BasicContainsTokenParser())
             ->addTokenParser(new FiqlContainsTokenParser())
