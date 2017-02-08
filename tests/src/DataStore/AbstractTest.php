@@ -717,12 +717,12 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-   /* protected $_itemsArrayDelault = array(
-        array('id' => 1, 'anotherId' => 10, 'fString' => 'val1', 'fFloat' => 400.0004),
-        array('id' => 2, 'anotherId' => 20, 'fString' => 'val2', 'fFloat' => 300.003),
-        array('id' => 3, 'anotherId' => 40, 'fString' => 'val2', 'fFloat' => 300.003),
-        array('id' => 4, 'anotherId' => 30, 'fString' => 'val2', 'fFloat' => 100.1)
-    );*/
+    /* protected $_itemsArrayDelault = array(
+         array('id' => 1, 'anotherId' => 10, 'fString' => 'val1', 'fFloat' => 400.0004),
+         array('id' => 2, 'anotherId' => 20, 'fString' => 'val2', 'fFloat' => 300.003),
+         array('id' => 3, 'anotherId' => 40, 'fString' => 'val2', 'fFloat' => 300.003),
+         array('id' => 4, 'anotherId' => 30, 'fString' => 'val2', 'fFloat' => 100.1)
+     );*/
 
     public function providerQuery_Where_Like_Combine()
     {
@@ -1023,7 +1023,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(4, $resp[0]['id->max']);
     }
 
-    public function testSelectAggregateFunction_Mix_True()
+    public function testSelectAggregateFunction_Min_True()
     {
         $this->_initObject();
         $query = new Query();
@@ -1035,6 +1035,30 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1, $resp[0]['id->min']);
     }
 
+    public function testSelectAggregateFunction_Sum_True()
+    {
+        $this->_initObject();
+        $query = new Query();
+        $aggregateCount = new AggregateFunctionNode('sum', 'id');
+        $query->setSelect(new AggregateSelectNode([$aggregateCount]));
+        $resp = $this->object->query($query);
+        $this->assertEquals(1, count($resp));
+        //$this->assertEquals(1, $resp[0]['min(id)']);
+        $this->assertEquals(10, $resp[0]['id->sum']);
+    }
+
+    public function testSelectAggregateFunction_Avg_True()
+    {
+        $this->_initObject();
+        $query = new Query();
+        $aggregateCount = new AggregateFunctionNode('avg', 'id');
+        $query->setSelect(new AggregateSelectNode([$aggregateCount]));
+        $resp = $this->object->query($query);
+        $this->assertEquals(1, count($resp));
+        //$this->assertEquals(1, $resp[0]['min(id)']);
+        $this->assertEquals(2.5, $resp[0]['id->avg']);
+    }
+
     public function testSelectAggregateFunction_Combo_True()
     {
         $this->_initObject();
@@ -1043,10 +1067,18 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $aggregateCount = new AggregateFunctionNode('count', 'id');
         $aggregateMaxId = new AggregateFunctionNode('max', 'id');
         $aggregateMinId = new AggregateFunctionNode('min', 'id');
+        $aggregateSumId = new AggregateFunctionNode('sum', 'id');
+        $aggregateAvgId = new AggregateFunctionNode('avg', 'id');
 
         $query->setLimit(new Node\LimitNode(2, 1));
         $query->setQuery(new ScalarOperator\EqNode('fString', 'val2'));
-        $query->setSelect(new AggregateSelectNode([$aggregateCount, $aggregateMaxId, $aggregateMinId, "anotherId"]));
+        $query->setSelect(new AggregateSelectNode([
+            $aggregateCount,
+            $aggregateMaxId,
+            $aggregateMinId,
+            $aggregateSumId,
+            $aggregateAvgId
+        ]));
 
         $resp = $this->object->query($query);
 
@@ -1057,8 +1089,9 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(4, $resp[0]['id->max']);
         //$this->assertEquals(4, $resp[0]['max(id)']);
         $this->assertEquals(3, $resp[0]['id->min']);
+        $this->assertEquals(7, $resp[0]['id->sum']);
+        $this->assertEquals(3.5, $resp[0]['id->avg']);
         //$this->assertEquals(3, $resp[0]['min(id)']);
-        $this->assertEquals(40, $resp[0]['anotherId']);
         //$this->assertEquals(40, $resp[0]['anotherId']);
     }
 

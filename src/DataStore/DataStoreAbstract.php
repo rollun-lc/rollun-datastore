@@ -9,6 +9,7 @@
 
 namespace rollun\datastore\DataStore;
 
+use phpDocumentor\Reflection\Types\Integer;
 use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Iterators\DataStoreIterator;
@@ -136,6 +137,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
         }
         return $result;
     }
+
     /**
      * @param $result
      * @param RqlQuery $query
@@ -193,17 +195,6 @@ abstract class DataStoreAbstract implements DataStoresInterface
         return $data;
     }
 
-    protected function groupBy(array $groups, $groupField)
-    {
-        $newGroup = [];
-        foreach ($groups as $group) {
-            foreach ($group as $item) {
-                $newGroup[$item[$groupField]][] = $item;
-            }
-        }
-        return $newGroup;
-    }
-
     protected function queryGroupBy($result, RqlQuery $query)
     {
         $groupFields = $query->getGroupby()->getFields();
@@ -215,32 +206,6 @@ abstract class DataStoreAbstract implements DataStoresInterface
         }
         $query->setSelect(new AggregateSelectNode($selectionFields));
 
-        $a = [
-            'val1' => [
-                [
-                    'item' => 'val1',
-                    'id' => '2'
-                ]
-            ],
-            'val2' => [
-                '3' => [
-                    [
-                        'item' => 'val2',
-                        'id' => '3'
-                    ]
-                ],
-                '1' => [
-                    [
-                        'item' => 'val2',
-                        'id' => '1'
-                    ],
-                ]
-            ],
-        ];
-        $groups = [];
-        /*foreach ($result as $item) {
-            $groups[$groupFields[0]][] = $item;
-        }*/
         $groups = [$result];
         foreach ($groupFields as $groupField) {
             $groups = $this->groupBy($groups, $groupField);
@@ -256,6 +221,17 @@ abstract class DataStoreAbstract implements DataStoresInterface
             $result = array_merge($result, [$union]);
         }
         return $result;
+    }
+
+    protected function groupBy(array $groups, $groupField)
+    {
+        $newGroup = [];
+        foreach ($groups as $group) {
+            foreach ($group as $item) {
+                $newGroup[$item[$groupField]][] = $item;
+            }
+        }
+        return $newGroup;
     }
 
     protected function querySelect($data, Query $query)
@@ -281,26 +257,41 @@ abstract class DataStoreAbstract implements DataStoresInterface
                             break;
                         }
                         case 'max': {
-                            $max = 0;
+                            $firstItem = array_pop($data);
+                            $max = $firstItem[$field->getField()];
                             foreach ($data as $item) {
-                                if ($max < $item[$field->getField()]) {
-                                    $max = $item[$field->getField()];
-                                }
+                                $max = $max < $item[$field->getField()] ? $item[$field->getField()] : $max;
                             }
+                            array_push($data, $firstItem);
                             $compareArray[$field->getField() . '->' . $field->getFunction()] = [$max];
                             break;
                         }
                         case 'min': {
-                            $min = null;
+                            $firstItem = array_pop($data);
+                            $min = $firstItem[$field->getField()];
                             foreach ($data as $item) {
-                                if (!isset($min)) {
-                                    $min = $item[$field->getField()];
-                                }
-                                if ($min > $item[$field->getField()]) {
-                                    $min = $item[$field->getField()];
-                                }
+                                $min = $min > $item[$field->getField()] ? $item[$field->getField()] : $min;
                             }
+                            array_push($data, $firstItem);
                             $compareArray[$field->getField() . '->' . $field->getFunction()] = [$min];
+                            break;
+                        }
+                        case 'sum': {
+                            $sum = 0;
+                            foreach ($data as $item) {
+                                $sum += isset($item[$field->getField()]) ? $item[$field->getField()] : 0;
+                            }
+                            $compareArray[$field->getField() . '->' . $field->getFunction()] = [$sum];
+                            break;
+                        }
+                        case 'avg': {
+                            $sum = 0;
+                            $count = 0;
+                            foreach ($data as $item) {
+                                $sum += isset($item[$field->getField()]) ? $item[$field->getField()] : 0;
+                                $count += isset($item[$field->getField()]) ? 1 : 0;
+                            }
+                            $compareArray[$field->getField() . '->' . $field->getFunction()] = [$sum/$count];
                             break;
                         }
                     }
