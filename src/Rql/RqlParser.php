@@ -47,7 +47,7 @@ class RqlParser
         if (isset($allowedAggregateFunction)) {
             $this->allowedAggregateFunction = $allowedAggregateFunction;
         } else {
-            $this->allowedAggregateFunction = ['count', 'max', 'min'];
+            $this->allowedAggregateFunction = ['count', 'max', 'min', 'sum', 'avg'];
         }
 
         if (isset($conditionBuilder)) {
