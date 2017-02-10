@@ -207,15 +207,13 @@ abstract class DataStoreAbstract implements DataStoresInterface
         $query->setSelect(new AggregateSelectNode($selectionFields));
 
         $groups = [$result];
-        foreach ($groupFields as $groupField) {
-            $groups = $this->groupBy($groups, $groupField);
-        }
+        $groups = $this->groupBy($groups, $groupFields);
 
         $result = [];
         foreach ($groups as $group) {
-            $group = $this->querySelect($group, $query);
+            $data = $this->querySelect($group, $query);
             $union = [];
-            foreach ($group as $item) {
+            foreach ($data as $item) {
                 $union = array_merge($union, $item);
             }
             $result = array_merge($result, [$union]);
@@ -223,12 +221,16 @@ abstract class DataStoreAbstract implements DataStoresInterface
         return $result;
     }
 
-    protected function groupBy(array $groups, $groupField)
+    protected function groupBy(array $groups, $groupFields)
     {
         $newGroup = [];
         foreach ($groups as $group) {
             foreach ($group as $item) {
-                $newGroup[$item[$groupField]][] = $item;
+                $key = '';
+                foreach ($groupFields as $groupField) {
+                    $key .= $item[$groupField];
+                }
+                $newGroup[$key][] = $item;
             }
         }
         return $newGroup;

@@ -1105,6 +1105,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(['fString' => 'val2'], $result[1]);
     }
 
+
     public function test_testGroupbyAgregate()
     {
         $this->_initObject($this->_itemsArrayDelault);
@@ -1129,15 +1130,43 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
 
     public function test_testGroupByTwoColumns()
     {
-        $this->_initObject($this->_itemsArrayDelault);
-        $result = $this->object->query(new RqlQuery("select(id,fString)&groupby(fString,id)"));
-        $this->assertEquals(4, count($result));
-        $this->assertEquals([
-            array('id' => 1, 'fString' => 'val1'),
-            array('id' => 2, 'fString' => 'val2'),
-            array('id' => 3, 'fString' => 'val2'),
-            array('id' => 4, 'fString' => 'val2')
-        ], $result);
+        $this->_initObject(
+            [
+                ['id' => 1, 'surname' => 'A', 'age' => 44],
+                ['id' => 2, 'surname' => 'B', 'age' => 30],
+                ['id' => 3, 'surname' => 'C', 'age' => 25],
+                ['id' => 4, 'surname' => 'C', 'age' => 44],
+                ['id' => 5, 'surname' => 'B', 'age' => 10],
+                ['id' => 6, 'surname' => 'A', 'age' => 20],
+                ['id' => 7, 'surname' => 'A', 'age' => 30],
+                ['id' => 8, 'surname' => 'B', 'age' => 10],
+                ['id' => 9, 'surname' => 'C', 'age' => 25],
+                ['id' => 10, 'surname' => 'A', 'age' => 30]
+            ]
+        );
+        $result = $this->object->query(new RqlQuery("select(count(surname),max(age))&groupby(surname,age)"));
+        $expected = [
+            ['age->max' => 44, 'surname->count' => 1],
+            ['age->max' => 30, 'surname->count' => 1],
+            ['age->max' => 25, 'surname->count' => 2],
+            ['age->max' => 44, 'surname->count' => 1],
+            ['age->max' => 10, 'surname->count' => 2],
+            ['age->max' => 20, 'surname->count' => 1],
+            ['age->max' => 30, 'surname->count' => 2],
+        ];
+
+        $sort = function ($item0, $item1) {
+            if ($item0['age->max'] === $item1['age->max']) {
+                if ($item0['surname->count'] === $item1['surname->count']) {
+                    return 0;
+                }
+                return ($item0['surname->count'] < $item1['surname->count']) ? -1 : 1;
+            }
+            return ($item0['age->max'] < $item1['age->max']) ? -1 : 1;
+        };
+        $expected = uasort($expected, $sort);
+        $result = uasort($result, $sort);
+        $this->assertEquals($expected, $result);
     }
 
     /**
