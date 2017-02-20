@@ -12,13 +12,19 @@ namespace rollun\datastore\DataStore\Factory;
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\Cacheable;
 use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\Memory;
 
 class CacheableAbstractFactory extends DataStoreAbstractFactory
 {
 
     const KEY_DATASOURCE = 'dataSource';
+
     const KEY_CACHEABLE = 'cacheable';
+
+    const KEY_IS_REFRESH = 'isRefresh';
+
     public static $KEY_DATASTORE_CLASS = Cacheable::class;
+
     protected static $KEY_IN_CREATE = 0;
 
     public function canCreate(ContainerInterface $container, $requestedName)
@@ -66,6 +72,7 @@ class CacheableAbstractFactory extends DataStoreAbstractFactory
             'There is DataSource for ' . $requestedName . 'in config \'dataStore\''
             );
         }
+
         if (isset($serviceConfig[self::KEY_CACHEABLE])) {
             if ($container->has($serviceConfig[self::KEY_CACHEABLE])) {
                 $cashStore = $container->get($serviceConfig[self::KEY_CACHEABLE]);
@@ -76,13 +83,18 @@ class CacheableAbstractFactory extends DataStoreAbstractFactory
                 );
             }
         } else {
-            $cashStore = null;
+            $cashStore = new Memory();
         }
 
         $this::$KEY_IN_CREATE = 0;
 
         //$cashStore = isset($serviceConfig['cashStore']) ?  new $serviceConfig['cashStore']() : null;
-        return new $requestedClassName($getAll, $cashStore);
+        /** @var Cacheable $cashable */
+        $cashable = new $requestedClassName($getAll, $cashStore);
+        if($serviceConfig[self::KEY_IS_REFRESH]) {
+            $cashable->refresh();
+        }
+        return $cashable;
     }
 
 }
