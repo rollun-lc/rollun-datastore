@@ -18,8 +18,13 @@ class CacheableAbstractFactory extends DataStoreAbstractFactory
 {
 
     const KEY_DATASOURCE = 'dataSource';
+
     const KEY_CACHEABLE = 'cacheable';
+
+    const KEY_IS_REFRESH = 'isRefresh';
+
     public static $KEY_DATASTORE_CLASS = Cacheable::class;
+
     protected static $KEY_IN_CREATE = 0;
 
     public function canCreate(ContainerInterface $container, $requestedName)
@@ -84,7 +89,12 @@ class CacheableAbstractFactory extends DataStoreAbstractFactory
         $this::$KEY_IN_CREATE = 0;
 
         //$cashStore = isset($serviceConfig['cashStore']) ?  new $serviceConfig['cashStore']() : null;
-        return new $requestedClassName($getAll, $cashStore);
+        /** @var Cacheable $cashable */
+        $cashable = new $requestedClassName($getAll, $cashStore);
+        if($serviceConfig[self::KEY_IS_REFRESH]) {
+            $cashable->refresh();
+        }
+        return $cashable;
     }
 
 }
