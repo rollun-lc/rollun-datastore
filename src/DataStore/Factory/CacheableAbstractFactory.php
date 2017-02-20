@@ -12,6 +12,7 @@ namespace rollun\datastore\DataStore\Factory;
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\Cacheable;
 use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\Memory;
 
 class CacheableAbstractFactory extends DataStoreAbstractFactory
 {
@@ -66,6 +67,7 @@ class CacheableAbstractFactory extends DataStoreAbstractFactory
             'There is DataSource for ' . $requestedName . 'in config \'dataStore\''
             );
         }
+
         if (isset($serviceConfig[self::KEY_CACHEABLE])) {
             if ($container->has($serviceConfig[self::KEY_CACHEABLE])) {
                 $cashStore = $container->get($serviceConfig[self::KEY_CACHEABLE]);
@@ -76,7 +78,7 @@ class CacheableAbstractFactory extends DataStoreAbstractFactory
                 );
             }
         } else {
-            $cashStore = null;
+            $cashStore = new Memory();
         }
 
         $this::$KEY_IN_CREATE = 0;
