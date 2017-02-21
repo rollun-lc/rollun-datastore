@@ -91,7 +91,7 @@ class CacheableAbstractFactory extends DataStoreAbstractFactory
         //$cashStore = isset($serviceConfig['cashStore']) ?  new $serviceConfig['cashStore']() : null;
         /** @var Cacheable $cashable */
         $cashable = new $requestedClassName($getAll, $cashStore);
-        if($serviceConfig[self::KEY_IS_REFRESH]) {
+        if(isset($serviceConfig[self::KEY_IS_REFRESH]) && $serviceConfig[self::KEY_IS_REFRESH]) {
             $cashable->refresh();
         }
         return $cashable;

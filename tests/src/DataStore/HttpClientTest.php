@@ -67,6 +67,7 @@ class HttpClientTest extends AbstractTest
         $url = $this->config['testHttpClient']['url'] . "?$queryString";
         $client = new Client($url);
         $client->setHeaders(['Accept' => 'application/json']);
+        $headerss = $client->getRequest()->getHeaders();
         $responce = $client->send();
         $headers = $responce->getHeaders()->toArray();
         foreach ($headerExpected as $key => $value) {
