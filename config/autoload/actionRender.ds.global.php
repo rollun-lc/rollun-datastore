@@ -7,6 +7,7 @@
  */
 
 use rollun\actionrender\Factory\ActionRenderAbstractFactory;
+use rollun\actionrender\Factory\LazyLoadDirectAbstractFactory;
 use rollun\actionrender\Factory\MiddlewarePipeAbstractFactory;
 use rollun\actionrender\Renderer\ResponseRendererAbstractFactory;
 use rollun\datastore\Middleware\RequestDecoder;
@@ -20,11 +21,14 @@ return [
             \rollun\datastore\Middleware\RequestDecoder::class => \rollun\datastore\Middleware\RequestDecoder::class,
         ],
         'factories' => [
-            'dataStoreMiddleware' => \rollun\datastore\Middleware\Factory\StoreLazyLoadFactory::class,
             \rollun\datastore\Middleware\HtmlDataStoreRendererAction::class =>
                 \rollun\datastore\Middleware\Factory\HtmlDataStoreRendererFactory::class
+        ],
+        'abstract_factories' => [
+            \rollun\actionrender\Factory\LazyLoadDirectAbstractFactory::class
         ]
     ],
+
     ResponseRendererAbstractFactory::KEY_RESPONSE_RENDERER => [
         'dataStoreHtmlJsonRenderer' => [
             ResponseRendererAbstractFactory::KEY_ACCEPT_TYPE_PATTERN => [
@@ -34,6 +38,14 @@ return [
             ]
         ]
     ],
+
+    LazyLoadDirectAbstractFactory::KEY_LAZY_LOAD => [
+        'dataStoreMiddleware' => [
+            LazyLoadDirectAbstractFactory::KEY_DIRECT_FACTORY =>
+                \rollun\datastore\Middleware\Factory\DataStoreDirectFactory::class
+        ]
+    ],
+
     ActionRenderAbstractFactory::KEY_AR_SERVICE => [
         'api-rest' => [
             ActionRenderAbstractFactory::KEY_AR_MIDDLEWARE => [
@@ -42,6 +54,7 @@ return [
             ]
         ]
     ],
+
     MiddlewarePipeAbstractFactory::KEY_AMP => [
         'apiRestAction' => [
             'middlewares' => [
