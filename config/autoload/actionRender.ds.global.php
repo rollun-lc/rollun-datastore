@@ -8,8 +8,13 @@
 
 use rollun\actionrender\Factory\ActionRenderAbstractFactory;
 use rollun\actionrender\Factory\LazyLoadDirectAbstractFactory;
+use rollun\actionrender\Factory\LazyLoadPipeAbstractFactory;
 use rollun\actionrender\Factory\LazyLoadResponseRendererAbstractFactory;
 use rollun\actionrender\Factory\MiddlewarePipeAbstractFactory;
+use rollun\actionrender\LazyLoadMiddlewareGetter\Factory\AbstractLazyLoadMiddlewareGetterAbstractFactory;
+use rollun\actionrender\LazyLoadMiddlewareGetter\Factory\AttributeAbstractFactory;
+use rollun\actionrender\LazyLoadMiddlewareGetter\Factory\AttributeSwitchAbstractFactory;
+use rollun\actionrender\LazyLoadMiddlewareGetter\Factory\ResponseRendererAbstractFactory;
 
 return [
     'dependencies' => [
@@ -23,34 +28,38 @@ return [
                 \rollun\datastore\Middleware\Factory\HtmlDataStoreRendererFactory::class
         ],
         'abstract_factories' => [
-            \rollun\actionrender\Factory\LazyLoadDirectAbstractFactory::class,
             MiddlewarePipeAbstractFactory::class,
             ActionRenderAbstractFactory::class,
-            LazyLoadResponseRendererAbstractFactory::class,
+            AttributeAbstractFactory::class,
+            ResponseRendererAbstractFactory::class,
+            LazyLoadPipeAbstractFactory::class,
+            AttributeSwitchAbstractFactory::class,
         ]
     ],
 
-    LazyLoadResponseRendererAbstractFactory::KEY => [
+    AbstractLazyLoadMiddlewareGetterAbstractFactory::KEY => [
+        'dataStoreMiddlewareByResourceName' => [
+            AttributeAbstractFactory::KEY_ATTRIBUTE_NAME => 'resourceName',
+            AttributeAbstractFactory::KEY_CLASS => \rollun\actionrender\LazyLoadMiddlewareGetter\Attribute::class,
+        ],
         'dataStoreHtmlJsonRenderer' => [
-            LazyLoadResponseRendererAbstractFactory::KEY_ACCEPT_TYPE_PATTERN => [
-                //pattern => middleware-Service-Name
+            ResponseRendererAbstractFactory::KEY_MIDDLEWARE => [
                 '/application\/json/' => \rollun\actionrender\Renderer\Json\JsonRendererAction::class,
                 '/text\/html/' => 'dataStoreHtmlRenderer'
-            ]
-        ]
+            ],
+            ResponseRendererAbstractFactory::KEY_CLASS => \rollun\actionrender\LazyLoadMiddlewareGetter\ResponseRenderer::class,
+        ],
     ],
 
-    LazyLoadDirectAbstractFactory::KEY => [
-        'dataStoreMiddleware' => [
-            LazyLoadDirectAbstractFactory::KEY_DIRECT_FACTORY =>
-                \rollun\datastore\Middleware\Factory\DataStoreDirectFactory::class
-        ]
+    LazyLoadPipeAbstractFactory::KEY => [
+        'dataStoreLLPipe' => 'dataStoreMiddlewareByResourceName',
+        'dataStoreHtmlJsonRendererLLPipe' => 'dataStoreHtmlJsonRenderer'
     ],
 
     ActionRenderAbstractFactory::KEY => [
         'api-rest' => [
             ActionRenderAbstractFactory::KEY_ACTION_MIDDLEWARE_SERVICE => 'apiRestAction',
-            ActionRenderAbstractFactory::KEY_RENDER_MIDDLEWARE_SERVICE => 'dataStoreHtmlJsonRenderer'
+            ActionRenderAbstractFactory::KEY_RENDER_MIDDLEWARE_SERVICE => 'dataStoreHtmlJsonRendererLLPipe'
         ]
     ],
 
@@ -59,7 +68,7 @@ return [
             MiddlewarePipeAbstractFactory::KEY_MIDDLEWARES => [
                 \rollun\datastore\Middleware\ResourceResolver::class,
                 \rollun\datastore\Middleware\RequestDecoder::class,
-                'dataStoreMiddleware'
+                'dataStoreLLPipe'
             ]
         ],
         'dataStoreHtmlRenderer' => [

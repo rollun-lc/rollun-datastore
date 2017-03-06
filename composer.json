@@ -31,7 +31,7 @@
     "rollun-com/rollun-installer": "^1.0",
     "rollun-com/rollun-logger": "^1.0",
     "rollun-com/rollun-utils": "^1.0",
-    "rollun-com/rollun-actionrender": "^3"
+    "rollun-com/rollun-actionrender": "dev-develop"
   },
   "require-dev": {
     "phpunit/phpunit": "^4.0",

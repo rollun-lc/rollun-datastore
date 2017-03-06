@@ -22,11 +22,11 @@ use rollun\datastore\AbstractFactoryAbstract;
  * <code>
  *  'middleware' => [
  *      'MiddlewareName' => [
- *          'class' =>'rollun\datastore\MiddlewareType',
+ *          static::KEY_CLASS =>'rollun\datastore\MiddlewareType',
  *          'dataStore' => 'rollun\datastore\DataStore\Type'
  *      ],
  *      'MiddlewareAnotherName' => [
- *          'class' =>'rollun\datastore\MiddlewareAnotherType',
+ *          static::KEY_CLASS =>'rollun\datastore\MiddlewareAnotherType',
  *          'dataStore' => 'rollun\datastore\DataStore\AnotherType'
  *      ],
  *  ...
@@ -37,6 +37,7 @@ use rollun\datastore\AbstractFactoryAbstract;
  */
 class DataStoreAbstractFactory extends AbstractFactoryAbstract
 {
+    const KEY = 'middleware';
 
     /**
      * Can the factory create an instance for the service?
@@ -48,9 +49,9 @@ class DataStoreAbstractFactory extends AbstractFactoryAbstract
     public function canCreate(ContainerInterface $container, $requestedName)
     {
         $config = $container->get('config');
-        $isClassName = isset($config['middleware'][$requestedName]['class']);
+        $isClassName = isset($config[static::KEY][$requestedName][static::KEY_CLASS]);
         if ($isClassName) {
-            $requestedClassName = $config['middleware'][$requestedName]['class'];
+            $requestedClassName = $config[static::KEY][$requestedName][static::KEY_CLASS];
             return is_a($requestedClassName, DataStoreAbstract::class, true);
         } else {
             return false;
@@ -69,8 +70,8 @@ class DataStoreAbstractFactory extends AbstractFactoryAbstract
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $config = $container->get('config');
-        $serviceConfig = $config['middleware'][$requestedName];
-        $requestedClassName = $serviceConfig['class'];
+        $serviceConfig = $config[static::KEY][$requestedName];
+        $requestedClassName = $serviceConfig[static::KEY_CLASS];
         //take store for Middleware
         $dataStoreServiceName = isset($serviceConfig['dataStore']) ? $serviceConfig['dataStore'] : null;
         if (!($container->get($dataStoreServiceName))) {

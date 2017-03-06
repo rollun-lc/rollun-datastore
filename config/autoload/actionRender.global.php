@@ -7,15 +7,18 @@
  */
 
 use rollun\actionrender\Factory\ActionRenderAbstractFactory;
+use rollun\actionrender\Factory\LazyLoadPipeAbstractFactory;
 use rollun\actionrender\Factory\LazyLoadResponseRendererAbstractFactory;
 use rollun\actionrender\Factory\MiddlewarePipeAbstractFactory;
+use rollun\actionrender\LazyLoadMiddlewareGetter\Factory\AbstractLazyLoadMiddlewareGetterAbstractFactory;
+use rollun\actionrender\LazyLoadMiddlewareGetter\Factory\AttributeAbstractFactory;
+use rollun\actionrender\LazyLoadMiddlewareGetter\Factory\ResponseRendererAbstractFactory;
 
 return [
     'dependencies' => [
         'abstract_factories' => [
             MiddlewarePipeAbstractFactory::class,
             ActionRenderAbstractFactory::class,
-            LazyLoadResponseRendererAbstractFactory::class
         ],
         'invokables' => [
             \rollun\actionrender\Renderer\Html\HtmlParamResolver::class =>
@@ -28,6 +31,7 @@ return [
                 \rollun\actionrender\Renderer\Html\HtmlRendererFactory::class
         ],
     ],
+
     MiddlewarePipeAbstractFactory::KEY => [
         'htmlReturner' => [
             'middlewares' => [
@@ -36,15 +40,23 @@ return [
             ]
         ]
     ],
-    LazyLoadResponseRendererAbstractFactory::KEY => [
+
+    AbstractLazyLoadMiddlewareGetterAbstractFactory::KEY => [
+
         'simpleHtmlJsonRenderer' => [
-            LazyLoadResponseRendererAbstractFactory::KEY_ACCEPT_TYPE_PATTERN => [
-                //pattern => middleware-Service-Name
+            ResponseRendererAbstractFactory::KEY_MIDDLEWARE => [
                 '/application\/json/' => \rollun\actionrender\Renderer\Json\JsonRendererAction::class,
                 '/text\/html/' => 'htmlReturner'
-            ]
-        ]
+            ],
+            ResponseRendererAbstractFactory::KEY_CLASS => \rollun\actionrender\LazyLoadMiddlewareGetter\ResponseRenderer::class,
+        ],
+        ''
     ],
+
+    LazyLoadPipeAbstractFactory::KEY => [
+        'simpleHtmlJsonRendererLLPipe' => 'simpleHtmlJsonRenderer'
+    ],
+
     ActionRenderAbstractFactory::KEY => [
         /*'home-page' => [
                 ActionRenderAbstractFactory::KEY_ACTION_MIDDLEWARE_SERVICE => '',
