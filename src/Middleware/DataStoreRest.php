@@ -89,9 +89,9 @@ class DataStoreRest extends Middleware\DataStoreAbstract
                 $ex->getMessage()
             ], 500);
         }
-        $this->request = $this->request->withAttribute(Response::class, $response);
+        $request = $this->request->withAttribute(Response::class, $response);
         if ($next) {
-            return $next($this->request, $response);
+            return $next($request, $response);
         }
         return $response;
     }

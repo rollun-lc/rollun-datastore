@@ -1,6 +1,7 @@
 <?php
 
 use rollun\datastore\DataStore\Eav\EavAbstractFactory;
+use rollun\datastore\Middleware\Factory\DataStoreAbstractFactory;
 use rollun\datastore\TableGateway\Factory\TableManagerMysqlFactory;
 use rollun\datastore\DataStore\Aspect\Factory\AspectAbstractFactory;
 use rollun\datastore\Middleware\Factory\DataStoreAbstractFactory as MiddlewareDataStoreAbstractFactory;
@@ -28,6 +29,7 @@ return [
             CacheableAbstractFactory::class,
             AdapterAbstractServiceFactory::class,
             TableGatewayAbstractFactory::class,
+            DataStoreAbstractFactory::class,
         ],
     ]
 ];

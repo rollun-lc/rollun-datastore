@@ -7,14 +7,13 @@
  */
 
 use rollun\actionrender\Factory\ActionRenderAbstractFactory;
-use rollun\actionrender\Factory\LazyLoadDirectAbstractFactory;
 use rollun\actionrender\Factory\LazyLoadPipeAbstractFactory;
-use rollun\actionrender\Factory\LazyLoadResponseRendererAbstractFactory;
 use rollun\actionrender\Factory\MiddlewarePipeAbstractFactory;
 use rollun\actionrender\LazyLoadMiddlewareGetter\Factory\AbstractLazyLoadMiddlewareGetterAbstractFactory;
 use rollun\actionrender\LazyLoadMiddlewareGetter\Factory\AttributeAbstractFactory;
 use rollun\actionrender\LazyLoadMiddlewareGetter\Factory\AttributeSwitchAbstractFactory;
 use rollun\actionrender\LazyLoadMiddlewareGetter\Factory\ResponseRendererAbstractFactory;
+use rollun\datastore\LazyLoadDSMiddlewareGetter;
 
 return [
     'dependencies' => [
@@ -22,6 +21,7 @@ return [
             \rollun\datastore\Middleware\ResourceResolver::class =>
                 \rollun\datastore\Middleware\ResourceResolver::class,
             \rollun\datastore\Middleware\RequestDecoder::class => \rollun\datastore\Middleware\RequestDecoder::class,
+            LazyLoadDSMiddlewareGetter::class => LazyLoadDSMiddlewareGetter::class,
         ],
         'factories' => [
             \rollun\datastore\Middleware\HtmlDataStoreRendererAction::class =>
@@ -38,10 +38,10 @@ return [
     ],
 
     AbstractLazyLoadMiddlewareGetterAbstractFactory::KEY => [
-        'dataStoreMiddlewareByResourceName' => [
+        /*'dataStoreMiddlewareByResourceName' => [
             AttributeAbstractFactory::KEY_ATTRIBUTE_NAME => 'resourceName',
-            AttributeAbstractFactory::KEY_CLASS => \rollun\actionrender\LazyLoadMiddlewareGetter\Attribute::class,
-        ],
+            AttributeAbstractFactory::KEY_CLASS => LazyLoadDSMiddlewareGetter::class,
+        ],*/
         'dataStoreHtmlJsonRenderer' => [
             ResponseRendererAbstractFactory::KEY_MIDDLEWARE => [
                 '/application\/json/' => \rollun\actionrender\Renderer\Json\JsonRendererAction::class,
@@ -52,7 +52,7 @@ return [
     ],
 
     LazyLoadPipeAbstractFactory::KEY => [
-        'dataStoreLLPipe' => 'dataStoreMiddlewareByResourceName',
+        'dataStoreLLPipe' => LazyLoadDSMiddlewareGetter::class,
         'dataStoreHtmlJsonRendererLLPipe' => 'dataStoreHtmlJsonRenderer'
     ],
 
@@ -60,7 +60,7 @@ return [
         'api-rest' => [
             ActionRenderAbstractFactory::KEY_ACTION_MIDDLEWARE_SERVICE => 'apiRestAction',
             ActionRenderAbstractFactory::KEY_RENDER_MIDDLEWARE_SERVICE => 'dataStoreHtmlJsonRendererLLPipe'
-        ]
+        ],
     ],
 
     MiddlewarePipeAbstractFactory::KEY => [
