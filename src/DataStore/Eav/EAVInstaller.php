@@ -27,7 +27,7 @@ use Zend\Db\TableGateway\TableGateway;
  * @category   Zaboy
  * @package    zaboy
  */
-class Installer extends InstallerAbstract
+class EAVInstaller extends InstallerAbstract
 {
 
     /**
@@ -56,11 +56,16 @@ class Installer extends InstallerAbstract
     public function __construct(ContainerInterface $container, IOInterface $ioComposer)
     {
         parent::__construct($container, $ioComposer);
-        if ($this->container->has(EavAbstractFactory::DB_SERVICE_NAME)) {
-            $this->dbAdapter = $this->container->get(EavAbstractFactory::DB_SERVICE_NAME);
-        } else {
-            $this->io->write(EavAbstractFactory::DB_SERVICE_NAME . " not fount. It has did nothing");
-        }
+        //if ($this->container->has(EavAbstractFactory::DB_SERVICE_NAME)) {
+            $this->dbAdapter = $this->container->get('db');
+        /*} else {
+            $this->consoleIO->write(EavAbstractFactory::DB_SERVICE_NAME . " not fount. It has did nothing");
+        }*/
+    }
+
+    public function isInstall()
+    {
+        return $this->container->has(EavAbstractFactory::DB_SERVICE_NAME );
     }
 
     public function uninstall()
@@ -78,7 +83,7 @@ class Installer extends InstallerAbstract
                 $tableManager->deleteTable(StoreCatalog::TAG_TABLE_NAME);
                 $tableManager->deleteTable(SysEntities::TABLE_NAME);
             } else {
-                $this->io->write('constant("APP_ENV") !== "dev" It has did nothing');
+                $this->consoleIO->write('constant("APP_ENV") !== "dev" It has did nothing');
             }
         }
     }
@@ -114,7 +119,18 @@ class Installer extends InstallerAbstract
 
                 $tableManager->createTable(SysEntities::TABLE_NAME);
             }
+            return [
+                'services' => [
+                    'aliases' => [
+                        EavAbstractFactory::DB_SERVICE_NAME => getenv('APP_ENV') === 'prod' ? 'db' : 'db',
+                    ],
+                    'abstract_factories' => [
+                        EavAbstractFactory::class,
+                    ]
+                ],
+            ];
         }
+        return [];
     }
 
     public function addData()
@@ -140,5 +156,22 @@ class Installer extends InstallerAbstract
                 $dataStore->create($value, true);
             }
         }
+    }
+
+    /**
+     * Return string with description of installable functional.
+     * @param string $lang ; set select language for description getted.
+     * @return string
+     */
+    public function getDescription($lang = "en")
+    {
+        switch ($lang) {
+            case "ru":
+                $description = "Предоставляет EAV ранилище.";
+                break;
+            default:
+                $description = "Does not exist.";
+        }
+        return $description;
     }
 }
