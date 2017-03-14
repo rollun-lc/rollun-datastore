@@ -14,6 +14,7 @@ use rollun\datastore\DataStore\Composite\Example\Store;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use rollun\installer\Install\InstallerAbstract;
+use rollun\utils\DbInstaller;
 use Zend\Db\Adapter\AdapterInterface;
 use rollun\datastore\TableGateway\TableManagerMysql as TableManager;
 use Zend\Db\TableGateway\TableGateway;
@@ -151,5 +152,12 @@ class CompositeInstaller extends InstallerAbstract
                 $description = "Does not exist.";
         }
         return $description;
+    }
+
+    public function getDependencyInstallers()
+    {
+        return [
+            DbInstaller::class
+        ];
     }
 }

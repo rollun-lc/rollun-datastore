@@ -14,6 +14,7 @@ use Interop\Container\ContainerInterface;
 use rollun\installer\Install\InstallerAbstract;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
+use rollun\utils\DbInstaller;
 use Zend\Db\Adapter\AdapterInterface;
 use rollun\datastore\TableGateway\TableManagerMysql as TableManager;
 use rollun\datastore\DataStore\Eav\SysEntities;
@@ -178,5 +179,12 @@ class EAVInstaller extends InstallerAbstract
                 $description = "Does not exist.";
         }
         return $description;
+    }
+
+    public function getDependencyInstallers()
+    {
+        return [
+            DbInstaller::class
+        ];
     }
 }
