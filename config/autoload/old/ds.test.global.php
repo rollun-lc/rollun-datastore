@@ -20,10 +20,6 @@ return [
     ],
 
     'dataStore' => [
-        /*'testDbResHttp' => [
-            'class' => rollun\datastore\DataStore\DbTable::class,
-            'tableName' => 'test_res_http'
-        ],*/
         'test_DataStoreDbTableWithNameAsResourceName' => [
             'class' => rollun\datastore\DataStore\DbTable::class,
             'tableName' => 'table_for_db_data_store'
@@ -76,7 +72,6 @@ return [
 
         'testDataSourceDb' => [
             'class' => rollun\datastore\DataSource\DbTableDataSource::class,
-            //'class' => 'rollun\datastore\DataStore\DbTable',
             'tableName' => 'test_res_http'
         ],
 
@@ -95,8 +90,5 @@ return [
             'class' => rollun\datastore\Examples\Middleware\DataStoreMemory::class,
             'dataStore' => 'testMemory'
         ],
-       // "test_StoreForMiddlewareMiddleware" => "test_StoreForMiddleware",
-        //"testDbResHttpMiddleware" => "testDbResHttp",
-        //"entityProductMiddleware" => "entity_product",
     ],
 ];

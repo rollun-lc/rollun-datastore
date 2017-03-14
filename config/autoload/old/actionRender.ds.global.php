@@ -18,8 +18,7 @@ use rollun\datastore\LazyLoadDSMiddlewareGetter;
 return [
     'dependencies' => [
         'invokables' => [
-            \rollun\datastore\Middleware\ResourceResolver::class =>
-                \rollun\datastore\Middleware\ResourceResolver::class,
+            \rollun\datastore\Middleware\ResourceResolver::class => \rollun\datastore\Middleware\ResourceResolver::class,
             \rollun\datastore\Middleware\RequestDecoder::class => \rollun\datastore\Middleware\RequestDecoder::class,
             LazyLoadDSMiddlewareGetter::class => LazyLoadDSMiddlewareGetter::class,
         ],
@@ -38,10 +37,6 @@ return [
     ],
 
     AbstractLazyLoadMiddlewareGetterAbstractFactory::KEY => [
-        /*'dataStoreMiddlewareByResourceName' => [
-            AttributeAbstractFactory::KEY_ATTRIBUTE_NAME => 'resourceName',
-            AttributeAbstractFactory::KEY_CLASS => LazyLoadDSMiddlewareGetter::class,
-        ],*/
         'dataStoreHtmlJsonRenderer' => [
             ResponseRendererAbstractFactory::KEY_MIDDLEWARE => [
                 '/application\/json/' => \rollun\actionrender\Renderer\Json\JsonRendererAction::class,
@@ -57,14 +52,14 @@ return [
     ],
 
     ActionRenderAbstractFactory::KEY => [
-        'api-rest' => [
-            ActionRenderAbstractFactory::KEY_ACTION_MIDDLEWARE_SERVICE => 'apiRestAction',
+        'api-datastore' => [
+            ActionRenderAbstractFactory::KEY_ACTION_MIDDLEWARE_SERVICE => 'apiDataStoreAction',
             ActionRenderAbstractFactory::KEY_RENDER_MIDDLEWARE_SERVICE => 'dataStoreHtmlJsonRendererLLPipe'
         ],
     ],
 
     MiddlewarePipeAbstractFactory::KEY => [
-        'apiRestAction' => [
+        'apiDataStoreAction' => [
             MiddlewarePipeAbstractFactory::KEY_MIDDLEWARES => [
                 \rollun\datastore\Middleware\ResourceResolver::class,
                 \rollun\datastore\Middleware\RequestDecoder::class,

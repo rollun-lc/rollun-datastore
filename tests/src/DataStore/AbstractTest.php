@@ -1144,6 +1144,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
                 ['id' => 10, 'surname' => 'A', 'age' => 30]
             ]
         );
+        
         $result = $this->object->query(new RqlQuery("select(count(surname),max(age))&groupby(surname,age)"));
         $expected = [
             ['age->max' => 44, 'surname->count' => 1],

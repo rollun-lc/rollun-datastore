@@ -57,7 +57,7 @@ class EAVInstaller extends InstallerAbstract
     {
         parent::__construct($container, $ioComposer);
         //if ($this->container->has(EavAbstractFactory::DB_SERVICE_NAME)) {
-            $this->dbAdapter = $this->container->get('db');
+        $this->dbAdapter = $this->container->get('db');
         /*} else {
             $this->consoleIO->write(EavAbstractFactory::DB_SERVICE_NAME . " not fount. It has did nothing");
         }*/
@@ -65,7 +65,12 @@ class EAVInstaller extends InstallerAbstract
 
     public function isInstall()
     {
-        return $this->container->has(EavAbstractFactory::DB_SERVICE_NAME );
+        $config = $this->container->get('config');
+        return (
+            isset($config['services']['abstract_factories']) &&
+            in_array(EavAbstractFactory::class, $config['services']['abstract_factories']) &&
+            $this->container->has(EavAbstractFactory::DB_SERVICE_NAME)
+            );
     }
 
     public function uninstall()
@@ -122,7 +127,7 @@ class EAVInstaller extends InstallerAbstract
             return [
                 'services' => [
                     'aliases' => [
-                        EavAbstractFactory::DB_SERVICE_NAME => getenv('APP_ENV') === 'prod' ? 'db' : 'db',
+                        EavAbstractFactory::DB_SERVICE_NAME => 'db',
                     ],
                     'abstract_factories' => [
                         EavAbstractFactory::class,

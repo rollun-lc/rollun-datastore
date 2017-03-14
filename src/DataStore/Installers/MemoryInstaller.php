@@ -1,19 +1,17 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: victorsecuring
- * Date: 11.03.17
- * Time: 11:55 AM
+ * User: root
+ * Date: 13.03.17
+ * Time: 11:32
  */
 
 namespace rollun\datastore\DataStore\Installers;
 
-
-use rollun\datastore\DataStore\Factory\HttpClientAbstractFactory;
-use rollun\datastore\Middleware\Factory\DataStoreAbstractFactory;
+use rollun\datastore\DataStore\Factory\MemoryAbstractFactory;
 use rollun\installer\Install\InstallerAbstract;
 
-class HttpClientInstaller extends InstallerAbstract
+class MemoryInstaller extends InstallerAbstract
 {
 
     /**
@@ -25,7 +23,7 @@ class HttpClientInstaller extends InstallerAbstract
         return [
             'services' => [
                 'abstract_factories' => [
-                    HttpClientAbstractFactory::class,
+                    MemoryAbstractFactory::class,
                 ],
             ]
         ];
@@ -40,13 +38,6 @@ class HttpClientInstaller extends InstallerAbstract
 
     }
 
-    public function isInstall()
-    {
-        $config = $this->container->get('config');
-        return (isset($config['services']['abstract_factories']) &&
-            in_array(HttpClientAbstractFactory::class, $config['services']['abstract_factories']));
-    }
-
     /**
      * Return string with description of installable functional.
      * @param string $lang ; set select language for description getted.
@@ -56,11 +47,18 @@ class HttpClientInstaller extends InstallerAbstract
     {
         switch ($lang) {
             case "ru":
-                $description = "Позволяет представить удаленный ресурс в качестве хранилища.";
+                $description = "Позволяет представить массив в качестве хранилища.";
                 break;
             default:
                 $description = "Does not exist.";
         }
         return $description;
+    }
+
+    public function isInstall()
+    {
+        $config = $this->container->get('config');
+        return (isset($config['services']['abstract_factories']) &&
+            in_array(MemoryAbstractFactory::class, $config['services']['abstract_factories']));
     }
 }

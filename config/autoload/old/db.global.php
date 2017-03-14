@@ -1,6 +1,12 @@
 <?php
-return [ 
+use Zend\Db\Adapter\AdapterAbstractServiceFactory;
 
+return [
+    'services' => [
+        'abstract_factories' => [
+            AdapterAbstractServiceFactory::class,
+        ],
+    ],
     'db' => [
         'adapters' => [
             'db' => [
