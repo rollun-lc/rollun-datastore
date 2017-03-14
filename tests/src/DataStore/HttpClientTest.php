@@ -11,6 +11,7 @@ namespace rollun\test\datastore\DataStore;
 
 use rollun\datastore\Rql\RqlQuery;
 use rollun\test\datastore\DataStore\AbstractTest;
+use Zend\Db\Adapter\Adapter;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Http\Client;
 
@@ -67,6 +68,7 @@ class HttpClientTest extends AbstractTest
         $url = $this->config['testHttpClient']['url'] . "?$queryString";
         $client = new Client($url);
         $client->setHeaders(['Accept' => 'application/json']);
+        $client->setOptions(['timeout' => 60]);
         $headerss = $client->getRequest()->getHeaders();
         $responce = $client->send();
         $headers = $responce->getHeaders()->toArray();
@@ -91,7 +93,7 @@ class HttpClientTest extends AbstractTest
         $dbTable = new TableGateway($this->dbTableName, $this->adapter);
 
         foreach ($data as $record) {
-            $dbTable->insert($record);
+            $inserted = $dbTable->insert($record);
         }
     }
 

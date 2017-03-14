@@ -10,11 +10,5 @@ return [
     ],
 
     'routes' => [
-        [
-            'name' => 'api-rest',
-            'path' => '/api/rest[/{resourceName}[/{id}]]',
-            'middleware' => 'api-rest',
-            'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-        ],
-    ],
+    ]
 ];

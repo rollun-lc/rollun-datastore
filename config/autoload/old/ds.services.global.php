@@ -1,9 +1,7 @@
 <?php
 
-use rollun\datastore\DataStore\Eav\EavAbstractFactory;
 use rollun\datastore\TableGateway\Factory\TableManagerMysqlFactory;
 use rollun\datastore\DataStore\Aspect\Factory\AspectAbstractFactory;
-use rollun\datastore\Middleware\Factory\DataStoreAbstractFactory as MiddlewareDataStoreAbstractFactory;
 use rollun\datastore\DataStore\Factory\HttpClientAbstractFactory;
 use rollun\datastore\DataStore\Factory\DbTableAbstractFactory;
 use rollun\datastore\DataStore\Factory\CsvAbstractFactory;
@@ -20,7 +18,6 @@ return [
         ],
         'abstract_factories' => [
             AspectAbstractFactory::class,
-            MiddlewareDataStoreAbstractFactory::class,
             HttpClientAbstractFactory::class,
             DbTableAbstractFactory::class,
             CsvAbstractFactory::class,

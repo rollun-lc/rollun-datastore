@@ -79,7 +79,7 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
         return new $requestedClassName($tableGateway);
     }
 
-    protected function getTableGateway($container, $serviceConfig, $requestedName)
+    protected function getTableGateway(ContainerInterface $container, $serviceConfig, $requestedName)
     {
         if (isset($serviceConfig[self::KEY_TABLE_GATEWAY])) {
             if ($container->has($serviceConfig[self::KEY_TABLE_GATEWAY])) {

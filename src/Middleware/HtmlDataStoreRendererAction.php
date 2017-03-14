@@ -32,8 +32,8 @@ class HtmlDataStoreRendererAction extends HtmlRendererAction
             $status = $response->getStatusCode();
             $headers = $response->getHeaders();
         }
-
-        $response = new HtmlResponse($this->templateRenderer->render($name, ['data' => $data]), $status);
+        $page = $this->templateRenderer->render($name, ['data' => $data]);
+        $response = new HtmlResponse($page, $status);
         foreach ($headers as $header => $value) {
             $response = $response->withHeader($header, $value);
         }
