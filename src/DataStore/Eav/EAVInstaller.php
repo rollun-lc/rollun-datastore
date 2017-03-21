@@ -51,19 +51,8 @@ class EAVInstaller extends InstallerAbstract
      *        ]
      *    ],
      * </code>
-     * @param ContainerInterface $container
-     * @param IOInterface $ioComposer
+     *
      */
-    public function __construct(ContainerInterface $container, IOInterface $ioComposer)
-    {
-        parent::__construct($container, $ioComposer);
-        //if ($this->container->has(EavAbstractFactory::DB_SERVICE_NAME)) {
-        $this->dbAdapter = $this->container->get('db');
-        /*} else {
-            $this->consoleIO->write(EavAbstractFactory::DB_SERVICE_NAME . " not fount. It has did nothing");
-        }*/
-    }
-
     public function isInstall()
     {
         $config = $this->container->get('config');
@@ -76,6 +65,7 @@ class EAVInstaller extends InstallerAbstract
 
     public function uninstall()
     {
+        $this->dbAdapter = $this->container->get(EavAbstractFactory::DB_SERVICE_NAME);
         if (isset($this->dbAdapter)) {
             if (constant('APP_ENV') === 'dev') {
                 $tableManager = new TableManager($this->dbAdapter);
@@ -96,6 +86,7 @@ class EAVInstaller extends InstallerAbstract
 
     public function install()
     {
+        $this->dbAdapter = $this->container->get('db');
         if (isset($this->dbAdapter)) {
             if (constant('APP_ENV') === 'dev') {
                 //develop only
