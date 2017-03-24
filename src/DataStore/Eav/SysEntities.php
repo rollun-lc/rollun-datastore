@@ -17,7 +17,7 @@ use rollun\datastore\TableGateway\TableManagerMysql as TableManager;
  *
  * Add to config:
  * <code>
- *    'services' => [
+ *    'dependencies' => [
  *        'aliases' => [
  *            EavAbstractFactory::DB_SERVICE_NAME => getenv('APP_ENV') === 'prod' ? 'dbOnProduction' : 'local-db',
  *        ],

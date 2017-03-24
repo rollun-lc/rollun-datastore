@@ -9,7 +9,7 @@
 use rollun\datastore\DataStore\Eav\EavAbstractFactory;
 
 return [
-    'services' => [
+    'dependencies' => [
         'aliases' => [
             EavAbstractFactory::DB_SERVICE_NAME => getenv('APP_ENV') === 'prod' ? 'db' : 'db',
         ],

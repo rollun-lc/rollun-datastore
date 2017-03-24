@@ -27,3 +27,9 @@
  */
 
 /*$app->get('/', App\Action\HomePageAction::class, 'home');*/
+$app->route(
+    '/api/datastore[/{resourceName}[/{id}]]',
+    'api-datastore',
+    ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    'api-datastore'
+);

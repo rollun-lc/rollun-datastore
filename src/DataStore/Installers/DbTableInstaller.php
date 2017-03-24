@@ -25,7 +25,7 @@ class DbTableInstaller extends InstallerAbstract
     public function install()
     {
         $config = [
-            'services' => [
+            'dependencies' => [
                 'factories' => [
                     'TableManagerMysql' => TableManagerMysqlFactory::class
                 ],
@@ -68,12 +68,12 @@ class DbTableInstaller extends InstallerAbstract
     {
         $config = $this->container->get('config');
         //return false;
-        $result = isset($config['services']['abstract_factories']) &&
-            isset($config['services']['factories']) &&
-            in_array(DbTableAbstractFactory::class, $config['services']['abstract_factories']) &&
-            in_array(TableGatewayAbstractFactory::class, $config['services']['abstract_factories']) &&
-            isset($config['services']['factories']['TableManagerMysql']) &&
-            $config['services']['factories']['TableManagerMysql'] === TableManagerMysqlFactory::class;
+        $result = isset($config['dependencies']['abstract_factories']) &&
+            isset($config['dependencies']['factories']) &&
+            in_array(DbTableAbstractFactory::class, $config['dependencies']['abstract_factories']) &&
+            in_array(TableGatewayAbstractFactory::class, $config['dependencies']['abstract_factories']) &&
+            isset($config['dependencies']['factories']['TableManagerMysql']) &&
+            $config['dependencies']['factories']['TableManagerMysql'] === TableManagerMysqlFactory::class;
         return $result;
     }
 

@@ -12,7 +12,7 @@ use rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory;
 
 return [
 
-    'services' => [
+    'dependencies' => [
         'factories' => [
             'TableManagerMysql' => TableManagerMysqlFactory::class
         ],

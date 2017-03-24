@@ -2,7 +2,7 @@
 use Zend\Db\Adapter\AdapterAbstractServiceFactory;
 
 return [
-    'services' => [
+    'dependencies' => [
         'abstract_factories' => [
             AdapterAbstractServiceFactory::class,
         ],

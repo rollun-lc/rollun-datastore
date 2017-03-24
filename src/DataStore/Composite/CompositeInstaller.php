@@ -32,7 +32,7 @@ class CompositeInstaller extends InstallerAbstract
      *
      * Add to config:
      * <code>
-     *    'services' => [
+     *    'dependencies' => [
      *        'aliases' => [
      *            EavAbstractFactory::DB_SERVICE_NAME => getenv('APP_ENV') === 'prod' ? 'dbOnProduction' : 'local-db',
      *        ],
@@ -98,7 +98,7 @@ class CompositeInstaller extends InstallerAbstract
                         'tableName' => 'category_products'
                     ],
                 ],
-                'services' => [
+                'dependencies' => [
                     'aliases' => [
                         Composite::DB_SERVICE_NAME => 'db',
                     ],
