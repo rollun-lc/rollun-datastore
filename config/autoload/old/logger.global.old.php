@@ -14,7 +14,7 @@ use \rollun\installer\Command;
 use \rollun\logger\Installer as LoggerInstaller;
 
 return [
-    'services' => [
+    'dependencies' => [
         'factories' => [
             FileLogWriter::class => FileLogWriterFactory::class,
             Logger::class => LoggerFactory::class,

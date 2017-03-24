@@ -42,7 +42,7 @@ class EAVInstaller extends InstallerAbstract
      *
      * Add to config:
      * <code>
-     *    'services' => [
+     *    'dependencies' => [
      *        'aliases' => [
      *            EavAbstractFactory::DB_SERVICE_NAME => getenv('APP_ENV') === 'prod' ? 'dbOnProduction' : 'local-db',
      *        ],
@@ -57,8 +57,8 @@ class EAVInstaller extends InstallerAbstract
     {
         $config = $this->container->get('config');
         return (
-            isset($config['services']['abstract_factories']) &&
-            in_array(EavAbstractFactory::class, $config['services']['abstract_factories']) &&
+            isset($config['dependencies']['abstract_factories']) &&
+            in_array(EavAbstractFactory::class, $config['dependencies']['abstract_factories']) &&
             $this->container->has(EavAbstractFactory::DB_SERVICE_NAME)
             );
     }
@@ -117,7 +117,7 @@ class EAVInstaller extends InstallerAbstract
                 $tableManager->createTable(SysEntities::TABLE_NAME);
             }
             return [
-                'services' => [
+                'dependencies' => [
                     'aliases' => [
                         EavAbstractFactory::DB_SERVICE_NAME => 'db',
                     ],

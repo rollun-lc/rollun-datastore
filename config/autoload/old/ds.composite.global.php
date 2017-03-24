@@ -27,7 +27,7 @@ return [
             'tableName' => 'category_products'
         ],
     ],
-    'services' => [
+    'dependencies' => [
         'aliases' => [
             Composite::DB_SERVICE_NAME => 'db',
         ],

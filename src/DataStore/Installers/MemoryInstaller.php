@@ -21,7 +21,7 @@ class MemoryInstaller extends InstallerAbstract
     public function install()
     {
         return [
-            'services' => [
+            'dependencies' => [
                 'abstract_factories' => [
                     MemoryAbstractFactory::class,
                 ],
@@ -58,7 +58,7 @@ class MemoryInstaller extends InstallerAbstract
     public function isInstall()
     {
         $config = $this->container->get('config');
-        return (isset($config['services']['abstract_factories']) &&
-            in_array(MemoryAbstractFactory::class, $config['services']['abstract_factories']));
+        return (isset($config['dependencies']['abstract_factories']) &&
+            in_array(MemoryAbstractFactory::class, $config['dependencies']['abstract_factories']));
     }
 }
