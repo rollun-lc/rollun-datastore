@@ -9,10 +9,11 @@
 
 namespace rollun\datastore\Middleware;
 
+use Interop\Http\ServerMiddleware\DelegateInterface;
+use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use rollun\datastore\DataStore;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Zend\Stratigility\MiddlewareInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 
 /**
@@ -38,13 +39,4 @@ abstract class DataStoreAbstract implements MiddlewareInterface
     {
         $this->dataStore = $dataStore;
     }
-
-    /**
-     *
-     * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @param callable|null $next
-     * @return ResponseInterface
-     */
-    abstract public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null);
 }

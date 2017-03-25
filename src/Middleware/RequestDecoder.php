@@ -9,6 +9,8 @@
 
 namespace rollun\datastore\Middleware;
 
+use Interop\Http\ServerMiddleware\DelegateInterface;
+use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\utils\Json\Serializer;
@@ -17,7 +19,6 @@ use Xiag\Rql\Parser\TokenParser\Query;
 use Xiag\Rql\Parser\TypeCaster;
 use rollun\datastore\RestException;
 use rollun\datastore\Rql\RqlParser;
-use Zend\Stratigility\MiddlewareInterface;
 
 /**
  * Parse body fron JSON and add result array to $request->withParsedBody()
@@ -35,16 +36,16 @@ use Zend\Stratigility\MiddlewareInterface;
  */
 class RequestDecoder implements MiddlewareInterface
 {
-    /**                         Location: http://www.example.com/users/4/
+    /**
+     * Process an incoming server request and return a response, optionally delegating
+     * to the next middleware component to create the response.
      *
-     * @todo positionHeaders = 'beforeId'  'Put-Default-Position'  'Put-Default-Position'
      * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @param callable|null $next
+     * @param DelegateInterface $delegate
      * @return ResponseInterface
      * @throws RestException
      */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
+    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
     {
 
         // @see https://github.com/SitePen/dstore/blob/21129125823a29c6c18533e7b5a31432cf6e5c56/src/Rest.js
@@ -103,9 +104,7 @@ class RequestDecoder implements MiddlewareInterface
             );
         }
 
-        if ($next) {
-            return $next($request, $response);
-        }
+        $response = $delegate->process($request);
 
         return $response;
     }

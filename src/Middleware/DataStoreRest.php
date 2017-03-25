@@ -10,6 +10,7 @@
 
 namespace rollun\datastore\Middleware;
 
+use Interop\Http\ServerMiddleware\DelegateInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
@@ -22,6 +23,7 @@ use rollun\datastore\Middleware;
 use rollun\datastore\RestException;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
+use Zend\Diactoros\Response\EmptyResponse;
 use Zend\Diactoros\Response\JsonResponse;
 
 /**
@@ -43,14 +45,14 @@ class DataStoreRest extends Middleware\DataStoreAbstract
 
     /**
      * @param ServerRequestInterface $request
-     * @param Response $response
-     * @param callable|null $next
+     * @param DelegateInterface $delegate
      * @return Response
      */
-    public function __invoke(ServerRequestInterface $request, Response $response, callable $next = null)
+    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
     {
         $isPrimaryKeyValue = null !== $request->getAttribute('primaryKeyValue');
         $httpMethod = $request->getMethod();
+        $response = new EmptyResponse();
         try {
             switch ($request->getMethod()) {
                 case $httpMethod === 'GET' && $isPrimaryKeyValue:
@@ -90,9 +92,9 @@ class DataStoreRest extends Middleware\DataStoreAbstract
             ], 500);
         }
         $request = $this->request->withAttribute(Response::class, $response);
-        if ($next) {
-            return $next($request, $response);
-        }
+
+        $response = $delegate->process($request);
+
         return $response;
     }
 

@@ -9,6 +9,7 @@
 
 namespace rollun\datastore\Examples\Middleware;
 
+use Interop\Http\ServerMiddleware\DelegateInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\Middleware;
@@ -34,21 +35,18 @@ class DataStoreMemory extends Middleware\DataStoreAbstract
     }
 
     /**
-     * Make DataStoreMemory
+     * Process an incoming server request and return a response, optionally delegating
+     * to the next middleware component to create the response.
      *
      * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @param callable|null $next
+     * @param DelegateInterface $delegate
+     *
      * @return ResponseInterface
      */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
+    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
     {
         $request = $request->withAttribute('memoryStore', $this->dataStore);
-
-        if ($next) {
-            return $next($request, $response);
-        }
+        $response = $delegate->process($request);
         return $response;
     }
-
 }
