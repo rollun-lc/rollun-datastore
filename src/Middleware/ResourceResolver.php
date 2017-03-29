@@ -9,9 +9,11 @@
 
 namespace rollun\datastore\Middleware;
 
+use Interop\Http\ServerMiddleware\DelegateInterface;
+use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Zend\Stratigility\MiddlewareInterface;
+
 
 /**
  * Extracts resource name and row id from URL or from request attributes
@@ -36,13 +38,15 @@ class ResourceResolver implements MiddlewareInterface
 {
 
     /**
+     * Process an incoming server request and return a response, optionally delegating
+     * to the next middleware component to create the response.
      *
      * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @param callable|null $next
+     * @param DelegateInterface $delegate
+     *
      * @return ResponseInterface
      */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
+    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
     {
         if (null !== $request->getAttribute("resourceName")) {
             //Router have set "resourceName". It work in expressive.
@@ -59,9 +63,8 @@ class ResourceResolver implements MiddlewareInterface
             $request = $request->withAttribute('primaryKeyValue', $id);
         }
 
-        if ($next) {
-            return $next($request, $response);
-        }
+        $response = $delegate->process($request);
+
         return $response;
     }
 
@@ -74,5 +77,4 @@ class ResourceResolver implements MiddlewareInterface
             '%7E' => '~',
         ]));
     }
-
 }

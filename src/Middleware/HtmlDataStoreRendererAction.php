@@ -8,6 +8,7 @@
 
 namespace rollun\datastore\Middleware;
 
+use Interop\Http\ServerMiddleware\DelegateInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use rollun\installer\Command;
@@ -18,7 +19,7 @@ use rollun\actionrender\Renderer\Html\HtmlRendererAction;
 
 class HtmlDataStoreRendererAction extends HtmlRendererAction
 {
-    public function __invoke(Request $request, Response $response, callable $out = null)
+    public function process(Request $request, DelegateInterface $delegate)
     {
         $data = $request->getAttribute('responseData');
         $name = $request->getAttribute('templateName');
@@ -42,9 +43,7 @@ class HtmlDataStoreRendererAction extends HtmlRendererAction
             $response
         );
 
-        if (isset($out)) {
-            return $out($request, $response);
-        }
+        $response = $delegate->process($request);
 
         return $response;
     }

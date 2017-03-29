@@ -160,7 +160,7 @@ class DataStoreTestInstaller extends InstallerAbstract
                 return false;
             }
         }
-        return false;
+        return true;
     }
 
     public function getDependencyInstallers()
