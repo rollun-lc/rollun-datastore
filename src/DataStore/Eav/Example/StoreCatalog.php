@@ -248,16 +248,16 @@ class StoreCatalog
                 ]
             ],
             'url' => [
-                TableManager::FIELD_TYPE => 'Varchar',
+                TableManager::FIELD_TYPE => 'BLOB',
                 TableManager::FIELD_PARAMS => [
-                    'length' => 100,
+                    'length' => 65000,
                     'nullable' => false,
                 ],
             ],
             'alt' => [
-                TableManager::FIELD_TYPE => 'Varchar',
+                TableManager::FIELD_TYPE => 'BLOB',
                 TableManager::FIELD_PARAMS => [
-                    'length' => 100,
+                    'length' => 65000,
                     'nullable' => false,
                 ],
             ],
