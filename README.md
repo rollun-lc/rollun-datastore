@@ -15,12 +15,6 @@
 
 * [DataStore Абстрактные фабрики](https://github.com/rollun-com/rollun-datastore/blob/master/doc/DataStore%20Abstract%20Factory.md)
 
-* [EAV](https://github.com/rollun-com/rollun-datastore/blob/master/doc/EAVDataStore.md)
-
-* [EAV примеры](https://github.com/rollun-com/rollun-datastore/blob/master/doc/EAV%20example.md)
-
-* [Composite](https://github.com/rollun-com/rollun-datastore/blob/master/doc/Composite.md)
-
 * [Стандарты](https://github.com/rollun-com/rollun-skeleton/blob/master/docs/Standarts.md)
 
 ## Запуск тестов
