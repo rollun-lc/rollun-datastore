@@ -10,8 +10,6 @@ namespace rollun\datastore;
 
 use Composer\IO\IOInterface;
 use Interop\Container\ContainerInterface;
-use rollun\datastore\DataStore\Composite\CompositeInstaller;
-use rollun\datastore\DataStore\Eav\EAVInstaller;
 use rollun\datastore\DataStore\Aspect\AspectInstaller;
 use rollun\datastore\DataStore\Installers\CacheableInstaller;
 use rollun\datastore\DataStore\Installers\CsvInstaller;
@@ -71,16 +69,6 @@ class DataStoreTestInstaller extends InstallerAbstract
                 'class' => \rollun\datastore\DataStore\HttpClient::class,
                 'tableName' => 'test_res_http',
                 'url' => 'http://' . constant("HOST") . '/api/datastore/test_res_http',
-                'options' => ['timeout' => 30]
-            ],
-            'testEavOverHttpClient' => [
-                'class' => \rollun\datastore\DataStore\HttpClient::class,
-                'url' => 'http://' . constant("HOST") . '/api/datastore/entity_product',
-                'options' => ['timeout' => 30]
-            ],
-            'testEavOverHttpDbClient' => [
-                'class' => \rollun\datastore\DataStore\HttpClient::class,
-                'url' => 'http://' . constant("HOST") . '/api/datastore/db~entity_product',
                 'options' => ['timeout' => 30]
             ],
             'testMemory' => [
@@ -171,8 +159,6 @@ class DataStoreTestInstaller extends InstallerAbstract
             DbTableInstaller::class,
             HttpClientInstaller::class,
             MemoryInstaller::class,
-            EAVInstaller::class,
-            CompositeInstaller::class,
             AspectInstaller::class,
             DataStoreMiddlewareInstaller::class
         ];
