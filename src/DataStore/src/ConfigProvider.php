@@ -1,6 +1,6 @@
 <?php
 
-namespace rollun\amazon;
+namespace rollun\datastore;
 
 /**
  * The configuration provider for the App module
@@ -35,8 +35,8 @@ class ConfigProvider
         return [
             'paths' => [
                 'app'    => [__DIR__ . '/../templates/app'],
-                'error'  => [__DIR__ . '/../templates/error'],
-                'layout' => [__DIR__ . '/../templates/layout'],
+                //'error'  => [__DIR__ . '/../templates/error'],
+                //'layout' => [__DIR__ . '/../templates/layout'],
             ],
         ];
     }
