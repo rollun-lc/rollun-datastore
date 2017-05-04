@@ -1,0 +1,10 @@
+<?php $this->headTitle('DataStore'); ?>
+
+<div class="row">
+    <h2>DataStore</h2>
+    <?php if ($this->data) : ?>
+        <?php foreach ($this->data as $item) : ?>
+            <?php var_dump($item) ?>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</div>
