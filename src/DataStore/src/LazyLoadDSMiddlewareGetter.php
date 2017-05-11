@@ -34,9 +34,11 @@ class LazyLoadDSMiddlewareGetter extends Attribute
     public function getLazyLoadMiddlewares(Request $request)
     {
         $serviceName = $request->getAttribute($this->attributeName);
-        $result = [LazyLoadMiddlewareGetterInterface::KEY_FACTORY_CLASS => DataStoreMiddlewareFactory::class,
+        $result = [
+            LazyLoadMiddlewareGetterInterface::KEY_FACTORY_CLASS => DataStoreMiddlewareFactory::class,
             LazyLoadMiddlewareGetterInterface::KEY_REQUEST_NAME => $serviceName,
-            LazyLoadMiddlewareGetterInterface::KEY_OPTIONS => []];
+            LazyLoadMiddlewareGetterInterface::KEY_OPTIONS => []
+        ];
         return [
             $result
         ];

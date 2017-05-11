@@ -23,7 +23,10 @@ use rollun\datastore\DataStore\HttpClient;
  *     'HttpClient' => [
  *         'class' => 'rollun\datastore\DataStore\HttpDatastoreClassname',
  *          'url' => 'http://site.com/api/resource-name',
- *          'options' => ['timeout' => 30]
+ *          'options' => [
+ *              'timeout' => 30,
+ *              'adapter' => 'Zend\Http\Client\Adapter\Socket',
+ *          ]
  *     ]
  * ]
  * </code>

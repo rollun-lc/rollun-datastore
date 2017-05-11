@@ -41,6 +41,11 @@ class CacheableAbstractFactory extends DataStoreAbstractFactory
     }
 
     /**
+     * 'testCacheable' => [
+     *      'class' => \rollun\datastore\DataStore\Cacheable::class,
+     *      'dataSource' => 'testDataSourceDb',
+     *      'cacheable' => 'testDbTable'
+     * ]
      * @param ContainerInterface $container
      * @param string $requestedName
      * @param array|null $options
