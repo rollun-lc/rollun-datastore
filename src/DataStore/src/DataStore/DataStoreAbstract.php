@@ -81,7 +81,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
      */
     public function getIdentifier()
     {
-        return self::DEF_ID;
+        return static::DEF_ID;
     }
 
     /**

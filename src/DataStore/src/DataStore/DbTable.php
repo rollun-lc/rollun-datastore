@@ -108,9 +108,9 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         try {
             $insertedItem = $this->_create($itemData, $rewriteIfExist);
             $adapter->getDriver()->getConnection()->commit();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $adapter->getDriver()->getConnection()->rollback();
-            throw new DataStoreException('Can\'t insert item', 0, $e);
+            throw new DataStoreException('Can\'t insert item ' . $e->getMessage(), 0, $e);
         }
         return $insertedItem;
     }
@@ -144,8 +144,8 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         if ($this->read($item[$identifier])) {
             try {
                 $this->dbTable->delete(array($identifier => $item[$identifier]));
-            } catch (\Exception $e) {
-                throw new DataStoreException('Can\'t delete item with "id" = ' . $item[$identifier], 0, $e);
+            } catch (\Throwable $e) {
+                throw new DataStoreException("Can't delete item with '$identifier' = " . $item[$identifier], 0, $e);
             }
         }
     }
@@ -313,7 +313,7 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         try {
             $result = $this->_update($itemData, $createIfAbsent);
             $adapter->getDriver()->getConnection()->commit();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $adapter->getDriver()->getConnection()->rollback();
             throw new DataStoreException('Can\'t update item', 0, $e);
         }
