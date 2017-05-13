@@ -71,7 +71,9 @@ class HttpClient extends DataStoreAbstract
             $supportedKeys = [
                 'maxredirects',
                 'useragent',
+                'adapter',
                 'timeout',
+                'curloptions'
             ];
             $this->options = array_intersect_key($options, array_flip($supportedKeys));
         }

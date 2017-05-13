@@ -32,10 +32,7 @@ class DataStoreMiddlewareFactory implements FactoryInterface
      * @param  string $requestedName
      * @param  null|array $options
      * @return object
-     * @throws ServiceNotFoundException if unable to resolve the service.
-     * @throws ServiceNotCreatedException if an exception is raised when
-     *     creating a service.
-     * @throws ContainerException if any other error occurs
+     * @throws RestException
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
@@ -55,6 +52,7 @@ class DataStoreMiddlewareFactory implements FactoryInterface
                 $resourceObject = new Middleware\DataStoreRest($dataStore);
             case $resourceObject instanceof MiddlewareInterface:
                 $storeMiddleware = $resourceObject;
+                break;
             default:
                 if (!isset($storeMiddleware)) {
                     throw new RestException(

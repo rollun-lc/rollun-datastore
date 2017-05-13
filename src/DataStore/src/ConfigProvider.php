@@ -20,7 +20,6 @@ class ConfigProvider
     public function __invoke()
     {
         return [
-            //'dependencies' => $this->getDependencies(),
             'templates'    => $this->getTemplates()
         ];
     }
@@ -35,8 +34,6 @@ class ConfigProvider
         return [
             'paths' => [
                 'app'    => [__DIR__ . '/../templates/app'],
-                //'error'  => [__DIR__ . '/../templates/error'],
-                //'layout' => [__DIR__ . '/../templates/layout'],
             ],
         ];
     }
