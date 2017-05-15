@@ -10,7 +10,7 @@ namespace rollun\datastore\DataStore\Traits;
 
 use rollun\datastore\DataStore\DataStoreException;
 
-class NoSupportUpdateTrait
+trait NoSupportUpdateTrait
 {
     /**
      *{@inheritdoc}
