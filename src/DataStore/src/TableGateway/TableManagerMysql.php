@@ -97,6 +97,7 @@ class TableManagerMysql
     const FIELD_PARAMS = 'field_params';
     const FOREIGN_KEY = 'field_foreign_key';
     const UNIQUE_KEY = 'field_unique_key';
+    const PRIMARY_KEY = 'field_primary_key';
     //
     const KEY_IN_CONFIG = 'tableManagerMysql';
     const KEY_TABLES_CONFIGS = 'tablesConfigs';
@@ -171,7 +172,7 @@ class TableManagerMysql
     {
         if ($this->hasTable($tableName)) {
             throw new DataStoreException(
-            "Table with name $tableName is exist. Use rewriteTable()"
+                "Table with name $tableName is exist. Use rewriteTable()"
             );
         }
         return $this->create($tableName, $tableConfig);
@@ -202,7 +203,7 @@ class TableManagerMysql
     public function deleteTable($tableName)
     {
         $deleteStatementStr = "DROP TABLE IF EXISTS "
-                . $this->db->platform->quoteIdentifier($tableName);
+            . $this->db->platform->quoteIdentifier($tableName);
         $deleteStatement = $this->db->query($deleteStatementStr);
         return $deleteStatement->execute();
     }
@@ -229,8 +230,8 @@ class TableManagerMysql
         $result .= '    With columns: ' . PHP_EOL;
         foreach ($table->getColumns() as $column) {
             $result .= '        ' . $column->getName()
-                    . ' -> ' . $column->getDataType()
-                    . PHP_EOL;
+                . ' -> ' . $column->getDataType()
+                . PHP_EOL;
         }
 
         $result .= PHP_EOL;
@@ -239,8 +240,8 @@ class TableManagerMysql
         foreach ($metadata->getConstraints($tableName) as $constraint) {
             /** @var $constraint \Zend\Db\Metadata\Object\ConstraintObject */
             $result .= '        ' . $constraint->getName()
-                    . ' -> ' . $constraint->getType()
-                    . PHP_EOL;
+                . ' -> ' . $constraint->getType()
+                . PHP_EOL;
             if (!$constraint->hasColumns()) {
                 continue;
             }
@@ -320,9 +321,12 @@ class TableManagerMysql
 
         $alterTable = new AlterTable($tableName);
 
-        $table->addConstraint(new Constraint\PrimaryKey('id'));
-
+        $isPrimaryKeySet = false;
         foreach ($tableConfigArray as $fieldName => $fieldData) {
+            if(isset($fieldData[static::PRIMARY_KEY])) {
+                $table->addConstraint(new Constraint\PrimaryKey($fieldName));
+                $isPrimaryKeySet = true;
+            }
             $fieldType = $fieldData[self::FIELD_TYPE];
             $fieldParams = $this->getFieldParams($fieldData, $fieldType);
             array_unshift($fieldParams, $fieldName);
@@ -333,29 +337,32 @@ class TableManagerMysql
 
             if (isset($fieldData[self::UNIQUE_KEY])) {
                 $uniqueKeyConstraintName = $fieldData[self::UNIQUE_KEY] === true ?
-                        'UniqueKey_' . $tableName . '_' . $fieldName : $fieldData[self::UNIQUE_KEY];
+                    'UniqueKey_' . $tableName . '_' . $fieldName : $fieldData[self::UNIQUE_KEY];
                 $uniqueKeyInstance = new UniqueKey([$fieldName], $uniqueKeyConstraintName);
                 $alterTable->addConstraint($uniqueKeyInstance);
             }
 
             if (isset($fieldData[self::FOREIGN_KEY])) {
                 $foreignKeyConstraintName = !isset($fieldData[self::FOREIGN_KEY]['name']) ?
-                        'ForeignKey_' . $tableName . '_' . $fieldName : $fieldData[self::FOREIGN_KEY]['name'];
+                    'ForeignKey_' . $tableName . '_' . $fieldName : $fieldData[self::FOREIGN_KEY]['name'];
                 $onDeleteRule = isset($fieldData[self::FOREIGN_KEY]['onDeleteRule']) ?
-                        $fieldData[self::FOREIGN_KEY]['onDeleteRule'] : null;
+                    $fieldData[self::FOREIGN_KEY]['onDeleteRule'] : null;
                 $onUpdateRule = isset($fieldData[self::FOREIGN_KEY]['onUpdateRule']) ?
-                        $fieldData[self::FOREIGN_KEY]['onUpdateRule'] : null;
+                    $fieldData[self::FOREIGN_KEY]['onUpdateRule'] : null;
                 $foreignKeyInstance = new Constraint\ForeignKey(
-                        $foreignKeyConstraintName
-                        , [$fieldName]
-                        , $fieldData[self::FOREIGN_KEY]['referenceTable']
-                        , $fieldData[self::FOREIGN_KEY]['referenceColumn']
-                        , $onDeleteRule
-                        , $onUpdateRule
-                        , $foreignKeyConstraintName
+                    $foreignKeyConstraintName
+                    , [$fieldName]
+                    , $fieldData[self::FOREIGN_KEY]['referenceTable']
+                    , $fieldData[self::FOREIGN_KEY]['referenceColumn']
+                    , $onDeleteRule
+                    , $onUpdateRule
+                    , $foreignKeyConstraintName
                 );
                 $alterTable->addConstraint($foreignKeyInstance);
             }
+        }
+        if(!$isPrimaryKeySet) {
+            $table->addConstraint(new Constraint\PrimaryKey('id'));
         }
 
         // this is simpler version, not MySQL only, but without options[] support
@@ -404,9 +411,9 @@ class TableManagerMysql
     public function getLinkedTables($tableName)
     {
         $getTableSql = "SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = " .
-                "'" . $this->db->getCurrentSchema() . "'" .
-                " AND REFERENCED_TABLE_NAME = '" . $tableName . "'" .
-                " AND CONSTRAINT_NAME <>'PRIMARY' AND REFERENCED_TABLE_NAME is not null;";
+            "'" . $this->db->getCurrentSchema() . "'" .
+            " AND REFERENCED_TABLE_NAME = '" . $tableName . "'" .
+            " AND CONSTRAINT_NAME <>'PRIMARY' AND REFERENCED_TABLE_NAME is not null;";
         $rowSet = $this->db->query($getTableSql, Adapter\Adapter::QUERY_MODE_EXECUTE);
         return $rowSet->toArray();
     }
@@ -417,8 +424,8 @@ class TableManagerMysql
         /** @var Adapter\Adapter $adapter */
         $adapter = $this->db;
         $sql = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE"
-                . " TABLE_SCHEMA = '" . $adapter->getCurrentSchema() . "'"
-                . " AND TABLE_NAME = '" . $tableName . "' ;";
+            . " TABLE_SCHEMA = '" . $adapter->getCurrentSchema() . "'"
+            . " AND TABLE_NAME = '" . $tableName . "' ;";
         $resSet = $adapter->query($sql, Adapter\Adapter::QUERY_MODE_EXECUTE);
         $columnsNames = [];
         foreach ($resSet->toArray() as $column) {
