@@ -50,8 +50,6 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         $this->dbTable = $dbTable;
     }
 
-//** Interface "rollun\datastore\DataStore\Interfaces\ReadInterface" **/
-
     /**
      * {@inheritdoc}
      *
@@ -60,48 +58,6 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
     public function create($itemData, $rewriteIfExist = false)
     {
 
-        /*$identifier = $this->getIdentifier();
-        $adapter = $this->dbTable->getAdapter();
-
-        // begin Transaction
-        $errorMsg = 'Can\'t start insert transaction';
-
-        $adapter->getDriver()->getConnection()->beginTransaction();
-        try {
-            if ($rewriteIfExist) {
-                if (isset($itemData[$identifier])) {
-                    $errorMsg = 'Can\'t delete item with "id" = ' . $itemData[$identifier];
-                    if ($this->read($itemData[$identifier])) {
-                        $this->dbTable->delete(array($identifier => $itemData[$identifier]));
-                    }
-                } else if (isset($itemData[0]) && isset($itemData[0][$identifier])) {
-                    foreach ($itemData as $item) {
-                        if (isset($item[$identifier])) {
-                            $errorMsg = 'Can\'t delete item with "id" = ' . $item[$identifier];
-                            if ($this->read($item[$identifier])) {
-                                $this->dbTable->delete(array($identifier => $item[$identifier]));
-                            }
-                        }
-                    }
-                }
-            }
-            $errorMsg = 'Can\'t insert item';
-            $rowsCount = $this->dbTable->insert($itemData);
-            $adapter->getDriver()->getConnection()->commit();
-        } catch
-        (\Exception $e) {
-            $adapter->getDriver()->getConnection()->rollback();
-            throw new DataStoreException($errorMsg, 0, $e);
-        }
-
-        if(!isset($itemData[$identifier])) {
-            $id = $this->dbTable->getLastInsertValue();
-            $newItem = $this->read($id);
-        }else {
-            $newItem = $itemData;
-        }
-
-        return $newItem;*/
         $adapter = $this->dbTable->getAdapter();
 
         $adapter->getDriver()->getConnection()->beginTransaction();
@@ -115,6 +71,11 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         return $insertedItem;
     }
 
+    /**
+     * @param $itemData
+     * @param bool $rewriteIfExist
+     * @return array|mixed|null
+     */
     protected function _create($itemData, $rewriteIfExist = false)
     {
 
@@ -139,6 +100,11 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         return $newItem;
     }
 
+    /**
+     * @param array $item
+     * @param $identifier
+     * @throws DataStoreException
+     */
     protected function deleteIfExist(array $item, $identifier)
     {
         if ($this->read($item[$identifier])) {
@@ -165,6 +131,11 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         return $rowset->toArray();
     }
 
+    /**
+     * @param Select $selectSQL
+     * @param Query $query
+     * @return Select
+     */
     protected function setSelectLimitOffset(Select $selectSQL, Query $query)
     {
         $limits = $query->getLimit();
@@ -179,6 +150,11 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         return $selectSQL;
     }
 
+    /**
+     * @param Select $selectSQL
+     * @param Query $query
+     * @return Select
+     */
     protected function setSelectOrder(Select $selectSQL, Query $query)
     {
         $sort = $query->getSort();
@@ -196,6 +172,11 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         return $selectSQL;
     }
 
+    /**
+     * @param Select $selectSQL
+     * @param Query $query
+     * @return Select
+     */
     protected function setSelectColumns(Select $selectSQL, Query $query)
     {
         $select = $query->getSelect();  //What fields will return
@@ -215,11 +196,21 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         return $selectSQL;
     }
 
+    /**
+     * @param Select $selectSQL
+     * @param Query $query
+     * @return Select
+     */
     protected function setSelectJoin(Select $selectSQL, Query $query)
     {
         return $selectSQL;
     }
 
+    /**
+     * @param Select $selectSQL
+     * @param RqlQuery $query
+     * @return Select
+     */
     protected function setGroupby(Select $selectSQL, RqlQuery $query)
     {
         $groupByFields = $query->getGroupby()->getFields();
@@ -234,6 +225,10 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         return $selectSQL;
     }
 
+    /**
+     * @param Select $selectSQL
+     * @return Select
+     */
     protected function makeExternalSql(Select $selectSQL)
     {
         //create new Select - for aggregate func query
@@ -256,7 +251,6 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         }
     }
 
-// ** Interface "rollun\datastore\DataStore\Interfaces\DataStoresInterface"  **/
 
     /**
      * {@inheritdoc}
@@ -420,7 +414,13 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         return $rowset->current()['count'];
     }
 
-// ** protected  **/
+    /**
+     * @return TableGateway
+     */
+    public function getDbTable()
+    {
+        return $this->dbTable;
+    }
 
     /**
      * {@inheritdoc}
@@ -445,6 +445,10 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         return $keys;
     }
 
+    /**
+     * @param Query $query
+     * @return mixed|string
+     */
     public function getSqlQuery(Query $query)
     {
         $conditionBuilder = new SqlConditionBuilder($this->dbTable->getAdapter(), $this->dbTable->getTable());
