@@ -43,6 +43,7 @@ class TableGatewayAbstractFactory extends AbstractFactoryAbstract
      * @var Zend\Db\Adapter\AdapterInterface
      */
     protected $db;
+    const KEY_ADAPTER = 'adapter';
 
     /**
      * Can the factory create an instance for the service?
@@ -83,9 +84,9 @@ class TableGatewayAbstractFactory extends AbstractFactoryAbstract
     {
 
         $config = $container->get('config')[TableGatewayAbstractFactory::KEY_TABLE_GATEWAY];
-        if (isset($config[$requestedName]) && isset($config[$requestedName]['adapter'])) {
-            $this->db = $container->has($config[$requestedName]['adapter']) ?
-                $container->get($config[$requestedName]['adapter']) : false;
+        if (isset($config[$requestedName]) && isset($config[$requestedName][static::KEY_ADAPTER])) {
+            $this->db = $container->has($config[$requestedName][static::KEY_ADAPTER]) ?
+                $container->get($config[$requestedName][static::KEY_ADAPTER]) : false;
         } else {
             $this->db = $container->has('db') ? $container->get('db') : false;
         }
