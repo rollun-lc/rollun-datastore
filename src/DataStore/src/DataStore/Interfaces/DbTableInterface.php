@@ -10,7 +10,7 @@ namespace rollun\datastore\DataStore\Interfaces;
 
 use Zend\Db\TableGateway\TableGateway;
 
-interface DbTableInterface
+interface DbTableInterface extends DataStoresInterface
 {
     /**
      * @return TableGateway
