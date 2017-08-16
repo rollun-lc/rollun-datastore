@@ -38,7 +38,7 @@ abstract class ConditionBuilderAbstract
             'in' => ['before' => '(', 'between' => ',(', 'delimiter' => ',', 'after' => '))']
         ],
         'ScalarOperator' => [
-            'ge' => ['before' => '(', 'between' => '=>', 'after' => ')'],
+            'ge' => ['before' => '(', 'between' => '>=', 'after' => ')'],
             'gt' => ['before' => '(', 'between' => '>', 'after' => ')'],
             'le' => ['before' => '(', 'between' => '<=', 'after' => ')'],
             'lt' => ['before' => '(', 'between' => '<', 'after' => ')'],

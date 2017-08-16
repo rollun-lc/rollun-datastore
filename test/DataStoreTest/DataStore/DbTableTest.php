@@ -120,11 +120,9 @@ class DbTableTest extends AbstractTest
      */
     protected function _initObject($data = null)
     {
-
         if (is_null($data)) {
             $data = $this->_itemsArrayDelault;
         }
-
         $this->_prepareTable($data);
         $dbTable = new TableGateway($this->dbTableName, $this->adapter);
         foreach ($data as $record) {
@@ -132,5 +130,5 @@ class DbTableTest extends AbstractTest
         }
     }
 
-    /*     * ************************** Identifier *********************** */
+    /* * ************************** Identifier *********************** */
 }
