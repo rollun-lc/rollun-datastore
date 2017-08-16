@@ -35,7 +35,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         'ScalarOperator' => [
             'eq' => ['before' => '(', 'between' => '=', 'after' => ')'],
             'ne' => ['before' => '(', 'between' => '<>', 'after' => ')'],
-            'ge' => ['before' => '(', 'between' => '=>', 'after' => ')'],
+            'ge' => ['before' => '(', 'between' => '>=', 'after' => ')'],
             'gt' => ['before' => '(', 'between' => '>', 'after' => ')'],
             'le' => ['before' => '(', 'between' => '<=', 'after' => ')'],
             'lt' => ['before' => '(', 'between' => '<', 'after' => ')'],

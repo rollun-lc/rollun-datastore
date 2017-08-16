@@ -9,6 +9,7 @@
 
 namespace rollun\test\datastore\DataStore;
 
+use DateTime;
 use Interop\Container\ContainerInterface;
 use rollun\datastore\Rql\RqlParser;
 use rollun\datastore\Rql\RqlQuery;
@@ -17,6 +18,9 @@ use Xiag\Rql\Parser\Node;
 use Xiag\Rql\Parser\Node\Query\ArrayOperator;
 use Xiag\Rql\Parser\Node\Query\LogicOperator;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\GeNode;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\LeNode;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\LtNode;
 use Xiag\Rql\Parser\Query;
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\DbTable;
@@ -1170,6 +1174,34 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $result);
     }
 
+
+    public function test_testDataGeFiltred()
+    {
+        $this->_initObject(
+            [
+                ['id' => 1, 'date' => '2017-06-01T00:00:00+00:00'],
+                ['id' => 2, 'date' => '2017-06-02T00:00:00+00:00'],
+                ['id' => 3, 'date' => '2017-06-03T00:00:00+00:00'],
+                ['id' => 4, 'date' => '2017-06-04T00:00:00+00:00'],
+                ['id' => 5, 'date' => '2017-06-05T00:00:00+00:00'],
+                ['id' => 6, 'date' => '2017-06-06T00:00:00+00:00'],
+            ]
+        );
+        $query = new Query();
+
+        $query->setQuery(new LogicOperator\AndNode([
+            new GeNode("date", new DateTime("2017-06-01")),
+            new LtNode("date", new DateTime("2017-06-04")),
+        ]));
+        $result = $this->object->query($query);
+        $this->assertEquals([
+            ['id' => 1, 'date' => '2017-06-01T00:00:00+00:00'],
+            ['id' => 2, 'date' => '2017-06-02T00:00:00+00:00'],
+            ['id' => 3, 'date' => '2017-06-03T00:00:00+00:00'],
+        ], $result);
+
+
+    }
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
