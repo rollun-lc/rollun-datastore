@@ -73,9 +73,11 @@ class AspectAbstract implements DataStoresInterface
      *
      * @param $itemData
      * @param bool|false $rewriteIfExist
+     * @return array
      */
     protected function preCreate($itemData, $rewriteIfExist = false)
     {
+        return $itemData;
     }
 
     /**
@@ -85,9 +87,9 @@ class AspectAbstract implements DataStoresInterface
      */
     public function create($itemData, $rewriteIfExist = false)
     {
-        $this->preCreate($itemData, $rewriteIfExist);
-        $result = $this->dataStore->create($itemData, $rewriteIfExist);
-        return $this->postCreate($result, $itemData, $rewriteIfExist);
+        $newData = $this->preCreate($itemData, $rewriteIfExist);
+        $result = $this->dataStore->create($newData, $rewriteIfExist);
+        return $this->postCreate($result, $newData, $rewriteIfExist);
     }
 
     /**
@@ -111,9 +113,11 @@ class AspectAbstract implements DataStoresInterface
      *
      * @param $itemData
      * @param bool|false $createIfAbsent
+     * @return array
      */
     protected function preUpdate($itemData, $createIfAbsent = false)
     {
+        return $itemData;
     }
 
     /**
@@ -123,9 +127,9 @@ class AspectAbstract implements DataStoresInterface
      */
     public function update($itemData, $createIfAbsent = false)
     {
-        $this->preUpdate($itemData, $createIfAbsent);
-        $result = $this->dataStore->update($itemData, $createIfAbsent);
-        return $this->postUpdate($result, $itemData, $createIfAbsent);
+        $newData = $this->preUpdate($itemData, $createIfAbsent);
+        $result = $this->dataStore->update($newData, $createIfAbsent);
+        return $this->postUpdate($result, $newData, $createIfAbsent);
     }
 
     /**
@@ -329,9 +333,11 @@ class AspectAbstract implements DataStoresInterface
      * By default does nothing
      *
      * @param Query $query
+     * @return Query
      */
     protected function preQuery(Query $query)
     {
+        return $query;
     }
 
     /**
@@ -341,9 +347,9 @@ class AspectAbstract implements DataStoresInterface
      */
     public function query(Query $query)
     {
-        $this->preQuery($query);
-        $result = $this->dataStore->query($query);
-        return $this->postQuery($result, $query);
+        $newQuery = $this->preQuery($query);
+        $result = $this->dataStore->query($newQuery);
+        return $this->postQuery($result, $newQuery);
 
     }
 
