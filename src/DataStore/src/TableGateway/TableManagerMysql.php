@@ -322,9 +322,10 @@ class TableManagerMysql
         $alterTable = new AlterTable($tableName);
 
         $isPrimaryKeySet = false;
+        $primaryKeys = [];
         foreach ($tableConfigArray as $fieldName => $fieldData) {
             if(isset($fieldData[static::PRIMARY_KEY])) {
-                $table->addConstraint(new Constraint\PrimaryKey($fieldName));
+                $primaryKeys[] = $fieldName;
                 $isPrimaryKeySet = true;
             }
             $fieldType = $fieldData[self::FIELD_TYPE];
@@ -361,7 +362,9 @@ class TableManagerMysql
                 $alterTable->addConstraint($foreignKeyInstance);
             }
         }
-        if(!$isPrimaryKeySet) {
+        if($isPrimaryKeySet) {
+            $table->addConstraint(new Constraint\PrimaryKey(...$primaryKeys));
+        } else {
             $table->addConstraint(new Constraint\PrimaryKey('id'));
         }
 
