@@ -271,7 +271,7 @@ class TableManagerMysql
     public function hasTable($tableName)
     {
         $dbMetadata = Source\Factory::createSourceFromAdapter($this->db);
-        $tableNames = $dbMetadata->getTableNames();
+        $tableNames = array_merge($dbMetadata->getTableNames(), $dbMetadata->getViewNames());
         return in_array($tableName, $tableNames);
     }
 
