@@ -271,7 +271,19 @@ class TableManagerMysql
     public function hasTable($tableName)
     {
         $dbMetadata = Source\Factory::createSourceFromAdapter($this->db);
-        $tableNames = array_merge($dbMetadata->getTableNames(), $dbMetadata->getViewNames());
+        $tableNames = $dbMetadata->getTableNames();
+        return in_array($tableName, $tableNames);
+    }
+    /**
+     * Checks if the table exists
+     *
+     * @param string $tableName
+     * @return bool
+     */
+    public function hasView($tableName)
+    {
+        $dbMetadata = Source\Factory::createSourceFromAdapter($this->db);
+        $tableNames = $dbMetadata->getViewNames();
         return in_array($tableName, $tableNames);
     }
 

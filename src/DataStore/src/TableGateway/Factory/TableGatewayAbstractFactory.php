@@ -69,7 +69,7 @@ class TableGatewayAbstractFactory extends AbstractFactoryAbstract
         }
         if ($this->setDbAdapter($container, $requestedName)) {
             $dbMetadata = new Metadata($this->db);
-            $this->tableNames = $dbMetadata->getTableNames();
+            $this->tableNames = array_merge($dbMetadata->getTableNames(),  $dbMetadata->getViewNames());
         }
         return is_array($this->tableNames) && in_array($requestedName, $this->tableNames, true);
     }
