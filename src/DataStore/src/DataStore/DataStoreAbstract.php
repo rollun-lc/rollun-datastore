@@ -148,9 +148,9 @@ abstract class DataStoreAbstract implements DataStoresInterface
         $conditioon = $conditionBuilder($query->getQuery());
 
         $whereFunctionBody = PHP_EOL .
-            '$result = ' . PHP_EOL
-            . rtrim($conditioon, PHP_EOL) . ';' . PHP_EOL
-            . 'return $result;';
+                '$result = ' . PHP_EOL
+                . rtrim($conditioon, PHP_EOL) . ';' . PHP_EOL
+                . 'return $result;';
         $whereFunction = create_function('$item', $whereFunctionBody);
         $suitableItemsNumber = 0;
         $result = [];
@@ -179,14 +179,14 @@ abstract class DataStoreAbstract implements DataStoresInterface
         $nextCompareLevel = '';
         $sortFields = $query->getSort()->getFields();
         foreach ($sortFields as $ordKey => $ordVal) {
-            if ((int)$ordVal <> SortNode::SORT_ASC && (int)$ordVal <> SortNode::SORT_DESC) {
+            if ((int) $ordVal <> SortNode::SORT_ASC && (int) $ordVal <> SortNode::SORT_DESC) {
                 throw new DataStoreException('Invalid condition: ' . $ordVal);
             }
             $cond = $ordVal == SortNode::SORT_DESC ? '<' : '>';
             $notCond = $ordVal == SortNode::SORT_ASC ? '<' : '>';
 
             $prevCompareLevel = "if (\$a['$ordKey'] $cond \$b['$ordKey']) {return 1;};" . PHP_EOL
-                . "if (\$a['$ordKey'] $notCond  \$b['$ordKey']) {return -1;};" . PHP_EOL;
+                    . "if (\$a['$ordKey'] $notCond  \$b['$ordKey']) {return -1;};" . PHP_EOL;
             $nextCompareLevel = $nextCompareLevel . $prevCompareLevel;
         }
         $sortFunctionBody = $nextCompareLevel . 'return 0;';
@@ -249,53 +249,53 @@ abstract class DataStoreAbstract implements DataStoresInterface
                 if ($field instanceof AggregateFunctionNode) {
                     switch ($field->getFunction()) {
                         case 'count': {
-                            $arr = [];
-                            foreach ($data as $item) {
-                                if (isset($item[$field->getField()])) {
-                                    $arr[] = $item[$field->getField()];
+                                $arr = [];
+                                foreach ($data as $item) {
+                                    if (isset($item[$field->getField()])) {
+                                        $arr[] = $item[$field->getField()];
+                                    }
                                 }
+                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [count($arr)];
+                                break;
                             }
-                            $compareArray[$field->getField() . '->' . $field->getFunction()] = [count($arr)];
-                            break;
-                        }
                         case 'max': {
-                            $firstItem = array_pop($data);
-                            $max = $firstItem[$field->getField()];
-                            foreach ($data as $item) {
-                                $max = $max < $item[$field->getField()] ? $item[$field->getField()] : $max;
+                                $firstItem = array_pop($data);
+                                $max = $firstItem[$field->getField()];
+                                foreach ($data as $item) {
+                                    $max = $max < $item[$field->getField()] ? $item[$field->getField()] : $max;
+                                }
+                                array_push($data, $firstItem);
+                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [$max];
+                                break;
                             }
-                            array_push($data, $firstItem);
-                            $compareArray[$field->getField() . '->' . $field->getFunction()] = [$max];
-                            break;
-                        }
                         case 'min': {
-                            $firstItem = array_pop($data);
-                            $min = $firstItem[$field->getField()];
-                            foreach ($data as $item) {
-                                $min = $min > $item[$field->getField()] ? $item[$field->getField()] : $min;
+                                $firstItem = array_pop($data);
+                                $min = $firstItem[$field->getField()];
+                                foreach ($data as $item) {
+                                    $min = $min > $item[$field->getField()] ? $item[$field->getField()] : $min;
+                                }
+                                array_push($data, $firstItem);
+                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [$min];
+                                break;
                             }
-                            array_push($data, $firstItem);
-                            $compareArray[$field->getField() . '->' . $field->getFunction()] = [$min];
-                            break;
-                        }
                         case 'sum': {
-                            $sum = 0;
-                            foreach ($data as $item) {
-                                $sum += isset($item[$field->getField()]) ? $item[$field->getField()] : 0;
+                                $sum = 0;
+                                foreach ($data as $item) {
+                                    $sum += isset($item[$field->getField()]) ? $item[$field->getField()] : 0;
+                                }
+                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [$sum];
+                                break;
                             }
-                            $compareArray[$field->getField() . '->' . $field->getFunction()] = [$sum];
-                            break;
-                        }
                         case 'avg': {
-                            $sum = 0;
-                            $count = 0;
-                            foreach ($data as $item) {
-                                $sum += isset($item[$field->getField()]) ? $item[$field->getField()] : 0;
-                                $count += isset($item[$field->getField()]) ? 1 : 0;
+                                $sum = 0;
+                                $count = 0;
+                                foreach ($data as $item) {
+                                    $sum += isset($item[$field->getField()]) ? $item[$field->getField()] : 0;
+                                    $count += isset($item[$field->getField()]) ? 1 : 0;
+                                }
+                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [$sum / $count];
+                                break;
                             }
-                            $compareArray[$field->getField() . '->' . $field->getFunction()] = [$sum/$count];
-                            break;
-                        }
                     }
                 } else {
                     $dataLine = [];
@@ -352,15 +352,15 @@ abstract class DataStoreAbstract implements DataStoresInterface
     public function deleteAll()
     {
         /* $keys = $this->getKeys();
-         $deletedItemsNumber = 0;
-         foreach ($keys as $id) {
-             $deletedNumber = $this->delete($id);
-             if (is_null($deletedNumber)) {
-                 return null;
-             }
-             $deletedItemsNumber = $deletedItemsNumber + $deletedNumber;
-         }
-         return $deletedItemsNumber;*/
+          $deletedItemsNumber = 0;
+          foreach ($keys as $id) {
+          $deletedNumber = $this->delete($id);
+          if (is_null($deletedNumber)) {
+          return null;
+          }
+          $deletedItemsNumber = $deletedItemsNumber + $deletedNumber;
+          }
+          return $deletedItemsNumber; */
 
         $keys = $this->getKeys();
         $deletedItemsNumber = 0;
@@ -398,7 +398,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
      *
      * {@inheritdoc}
      */
-    abstract public function delete($id);
+    abstract function delete($id);
 
     /**
      * Interface "/Coutable"
