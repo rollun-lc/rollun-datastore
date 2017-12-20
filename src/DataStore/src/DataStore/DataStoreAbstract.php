@@ -87,7 +87,8 @@ abstract class DataStoreAbstract implements DataStoresInterface
     /**
      * Throw Exception if type of Identifier is wrong
      *
-     * @param mix $id
+     * @param int|string|double $id
+     * @throws DataStoreException
      */
     protected function checkIdentifierType($id)
     {
