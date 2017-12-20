@@ -258,7 +258,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
         try {
             $this->fileHandler = fopen($this->filename, 'r');
             if ($seekFirstDataRow) {
-                fgets($this->fileHandler);
+                fgetcsv($this->fileHandler);
             }
         } catch (\Exception $e) {
             throw new DataStoreException('Failed to open file. The specified file does not exist or
