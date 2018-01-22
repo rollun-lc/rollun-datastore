@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: victorsecuring
@@ -21,13 +22,14 @@ use rollun\datastore\Rql\Node\AggregateSelectNode;
 use rollun\datastore\Rql\RqlQuery;
 use Zend\Db\Adapter\Platform\Oracle;
 
-
 class RqlQueryTest extends \PHPUnit_Framework_TestCase
 {
+
     /** @var  RqlQuery */
     private $object;
 
-    public function setUp() {
+    public function setUp()
+    {
 
     }
 
@@ -37,7 +39,7 @@ class RqlQueryTest extends \PHPUnit_Framework_TestCase
 
         $query = new Query();
         $query->setQuery(
-            new EqNode("a", "1")
+                new EqNode("a", "1")
         );
         $this->assertEquals($query->getQuery(), $this->object->getQuery());
     }
@@ -56,7 +58,7 @@ class RqlQueryTest extends \PHPUnit_Framework_TestCase
         $this->object = new RqlQuery("select(sadf_q,ads_x)");
 
         $query = new Query();
-        $query->setSelect(new AggregateSelectNode(['sadf_q','ads_x']));
+        $query->setSelect(new AggregateSelectNode(['sadf_q', 'ads_x']));
         $this->assertEquals($query->getSelect(), $this->object->getSelect());
     }
 
@@ -69,19 +71,28 @@ class RqlQueryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($query->getLimit(), $this->object->getLimit());
     }
 
-    /*public function testLSSQNodes()
+    public function testLimitNodeDefaultOffset()
     {
-        $this->object = new RqlQuery("and(eq(b,1),or(gt(z,2),lt(z,-1)))&select(b,z,a)&limit(12,14)&sort(+z)");
+        $this->object = new RqlQuery("limit(10)");
 
         $query = new Query();
-        $query->setQuery(
-            new AndNode([
-                new EqNode('b', 1),
-                new OrNode([
-                    new GtNode('z',2),
-                    new LtNode('z',-1),
-                ])
-            ])
-        );
-    }*/
+        $query->setLimit(new LimitNode(10, 0));
+        $this->assertEquals($query->getLimit(), $this->object->getLimit());
+    }
+
+    /* public function testLSSQNodes()
+      {
+      $this->object = new RqlQuery("and(eq(b,1),or(gt(z,2),lt(z,-1)))&select(b,z,a)&limit(12,14)&sort(+z)");
+
+      $query = new Query();
+      $query->setQuery(
+      new AndNode([
+      new EqNode('b', 1),
+      new OrNode([
+      new GtNode('z',2),
+      new LtNode('z',-1),
+      ])
+      ])
+      );
+      } */
 }

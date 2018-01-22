@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: root
@@ -30,9 +31,9 @@ use rollun\datastore\Rql\TokenParser\SelectTokenParser;
 
 class RqlParser
 {
+
     private $allowedAggregateFunction;
     private $conditionBuilder;
-
     protected static $nodes = [
         'select',
         'sort',
@@ -40,8 +41,7 @@ class RqlParser
     ];
 
     public function __construct(
-        array $allowedAggregateFunction = null,
-        ConditionBuilderAbstract $conditionBuilder = null
+    array $allowedAggregateFunction = null, ConditionBuilderAbstract $conditionBuilder = null
     )
     {
         if (isset($allowedAggregateFunction)) {
@@ -108,46 +108,46 @@ class RqlParser
         $rqlQueryString = RqlParser::prepareStringRql($rqlQueryString);
         $queryTokenParser = new TokenParserGroup();
         $queryTokenParser
-            ->addTokenParser(new TokenParser\Query\GroupTokenParser($queryTokenParser))
-            ->addTokenParser(new TokenParser\Query\Basic\LogicOperator\AndTokenParser($queryTokenParser))
-            ->addTokenParser(new TokenParser\Query\Basic\LogicOperator\OrTokenParser($queryTokenParser))
-            ->addTokenParser(new TokenParser\Query\Basic\LogicOperator\NotTokenParser($queryTokenParser))
-            ->addTokenParser(new TokenParser\Query\Basic\ArrayOperator\InTokenParser())
-            ->addTokenParser(new TokenParser\Query\Basic\ArrayOperator\OutTokenParser())
-            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\EqTokenParser())
-            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\NeTokenParser())
-            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LtTokenParser())
-            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\GtTokenParser())
-            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LeTokenParser())
-            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\GeTokenParser())
-            ->addTokenParser(new BasicLikeGlobTokenParser())
-            //->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LikeTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ArrayOperator\InTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ArrayOperator\OutTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\EqTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\NeTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LtTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\GtTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LeTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\GeTokenParser())
-            ->addTokenParser(new FiqlLikeGlobTokenParser())
-            //->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LikeTokenParser())
-            ->addTokenParser(new FiqlMatchTokenParser())
-            ->addTokenParser(new BasicContainsTokenParser())
-            ->addTokenParser(new FiqlContainsTokenParser())
-            ->addTokenParser(new BasicMatchTokenParser());
+                ->addTokenParser(new TokenParser\Query\GroupTokenParser($queryTokenParser))
+                ->addTokenParser(new TokenParser\Query\Basic\LogicOperator\AndTokenParser($queryTokenParser))
+                ->addTokenParser(new TokenParser\Query\Basic\LogicOperator\OrTokenParser($queryTokenParser))
+                ->addTokenParser(new TokenParser\Query\Basic\LogicOperator\NotTokenParser($queryTokenParser))
+                ->addTokenParser(new TokenParser\Query\Basic\ArrayOperator\InTokenParser())
+                ->addTokenParser(new TokenParser\Query\Basic\ArrayOperator\OutTokenParser())
+                ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\EqTokenParser())
+                ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\NeTokenParser())
+                ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LtTokenParser())
+                ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\GtTokenParser())
+                ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LeTokenParser())
+                ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\GeTokenParser())
+                ->addTokenParser(new BasicLikeGlobTokenParser())
+                //->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LikeTokenParser())
+                ->addTokenParser(new TokenParser\Query\Fiql\ArrayOperator\InTokenParser())
+                ->addTokenParser(new TokenParser\Query\Fiql\ArrayOperator\OutTokenParser())
+                ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\EqTokenParser())
+                ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\NeTokenParser())
+                ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LtTokenParser())
+                ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\GtTokenParser())
+                ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LeTokenParser())
+                ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\GeTokenParser())
+                ->addTokenParser(new FiqlLikeGlobTokenParser())
+                //->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LikeTokenParser())
+                ->addTokenParser(new FiqlMatchTokenParser())
+                ->addTokenParser(new BasicContainsTokenParser())
+                ->addTokenParser(new FiqlContainsTokenParser())
+                ->addTokenParser(new BasicMatchTokenParser());
 
         $parser = (new QueryParser((new ExpressionParser())
-            ->registerTypeCaster('string', new TypeCaster\StringTypeCaster())
-            ->registerTypeCaster('integer', new TypeCaster\IntegerTypeCaster())
-            ->registerTypeCaster('float', new TypeCaster\FloatTypeCaster())
-            ->registerTypeCaster('boolean', new TypeCaster\BooleanTypeCaster())
-        ))
-            ->addTokenParser(new SelectTokenParser($this->allowedAggregateFunction))
-            ->addTokenParser($queryTokenParser)
-            ->addTokenParser(new TokenParser\SortTokenParser())
-            ->addTokenParser(new TokenParser\LimitTokenParser())
-            ->addTokenParser(new GroupbyTokenParser());
+                ->registerTypeCaster('string', new TypeCaster\StringTypeCaster())
+                ->registerTypeCaster('integer', new TypeCaster\IntegerTypeCaster())
+                ->registerTypeCaster('float', new TypeCaster\FloatTypeCaster())
+                ->registerTypeCaster('boolean', new TypeCaster\BooleanTypeCaster())
+                ))
+                ->addTokenParser(new SelectTokenParser($this->allowedAggregateFunction))
+                ->addTokenParser($queryTokenParser)
+                ->addTokenParser(new TokenParser\SortTokenParser())
+                ->addTokenParser(new TokenParser\LimitTokenParser())
+                ->addTokenParser(new GroupbyTokenParser());
 
         $rqlQueryObject = $parser->parse((new Lexer())->tokenize($rqlQueryString));
 
@@ -184,7 +184,6 @@ class RqlParser
         return $rqlQueryString;
     }
 
-
     /**
      * @param RqlQuery $query
      * @return string
@@ -210,13 +209,22 @@ class RqlParser
     protected function makeLimit(Query $query)
     {
         $limitNode = $query->getLimit();
-        $limit = !$limitNode ? DataStoreAbstract::LIMIT_INFINITY : $limitNode->getLimit();
-        $offset = !$limitNode ? 0 : $limitNode->getOffset();
-        if ($limit == DataStoreAbstract::LIMIT_INFINITY && $offset == 0) {
-            return '';
-        } else {
-            return sprintf('&limit(%s,%s)', $limit, $offset);
+
+        switch (true) {
+            case (!isset($limitNode)):
+                $rqlString = '';
+                break;
+            case $limitNode->getLimit() == DataStoreAbstract::LIMIT_INFINITY && $limitNode->getOffset() == 0:
+                $rqlString = '';
+                break;
+            case empty($limitNode->getOffset()):
+                $rqlString = sprintf('&limit(%s)', $limitNode->getLimit());
+                break;
+            default:
+                $rqlString = sprintf('&limit(%s,%s)', $limitNode->getLimit(), $limitNode->getOffset());
         }
+
+        return $rqlString;
     }
 
     /**
@@ -270,11 +278,10 @@ class RqlParser
             $match = [];
             if (preg_match('/([\w]+)/', $node, $match)) {
                 if (!in_array($match[1], RqlParser::$nodes)) {
-                    $node = preg_replace_callback(['/\\\\([\w\W])/', '/\\@/', '/\\$/'],
-                        function (array $matches) {
-                            $value = isset($matches[1]) ? $matches[1] : $matches[0];
-                            return RqlConditionBuilder::encodeString($value);
-                        }, $node);
+                    $node = preg_replace_callback(['/\\\\([\w\W])/', '/\\@/', '/\\$/'], function (array $matches) {
+                        $value = isset($matches[1]) ? $matches[1] : $matches[0];
+                        return RqlConditionBuilder::encodeString($value);
+                    }, $node);
                 }
                 $escapedRqlString .= $node . '&';
             }

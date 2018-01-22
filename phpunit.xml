@@ -1,7 +1,7 @@
 <phpunit bootstrap="test/bootstrap.php" colors="true">
     <testsuites>
         <testsuite name="rollun\\test\\datastore\\">
-            <directory>./test/DataStoreTest/Cleaner</directory>
+            <directory>./test/DataStoreTest/RqlParser</directory>
         </testsuite>
     </testsuites>
 
