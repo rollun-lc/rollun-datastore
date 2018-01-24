@@ -96,8 +96,8 @@ class HttpClient extends DataStoreAbstract
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
             throw new DataStoreException(
-                'Status: ' . $response->getStatusCode()
-                . ' - ' . $response->getReasonPhrase()
+            'Status: ' . $response->getStatusCode()
+            . ' - ' . $response->getReasonPhrase()
             );
         }
         return $result;
@@ -159,8 +159,8 @@ class HttpClient extends DataStoreAbstract
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
             throw new DataStoreException(
-                'Status: ' . $response->getStatusCode()
-                . ' - ' . $response->getReasonPhrase()
+            'Status: ' . $response->getStatusCode()
+            . ' - ' . $response->getReasonPhrase()
             );
         }
         return $result;
@@ -188,8 +188,8 @@ class HttpClient extends DataStoreAbstract
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
             throw new DataStoreException(
-                'Status: ' . $response->getStatusCode()
-                . ' - ' . $response->getReasonPhrase()
+            'Status: ' . $response->getStatusCode()
+            . ' - ' . $response->getReasonPhrase()
             );
         }
         return $result;
@@ -216,8 +216,8 @@ class HttpClient extends DataStoreAbstract
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
             throw new DataStoreException(
-                'Status: ' . $response->getStatusCode()
-                . ' - ' . $response->getReasonPhrase()
+            'Status: ' . $response->getStatusCode()
+            . ' - ' . $response->getReasonPhrase()
             );
         }
         return $result;
@@ -237,8 +237,8 @@ class HttpClient extends DataStoreAbstract
             $result = !empty($response->getBody()) ? Serializer::jsonUnserialize($response->getBody()) : null;
         } else {
             throw new DataStoreException(
-                'Status: ' . $response->getStatusCode()
-                . ' - ' . $response->getReasonPhrase()
+            'Status: ' . $response->getStatusCode()
+            . ' - ' . $response->getReasonPhrase()
             );
         }
         return $result;

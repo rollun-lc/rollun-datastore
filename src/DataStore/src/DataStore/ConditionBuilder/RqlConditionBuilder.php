@@ -68,18 +68,19 @@ class RqlConditionBuilder extends ConditionBuilderAbstract
      */
     public function prepareFieldValue($fieldValue)
     {
-        $constStar = 'starhjc7vjHg6jd8mv8hcy75GFt0c67cnbv74FegxtEDJkcucG64frblmkb';
-        $constQuestion = 'questionhjc7vjHg6jd8mv8hcy75GFt0c67cnbv74FegxtEDJkcucG64frblmkb';
-
         $regexRqlDecoded = parent::prepareFieldValue($fieldValue);
-        if (is_null($fieldValue)) {
-            $regexRqlEnecoded = 'null()';
-        } else {
-            $regexRqlEnecoded = self::encodeString($regexRqlDecoded);
-        }
-        $regexRqlPrepared = strtr($regexRqlEnecoded, [$constStar => '*', $constQuestion => '?']);
 
-        return $regexRqlPrepared;
+        if (is_null($regexRqlDecoded)) {
+            return 'null()';
+        }
+        if (is_string($regexRqlDecoded)) {
+            $constStar = 'starhjc7vjHg6jd8mv8hcy75GFt0c67cnbv74FegxtEDJkcucG64frblmkb';
+            $constQuestion = 'questionhjc7vjHg6jd8mv8hcy75GFt0c67cnbv74FegxtEDJkcucG64frblmkb';
+            $regexRqlEnecoded = self::encodeString($regexRqlDecoded);
+            $regexRqlPrepared = strtr($regexRqlEnecoded, [$constStar => '*', $constQuestion => '?']);
+            return 'string:' . $regexRqlPrepared;
+        }
+        return $regexRqlDecoded;
     }
 
     /**

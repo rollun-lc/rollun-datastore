@@ -86,7 +86,7 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
 
     public function testRqlEncode()
     {
-        $this->rqlString = "and(and(eq(q,null()),ne(q,null()),le(q,r),ge(q,u)),or(lt(q,t),gt(q,y),in(q,(a,s,d,f,g))))";
+        $this->rqlString = "and(and(eq(q,null()),ne(q,null()),le(q,string:r),ge(q,string:u)),or(lt(q,string:t),gt(q,string:y),in(q,(string:a,string:s,string:d,string:f,string:g))))";
         $this->rqlString .= "&limit(20,30)";
         $this->rqlString .= "&sort(-q,+w,+e)";
         $this->rqlString .= "&select(q,max(q),min(q),count(q))";
@@ -101,6 +101,17 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
         $queryObject = RqlParser::rqlDecode("limit(20)");
         $rqlString = RqlParser::rqlEncode($queryObject);
         $this->assertEquals("&limit(20)", $rqlString);
+    }
+
+    public function testRqlEncodeStringNodeEq()
+    {
+//                $query = new Query();
+//        $query->setQuery(
+//                new EqNode("a", "01")
+//        );
+        $queryObject = RqlParser::rqlDecode("eq(a,string:01)");
+        $rqlString = RqlParser::rqlEncode($queryObject);
+        $this->assertEquals("eq(a,string:01)", $rqlString);
     }
 
     public function test__preparingQuery__oneNode()

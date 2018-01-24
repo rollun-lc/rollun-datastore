@@ -76,11 +76,42 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         array('id' => 4, 'anotherId' => 30, 'fString' => 'val2', 'fFloat' => 100.1, 'nll' => null)
     );
 
+    public function provider_Query_Where_Like_False()
+    {
+        return array(
+            array('*ol1'),
+            array('*s1*'),
+            array('dl1*'),
+            array('vol1 '),
+            array('?ol1'),
+            array('?s1*'),
+            array('dl1?'),
+            array('*vol1? '),
+        );
+    }
+
+    /**
+     * @dataProvider provider_Query_Where_Like_False
+     */
+    public function testQueryWhereLikeFalse($globString)
+    {
+        $this->_initObject();
+        $query = new Query();
+        $likeNode = new ScalarOperator\LikeNode(
+                'fString', new Glob($globString)
+        );
+        $query->setQuery($likeNode);
+        $queryArray = $this->object->query($query);
+        $this->assertEquals(
+                0, count($queryArray)
+        );
+    }
+
     public function testSetIdentifier()
     {
         $this->_initObject();
         $this->assertEquals(
-            'id', $this->object->getIdentifier()
+                'id', $this->object->getIdentifier()
         );
     }
 
@@ -103,11 +134,11 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     {
         $this->_initObject();
         $this->assertEquals(
-            $this->_itemsArrayDelault[2 - 1], $this->object->read(2)
+                $this->_itemsArrayDelault[2 - 1], $this->object->read(2)
         );
 
         $this->assertEquals(
-            $this->_itemsArrayDelault['1'], $this->object->read('2')
+                $this->_itemsArrayDelault['1'], $this->object->read('2')
         );
     }
 
@@ -126,20 +157,18 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     {
         $this->_initObject();
         $newItem = $this->object->create(
-            array(
-                'fFloat' => 1000.01,
-                'fString' => 'Create_withoutId_'
-            )
+                array(
+                    'fFloat' => 1000.01,
+                    'fString' => 'Create_withoutId_'
+                )
         );
         $id = $newItem['id'];
         $insertedItem = $this->object->read($id);
         $this->assertEquals(
-            'Create_withoutId_',
-            $insertedItem['fString']
+                'Create_withoutId_', $insertedItem['fString']
         );
         $this->assertEquals(
-            1000.01,
-            $insertedItem['fFloat']
+                1000.01, $insertedItem['fFloat']
         );
     }
 
@@ -147,19 +176,19 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     {
         $this->_initObject();
         $newItem = $this->object->create(
-            array(
-                'id' => 1000,
-                'fFloat' => 1000.01,
-                'fString' => 'Create_withId'
-            )
+                array(
+                    'id' => 1000,
+                    'fFloat' => 1000.01,
+                    'fString' => 'Create_withId'
+                )
         );
         $id = $newItem['id'];
         $insertedItem = $this->object->read($id);
         $this->assertEquals(
-            'Create_withId', $insertedItem['fString']
+                'Create_withId', $insertedItem['fString']
         );
         $this->assertEquals(
-            1000, $id
+                1000, $id
         );
     }
 
@@ -167,18 +196,18 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     {
         $this->_initObject();
         $newItem = $this->object->create(
-            array(
-                'id' => 2,
-                'fString' => 'Create_withtIdRewrite'
-            ), true
+                array(
+            'id' => 2,
+            'fString' => 'Create_withtIdRewrite'
+                ), true
         );
         $id = $newItem['id'];
         $insertedItem = $this->object->read($id);
         $this->assertEquals(
-            'Create_withtIdRewrite', $insertedItem['fString']
+                'Create_withtIdRewrite', $insertedItem['fString']
         );
         $this->assertEquals(
-            2, $id
+                2, $id
         );
     }
 
@@ -187,10 +216,10 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $this->setExpectedException('\rollun\datastore\DataStore\DataStoreException');
         $this->object->create(
-            array(
-                'id' => 2,
-                'fString' => 'Create_withtIdRewrite'
-            ), false
+                array(
+            'id' => 2,
+            'fString' => 'Create_withtIdRewrite'
+                ), false
         );
     }
 
@@ -199,10 +228,10 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $this->setExpectedException('\rollun\datastore\DataStore\DataStoreException');
         $id = $this->object->update(
-            array(
-                'fFloat' => 1000.01,
-                'fString' => 'Create_withoutId'
-            )
+                array(
+                    'fFloat' => 1000.01,
+                    'fString' => 'Create_withoutId'
+                )
         );
     }
 
@@ -211,21 +240,21 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
 
         $this->_initObject();
         $row = $this->object->update(
-            array(
-                'id' => 3,
-                'fString' => 'withtId_WhichPresent'
-            )
+                array(
+                    'id' => 3,
+                    'fString' => 'withtId_WhichPresent'
+                )
         );
 
         $item = $this->object->read(3);
         $this->assertEquals(
-            40, $item['anotherId']
+                40, $item['anotherId']
         );
         $this->assertEquals(
-            'withtId_WhichPresent', $item['fString']
+                'withtId_WhichPresent', $item['fString']
         );
         $this->assertEquals(
-            array('id' => 3, 'anotherId' => 40, 'fString' => 'withtId_WhichPresent', 'fFloat' => 300.003), $row
+                array('id' => 3, 'anotherId' => 40, 'fString' => 'withtId_WhichPresent', 'fFloat' => 300.003), $row
         );
     }
 
@@ -234,11 +263,11 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $this->setExpectedException('rollun\datastore\DataStore\DataStoreException');
         $this->object->update(
-            array(
-                'id' => 1000,
-                'fFloat' => 1000.01,
-                'fString' => 'withtIdwhichAbsent'
-            )
+                array(
+                    'id' => 1000,
+                    'fFloat' => 1000.01,
+                    'fString' => 'withtIdwhichAbsent'
+                )
         );
     }
 
@@ -246,23 +275,23 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     {
         $this->_initObject();
         $row = $this->object->update(
-            array(
-                'id' => 1000,
-                'fFloat' => 1000.01,
-                'fString' => 'withtIdwhichAbsent'
-            ), true
+                array(
+            'id' => 1000,
+            'fFloat' => 1000.01,
+            'fString' => 'withtIdwhichAbsent'
+                ), true
         );
         $item = $this->object->read(1000);
         $this->assertEquals(
-            'withtIdwhichAbsent', $item['fString']
+                'withtIdwhichAbsent', $item['fString']
         );
         unset($row['anotherId']);
         $this->assertEquals(
-            array(
-                'id' => 1000,
-                'fFloat' => 1000.01,
-                'fString' => 'withtIdwhichAbsent',
-            ), $row
+                array(
+            'id' => 1000,
+            'fFloat' => 1000.01,
+            'fString' => 'withtIdwhichAbsent',
+                ), $row
         );
     }
 
@@ -271,7 +300,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $item = $this->object->delete(1000);
         $this->assertEquals(
-            null, $item
+                null, $item
         );
     }
 
@@ -281,7 +310,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $item = $this->object->delete(4);
         $this->assertEquals($this->_itemsArrayDelault[3], $item);
         $this->assertNull(
-            $this->object->read(4)
+                $this->object->read(4)
         );
     }
 
@@ -297,11 +326,11 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $count = $this->object->deleteAll();
         $this->assertEquals(
-            4, $count
+                4, $count
         );
         $count = $this->object->deleteAll();
         $this->assertEquals(
-            0, $count
+                0, $count
         );
     }
 
@@ -309,7 +338,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     {
         $this->_initObject();
         $this->assertEquals(
-            4, $this->object->count()
+                4, $this->object->count()
         );
     }
 
@@ -318,7 +347,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $items = $this->object->deleteAll();
         $this->assertEquals(
-            0, $this->object->count()
+                0, $this->object->count()
         );
     }
 
@@ -331,7 +360,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     {
         $this->_initObject();
         $this->assertEquals(
-            4, $this->object->count()
+                4, $this->object->count()
         );
     }
 
@@ -342,7 +371,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $count = $this->object->deleteAll();
         $this->assertEquals(
-            0, $this->object->count()
+                0, $this->object->count()
         );
     }
 
@@ -354,13 +383,13 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
             $i = $i + 1;
             $this->assertEquals($value, $this->object->read($key));
             $this->assertEquals(
-                $this->_itemsArrayDelault[$key - 1], $value
+                    $this->_itemsArrayDelault[$key - 1], $value
             );
 
             unset($this->_itemsArrayDelault[$key - 1]);
         }
         $this->assertEquals(
-            $i, $this->object->count()
+                $i, $this->object->count()
         );
         $this->assertEmpty($this->_itemsArrayDelault);
     }
@@ -370,11 +399,11 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $query = new Query();
         $eqNode = new ScalarOperator\EqNode(
-            'fString', 'val1'
+                'fString', 'val1'
         );
         $query->setQuery($eqNode);
         $this->assertEquals(
-            $this->_itemsArrayDelault[0], $this->object->query($query)[0]
+                $this->_itemsArrayDelault[0], $this->object->query($query)[0]
         );
     }
 
@@ -385,12 +414,12 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $query = new Query();
         $eqNode = new ScalarOperator\NeNode(
-            'fString', 'val2'
+                'fString', 'val2'
         );
         $query->setQuery($eqNode);
 
         $this->assertEquals(
-            1, count($this->object->query($query))
+                1, count($this->object->query($query))
         );
     }
 
@@ -401,14 +430,14 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $query = new Query();
         $endNode = new LogicOperator\AndNode(
-            [
-                new ScalarOperator\EqNode('id', '2'),
-                new ScalarOperator\EqNode('anotherId', '20')
-            ]
+                [
+            new ScalarOperator\EqNode('id', '2'),
+            new ScalarOperator\EqNode('anotherId', '20')
+                ]
         );
         $query->setQuery($endNode);
         $this->assertEquals(
-            $this->_itemsArrayDelault[1], $this->object->query($query)[0]
+                $this->_itemsArrayDelault[1], $this->object->query($query)[0]
         );
     }
 
@@ -417,11 +446,11 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $query = new Query();
         $eqNode = new ScalarOperator\EqNode(
-            'fString', 'not_exist_value'
+                'fString', 'not_exist_value'
         );
         $query->setQuery($eqNode);
         $this->assertEquals(
-            [], $this->object->query($query)
+                [], $this->object->query($query)
         );
     }
 
@@ -432,7 +461,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $queryArray = $this->object->query($query);
         for ($index = 0; $index < count($this->_itemsArrayDelault); $index++) {
             $this->assertEquals(
-                array_pop($this->_itemsArrayDelault), array_pop($queryArray)
+                    array_pop($this->_itemsArrayDelault), array_pop($queryArray)
             );
         }
     }
@@ -446,7 +475,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $queryArray = $this->object->query($query);
         for ($index = 0; $index < count($this->_itemsArrayDelault); $index++) {
             $this->assertEquals(
-                array_pop($this->_itemsArrayDelault), array_pop($queryArray)
+                    array_pop($this->_itemsArrayDelault), array_pop($queryArray)
             );
         }
     }
@@ -459,10 +488,10 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $query->setSort($sortNode);
         $queryArray = $this->object->query($query);
         $this->assertEquals(
-            array_pop($this->_itemsArrayDelault), $queryArray[3 - 1]
+                array_pop($this->_itemsArrayDelault), $queryArray[3 - 1]
         );
         $this->assertEquals(
-            array_pop($this->_itemsArrayDelault), $queryArray[4 - 1]
+                array_pop($this->_itemsArrayDelault), $queryArray[4 - 1]
         );
     }
 
@@ -474,10 +503,10 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $query->setSort($sortNode);
         $queryArray = $this->object->query($query);
         $this->assertEquals(
-            $this->_itemsArrayDelault[1 - 1], $queryArray[4 - 1]
+                $this->_itemsArrayDelault[1 - 1], $queryArray[4 - 1]
         );
         $this->assertEquals(
-            $this->_itemsArrayDelault[2 - 1], $queryArray[3 - 1]
+                $this->_itemsArrayDelault[2 - 1], $queryArray[3 - 1]
         );
     }
 
@@ -489,13 +518,13 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $query->setSort($sortNode);
         $queryArray = $this->object->query($query);
         $this->assertEquals(
-            $this->_itemsArrayDelault[4 - 1], $queryArray[1 - 1]
+                $this->_itemsArrayDelault[4 - 1], $queryArray[1 - 1]
         );
         $this->assertEquals(
-            $this->_itemsArrayDelault[3 - 1], $queryArray[2 - 1]
+                $this->_itemsArrayDelault[3 - 1], $queryArray[2 - 1]
         );
         $this->assertEquals(
-            $this->_itemsArrayDelault[1 - 1], $queryArray[4 - 1]
+                $this->_itemsArrayDelault[1 - 1], $queryArray[4 - 1]
         );
     }
 
@@ -504,15 +533,15 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $query = new Query();
         $eqNode = new ScalarOperator\EqNode(
-            'id', 2
+                'id', 2
         );
         $query->setQuery($eqNode);
         $queryArray = $this->object->query($query);
         $this->assertEquals(
-            $this->_itemsArrayDelault[2 - 1], $queryArray[1 - 1]
+                $this->_itemsArrayDelault[2 - 1], $queryArray[1 - 1]
         );
         $this->assertEquals(
-            1, count($queryArray)
+                1, count($queryArray)
         );
     }
 
@@ -521,10 +550,10 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $query = new Query();
         $eqNode1 = new ScalarOperator\EqNode(
-            'fString', 'val2'
+                'fString', 'val2'
         );
         $eqNode2 = new ScalarOperator\EqNode(
-            'fFloat', 300.003
+                'fFloat', 300.003
         );
         $endNode = new LogicOperator\AndNode([$eqNode1, $eqNode2]);
         $query->setQuery($endNode);
@@ -532,10 +561,10 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $query->setSort($sortNode);
         $queryArray = $this->object->query($query);
         $this->assertEquals(
-            $this->_itemsArrayDelault[2 - 1], $queryArray[1 - 1]
+                $this->_itemsArrayDelault[2 - 1], $queryArray[1 - 1]
         );
         $this->assertEquals(
-            2, count($queryArray)
+                2, count($queryArray)
         );
     }
 
@@ -544,10 +573,10 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $query = new Query();
         $eqNode1 = new ScalarOperator\EqNode(
-            'fString', 'val2'
+                'fString', 'val2'
         );
         $eqNode2 = new ScalarOperator\EqNode(
-            'fFloat', 300.003
+                'fFloat', 300.003
         );
         $endNode = new LogicOperator\AndNode([$eqNode1, $eqNode2]);
         $query->setQuery($endNode);
@@ -557,10 +586,10 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $query->setSelect($selectNode);
         $queryArray = $this->object->query($query);
         $this->assertEquals(
-            array('fFloat' => $this->_itemsArrayDelault[2 - 1]['fFloat']), $queryArray[1 - 1]
+                array('fFloat' => $this->_itemsArrayDelault[2 - 1]['fFloat']), $queryArray[1 - 1]
         );
         $this->assertEquals(
-            2, count($queryArray)
+                2, count($queryArray)
         );
     }
 
@@ -569,10 +598,10 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $query = new Query();
         $eqNode1 = new ScalarOperator\EqNode(
-            'fString', 'val2'
+                'fString', 'val2'
         );
         $eqNode2 = new ScalarOperator\EqNode(
-            'fFloat', 300.003
+                'fFloat', 300.003
         );
         $endNode = new LogicOperator\AndNode([$eqNode1, $eqNode2]);
         $query->setQuery($endNode);
@@ -584,10 +613,10 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $query->setLimit($limitNode);
         $queryArray = $this->object->query($query);
         $this->assertEquals(
-            array('fFloat' => $this->_itemsArrayDelault[2 - 1]['fFloat']), $queryArray[1 - 1]
+                array('fFloat' => $this->_itemsArrayDelault[2 - 1]['fFloat']), $queryArray[1 - 1]
         );
         $this->assertEquals(
-            1, count($queryArray)
+                1, count($queryArray)
         );
     }
 
@@ -596,10 +625,10 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $query = new Query();
         $eqNode1 = new ScalarOperator\EqNode(
-            'fString', 'val2'
+                'fString', 'val2'
         );
         $eqNode2 = new ScalarOperator\EqNode(
-            'fFloat', 300.003
+                'fFloat', 300.003
         );
         $endNode = new LogicOperator\AndNode([$eqNode1, $eqNode2]);
         $query->setQuery($endNode);
@@ -612,10 +641,10 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $query->setLimit($limitNode);
         $queryArray = $this->object->query($query);
         $this->assertEquals(
-            array('fFloat' => $this->_itemsArrayDelault[2 - 1]['fFloat']), $queryArray[1 - 1]
+                array('fFloat' => $this->_itemsArrayDelault[2 - 1]['fFloat']), $queryArray[1 - 1]
         );
         $this->assertEquals(
-            1, count($queryArray)
+                1, count($queryArray)
         );
     }
 
@@ -624,7 +653,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $query = new Query();
         $eqNode1 = new ScalarOperator\EqNode(
-            'fString', 'val2'
+                'fString', 'val2'
         );
         $query->setQuery($eqNode1);
         $sortNode = new Node\SortNode(['id' => '1']);
@@ -635,13 +664,13 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $query->setLimit($limitNode);
         $queryArray = $this->object->query($query);
         $this->assertEquals(
-            array('fFloat' => $this->_itemsArrayDelault[3 - 1]['fFloat']), $queryArray[1 - 1]
+                array('fFloat' => $this->_itemsArrayDelault[3 - 1]['fFloat']), $queryArray[1 - 1]
         );
         $this->assertEquals(
-            array('fFloat' => $this->_itemsArrayDelault[4 - 1]['fFloat']), $queryArray[2 - 1]
+                array('fFloat' => $this->_itemsArrayDelault[4 - 1]['fFloat']), $queryArray[2 - 1]
         );
         $this->assertEquals(
-            2, count($queryArray)
+                2, count($queryArray)
         );
     }
 
@@ -671,20 +700,19 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->_initObject();
         $query = new Query();
         $likeNode = new ScalarOperator\LikeNode(
-            'fString', new Glob($globString)
+                'fString', new Glob($globString)
         );
         $query->setQuery($likeNode);
         $queryArray = $this->object->query($query);
         if (!empty($queryArray) && $arrayDelaultKeys > 0) {
             $this->assertEquals(
-                $this->_itemsArrayDelault[$arrayDelaultKeys - 1], $queryArray[1 - 1]
+                    $this->_itemsArrayDelault[$arrayDelaultKeys - 1], $queryArray[1 - 1]
             );
         }
         $this->assertEquals(
-            $count, count($queryArray)
+                $count, count($queryArray)
         );
     }
-
 
     public function provider_Query_Where_Contains_True()
     {
@@ -713,20 +741,20 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $queryArray = $this->object->query($query);
         if (!empty($queryArray) && $arrayDelaultKeys > 0) {
             $this->assertEquals(
-                $this->_itemsArrayDelault[$arrayDelaultKeys - 1], $queryArray[1 - 1]
+                    $this->_itemsArrayDelault[$arrayDelaultKeys - 1], $queryArray[1 - 1]
             );
         }
         $this->assertEquals(
-            $count, count($queryArray)
+                $count, count($queryArray)
         );
     }
 
     /* protected $_itemsArrayDelault = array(
-         array('id' => 1, 'anotherId' => 10, 'fString' => 'val1', 'fFloat' => 400.0004),
-         array('id' => 2, 'anotherId' => 20, 'fString' => 'val2', 'fFloat' => 300.003),
-         array('id' => 3, 'anotherId' => 40, 'fString' => 'val2', 'fFloat' => 300.003),
-         array('id' => 4, 'anotherId' => 30, 'fString' => 'val2', 'fFloat' => 100.1)
-     );*/
+      array('id' => 1, 'anotherId' => 10, 'fString' => 'val1', 'fFloat' => 400.0004),
+      array('id' => 2, 'anotherId' => 20, 'fString' => 'val2', 'fFloat' => 300.003),
+      array('id' => 3, 'anotherId' => 40, 'fString' => 'val2', 'fFloat' => 300.003),
+      array('id' => 4, 'anotherId' => 30, 'fString' => 'val2', 'fFloat' => 100.1)
+      ); */
 
     public function providerQuery_Where_Like_Combine()
     {
@@ -785,37 +813,6 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
 
         $resultAccept = $this->object->query($query);
         $this->assertEquals($resultExpected, $resultAccept);
-    }
-
-    public function provider_Query_Where_Like_False()
-    {
-        return array(
-            array('*ol1'),
-            array('*s1*'),
-            array('dl1*'),
-            array('vol1 '),
-            array('?ol1'),
-            array('?s1*'),
-            array('dl1?'),
-            array('*vol1? '),
-        );
-    }
-
-    /**
-     * @dataProvider provider_Query_Where_Like_False
-     */
-    public function testQuery_Where_Like_False($globString)
-    {
-        $this->_initObject();
-        $query = new Query();
-        $likeNode = new ScalarOperator\LikeNode(
-            'fString', new Glob($globString)
-        );
-        $query->setQuery($likeNode);
-        $queryArray = $this->object->query($query);
-        $this->assertEquals(
-            0, count($queryArray)
-        );
     }
 
     public function testQuery_Is_Null_True()
@@ -1109,7 +1106,6 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(['fString' => 'val2'], $result[1]);
     }
 
-
     public function test_testGroupbyAgregate()
     {
         $this->_initObject($this->_itemsArrayDelault);
@@ -1120,7 +1116,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(['fString' => 'val2', 'id->count' => 3], $result[1]);
     }
 
-    /*######################### GROUP BY ################################*/
+    /* ######################### GROUP BY ################################ */
 
     public function test_testGroupbyDefaultAgregate()
     {
@@ -1135,20 +1131,20 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     public function test_testGroupByTwoColumns()
     {
         $this->_initObject(
-            [
-                ['id' => 1, 'surname' => 'A', 'age' => 44],
-                ['id' => 2, 'surname' => 'B', 'age' => 30],
-                ['id' => 3, 'surname' => 'C', 'age' => 25],
-                ['id' => 4, 'surname' => 'C', 'age' => 44],
-                ['id' => 5, 'surname' => 'B', 'age' => 10],
-                ['id' => 6, 'surname' => 'A', 'age' => 20],
-                ['id' => 7, 'surname' => 'A', 'age' => 30],
-                ['id' => 8, 'surname' => 'B', 'age' => 10],
-                ['id' => 9, 'surname' => 'C', 'age' => 25],
-                ['id' => 10, 'surname' => 'A', 'age' => 30]
-            ]
+                [
+                    ['id' => 1, 'surname' => 'A', 'age' => 44],
+                    ['id' => 2, 'surname' => 'B', 'age' => 30],
+                    ['id' => 3, 'surname' => 'C', 'age' => 25],
+                    ['id' => 4, 'surname' => 'C', 'age' => 44],
+                    ['id' => 5, 'surname' => 'B', 'age' => 10],
+                    ['id' => 6, 'surname' => 'A', 'age' => 20],
+                    ['id' => 7, 'surname' => 'A', 'age' => 30],
+                    ['id' => 8, 'surname' => 'B', 'age' => 10],
+                    ['id' => 9, 'surname' => 'C', 'age' => 25],
+                    ['id' => 10, 'surname' => 'A', 'age' => 30]
+                ]
         );
-        
+
         $result = $this->object->query(new RqlQuery("select(count(surname),max(age))&groupby(surname,age)"));
         $expected = [
             ['age->max' => 44, 'surname->count' => 1],
@@ -1174,18 +1170,17 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $result);
     }
 
-
     public function test_testDataGeFiltred()
     {
         $this->_initObject(
-            [
-                ['id' => 1, 'date' => '2017-06-01T00:00:00+00:00'],
-                ['id' => 2, 'date' => '2017-06-02T00:00:00+00:00'],
-                ['id' => 3, 'date' => '2017-06-03T00:00:00+00:00'],
-                ['id' => 4, 'date' => '2017-06-04T00:00:00+00:00'],
-                ['id' => 5, 'date' => '2017-06-05T00:00:00+00:00'],
-                ['id' => 6, 'date' => '2017-06-06T00:00:00+00:00'],
-            ]
+                [
+                    ['id' => 1, 'date' => '2017-06-01T00:00:00+00:00'],
+                    ['id' => 2, 'date' => '2017-06-02T00:00:00+00:00'],
+                    ['id' => 3, 'date' => '2017-06-03T00:00:00+00:00'],
+                    ['id' => 4, 'date' => '2017-06-04T00:00:00+00:00'],
+                    ['id' => 5, 'date' => '2017-06-05T00:00:00+00:00'],
+                    ['id' => 6, 'date' => '2017-06-06T00:00:00+00:00'],
+                ]
         );
         $query = new Query();
 
@@ -1198,10 +1193,9 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
             ['id' => 1, 'date' => '2017-06-01T00:00:00+00:00'],
             ['id' => 2, 'date' => '2017-06-02T00:00:00+00:00'],
             ['id' => 3, 'date' => '2017-06-03T00:00:00+00:00'],
-        ], $result);
-
-
+                ], $result);
     }
+
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.

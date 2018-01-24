@@ -1,9 +1,10 @@
 <phpunit bootstrap="test/bootstrap.php" colors="true">
     <testsuites>
         <testsuite name="rollun\\test\\datastore\\">
-            <directory>./test/DataStoreTest/RqlParser</directory>
+            <file>./test/DataStoreTest/DataStore/HttpClientTest.php</file>
         </testsuite>
     </testsuites>
+
 
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
