@@ -212,4 +212,13 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($query, $queryByString);
     }
 
+    public function testSpecCharSuccess()
+    {
+        $this->object = new Query();
+        $this->object->setQuery(new EqNode("name", "asd(asd)asd"));
+
+        $stringRql = RqlParser::rqlEncode($this->object);
+        $query = RqlParser::rqlDecode($stringRql);
+        $this->assertEquals($this->object, $query);
+    }
 }
