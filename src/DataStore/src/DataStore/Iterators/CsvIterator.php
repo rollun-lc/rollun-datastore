@@ -7,38 +7,40 @@ use rollun\datastore\DataStore\CsvBase;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
 
-class CsvIterator extends DataStoreIterator
+class CsvIterator implements \Iterator// extends \SplFileObject
 {
+
     /**
      * File handler.
      * @var resource
      */
     protected $fileHandler;
 
-    /** @var LockHandler $lockHandler */
-    protected $lockHandler;
+    /**
+     *
+     * @var CsvBase
+     */
+    protected $dataStore;
 
     /**
-     * CsvIterator constructor.
      *
-     * After the creation an object it opens the file (by filename) and locks one.
-     *
-     * @param ReadInterface $dataStore
-     * @param $filename
-     * @param LockHandler $lockHandler
-     * @throws DataStoreException
+     * @var \SplFileObject
      */
-    public function __construct(ReadInterface $dataStore, $filename, LockHandler $lockHandler)
+    protected $splFileObject;
+
+    public function __construct(CsvBase $dataStore)
     {
-        parent::__construct($dataStore);
+        $filename = $dataStore->getFilename();
         if (!is_file($filename)) {
             throw new DataStoreException(sprintf('The specified file path "%s" does not exist', $filename));
         }
-        $this->lockHandler = $lockHandler;
-        $this->lockFile($filename);
-        $this->fileHandler = fopen($filename, 'r');
-        // We always pass the first row because it contains the column headings.
-        fgets($this->fileHandler);
+        $this->splFileObject = new \SplFileObject($filename);
+        $this->splFileObject->setFlags(\SplFileObject::READ_CSV);
+        $this->splFileObject->setCsvControl($dataStore->getCsvDelimiter());
+
+        $this->dataStore = $dataStore;
+
+        $this->lock();
     }
 
     /**
@@ -46,28 +48,39 @@ class CsvIterator extends DataStoreIterator
      */
     function __destruct()
     {
-        fclose($this->fileHandler);
-        $this->lockHandler->release();
+        $this->unlock();
     }
 
-    protected function lockFile($filename, $nbTries = 0)
+    public function lock($maxTries = 40, $timeout = 50)
     {
-        if (!$this->lockHandler->lock()) {
-            if ($nbTries >= CsvBase::MAX_LOCK_TRIES) {
-                throw new DataStoreException('Reach max retry for locking queue file ' . $filename);
+        $count = 0;
+
+        while (!$this->splFileObject->flock(LOCK_SH | LOCK_NB, $wouldblock)) {
+            if (!$wouldblock) {
+                throw new DataStoreException('There is a problem with file: ' . $this->splFileObject->getFilename());
             }
-            usleep(10);
-            return $this->lockFile($filename, ($nbTries + 1));
+            if ($count++ > $maxTries) {
+                throw new DataStoreException('Can not lock the file: ' . $this->splFileObject->getFilename());
+            }
+            usleep($timeout);
         }
     }
 
+    public function unlock()
+    {
+        return $this->splFileObject->flock(LOCK_UN);
+    }
 
-    /**
-     * {@inheritdoc}
-     */
     public function rewind()
     {
-        $this->index = 1;
+        $this->splFileObject->rewind();
+        $this->splFileObject->current();
+        $this->splFileObject->next();
+    }
+
+    public function key()
+    {
+        return $this->splFileObject->key();
     }
 
     /**
@@ -75,7 +88,11 @@ class CsvIterator extends DataStoreIterator
      */
     public function next()
     {
-        ++$this->index;
+        if ($this->splFileObject->key() === 0) {
+            $this->rewind();
+        }
+        $this->splFileObject->next();
+        $this->splFileObject->current();
     }
 
     /**
@@ -84,11 +101,18 @@ class CsvIterator extends DataStoreIterator
      */
     public function current()
     {
-        return $this->dataStore->getTrueRow(
-            fgetcsv($this->fileHandler, null, $this->dataStore->getCsvDelimiter())
-        );
-    }
+        if ($this->splFileObject->key() === 0) {
+            $this->rewind();
+        }
 
+        $row = $this->splFileObject->current();
+        if ([null] === $row) {
+            return null;
+        }
+
+        $item = $this->dataStore->getTrueRow($row);
+        return $item;
+    }
 
     /**
      * It checks if index is valid.
@@ -99,15 +123,14 @@ class CsvIterator extends DataStoreIterator
      */
     public function valid()
     {
-        if (!isset($this->index)) {
+        if (!$this->splFileObject->valid()) {
             return false;
         }
-        $ch = fgetc($this->fileHandler);
-        if (feof($this->fileHandler)) {
-            return false;
+        if ($this->splFileObject->key() === 0) {
+            $this->splFileObject->next();
         }
-        fseek($this->fileHandler, -1, SEEK_CUR);
-        return true;
+        $current = $this->splFileObject->current();
+        return $current <> [null];
     }
 
 }

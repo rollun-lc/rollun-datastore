@@ -8,22 +8,20 @@ use rollun\datastore\DataStore\Interfaces\DataSourceInterface;
 use rollun\datastore\DataStore\Iterators\CsvIterator;
 use rollun\datastore\DataStore\ConditionBuilder\PhpConditionBuilder;
 use Symfony\Component\Filesystem\LockHandler;
+use Xiag\Rql\Parser\Query;
 
 class CsvBase extends DataStoreAbstract implements DataSourceInterface
 {
+
     /**
      * Max size of the file in bytes
      */
     const MAX_FILE_SIZE_FOR_CACHE = 8388608;
-
     const MAX_LOCK_TRIES = 30;
-
     const DEFAULT_DELIMETER = ';';
 
     protected $fileHandler;
-
     protected $filename;
-
     protected $lockHandler;
 
     /**
@@ -31,7 +29,6 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      * @var mixed array
      */
     protected $columns;
-
     protected $csvDelimiter = self::DEFAULT_DELIMETER;
 
     /**
@@ -64,6 +61,10 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
         $this->conditionBuilder = new PhpConditionBuilder();
     }
 
+    public function getFilename()
+    {
+        return $this->filename;
+    }
 
     /**
      * {@inheritdoc}
@@ -79,7 +80,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
         $row = null;
         while (!feof($this->fileHandler)) {
             $row = $this->getTrueRow(
-                fgetcsv($this->fileHandler, null, $this->csvDelimiter)
+                    fgetcsv($this->fileHandler, null, $this->csvDelimiter)
             );
             if ($row && $row[$this->getIdentifier()] == $id) {
                 break;
@@ -88,7 +89,6 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
         $this->closeFile();
         return $row;
     }
-
 
     /**
      * {@inheritdoc}
@@ -99,7 +99,6 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     {
         return new CsvIterator($this, $this->filename, $this->lockHandler);
     }
-
 
     /**
      * {@inheritdoc}
@@ -123,7 +122,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
                 $id = $itemData[$identifier];
                 $this->checkIdentifierType($id);
                 $item = $this->createNewItem($itemData);
-            break;
+                break;
         }
         $this->flush($item);
         return $item;
@@ -244,7 +243,6 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
         unlink($tmpFile);
     }
 
-
     /**
      * Opens file for reading.
      *
@@ -295,15 +293,12 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     public function getAll()
     {
         if (filesize($this->filename) <= static::MAX_FILE_SIZE_FOR_CACHE) {
-            $return = file($this->filename);
-            // Deletes the first row where are the headers
-            array_shift($return);
+            $return = $this->query(new Query);
         } else {
             $return = $this->getIterator();
         }
         return $return;
     }
-
 
     /**
      * Closes file
@@ -411,7 +406,6 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
         });
         fputcsv($fHandler, $row, $this->csvDelimiter);
     }
-
 
     /**
      * Generates an unique identifier

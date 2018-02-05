@@ -8,10 +8,9 @@ use rollun\test\datastore\DataStore\AbstractTest;
 
 class CsvBaseTest extends AbstractTest
 {
+
     protected $filename;
-
     protected $delimiter;
-
     protected $entity = 'testCsvBase';
 
     protected function setUp()
@@ -31,7 +30,6 @@ class CsvBaseTest extends AbstractTest
     {
         unlink($this->filename);
     }
-
 
     protected function _initObject($data = null)
     {
@@ -64,14 +62,13 @@ class CsvBaseTest extends AbstractTest
             'fString' => ''
         );
         $this->object->create(
-            $itemData, true
+                $itemData, true
         );
         $row = $this->object->read(1000);
         $this->assertEquals(
-            $itemData, $row
+                $itemData, $row
         );
     }
-
 
     public function testWriteAndRead_FalseValue()
     {
@@ -83,14 +80,22 @@ class CsvBaseTest extends AbstractTest
             'fString' => 'FalseValue'
         );
         $this->object->create(
-            $itemData, true
+                $itemData, true
         );
         $row = $this->object->read(1000);
         $this->assertEquals(
-            $row['anotherId'], false
+                $row['anotherId'], false
         );
     }
 
+    public function testReadNotExistedRow()
+    {
+        $this->_initObject();
+        $row = $this->object->read(10000);
+        $this->assertEquals(
+                $row, null
+        );
+    }
 
     public function testWriteAndRead_TrueValue()
     {
@@ -102,11 +107,11 @@ class CsvBaseTest extends AbstractTest
             'fString' => 'TrueValue'
         );
         $this->object->create(
-            $itemData, true
+                $itemData, true
         );
         $row = $this->object->read(1000);
         $this->assertEquals(
-            $row['anotherId'], true
+                $row['anotherId'], true
         );
     }
 
@@ -132,27 +137,72 @@ class CsvBaseTest extends AbstractTest
         clearstatcache();
         $content = $this->object->getAll();
         $this->assertTrue(
-            is_array($content)
+                isset($content[0]['id'])
         );
     }
 
-    public function test_getAllExpectIterator()
+    public function testIterator()
     {
         $this->_initObject();
-        clearstatcache();
-        $count = $this->object->count();
-        $fp = fopen($this->filename, 'a+');
-        $itemData = $this->_itemsArrayDelault[$count - 1];
-        while (filesize($this->filename) <= CsvBase::MAX_FILE_SIZE_FOR_CACHE + 100) {
-            $count++;
-            $itemData['id'] = $count;
-            fputcsv($fp, $itemData, $this->delimiter);
-            clearstatcache();
-        }
-        fclose($fp);
-        $content = $this->object->getAll();
-        $this->assertTrue(
-            $content instanceof \Traversable
-        );
+        $iterator = $this->object->getIterator();
+        //$iterator->rewind();
+//        $key = $iterator->key();
+//        $item = $iterator->current();
+//        $iterator->next();
+//
+//        $key = $iterator->key();
+//        $item = $iterator->current();
+//        $iterator->next();
+//
+//        $key = $iterator->key();
+//        $item = $iterator->current();
+//        $iterator->next();
+//
+//
+//
+//
+//        $iterator->rewind();
+        $item = $iterator->current();
+        $this->assertEquals(1, $item['id']);
+
+        $item = $iterator->current();
+        $this->assertEquals(1, $item['id']);
+
+        $iterator->next();
+        $item = $iterator->current();
+        $this->assertEquals(2, $item['id']);
+
+        $iterator->next();
+        $iterator->next();
+        $item = $iterator->current();
+        $this->assertEquals(4, $item['id']);
+        $this->assertTrue($iterator->valid());
+
+        $iterator->next();
+        $this->assertFalse($iterator->valid());
+        $this->assertEquals(4, $item['id']);
+
+        $item = $iterator->current();
+        $this->assertNull($item);
     }
+
+//    public function test_getAllExpectIterator()
+//    {
+//        $this->_initObject();
+//        clearstatcache();
+//        $count = $this->object->count();
+//        $fp = fopen($this->filename, 'a+');
+//        $itemData = $this->_itemsArrayDelault[$count - 1];
+//        while (filesize($this->filename) <= CsvBase::MAX_FILE_SIZE_FOR_CACHE + 100) {
+//            $count++;
+//            $itemData['id'] = $count;
+//            fputcsv($fp, $itemData, $this->delimiter);
+//            clearstatcache();
+//        }
+//        fclose($fp);
+//        $content = $this->object->getAll();
+//        $this->assertTrue(
+//            $content instanceof \Traversable
+//        );
+//    }
 }
