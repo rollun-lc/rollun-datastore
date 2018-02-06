@@ -16,6 +16,7 @@ use rollun\datastore\Rql\Node\GroupbyNode;
 use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
+use Xiag\Rql\Parser\Node\Query\ArrayOperator\OutNode;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\OrNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
@@ -210,6 +211,28 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
         $query = new RqlQuery();
         $query->setQuery(new ContainsNode("id", "1v23"));
         $this->assertEquals($query, $queryByString);
+    }
+
+    public function testSpecCharSuccess()
+    {
+        $this->object = new Query();
+        $this->object->setQuery(new EqNode("name", "asd(asd)asd"));
+        $stringRql = RqlParser::rqlEncode($this->object);
+        $query = RqlParser::rqlDecode($stringRql);
+        $this->assertEquals($this->object->getQuery(), $query->getQuery());
+    }
+
+    public function testArrayNode()
+    {
+        $values = [];
+        foreach (range(0, 100) as $index) {
+            $values[] = "asd(a{$index}d)asd";
+            $this->object = new Query();
+            $this->object->setQuery(new OutNode("name", $values));
+            $stringRql = RqlParser::rqlEncode($this->object);
+            $query = RqlParser::rqlDecode($stringRql);
+            $this->assertEquals($this->object->getQuery(), $query->getQuery());
+        }
     }
 
 }
