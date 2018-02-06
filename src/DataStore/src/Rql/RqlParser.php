@@ -92,10 +92,6 @@ class RqlParser
             $sortNode = trim($sortNode, ",") . ")";
             $rqlQueryString = preg_replace($sortNodePattern, $sortNode, $rqlQueryString);
         }
-//        $tempRql = preg_replace(['/\%28/', '/\%29/'], ['(', ')'], $rqlQueryString);
-//        if (isset($tempRql)) {
-//            $rqlQueryString = $tempRql;
-//        }
         return $rqlQueryString;
     }
 
