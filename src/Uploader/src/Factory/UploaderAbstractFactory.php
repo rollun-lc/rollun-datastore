@@ -13,9 +13,9 @@ use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 
-class UploaderFactory implements AbstractFactoryInterface
+class UploaderAbstractFactory implements AbstractFactoryInterface
 {
-    const KEY = UploaderFactory::class;
+    const KEY = UploaderAbstractFactory::class;
 
     const KEY_SOURCE_DATA_ITERATOR_AGGREGATOR = "SourceDataIteratorAggregator";
 
