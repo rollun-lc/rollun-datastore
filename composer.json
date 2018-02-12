@@ -44,12 +44,14 @@
     },
     "autoload": {
         "psr-4": {
-            "rollun\\datastore\\": "src/DataStore/src"
+            "rollun\\datastore\\": "src/DataStore/src",
+            "rollun\\uploader\\": "src/Uploader/src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "rollun\\test\\datastore\\": "test/DataStoreTest"
+            "rollun\\test\\datastore\\": "test/DataStoreTest",
+            "rollun\\test\\uploader\\": "test/UploaderTest"
         }
     },
     "scripts": {
