@@ -20,7 +20,6 @@ use rollun\datastore\DataStore\Installers\MemoryInstaller;
 use rollun\datastore\Middleware\DataStoreMiddlewareInstaller;
 use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use rollun\installer\Install\InstallerAbstract;
-use rollun\test\datastore\DataStore\DbTableTest;
 
 class DataStoreTestInstaller extends InstallerAbstract
 {
@@ -53,11 +52,11 @@ class DataStoreTestInstaller extends InstallerAbstract
         $this->dataStore = [
             'exploited1DbTable' => [
                 'class' => DbTable::class,
-                'tableName' => DbTableTest::TABLE_EXPLOIT_1_NAME
+                'tableName' => "test_exploit1_tablle"
             ],
             'exploited2DbTable' => [
                 'class' => DbTable::class,
-                'tableName' => DbTableTest::TABLE_EXPLOIT_2_NAME
+                'tableName' => "test_exploit2_tablle"
             ],
             'test_DataStoreDbTableWithNameAsResourceName' => [
                 'class' => DbTable::class,
