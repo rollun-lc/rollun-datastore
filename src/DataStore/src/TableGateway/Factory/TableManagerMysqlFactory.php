@@ -48,7 +48,6 @@ class TableManagerMysqlFactory extends FactoryAbstract
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $config = $container->get("config");
         $db = $container->get('db');
         if (!isset($config[TableManagerMysql::KEY_IN_CONFIG])) {
             //throw new RestException('There is not "tableManager" key in config');
