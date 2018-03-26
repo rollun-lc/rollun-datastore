@@ -25,7 +25,7 @@
         "zendframework/zend-http": "^2.5",
         "rollun-com/rollun-utils": "^4.0",
         "rollun-com/rollun-installer": "^4.0",
-        "rollun-com/rollun-actionrender": "dev-refactor-features",
+        "rollun-com/rollun-actionrender": "^6.0",
         "http-interop/http-middleware": "0.4.1"
     },
     "require-dev": {
