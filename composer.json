@@ -48,6 +48,7 @@
     "autoload-dev": {
         "psr-4": {
             "rollun\\test\\datastore\\": "test/DataStoreTest",
+            "rollun\\test\\datastore\\DataStore\\": "test/_newDataStoreTest",
             "rollun\\test\\uploader\\": "test/UploaderTest"
         }
     },
