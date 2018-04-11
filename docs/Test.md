@@ -14,3 +14,4 @@
 
 Если вам нужно отладить интеллеры вы можете [воспользоваться скриптом ](https://github.com/rollun-com/rollun-installer/blob/master/docs/InstallerSelfCall.md)
 Он позволит запускать конкретный инталлер без запуска composer.
+Name	Shipment ID	Created on	Last updated	MSKUs	Shipped	Received	Destination*	Status
