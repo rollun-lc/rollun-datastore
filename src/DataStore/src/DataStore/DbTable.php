@@ -123,10 +123,14 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
      */
     public function query(Query $query)
     {
-        $sql = $this->getSqlQuery($query);
         /** @var Adapter $adapter */
         $adapter = $this->dbTable->getAdapter();
-        $rowset = $adapter->query($sql, $adapter::QUERY_MODE_EXECUTE);
+        $sql = $this->getSqlQuery($query);
+        try {
+            $rowset = $adapter->query($sql, $adapter::QUERY_MODE_EXECUTE);
+        } catch (\PDOException $exception) {
+            throw new DataStoreException("Error by execute $sql query to {$this->getDbTable()->getTable()}.", $exception->getCode(), $exception);
+        }
 
         return $rowset->toArray();
     }
@@ -158,7 +162,18 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
     protected function setSelectOrder(Select $selectSQL, Query $query)
     {
         $sort = $query->getSort();
-        $sortFields = !$sort ? [$this->dbTable->table . '.' . $this->getIdentifier() => SortNode::SORT_ASC] : $sort->getFields();
+        if (!$sort) {
+            $sort = new SortNode();
+            if ($query->getSelect()) {
+                foreach ($query->getSelect()->getFields() as $field) {
+                    if (is_string($field)) {
+                        $sort->addField($field);
+                    }
+                }
+            }
+        }
+        $sortFields = $sort->getFields();
+
         foreach ($sortFields as $ordKey => $ordVal) {
             if (!preg_match('/[\w]+\.[\w]+/', $ordKey)) {
                 $ordKey = $this->dbTable->table . '.' . $ordKey;
@@ -224,33 +239,6 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         $selectSQL->group($query->getGroupby()->getFields());
         return $selectSQL;
     }
-
-    /**
-     * @param Select $selectSQL
-     * @return Select
-     */
-    protected function makeExternalSql(Select $selectSQL)
-    {
-        //create new Select - for aggregate func query
-        $fields = $selectSQL->getRawState(Select::COLUMNS);
-
-        $hasAggregateFilds = array_keys($fields) != range(0, count($fields) - 1) && !empty($fields);
-        if ($hasAggregateFilds) {
-            $externalSql = new Select();
-            $externalSql->columns($selectSQL->getRawState(Select::COLUMNS));
-            $externalSql->group($selectSQL->getRawState(Select::GROUP));
-            $selectSQL->reset(Select::GROUP);
-            //change select column to all
-            $selectSQL->columns(['*']);
-            //create sub query without aggreagate func and with all fields
-            $from = "(" . $this->dbTable->getSql()->buildSqlString($selectSQL) . ")";
-            $externalSql->from(array('Q' => $from));
-            return $externalSql;
-        } else {
-            return $selectSQL;
-        }
-    }
-
 
     /**
      * {@inheritdoc}
@@ -461,7 +449,6 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
             $this->setGroupby($selectSQL, $query) : $selectSQL;
         $selectSQL = $this->setSelectColumns($selectSQL, $query);
         $selectSQL = $this->setSelectJoin($selectSQL, $query);
-        $selectSQL = $this->makeExternalSql($selectSQL);
 
         //build sql string
         $sql = $this->dbTable->getSql()->buildSqlString($selectSQL);

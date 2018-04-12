@@ -6,29 +6,37 @@ namespace rollun\test\datastore\DataStore\Aggregate;
 
 trait AggregateSimpleDataProviderTrait
 {
+
+    /**
+     * Prepare datastore for initialized with transmitted data
+     * @param array $data
+     * @return void
+     */
+    abstract protected function setInitialData(array $data);
+
     /**
      * @return string
      */
-    abstract function getIdColumn();
+    abstract protected function getDataStoreIdentifier();
 
     /**
      * @param $filedName
      * @param $aggregateFunction
      * @return string
      */
-    abstract function decorateAggregateField($filedName, $aggregateFunction);
+    abstract protected function decorateAggregateField($filedName, $aggregateFunction);
 
     /**
      * @return array
      */
-    function getDataProviderInitData() {
+    private function getInitSimpleDataForDataStore() {
         return [
-            [$this->getIdColumn() => 0],
-            [$this->getIdColumn() => 1],
-            [$this->getIdColumn() => 2],
-            [$this->getIdColumn() => 3],
-            [$this->getIdColumn() => 4],
-            [$this->getIdColumn() => 5],
+            [$this->getDataStoreIdentifier() => 0],
+            [$this->getDataStoreIdentifier() => 1],
+            [$this->getDataStoreIdentifier() => 2],
+            [$this->getDataStoreIdentifier() => 3],
+            [$this->getDataStoreIdentifier() => 4],
+            [$this->getDataStoreIdentifier() => 5],
         ];
     }
 
@@ -36,14 +44,15 @@ trait AggregateSimpleDataProviderTrait
      * DataProvider for testMaxSuccess
      * @return array
      */
-    function provideMaxSuccessData()
+    public function provideMaxSuccessData()
     {
+        $this->setInitialData($this->getInitSimpleDataForDataStore());
         return [
             //Test with id
             [
-                $this->getIdColumn(),
+                $this->getDataStoreIdentifier(),
                 [[
-                    $this->decorateAggregateField($this->getIdColumn(), "max") => 5
+                    $this->decorateAggregateField($this->getDataStoreIdentifier(), "max") => 5
                 ]]
             ]
         ];
@@ -53,13 +62,14 @@ trait AggregateSimpleDataProviderTrait
      * DataProvider for testMinSuccess
      * @return array
      */
-    function provideMinSuccessData()
+    public function provideMinSuccessData()
     {
+        $this->setInitialData($this->getInitSimpleDataForDataStore());
         return [
             [
-                $this->getIdColumn(),
+                $this->getDataStoreIdentifier(),
                 [[
-                    $this->decorateAggregateField($this->getIdColumn(), "min") => 0
+                    $this->decorateAggregateField($this->getDataStoreIdentifier(), "min") => 0
                 ]]
             ]
         ];
@@ -69,13 +79,14 @@ trait AggregateSimpleDataProviderTrait
      * DataProvider for testAvgSuccess
      * @return array
      */
-    function provideAvgSuccessData()
+    public function provideAvgSuccessData()
     {
+        $this->setInitialData($this->getInitSimpleDataForDataStore());
         return [
             [
-                $this->getIdColumn(),
+                $this->getDataStoreIdentifier(),
                 [[
-                    $this->decorateAggregateField($this->getIdColumn(), "avg") => 2.5
+                    $this->decorateAggregateField($this->getDataStoreIdentifier(), "avg") => 2.5
                 ]]
             ]
         ];
@@ -85,13 +96,14 @@ trait AggregateSimpleDataProviderTrait
      * DataProvider for testCountSuccess
      * @return array
      */
-    function provideCountSuccessData()
+    public function provideCountSuccessData()
     {
+        $this->setInitialData($this->getInitSimpleDataForDataStore());
         return [
             [
-                $this->getIdColumn(),
+                $this->getDataStoreIdentifier(),
                 [[
-                    $this->decorateAggregateField($this->getIdColumn(), "count") => 6
+                    $this->decorateAggregateField($this->getDataStoreIdentifier(), "count") => 6
                 ]]
             ]
         ];

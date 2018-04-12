@@ -9,12 +9,10 @@
 
 namespace rollun\datastore\DataStore;
 
-use phpDocumentor\Reflection\Types\Integer;
 use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Iterators\DataStoreIterator;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
-use rollun\datastore\Rql\Node\AggregateSelectNode;
 use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\Node;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
@@ -101,6 +99,16 @@ abstract class DataStoreAbstract implements DataStoresInterface
 
 // ** Interface "rollun\datastore\DataStore\Interfaces\DataStoresInterface"  **/
 
+    private function validateQuery(Query $query) {
+        $groupFields = ($query instanceof RqlQuery && $query->getGroupby() != null) ? $query->getGroupby()->getFields() : [];
+        $selectionFields = $query->getSelect()->getFields();
+        foreach ($selectionFields as &$field) {
+            if (!in_array($field, $groupFields) && !($field instanceof AggregateFunctionNode)) {
+                throw new DataStoreException("Query is not valid. Selected $field is not GroupBy or Aggregate field.");
+            }
+        }
+    }
+
     /**
      * {@inheritdoc}
      *
@@ -108,22 +116,25 @@ abstract class DataStoreAbstract implements DataStoresInterface
      */
     public function query(Query $query)
     {
+        $this->validateQuery($query);
         $limitNode = $query->getLimit();
         $limit = !$limitNode ? self::LIMIT_INFINITY : $query->getLimit()->getLimit();
         $offset = !$limitNode ? 0 : $query->getLimit()->getOffset();
-        if (isset($limitNode) && $query->getSort() !== null) {
-            $data = $this->queryWhere($query, self::LIMIT_INFINITY, 0);
-            $sortedData = $this->querySort($data, $query);
-            $result = array_slice($sortedData, $offset, $limit == self::LIMIT_INFINITY ? null : $limit);
-        } else {
-            $data = $this->queryWhere($query, $limit, $offset);
-            $result = $this->querySort($data, $query);
-        }
+
+        //query
+        $result = $this->queryWhere($query, self::LIMIT_INFINITY, 0);
+
+        //select/groupBy
         if ($query instanceof RqlQuery && $query->getGroupby() != null) {
             $result = $this->queryGroupBy($result, $query);
         } else {
             $result = $this->querySelect($result, $query);
         }
+        //sort
+        $result = $this->querySort($result, $query);
+        //limit
+        $result = array_slice($result, $offset, $limit == self::LIMIT_INFINITY ? null : $limit);
+
         //filled item unset field
         $itemFiled = [];
         foreach ($result as &$item) {
@@ -139,8 +150,10 @@ abstract class DataStoreAbstract implements DataStoresInterface
     }
 
     /**
-     * @param $result
-     * @param RqlQuery $query
+     * @param Query $query
+     * @param $limit
+     * @param $offset
+     * @return array
      */
     protected function queryWhere(Query $query, $limit, $offset)
     {
@@ -148,10 +161,9 @@ abstract class DataStoreAbstract implements DataStoresInterface
         $conditioon = $conditionBuilder($query->getQuery());
 
         $whereFunctionBody = PHP_EOL .
-                '$result = ' . PHP_EOL
-                . rtrim($conditioon, PHP_EOL) . ';' . PHP_EOL
-                . 'return $result;';
-//print_r($whereFunctionBody);
+            '$result = ' . PHP_EOL
+            . rtrim($conditioon, PHP_EOL) . ';' . PHP_EOL
+            . 'return $result;';
         $whereFunction = create_function('$item', $whereFunctionBody);
         $suitableItemsNumber = 0;
         $result = [];
@@ -180,15 +192,15 @@ abstract class DataStoreAbstract implements DataStoresInterface
         $nextCompareLevel = '';
         $sortFields = $query->getSort()->getFields();
         foreach ($sortFields as $ordKey => $ordVal) {
-            if ((int) $ordVal <> SortNode::SORT_ASC && (int) $ordVal <> SortNode::SORT_DESC) {
+            if ((int)$ordVal <> SortNode::SORT_ASC && (int)$ordVal <> SortNode::SORT_DESC) {
                 throw new DataStoreException('Invalid condition: ' . $ordVal);
             }
             $cond = $ordVal == SortNode::SORT_DESC ? '<' : '>';
             $notCond = $ordVal == SortNode::SORT_ASC ? '<' : '>';
-            $ordKeySafe = "'". addslashes($ordKey) ."'";
+            $ordKeySafe = "'" . addslashes($ordKey) . "'";
             $prevCompareLevel = "if (!isset(\$a[$ordKeySafe])) {return 0;};" . PHP_EOL
-                    . "if (\$a[$ordKeySafe] $cond \$b[$ordKeySafe]) {return 1;};" . PHP_EOL
-                    . "if (\$a[$ordKeySafe] $notCond  \$b[$ordKeySafe]) {return -1;};" . PHP_EOL;
+                . "if (\$a[$ordKeySafe] $cond \$b[$ordKeySafe]) {return 1;};" . PHP_EOL
+                . "if (\$a[$ordKeySafe] $notCond  \$b[$ordKeySafe]) {return -1;};" . PHP_EOL;
             $nextCompareLevel = $nextCompareLevel . $prevCompareLevel;
         }
         $sortFunctionBody = $nextCompareLevel . 'return 0;';
@@ -200,14 +212,6 @@ abstract class DataStoreAbstract implements DataStoresInterface
     protected function queryGroupBy($result, RqlQuery $query)
     {
         $groupFields = $query->getGroupby()->getFields();
-        $selectionFields = $query->getSelect()->getFields();
-        foreach ($selectionFields as &$field) {
-            if (!in_array($field, $groupFields) && !($field instanceof AggregateFunctionNode)) {
-                $field = new AggregateFunctionNode('count', $field);
-            }
-        }
-        $query->setSelect(new AggregateSelectNode($selectionFields));
-
         $groups = [$result];
         $groups = $this->groupBy($groups, $groupFields);
 
@@ -238,93 +242,72 @@ abstract class DataStoreAbstract implements DataStoresInterface
         return $newGroup;
     }
 
+    /**
+     * @param $data
+     * @param Query $query
+     * @return mixed
+     */
     protected function querySelect($data, Query $query)
     {
         $selectNode = $query->getSelect();
         if (empty($selectNode)) {
             return $data;
-        } else {
-            $resultArray = array();
-            $compareArray = array();
+        }
+        $fields = array_filter($selectNode->getFields(), "is_string");
+        $aggregateFunctions = array_filter($selectNode->getFields(), function ($item) {
+            return $item instanceof AggregateFunctionNode;
+        });
 
-            foreach ($selectNode->getFields() as $field) {
-                if ($field instanceof AggregateFunctionNode) {
-                    switch ($field->getFunction()) {
-                        case 'count': {
-                                $arr = [];
-                                foreach ($data as $item) {
-                                    if (isset($item[$field->getField()])) {
-                                        $arr[] = $item[$field->getField()];
-                                    }
-                                }
-                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [count($arr)];
-                                break;
-                            }
-                        case 'max': {
-                                $firstItem = array_pop($data);
-                                $max = $firstItem[$field->getField()];
-                                foreach ($data as $item) {
-                                    $max = $max < $item[$field->getField()] ? $item[$field->getField()] : $max;
-                                }
-                                array_push($data, $firstItem);
-                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [$max];
-                                break;
-                            }
-                        case 'min': {
-                                $firstItem = array_pop($data);
-                                $min = $firstItem[$field->getField()];
-                                foreach ($data as $item) {
-                                    $min = $min > $item[$field->getField()] ? $item[$field->getField()] : $min;
-                                }
-                                array_push($data, $firstItem);
-                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [$min];
-                                break;
-                            }
-                        case 'sum': {
-                                $sum = 0;
-                                foreach ($data as $item) {
-                                    $sum += isset($item[$field->getField()]) ? $item[$field->getField()] : 0;
-                                }
-                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [$sum];
-                                break;
-                            }
-                        case 'avg': {
-                                $sum = 0;
-                                $count = 0;
-                                foreach ($data as $item) {
-                                    $sum += isset($item[$field->getField()]) ? $item[$field->getField()] : 0;
-                                    $count += isset($item[$field->getField()]) ? 1 : 0;
-                                }
-                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [$sum / $count];
-                                break;
-                            }
-                    }
-                } else {
-                    $dataLine = [];
-                    foreach ($data as $item) {
-                        $dataLine[] = $item[$field];
-                    }
-                    $compareArray[$field] = $dataLine;
-                }
-            }
-            $min = null;
-            foreach ($compareArray as $column) {
-                if (!isset($min)) {
-                    $min = count($column);
-                } elseif (count($column) < $min) {
-                    $min = count($column);
-                }
-            }
-            for ($i = 0; $i < $min; ++$i) {
-                $item = [];
-                foreach ($compareArray as $fieldName => $column) {
-                    $item[$fieldName] = $column[$i];
-                }
-                $resultArray[] = $item;
-            }
-            return $resultArray;
+        //select fields
+        $selectData = array_filter(array_map(function ($item) use ($fields) {
+            return array_filter($item, function ($filed) use ($fields) {
+                return in_array($filed, $fields);
+            }, ARRAY_FILTER_USE_KEY);
+        }, $data));
+
+        $aggregateData = array_map(function (AggregateFunctionNode $aggregateFunction) use ($data) {
+            $filed = $aggregateFunction->getField();
+            $functionName = $aggregateFunction->getFunction();
+            $size = count($data);
+            $value = array_reduce($data, function ($carry, $item) use ($filed, $functionName, $size) {
+                return $this->calculateAggregateFunction($functionName, $carry, $item[$filed], $size);
+            });
+            //TODO: usage decorator
+            return ["$filed->$functionName" => $value];
+        }, $aggregateFunctions);
+        return array_merge_recursive($aggregateData, $selectData);
+    }
+
+    /**
+     * @param $functionName
+     * @param $carry
+     * @param $currentValue
+     * @param $size
+     * @return float|int
+     */
+    protected function calculateAggregateFunction($functionName, $carry, $currentValue, $size)
+    {
+        switch ($functionName) {
+            case "min":
+                if (is_null($carry)) $carry = PHP_INT_MAX;
+                return $carry > $currentValue ? $currentValue : $carry;
+            case "max":
+                if (is_null($carry)) $carry = PHP_INT_MIN;
+                return $carry < $currentValue ? $currentValue : $carry;
+            case "sum":
+                if (is_null($carry)) $carry = 0;
+                return $carry + $currentValue;
+            case "avg":
+                if (is_null($carry)) $carry = 0;
+                return $carry + ($currentValue / $size);
+            case "count":
+                if (is_null($carry)) $carry = 0;
+                return $carry + 1;
+            default:
+                throw new DataStoreException("Aggregate function $functionName is not supported");
         }
     }
+
 
 // ** Interface "/Coutable"  **/
 

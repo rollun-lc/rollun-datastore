@@ -4,7 +4,6 @@ namespace rollun\test\datastore\DataStore\Aggregate;
 
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
-use rollun\datastore\Rql\Node\AggregateSelectNode;
 use rollun\datastore\Rql\Node\GroupbyNode;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\test\datastore\DataStore\AbstractDataStoreTest;
@@ -64,13 +63,7 @@ abstract class AbstractAggregateTest extends AbstractDataStoreTest
      * DataProvider for testAggregateWithLimitOffsetGroupBySuccess
      * @return array
      */
-    abstract function provideAggregateWithLimitOffsetGroupBySuccessData();
-
-    /**
-     * DataProvider for testAggregateWithGroupByException
-     * @return array
-     */
-    abstract function provideAggregateWithGroupByExceptionData();
+    abstract function provideAggregateWithSelectLimitOffsetGroupBySuccessData();
 
     /**
      * DataProvider for testAggregateWithSelectException
@@ -167,7 +160,7 @@ abstract class AbstractAggregateTest extends AbstractDataStoreTest
      * @param $expectedResult
      * @dataProvider provideAggregateWithGroupBySuccessData
      */
-    public function testAggregateWithGroupBySuccess(AggregateFunctionNode $aggregateNode, GroupbyNode $groupByNode, $expectedResult) {
+    public function testAggregateWithGroupBySuccess(GroupbyNode $groupByNode, AggregateFunctionNode $aggregateNode, $expectedResult) {
         $query = new RqlQuery();
         $query->setSelect(new SelectNode([
             $aggregateNode,
@@ -183,7 +176,7 @@ abstract class AbstractAggregateTest extends AbstractDataStoreTest
      * @param $expectedResult
      * @dataProvider provideAggregateWithSelectGroupBySuccessData
      */
-    public function testAggregateWithSelectGroupBySuccess(AggregateFunctionNode $aggregateNode, GroupbyNode $groupByNode, $expectedResult) {
+    public function testAggregateWithSelectGroupBySuccess(GroupbyNode $groupByNode, AggregateFunctionNode $aggregateNode, $expectedResult) {
         $query = new RqlQuery();
         $query->setSelect(new SelectNode(array_merge([
             $aggregateNode,
@@ -198,13 +191,13 @@ abstract class AbstractAggregateTest extends AbstractDataStoreTest
      * @param AggregateFunctionNode $aggregateNode
      * @param GroupbyNode $groupByNode
      * @param $expectedResult
-     * @dataProvider provideAggregateWithLimitOffsetGroupBySuccessData
+     * @dataProvider provideAggregateWithSelectLimitOffsetGroupBySuccessData
      */
-    public function testAggregateWithLimitOffsetGroupBySuccess(LimitNode $limitNode, AggregateFunctionNode $aggregateNode, GroupbyNode $groupByNode, $expectedResult) {
+    public function testAggregateWithSelectLimitOffsetGroupBySuccess(LimitNode $limitNode, GroupbyNode $groupByNode, AggregateFunctionNode $aggregateNode, $expectedResult) {
         $query = new RqlQuery();
-        $query->setSelect(new SelectNode([
-            $aggregateNode
-        ]));
+        $query->setSelect(new SelectNode(array_merge([
+            $aggregateNode,
+        ], $groupByNode->getFields())));
         $query->setLimit($limitNode);
         $query->setGroupby($groupByNode);
         $result = $this->object->query($query);
@@ -215,25 +208,15 @@ abstract class AbstractAggregateTest extends AbstractDataStoreTest
 
     /**
      * @param AggregateFunctionNode $aggregateNode
-     * @param GroupbyNode $groupByNode
-     * @expectedException DataStoreException
-     * @dataProvider provideAggregateWithGroupByExceptionData
-     */
-    public function testAggregateWithGroupByException(AggregateFunctionNode $aggregateNode, GroupbyNode $groupByNode) {
-        $query = new RqlQuery();
-        $query->setSelect(new SelectNode([$aggregateNode]));
-        $query->setGroupby($groupByNode);
-        $this->object->query($query);
-    }
-
-    /**
-     * @param AggregateFunctionNode $aggregateNode
-     * @expectedException DataStoreException
+     * @param $selectFields
+     * @expectedException \rollun\datastore\DataStore\DataStoreException
      * @dataProvider provideAggregateWithSelectExceptionData
      */
-    public function testAggregateWithSelectException(AggregateFunctionNode $aggregateNode) {
+    public function testAggregateWithSelectException(AggregateFunctionNode $aggregateNode, $selectFields) {
         $query = new Query();
-        $query->setSelect(new SelectNode([$aggregateNode]));
+        $query->setSelect(new SelectNode(
+            array_merge([$aggregateNode], $selectFields)
+        ));
         $this->object->query($query);
     }
 }
