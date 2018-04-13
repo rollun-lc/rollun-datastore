@@ -15,8 +15,7 @@ use rollun\test\datastore\DataStore\OldStyleAggregateDecorator;
 class MemoryTest extends AbstractAggregateTest
 {
     use OldStyleAggregateDecorator;
-    use AggregateSimpleDataProviderTrait;
-    use AggregateMixedDataProviderTrait;
+    use AggregateDataProviderTrait;
 
     static private $INITIAL_CONFIG = [];
 

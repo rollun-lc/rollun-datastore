@@ -12,8 +12,7 @@ use Zend\Db\TableGateway\TableGateway;
 class DbTableTest extends AbstractAggregateTest
 {
     use OldStyleAggregateDecorator;
-    use AggregateSimpleDataProviderTrait;
-    use AggregateMixedDataProviderTrait;
+    use AggregateDataProviderTrait;
 
     const TEST_TABLE_NAME = "test_aggregate_table";
 
