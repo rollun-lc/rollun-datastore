@@ -10,11 +10,12 @@ namespace rollun\test\datastore\DataStore\Aggregate;
 
 
 use rollun\datastore\DataStore\Memory;
-use rollun\test\datastore\DataStore\OldStyleAggregateDecorator;
+use rollun\test\datastore\DataStore\NewStyleAggregateDecoratorTrait;
+use rollun\test\datastore\DataStore\OldStyleAggregateDecoratorTrait;
 
 class MemoryTest extends AbstractAggregateTest
 {
-    use OldStyleAggregateDecorator;
+    use NewStyleAggregateDecoratorTrait;
     use AggregateDataProviderTrait;
 
     /**

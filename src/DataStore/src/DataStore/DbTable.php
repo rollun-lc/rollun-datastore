@@ -201,12 +201,13 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
 
             foreach ($selectFields as $field) {
                 if ($field instanceof AggregateFunctionNode) {
-                    $fields[$field->getField() . "->" . $field->getFunction()] = new Expression($field->__toString());
+                    //$fields[$field->getField() . "->" . $field->getFunction()] = new Expression($field->__toString());
+                    $fields[$field->__toString()."`"] = new Expression($field->__toString());
                 } else {
                     $fields[] = $field;
                 }
             }
-            $selectSQL->columns($fields);
+            $selectSQL->columns($fields,false);
         }
         return $selectSQL;
     }
@@ -228,14 +229,6 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
      */
     protected function setGroupby(Select $selectSQL, RqlQuery $query)
     {
-        $groupByFields = $query->getGroupby()->getFields();
-        $selectionFields = $query->getSelect()->getFields();
-        foreach ($selectionFields as &$field) {
-            if (!in_array($field, $groupByFields) && !($field instanceof AggregateFunctionNode)) {
-                $field = new AggregateFunctionNode('count', $field);
-            }
-        }
-        $query->setSelect(new AggregateSelectNode($selectionFields));
         $selectSQL->group($query->getGroupby()->getFields());
         return $selectSQL;
     }

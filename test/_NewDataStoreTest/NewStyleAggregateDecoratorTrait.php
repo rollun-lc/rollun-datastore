@@ -2,14 +2,14 @@
 /**
  * Created by PhpStorm.
  * User: victorsecuring
- * Date: 12.04.18
- * Time: 11:17 AM
+ * Date: 13.04.18
+ * Time: 6:29 PM
  */
 
 namespace rollun\test\datastore\DataStore;
 
 
-trait OldStyleAggregateDecorator
+trait NewStyleAggregateDecoratorTrait
 {
     /**
      * @param string $filedName
@@ -18,7 +18,6 @@ trait OldStyleAggregateDecorator
      */
     protected function decorateAggregateField($filedName, $aggregateFunction)
     {
-        //return "{$aggregateFunction}({$filedName})";
-        return "{$filedName}->{$aggregateFunction}";
+        return "{$aggregateFunction}({$filedName})";
     }
 }

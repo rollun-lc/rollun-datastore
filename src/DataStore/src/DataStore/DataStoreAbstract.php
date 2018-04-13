@@ -272,8 +272,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
             $value = array_reduce($data, function ($carry, $item) use ($filed, $functionName, $size) {
                 return $this->calculateAggregateFunction($functionName, $carry, $item[$filed], $size);
             });
-            //TODO: usage decorator
-            return ["$filed->$functionName" => $value];
+            return ["$aggregateFunction" => $value];
         }, $aggregateFunctions);
         return array_merge_recursive($aggregateData, $selectData);
     }

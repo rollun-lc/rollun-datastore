@@ -256,7 +256,7 @@ class RqlParser
         } else {
             $selectString = '&select(';
             foreach ($selectFields as $field) {
-                $selectString = $selectString . $field . ',';
+                $selectString .= $field . ',';
             }
             return rtrim($selectString, ',') . ')';
         }
