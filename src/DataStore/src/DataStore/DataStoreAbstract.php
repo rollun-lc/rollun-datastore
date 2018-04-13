@@ -99,7 +99,8 @@ abstract class DataStoreAbstract implements DataStoresInterface
 
 // ** Interface "rollun\datastore\DataStore\Interfaces\DataStoresInterface"  **/
 
-    private function validateQuery(Query $query) {
+    private function validateQuery(Query $query)
+    {
         $groupFields = ($query instanceof RqlQuery && $query->getGroupby() != null) ? $query->getGroupby()->getFields() : [];
         $selectionFields = $query->getSelect()->getFields();
         foreach ($selectionFields as &$field) {
@@ -407,4 +408,13 @@ abstract class DataStoreAbstract implements DataStoresInterface
         return new DataStoreIterator($this);
     }
 
+
+    /**
+     * Return DataStore fields Name and type.
+     * @return array
+     */
+    public function getFieldsInfo()
+    {
+        return [];
+    }
 }
