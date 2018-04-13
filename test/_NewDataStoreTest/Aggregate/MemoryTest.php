@@ -17,8 +17,6 @@ class MemoryTest extends AbstractAggregateTest
     use OldStyleAggregateDecorator;
     use AggregateDataProviderTrait;
 
-    static private $INITIAL_CONFIG = [];
-
     /**
      * Prepare datastore for initialized with transmitted data
      * @param array $data
@@ -27,7 +25,7 @@ class MemoryTest extends AbstractAggregateTest
     protected function setInitialData(array $data)
     {
         $testCaseName = $this->getTestCaseName();
-        static::$INITIAL_CONFIG[$testCaseName] = ["initialData" => $data];
+        $this->setConfigForTest($testCaseName,["initialData" => $data]);
     }
 
     /**
@@ -36,7 +34,7 @@ class MemoryTest extends AbstractAggregateTest
     public function setUp()
     {
         $name = $this->getName(false);
-        $initialData = static::$INITIAL_CONFIG[$name]["initialData"];
+        $initialData = $this->getConfigForTest($name)["initialData"];
         //create store
         $this->object = new Memory();
 

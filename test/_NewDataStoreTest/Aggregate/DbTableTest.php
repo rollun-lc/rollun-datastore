@@ -18,8 +18,6 @@ class DbTableTest extends AbstractAggregateTest
 
     const TEST_DB_ADAPTER = "TestDbAdapter";
 
-    static private $INITIAL_CONFIG = [];
-
     /**
      * @var Adapter
      */
@@ -30,6 +28,8 @@ class DbTableTest extends AbstractAggregateTest
      * @param string|null $name
      * @param array $data
      * @param string $dataName
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function __construct(string $name = null, array $data = [], string $dataName = '')
     {
@@ -44,8 +44,9 @@ class DbTableTest extends AbstractAggregateTest
     public function setUp()
     {
         $name = $this->getName(false);
-        $dbTableConfig = static::$INITIAL_CONFIG[$name]["dbTableConfig"];
-        $initialData = static::$INITIAL_CONFIG[$name]["initialData"];;
+
+        $dbTableConfig = $this->getConfigForTest($name)["dbTableConfig"];
+        $initialData = $this->getConfigForTest($name)["initialData"];;
 
         $this->createTableFromConfig($dbTableConfig);
 
@@ -67,10 +68,10 @@ class DbTableTest extends AbstractAggregateTest
     protected function setInitialData(array $data)
     {
         $testCaseName = $this->getTestCaseName();
-        static::$INITIAL_CONFIG[$testCaseName] = [
+        $this->setConfigForTest($testCaseName, [
             "dbTableConfig" => [static::TEST_TABLE_NAME => $this->createTableConfig($data)],
             "initialData" => $data
-        ];
+        ]);
     }
 
     /**

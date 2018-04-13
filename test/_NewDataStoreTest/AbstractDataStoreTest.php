@@ -20,6 +20,27 @@ abstract class AbstractDataStoreTest extends TestCase
     protected $container;
 
     /**
+     * @var array
+     */
+    static private $INITIAL_CONFIG = [];
+
+    /**
+     * @param $testName
+     * @return mixed
+     */
+    protected function getConfigForTest(string $testName) {
+        return isset(self::$INITIAL_CONFIG[$testName]) ? self::$INITIAL_CONFIG[$testName] : null;
+    }
+
+    /**
+     * @param $testName
+     * @param $config mixed
+     */
+    protected function setConfigForTest(string $testName, $config) {
+        self::$INITIAL_CONFIG[$testName] = $config;
+    }
+
+    /**
      * Return test case name from dataProvider
      * @return string
      */
