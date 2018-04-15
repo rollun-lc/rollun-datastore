@@ -57,6 +57,11 @@ abstract class AbstractDbTableTest extends AbstractDataStoreTest
 
         //create data
         foreach ($initialData as $datum) {
+            foreach ($datum as $field => $value) {
+                if($value instanceof \DateTime) {
+                    $datum[$field] = $value->format("Y-m-d H:i:s");
+                }
+            }
             $this->object->create($datum);
         }
     }
@@ -96,6 +101,9 @@ abstract class AbstractDbTableTest extends AbstractDataStoreTest
                     $config[$filedName] = [];
                 }
                 switch (true) {
+                    case $value instanceof \DateTime:
+                        $config[$filedName][TableManagerMysql::FIELD_TYPE] = "Datetime";
+                        break;
                     case is_null($value):
                         $config[$filedName][TableManagerMysql::FIELD_PARAMS] = array_merge(
                             isset($config[$filedName][TableManagerMysql::FIELD_PARAMS]) ? $config[$filedName][TableManagerMysql::FIELD_PARAMS] : [],

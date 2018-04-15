@@ -150,9 +150,12 @@ abstract class DataStoreAbstract implements DataStoresInterface
 
         //check if select undefined field
         //TODO: need refactor
-        if (!is_null($query->getSelect()) && !empty($query->getSelect()->getFields())) {
-            $selectedFields = $query->getSelect()->getFields();
-            $selectedFields = array_filter($selectedFields, function ($item) {
+
+        $fields = [];
+        $fields = array_merge($fields, !is_null($query->getSelect() ) ? $query->getSelect()->getFields() : []);
+        $fields = array_merge($fields, !is_null($query->getSort()) ? array_keys($query->getSort()->getFields()) : []);
+        if (!empty($fields)) {
+            $selectedFields = array_filter($fields, function ($item) {
                 return !$item instanceof AggregateFunctionNode;
             });
             $fieldsInItems = array_combine(array_values($selectedFields), array_fill(0, count($selectedFields), 0));
@@ -221,11 +224,13 @@ abstract class DataStoreAbstract implements DataStoresInterface
 
     protected function querySort($data, Query $query)
     {
-        if (empty($query->getSort())) {
-            return $data;
+        $sort = $query->getSort();
+        if (!$sort || empty($sort->getFields())){
+            $sort = new SortNode();
+            $sort->addField($this->getIdentifier());
         }
         $nextCompareLevel = '';
-        $sortFields = $query->getSort()->getFields();
+        $sortFields = $sort->getFields();
         foreach ($sortFields as $ordKey => $ordVal) {
             if ((int)$ordVal <> SortNode::SORT_ASC && (int)$ordVal <> SortNode::SORT_DESC) {
                 throw new DataStoreException('Invalid condition: ' . $ordVal);

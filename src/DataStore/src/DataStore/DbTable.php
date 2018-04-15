@@ -162,15 +162,16 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
     protected function setSelectOrder(Select $selectSQL, Query $query)
     {
         $sort = $query->getSort();
-        if (!$sort) {
-            $sort = new SortNode();
+        if (!$sort || empty($sort->getFields())) {
+            return $selectSQL;
+            /*$sort = new SortNode();
             if ($query->getSelect()) {
                 foreach ($query->getSelect()->getFields() as $field) {
                     if (is_string($field)) {
                         $sort->addField($field);
                     }
                 }
-            }
+            }*/
         }
         $sortFields = $sort->getFields();
 
@@ -240,49 +241,6 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
      */
     public function update($itemData, $createIfAbsent = false)
     {
-
-        /*$adapter = $this->dbTable->getAdapter();
-        $adapter->getDriver()->getConnection()->beginTransaction();
-
-        $identifier = $this->getIdentifier();
-        if (!isset($itemData[$identifier])) {
-            throw new DataStoreException('Item must has primary key');
-        }
-        $id = $itemData[$identifier];
-        $this->checkIdentifierType($id);
-
-        $errorMsg = 'Can\'t update item with "id" = ' . $id;
-
-        $queryStr = 'SELECT ' . Select::SQL_STAR
-            . ' FROM ' . $adapter->platform->quoteIdentifier($this->dbTable->getTable())
-            . ' WHERE ' . $adapter->platform->quoteIdentifier($identifier) . ' = ?'
-            . ' FOR UPDATE';
-
-        try {
-            //is row with this index exist?
-            $rowset = $adapter->query($queryStr, array($id));
-            $isExist = !is_null($rowset->current());
-            switch (true) {
-                case!$isExist && !$createIfAbsent:
-                    throw new DataStoreException($errorMsg);
-                case!$isExist && $createIfAbsent:
-                    $this->dbTable->insert($itemData);
-                    $result = $itemData;
-                    break;
-                case $isExist:
-                    unset($itemData[$identifier]);
-                    $this->dbTable->update($itemData, array($identifier => $id));
-                    $rowset = $adapter->query($queryStr, array($id));
-                    $result = $rowset->current()->getArrayCopy();
-                    break;
-            }
-            $adapter->getDriver()->getConnection()->commit();
-        } catch (\Exception $e) {
-            $adapter->getDriver()->getConnection()->rollback();
-            throw new DataStoreException($errorMsg, 0, $e);
-        }
-        return $result;*/
-
         $adapter = $this->dbTable->getAdapter();
         $adapter->getDriver()->getConnection()->beginTransaction();
         try {
