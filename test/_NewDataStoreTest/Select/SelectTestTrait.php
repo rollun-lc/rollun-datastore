@@ -9,12 +9,19 @@
 namespace rollun\test\datastore\DataStore\Select;
 
 use PHPUnit\Framework\Assert;
+use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\test\datastore\DataStore\AbstractDataStoreTest;
+use rollun\test\datastore\DataStore\Limit\LimitTestTrait;
 use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Query;
 
-abstract class AbstractSelectTest extends AbstractDataStoreTest
+trait SelectTestTrait
 {
+
+    /**
+     * @var DataStoresInterface
+     */
+    protected $object;
 
     /**
      * DataProvider testSelectSuccess

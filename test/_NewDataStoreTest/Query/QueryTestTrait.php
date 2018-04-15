@@ -10,6 +10,7 @@ namespace rollun\test\datastore\DataStore\Query;
 
 
 use PHPUnit\Framework\Assert;
+use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\test\datastore\DataStore\AbstractDataStoreTest;
 use Xiag\Rql\Parser\Node\AbstractQueryNode;
 use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
@@ -25,10 +26,14 @@ use Xiag\Rql\Parser\Node\Query\ScalarOperator\LtNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\NeNode;
 use Xiag\Rql\Parser\Query;
 
-abstract class AbstractQueryTest extends AbstractDataStoreTest
+trait QueryTestTrait
 {
 
     /*public function testMatchSuccess($field, $value, $expectedResult) {}*/
+    /**
+     * @var DataStoresInterface
+     */
+    protected $object;
 
     /**
      * @param $field

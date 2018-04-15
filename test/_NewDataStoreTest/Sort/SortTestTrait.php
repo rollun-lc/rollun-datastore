@@ -9,12 +9,19 @@
 namespace rollun\test\datastore\DataStore\Sort;
 
 use PHPUnit\Framework\Assert;
+use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\test\datastore\DataStore\AbstractDataStoreTest;
 use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
 
-abstract class AbstractSortTest extends AbstractDataStoreTest
+trait SortTestTrait
 {
+
+    /**
+     * @var DataStoresInterface
+     */
+    protected $object;
+
     /**
      * Data provider for testSortField
      * @return mixed

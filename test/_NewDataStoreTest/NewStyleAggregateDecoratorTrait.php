@@ -9,6 +9,8 @@
 namespace rollun\test\datastore\DataStore;
 
 
+use rollun\datastore\Rql\Node\AggregateFunctionNode;
+
 trait NewStyleAggregateDecoratorTrait
 {
     /**
@@ -18,6 +20,6 @@ trait NewStyleAggregateDecoratorTrait
      */
     protected function decorateAggregateField($filedName, $aggregateFunction)
     {
-        return "{$aggregateFunction}({$filedName})";
+        return (new AggregateFunctionNode($aggregateFunction, $filedName))->__toString();
     }
 }

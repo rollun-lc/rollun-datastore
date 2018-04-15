@@ -9,12 +9,17 @@
 namespace rollun\test\datastore\DataStore\GroupBy;
 
 use PHPUnit\Framework\Assert;
+use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\Rql\Node\GroupbyNode;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\test\datastore\DataStore\AbstractDataStoreTest;
 
-abstract class AbstractGroupByTest extends AbstractDataStoreTest
+trait GroupByTestTrait
 {
+    /**
+     * @var DataStoresInterface
+     */
+    protected $object;
 
     /**
      * Data provider for testGroupByField
