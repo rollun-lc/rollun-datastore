@@ -31,3 +31,17 @@
 
 Что бы использовать данную библиотеку в своих приложениях следуйте [данной инструкции](INSTALL.md)
 
+# New Test
+Для того что бы расширять новые тесты, существует несколько правил.
+
+*Именования DataProvider* - все **dataProvider** методы должны называтся по маске
+: `privice{TestCaseName}Data`. **TestCaseName** - имя теста без приставки **test**.
+Пример
+* тест - **testSelectSuccess**
+* dataProvider - **provideSelectSuccessData**
+
+
+Если вам необходимо инициализировать DS данными перед тестом,
+это Необходимо делать в DataProvider для теста, используя метод `setInitialData(array $data)`.
+
+
