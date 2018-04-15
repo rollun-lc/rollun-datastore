@@ -102,7 +102,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
     private function validateQuery(Query $query)
     {
         $groupFields = ($query instanceof RqlQuery && $query->getGroupby() != null) ? $query->getGroupby()->getFields() : [];
-        $selectionFields = $query->getSelect()->getFields();
+        $selectionFields = is_null($query->getSelect()) ? [] : $query->getSelect()->getFields();
         foreach ($selectionFields as &$field) {
             if (!in_array($field, $groupFields) && !($field instanceof AggregateFunctionNode)) {
                 throw new DataStoreException("Query is not valid. Selected $field is not GroupBy or Aggregate field.");

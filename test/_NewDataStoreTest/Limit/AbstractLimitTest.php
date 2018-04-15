@@ -42,6 +42,7 @@ abstract class AbstractLimitTest extends AbstractDataStoreTest
     /**
      * @param $limit
      * @param $expectedResult
+     * @dataProvider provideLimitData
      */
     public function testLimit($limit, $expectedResult)
     {
@@ -57,6 +58,7 @@ abstract class AbstractLimitTest extends AbstractDataStoreTest
      * @param $limit
      * @param $offset
      * @param $expectedResult
+     * @dataProvider provideLimitOffsetData
      */
     public function testLimitOffset($limit, $offset, $expectedResult)
     {

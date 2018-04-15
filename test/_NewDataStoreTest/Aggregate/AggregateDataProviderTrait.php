@@ -31,6 +31,7 @@ trait AggregateDataProviderTrait
     abstract protected function getDataStoreIdentifier();
 
     /**
+     *
      * @return array
      */
     private function getInitSimpleDataForDataStore() {
