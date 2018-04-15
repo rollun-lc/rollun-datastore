@@ -90,13 +90,13 @@ trait LimitTestTrait
     {
         $this->setInitialData($this->getInitDataForDataStore());
         return [
-            [
+            "One item" => [
                 1,
                 [
                     [$this->getDataStoreIdentifier() => 0]
                 ]
             ],
-            [
+            "three item" =>[
                 3,
                 [
                     [$this->getDataStoreIdentifier() => 0],
@@ -104,11 +104,11 @@ trait LimitTestTrait
                     [$this->getDataStoreIdentifier() => 2],
                 ],
             ],
-            [
+            "zero items" => [
                 0,
                 [],
             ],
-            [
+            "10 items (All)" => [
                 10,
                 [
                     [$this->getDataStoreIdentifier() => 0],
@@ -123,7 +123,7 @@ trait LimitTestTrait
                     [$this->getDataStoreIdentifier() => 9],
                 ],
             ],
-            [
+            "15 items (more then there are)" => [
                 15,
                 [
                     [$this->getDataStoreIdentifier() => 0],
@@ -156,7 +156,7 @@ trait LimitTestTrait
                     [$this->getDataStoreIdentifier() => 0]
                 ]
             ],
-            [
+            "one item with 'shift' (offset)" => [
                 1,
                 1,
                 [
