@@ -35,17 +35,153 @@ trait GroupByTestTrait
      */
     abstract protected function getDataStoreIdentifier();
 
+
+
+final private function getCategoryFieldName() {return "category";}
+final private function getSubCategoryFieldName() {return "subCategory";}
+final private function getWeightFieldName() {return "weight";}
+
+    /**
+     * @return array
+     */
+    final private function getInitDataForDataStore()
+    {
+        return [
+            //[A]
+            [
+                $this->getDataStoreIdentifier() => 0,
+                $this->getCategoryFieldName() => "A",
+                $this->getSubCategoryFieldName() => "S_A",
+                $this->getWeightFieldName() => 10,
+            ],
+            [
+                $this->getDataStoreIdentifier() => 1,
+                $this->getCategoryFieldName() => "A",
+                $this->getSubCategoryFieldName() => "S_A",
+                $this->getWeightFieldName() => 5,
+            ],
+            [
+                $this->getDataStoreIdentifier() => 2,
+                $this->getCategoryFieldName() => "A",
+                $this->getSubCategoryFieldName() => "S_B",
+                $this->getWeightFieldName() => 12,
+            ],
+            //[B]
+            [
+                $this->getDataStoreIdentifier() => 3,
+                $this->getCategoryFieldName() => "B",
+                $this->getSubCategoryFieldName() => "S_A",
+                $this->getWeightFieldName() => 10,
+            ],
+            [
+                $this->getDataStoreIdentifier() => 4,
+                $this->getCategoryFieldName() => "B",
+                $this->getSubCategoryFieldName() => "S_C",
+                $this->getWeightFieldName() => 3,
+            ],
+            //[C]
+            [
+                $this->getDataStoreIdentifier() => 5,
+                $this->getCategoryFieldName() => "C",
+                $this->getSubCategoryFieldName() => "S_A",
+                $this->getWeightFieldName() => 6,
+            ],
+            [
+                $this->getDataStoreIdentifier() => 6,
+                $this->getCategoryFieldName() => "C",
+                $this->getSubCategoryFieldName() => "S_C",
+                $this->getWeightFieldName() => 3,
+            ],
+            [
+                $this->getDataStoreIdentifier() => 7,
+                $this->getCategoryFieldName() => "C",
+                $this->getSubCategoryFieldName() => "S_C",
+                $this->getWeightFieldName() => 7,
+            ],
+            [
+                $this->getDataStoreIdentifier() => 8,
+                $this->getCategoryFieldName() => "C",
+                $this->getSubCategoryFieldName() => "S_B",
+                $this->getWeightFieldName() => 3,
+            ],
+            //[D]
+            [
+                $this->getDataStoreIdentifier() => 9,
+                $this->getCategoryFieldName() => "D",
+                $this->getSubCategoryFieldName() => "S_D",
+                $this->getWeightFieldName() => 11,
+            ],
+        ];
+    }
+
     /**
      * Data provider for testGroupByField
      * @return mixed
      */
-    abstract function provideGroupByFieldData();
+    function provideGroupByFieldData() {
+        $this->setInitialData($this->getInitDataForDataStore());
+        return [
+            "group by id" => [
+                [$this->getDataStoreIdentifier()],
+                [
+                    [$this->getDataStoreIdentifier() => 0],
+                    [$this->getDataStoreIdentifier() => 1],
+                    [$this->getDataStoreIdentifier() => 2],
+                    [$this->getDataStoreIdentifier() => 3],
+                    [$this->getDataStoreIdentifier() => 4],
+                    [$this->getDataStoreIdentifier() => 5],
+                    [$this->getDataStoreIdentifier() => 6],
+                    [$this->getDataStoreIdentifier() => 7],
+                    [$this->getDataStoreIdentifier() => 8],
+                    [$this->getDataStoreIdentifier() => 9],
+                ],
+            ],
+            "group by category" => [
+                [$this->getCategoryFieldName()],
+                [
+                    [$this->getCategoryFieldName() => "A"],
+                    [$this->getCategoryFieldName() => "B"],
+                    [$this->getCategoryFieldName() => "C"],
+                    [$this->getCategoryFieldName() => "D"],
+
+                ],
+            ],
+            "group by sub category" => [
+                [$this->getSubCategoryFieldName()],
+                [
+                    [$this->getSubCategoryFieldName() => "S_A"],
+                    [$this->getSubCategoryFieldName() => "S_B"],
+                    [$this->getSubCategoryFieldName() => "S_C"],
+                    [$this->getSubCategoryFieldName() => "S_D"],
+                ],
+            ],
+            "group by weight" => [
+                [$this->getWeightFieldName()],
+                [
+                    [$this->getWeightFieldName() => 10,],
+                    [$this->getWeightFieldName() => 5,],
+                    [$this->getWeightFieldName() => 12,],
+                    [$this->getWeightFieldName() => 3,],
+                    [$this->getWeightFieldName() => 6,],
+                    [$this->getWeightFieldName() => 7,],
+                    [$this->getWeightFieldName() => 11,],
+                ],
+            ],
+        ];
+    }
 
     /**
      * Data provider for testGroupByException
      * @return mixed
      */
-    abstract function provideGroupByExceptionData();
+    function provideGroupByExceptionData() {
+        $this->setInitialData($this->getInitDataForDataStore());
+        return [
+            "get undefined field" => [
+                ["undefined_field"]
+            ]
+        ];
+    }
 
     /**
      * @param array $groupByFields
