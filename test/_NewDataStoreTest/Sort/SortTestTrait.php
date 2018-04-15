@@ -23,6 +23,20 @@ trait SortTestTrait
     protected $object;
 
     /**
+     * Prepare datastore for initialized with transmitted data
+     * @param array $data
+     * @return void
+     */
+    abstract protected function setInitialData(array $data);
+
+
+    /**
+     * Return dataStore Identifier field name
+     * @return string
+     */
+    abstract protected function getDataStoreIdentifier();
+
+    /**
      * Data provider for testSortField
      * @return mixed
      */

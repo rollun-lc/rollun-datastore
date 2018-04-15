@@ -101,7 +101,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
 
     private function validateQuery(Query $query)
     {
-        if(($query instanceof RqlQuery && $query->getGroupby() != null)) {
+        if (($query instanceof RqlQuery && $query->getGroupby() != null)) {
             $groupFields = $query->getGroupby()->getFields();
             $selectionFields = is_null($query->getSelect()) ? [] : $query->getSelect()->getFields();
             foreach ($selectionFields as &$field) {
@@ -113,10 +113,10 @@ abstract class DataStoreAbstract implements DataStoresInterface
         $limitNode = $query->getLimit();
         $limit = !$limitNode ? self::LIMIT_INFINITY : $query->getLimit()->getLimit();
         $offset = !$limitNode ? 0 : $query->getLimit()->getOffset();
-        if($limit < 0) {
+        if ($limit < 0) {
             throw new DataStoreException("Query is not valid. Limit less then zero - $limit");
         }
-        if($offset < 0) {
+        if ($offset < 0) {
             throw new DataStoreException("Query is not valid. Offset less then zero - $offset");
         }
 
@@ -147,6 +147,28 @@ abstract class DataStoreAbstract implements DataStoresInterface
         $result = $this->querySort($result, $query);
         //limit
         $result = array_slice($result, $offset, $limit == self::LIMIT_INFINITY ? null : $limit);
+
+        //check if select undefined field
+        //TODO: need refactor
+        if (!is_null($query->getSelect()) && !empty($query->getSelect()->getFields())) {
+            $selectedFields = $query->getSelect()->getFields();
+            $selectedFields = array_filter($selectedFields, function ($item) {
+                return !$item instanceof AggregateFunctionNode;
+            });
+            $fieldsInItems = array_combine(array_values($selectedFields), array_fill(0, count($selectedFields), 0));
+            array_map(function ($item) use (&$fieldsInItems) {
+                foreach (array_keys($fieldsInItems) as $fieldName) {
+                    if(isset($item[$fieldName])) {
+                        $fieldsInItems[$fieldName] += 1;
+                    }
+                }
+            }, $result);
+            foreach ($fieldsInItems as $fieldName => $count) {
+                if($count == 0) {
+                    throw new DataStoreException("Selected undefined field - $fieldName.");
+                }
+            }
+        }
 
         //filled item unset field
         $itemFiled = [];
@@ -263,7 +285,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
     protected function querySelect($data, Query $query)
     {
         $selectNode = $query->getSelect();
-        if (empty($selectNode)) {
+        if (is_null($selectNode) || empty($selectNode->getFields())) {
             return $data;
         }
         $fields = array_filter($selectNode->getFields(), "is_string");
