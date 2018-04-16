@@ -140,6 +140,13 @@ abstract class DataStoreAbstract implements DataStoresInterface
         //select/groupBy
         if ($query instanceof RqlQuery && $query->getGroupby() != null) {
             $result = $this->queryGroupBy($result, $query);
+            if(!$query->getSort() || empty($query->getSort()->getFields())) {
+                $sort = new SortNode();
+                foreach ($query->getGroupby()->getFields() as $fieldName) {
+                    $sort->addField($fieldName, SortNode::SORT_ASC);
+                }
+                $query->setSort($sort);
+            }
         } else {
             $result = $this->querySelect($result, $query);
         }
@@ -154,6 +161,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
         $fields = [];
         $fields = array_merge($fields, !is_null($query->getSelect() ) ? $query->getSelect()->getFields() : []);
         $fields = array_merge($fields, !is_null($query->getSort()) ? array_keys($query->getSort()->getFields()) : []);
+        $fields = array_merge($fields, !is_null($query->getGroupby()) ? $query->getGroupby()->getFields() : []);
         if (!empty($fields)) {
             $selectedFields = array_filter($fields, function ($item) {
                 return !$item instanceof AggregateFunctionNode;
@@ -258,10 +266,14 @@ abstract class DataStoreAbstract implements DataStoresInterface
         $result = [];
         foreach ($groups as $group) {
             $data = $this->querySelect($group, $query);
-            $union = [];
+            $union = current($data);
             foreach ($data as $item) {
-                $union = array_merge($union, $item);
+                $diff = array_diff($union, $item);
+                if(!empty($diff)) {
+                    throw new DataStoreException("Select list is not groupBy clause.");
+                }
             }
+
             $result = array_merge($result, [$union]);
         }
         return $result;
@@ -274,7 +286,9 @@ abstract class DataStoreAbstract implements DataStoresInterface
             foreach ($group as $item) {
                 $key = '';
                 foreach ($groupFields as $groupField) {
-                    $key .= $item[$groupField];
+                    if(array_key_exists($groupField, $item)) {
+                        $key .= $item[$groupField];
+                    }
                 }
                 $newGroup[$key][] = $item;
             }
