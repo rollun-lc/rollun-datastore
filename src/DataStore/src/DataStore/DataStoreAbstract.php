@@ -465,6 +465,12 @@ abstract class DataStoreAbstract implements DataStoresInterface
 
     /**
      * Return DataStore fields Name and type.
+     * [
+     *      "fieldName" => [
+     *          'field_type' => 'Integer',
+     *      ],
+     *      ...
+     * ]
      * @return array
      */
     public function getFieldsInfo()

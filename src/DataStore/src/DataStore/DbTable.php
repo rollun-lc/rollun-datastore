@@ -14,6 +14,7 @@ use rollun\datastore\DataStore\Interfaces\SqlQueryGetterInterface;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
 use rollun\datastore\Rql\RqlQuery;
+use rollun\datastore\TableGateway\TableManagerMysql;
 use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
 use Zend\Db\Adapter\Adapter;
@@ -398,4 +399,17 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         $sql = str_replace(["`(", ")`", "``"], ['(', ')', "`"], $sql);
         return $sql;
     }
+
+    /**
+     * @return array
+     */
+    public function getFieldsInfo()
+    {
+        $fieldsInfo = [];
+        $mysqlManager = new TableManagerMysql();
+
+        return $fieldsInfo;
+    }
+
+
 }
