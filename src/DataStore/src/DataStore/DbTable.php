@@ -126,6 +126,7 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         /** @var Adapter $adapter */
         $adapter = $this->dbTable->getAdapter();
         $sql = $this->getSqlQuery($query);
+        echo $sql;
         try {
             $rowset = $adapter->query($sql, $adapter::QUERY_MODE_EXECUTE);
         } catch (\PDOException $exception) {
@@ -164,14 +165,6 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         $sort = $query->getSort();
         if (!$sort || empty($sort->getFields())) {
             return $selectSQL;
-            /*$sort = new SortNode();
-            if ($query->getSelect()) {
-                foreach ($query->getSelect()->getFields() as $field) {
-                    if (is_string($field)) {
-                        $sort->addField($field);
-                    }
-                }
-            }*/
         }
         $sortFields = $sort->getFields();
 
@@ -202,7 +195,6 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
 
             foreach ($selectFields as $field) {
                 if ($field instanceof AggregateFunctionNode) {
-                    //$fields[$field->getField() . "->" . $field->getFunction()] = new Expression($field->__toString());
                     $fields[$field->__toString()."`"] = new Expression($field->__toString());
                 } else {
                     $fields[] = $field;

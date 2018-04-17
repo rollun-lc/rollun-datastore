@@ -11,6 +11,7 @@ namespace rollun\test\datastore\DataStore\Query;
 
 use PHPUnit\Framework\Assert;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node\AbstractQueryNode;
 use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
 use Xiag\Rql\Parser\Node\Query\ArrayOperator\OutNode;
@@ -315,13 +316,6 @@ trait QueryTestTrait
                         $this->getAgeFieldName() => 22,
                         $this->getTextFieldName() => "text"
                     ],
-                    [
-                        $this->getDataStoreIdentifier() => 3,
-                        $this->getNameFieldName() => "name1",
-                        $this->getSurnameFieldName() => "025",
-                        $this->getAgeFieldName() => 12,
-                        $this->getTextFieldName() => "123.43"
-                    ],
                 ]
             ],
             "grate then or equals id" => [
@@ -381,6 +375,20 @@ trait QueryTestTrait
             "grate then or equals numeric text" => [
                 $this->getTextFieldName(), "123.43", [
                     [
+                        $this->getDataStoreIdentifier() => 1,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "surname1",
+                        $this->getAgeFieldName() => 21,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 2,
+                        $this->getNameFieldName() => "name2",
+                        $this->getSurnameFieldName() => "surname2",
+                        $this->getAgeFieldName() => 22,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
                         $this->getDataStoreIdentifier() => 3,
                         $this->getNameFieldName() => "name1",
                         $this->getSurnameFieldName() => "025",
@@ -408,13 +416,6 @@ trait QueryTestTrait
                         $this->getSurnameFieldName() => "surname2",
                         $this->getAgeFieldName() => 22,
                         $this->getTextFieldName() => "text"
-                    ],
-                    [
-                        $this->getDataStoreIdentifier() => 3,
-                        $this->getNameFieldName() => "name1",
-                        $this->getSurnameFieldName() => "025",
-                        $this->getAgeFieldName() => 12,
-                        $this->getTextFieldName() => "123.43"
                     ],
                 ]
             ],
@@ -449,17 +450,24 @@ trait QueryTestTrait
                         $this->getAgeFieldName() => 22,
                         $this->getTextFieldName() => "text"
                     ],
-                    [
-                        $this->getDataStoreIdentifier() => 3,
-                        $this->getNameFieldName() => "name1",
-                        $this->getSurnameFieldName() => "025",
-                        $this->getAgeFieldName() => 12,
-                        $this->getTextFieldName() => "123.43"
-                    ],
                 ]
             ],
             "grate then numeric text" => [
                 $this->getTextFieldName(), "123.42", [
+                    [
+                        $this->getDataStoreIdentifier() => 1,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "surname1",
+                        $this->getAgeFieldName() => 21,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 2,
+                        $this->getNameFieldName() => "name2",
+                        $this->getSurnameFieldName() => "surname2",
+                        $this->getAgeFieldName() => 22,
+                        $this->getTextFieldName() => "text"
+                    ],
                     [
                         $this->getDataStoreIdentifier() => 3,
                         $this->getNameFieldName() => "name1",
@@ -533,6 +541,27 @@ trait QueryTestTrait
             "grate then or equals numeric surname" => [
                 $this->getSurnameFieldName(), 25, [
                     [
+                        $this->getDataStoreIdentifier() => 0,
+                        $this->getNameFieldName() => "name0",
+                        $this->getSurnameFieldName() => "surname0",
+                        $this->getAgeFieldName() => 20,
+                        $this->getTextFieldName() => ""
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 1,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "surname1",
+                        $this->getAgeFieldName() => 21,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 2,
+                        $this->getNameFieldName() => "name2",
+                        $this->getSurnameFieldName() => "surname2",
+                        $this->getAgeFieldName() => 22,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
                         $this->getDataStoreIdentifier() => 3,
                         $this->getNameFieldName() => "name1",
                         $this->getSurnameFieldName() => "025",
@@ -568,6 +597,13 @@ trait QueryTestTrait
             ],
             "grate then or equals numeric text" => [
                 $this->getTextFieldName(), "123.43", [
+                    [
+                        $this->getDataStoreIdentifier() => 0,
+                        $this->getNameFieldName() => "name0",
+                        $this->getSurnameFieldName() => "surname0",
+                        $this->getAgeFieldName() => 20,
+                        $this->getTextFieldName() => ""
+                    ],
                     [
                         $this->getDataStoreIdentifier() => 3,
                         $this->getNameFieldName() => "name1",
@@ -627,6 +663,27 @@ trait QueryTestTrait
             "grate then or equals numeric surname" => [
                 $this->getSurnameFieldName(), 26, [
                     [
+                        $this->getDataStoreIdentifier() => 0,
+                        $this->getNameFieldName() => "name0",
+                        $this->getSurnameFieldName() => "surname0",
+                        $this->getAgeFieldName() => 20,
+                        $this->getTextFieldName() => ""
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 1,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "surname1",
+                        $this->getAgeFieldName() => 21,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 2,
+                        $this->getNameFieldName() => "name2",
+                        $this->getSurnameFieldName() => "surname2",
+                        $this->getAgeFieldName() => 22,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
                         $this->getDataStoreIdentifier() => 3,
                         $this->getNameFieldName() => "name1",
                         $this->getSurnameFieldName() => "025",
@@ -649,6 +706,13 @@ trait QueryTestTrait
             "grate then or equals numeric text" => [
                 $this->getTextFieldName(), "123.44", [
                     [
+                        $this->getDataStoreIdentifier() => 0,
+                        $this->getNameFieldName() => "name0",
+                        $this->getSurnameFieldName() => "surname0",
+                        $this->getAgeFieldName() => 20,
+                        $this->getTextFieldName() => ""
+                    ],
+                    [
                         $this->getDataStoreIdentifier() => 3,
                         $this->getNameFieldName() => "name1",
                         $this->getSurnameFieldName() => "025",
@@ -668,7 +732,94 @@ trait QueryTestTrait
     {
         $this->setInitialData($this->getInitDataForDataStore());
         return [
-
+            "in name" => [
+                $this->getNameFieldName(), ["name1", "name0"],
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 0,
+                        $this->getNameFieldName() => "name0",
+                        $this->getSurnameFieldName() => "surname0",
+                        $this->getAgeFieldName() => 20,
+                        $this->getTextFieldName() => ""
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 1,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "surname1",
+                        $this->getAgeFieldName() => 21,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 3,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "025",
+                        $this->getAgeFieldName() => 12,
+                        $this->getTextFieldName() => "123.43"
+                    ],
+                ]
+            ],
+            "in surname with numeric" => [
+                $this->getSurnameFieldName(), [25, 1],
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 3,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "025",
+                        $this->getAgeFieldName() => 12,
+                        $this->getTextFieldName() => "123.43"
+                    ],
+                ]
+            ],
+            "in surname with numeric string" => [
+                $this->getSurnameFieldName(), ["025", 1],
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 3,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "025",
+                        $this->getAgeFieldName() => 12,
+                        $this->getTextFieldName() => "123.43"
+                    ],
+                ]
+            ],
+            "in age" => [
+                $this->getAgeFieldName(), [22, 12],
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 2,
+                        $this->getNameFieldName() => "name2",
+                        $this->getSurnameFieldName() => "surname2",
+                        $this->getAgeFieldName() => 22,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 3,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "025",
+                        $this->getAgeFieldName() => 12,
+                        $this->getTextFieldName() => "123.43"
+                    ],
+                ]
+            ],
+            "in text  with numeric" => [
+                $this->getTextFieldName(), ["123.43", ""],
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 0,
+                        $this->getNameFieldName() => "name0",
+                        $this->getSurnameFieldName() => "surname0",
+                        $this->getAgeFieldName() => 20,
+                        $this->getTextFieldName() => ""
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 3,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "025",
+                        $this->getAgeFieldName() => 12,
+                        $this->getTextFieldName() => "123.43"
+                    ],
+                ]
+            ],
         ];
     }
 
@@ -680,7 +831,82 @@ trait QueryTestTrait
     {
         $this->setInitialData($this->getInitDataForDataStore());
         return [
-
+            "in name" => [
+                $this->getNameFieldName(), ["name1", "name0"],
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 2,
+                        $this->getNameFieldName() => "name2",
+                        $this->getSurnameFieldName() => "surname2",
+                        $this->getAgeFieldName() => 22,
+                        $this->getTextFieldName() => "text"
+                    ],
+                ]
+            ],
+            "in surname with numeric" => [
+                $this->getSurnameFieldName(), [25, 1],
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 0,
+                        $this->getNameFieldName() => "name0",
+                        $this->getSurnameFieldName() => "surname0",
+                        $this->getAgeFieldName() => 20,
+                        $this->getTextFieldName() => ""
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 1,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "surname1",
+                        $this->getAgeFieldName() => 21,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 2,
+                        $this->getNameFieldName() => "name2",
+                        $this->getSurnameFieldName() => "surname2",
+                        $this->getAgeFieldName() => 22,
+                        $this->getTextFieldName() => "text"
+                    ],
+                ]
+            ],
+            "in age" => [
+                $this->getAgeFieldName(), [22, 12],
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 0,
+                        $this->getNameFieldName() => "name0",
+                        $this->getSurnameFieldName() => "surname0",
+                        $this->getAgeFieldName() => 20,
+                        $this->getTextFieldName() => ""
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 1,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "surname1",
+                        $this->getAgeFieldName() => 21,
+                        $this->getTextFieldName() => "text"
+                    ],
+                ]
+            ],
+            "in text  with numeric" => [
+                $this->getTextFieldName(), ["123.43", ""],
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 1,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "surname1",
+                        $this->getAgeFieldName() => 21,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 2,
+                        $this->getNameFieldName() => "name2",
+                        $this->getSurnameFieldName() => "surname2",
+                        $this->getAgeFieldName() => 22,
+                        $this->getTextFieldName() => "text"
+                    ],
+                ]
+            ],
         ];
     }
 
@@ -692,7 +918,110 @@ trait QueryTestTrait
     {
         $this->setInitialData($this->getInitDataForDataStore());
         return [
-
+             [
+                 $this->getNameFieldName(), new Glob("name?"),
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 0,
+                        $this->getNameFieldName() => "name0",
+                        $this->getSurnameFieldName() => "surname0",
+                        $this->getAgeFieldName() => 20,
+                        $this->getTextFieldName() => ""
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 1,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "surname1",
+                        $this->getAgeFieldName() => 21,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 2,
+                        $this->getNameFieldName() => "name2",
+                        $this->getSurnameFieldName() => "surname2",
+                        $this->getAgeFieldName() => 22,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 3,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "025",
+                        $this->getAgeFieldName() => 12,
+                        $this->getTextFieldName() => "123.43"
+                    ],
+                ]
+             ],
+            [
+                $this->getSurnameFieldName(), new Glob("s*0*"),
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 0,
+                        $this->getNameFieldName() => "name0",
+                        $this->getSurnameFieldName() => "surname0",
+                        $this->getAgeFieldName() => 20,
+                        $this->getTextFieldName() => ""
+                    ],
+                ]
+            ],
+            [
+                $this->getAgeFieldName(), new Glob("2?"),
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 0,
+                        $this->getNameFieldName() => "name0",
+                        $this->getSurnameFieldName() => "surname0",
+                        $this->getAgeFieldName() => 20,
+                        $this->getTextFieldName() => ""
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 1,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "surname1",
+                        $this->getAgeFieldName() => 21,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 2,
+                        $this->getNameFieldName() => "name2",
+                        $this->getSurnameFieldName() => "surname2",
+                        $this->getAgeFieldName() => 22,
+                        $this->getTextFieldName() => "text"
+                    ],
+                ]
+            ],
+            [
+                $this->getTextFieldName(), new Glob("*"),
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 0,
+                        $this->getNameFieldName() => "name0",
+                        $this->getSurnameFieldName() => "surname0",
+                        $this->getAgeFieldName() => 20,
+                        $this->getTextFieldName() => ""
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 1,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "surname1",
+                        $this->getAgeFieldName() => 21,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 2,
+                        $this->getNameFieldName() => "name2",
+                        $this->getSurnameFieldName() => "surname2",
+                        $this->getAgeFieldName() => 22,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 3,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "025",
+                        $this->getAgeFieldName() => 12,
+                        $this->getTextFieldName() => "123.43"
+                    ],
+                ]
+            ],
         ];
     }
 
@@ -704,7 +1033,30 @@ trait QueryTestTrait
     {
         $this->setInitialData($this->getInitDataForDataStore());
         return [
-
+            "select with name and age grate then or equals " => [
+                [new EqNode($this->getNameFieldName(), "name1"), new GeNode($this->getAgeFieldName(), 20)],
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 1,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "surname1",
+                        $this->getAgeFieldName() => 21,
+                        $this->getTextFieldName() => "text"
+                    ],
+                ]
+            ],
+            "select with name not eq " => [
+                [new NeNode($this->getNameFieldName(), "name1"), new LikeNode($this->getTextFieldName(), new Glob("t*"))],
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 2,
+                        $this->getNameFieldName() => "name2",
+                        $this->getSurnameFieldName() => "surname2",
+                        $this->getAgeFieldName() => 22,
+                        $this->getTextFieldName() => "text"
+                    ],
+                ]
+            ],
         ];
     }
 
@@ -716,7 +1068,58 @@ trait QueryTestTrait
     {
         $this->setInitialData($this->getInitDataForDataStore());
         return [
-
+            "select with name or age grate then " => [
+                [new EqNode($this->getNameFieldName(), "name1"), new GtNode($this->getAgeFieldName(), 20)],
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 1,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "surname1",
+                        $this->getAgeFieldName() => 21,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 2,
+                        $this->getNameFieldName() => "name2",
+                        $this->getSurnameFieldName() => "surname2",
+                        $this->getAgeFieldName() => 22,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 3,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "025",
+                        $this->getAgeFieldName() => 12,
+                        $this->getTextFieldName() => "123.43"
+                    ],
+                ]
+            ],
+            "select with name not equals or  " => [
+                [new NeNode($this->getNameFieldName(), "name1"), new LikeNode($this->getTextFieldName(), new Glob("t*"))],
+                [
+                    [
+                        $this->getDataStoreIdentifier() => 0,
+                        $this->getNameFieldName() => "name0",
+                        $this->getSurnameFieldName() => "surname0",
+                        $this->getAgeFieldName() => 20,
+                        $this->getTextFieldName() => ""
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 1,
+                        $this->getNameFieldName() => "name1",
+                        $this->getSurnameFieldName() => "surname1",
+                        $this->getAgeFieldName() => 21,
+                        $this->getTextFieldName() => "text"
+                    ],
+                    [
+                        $this->getDataStoreIdentifier() => 2,
+                        $this->getNameFieldName() => "name2",
+                        $this->getSurnameFieldName() => "surname2",
+                        $this->getAgeFieldName() => 22,
+                        $this->getTextFieldName() => "text"
+                    ],
+                ]
+            ],
         ];
     }
 
@@ -826,7 +1229,7 @@ trait QueryTestTrait
      * @param $expectedResult
      * @dataProvider provideInSuccessData
      */
-    public function testInSuccess($field, $values, $expectedResult)
+    public function testInSuccess($field, array $values, $expectedResult)
     {
         $query = new Query();
         $query->setQuery(new InNode($field, $values));
@@ -840,7 +1243,7 @@ trait QueryTestTrait
      * @param $expectedResult
      * @dataProvider provideOutSuccessData
      */
-    public function testOutSuccess($field, $values, $expectedResult)
+    public function testOutSuccess($field, array $values, $expectedResult)
     {
         $query = new Query();
         $query->setQuery(new OutNode($field, $values));

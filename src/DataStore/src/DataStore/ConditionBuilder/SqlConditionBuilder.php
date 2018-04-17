@@ -74,7 +74,13 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
     public function prepareFieldValue($fieldValue)
     {
         $fieldValue = parent::prepareFieldValue($fieldValue);
-        return $this->db->platform->quoteValue($fieldValue);
+        if(!is_string($fieldValue) && is_integer($fieldValue)){
+            return (int)$fieldValue;
+        }elseif(!is_string($fieldValue) && is_float($fieldValue)){
+            return (float)$fieldValue;
+        }else {
+            return $this->db->platform->quoteValue($fieldValue);
+        }
     }
 
     /**
