@@ -132,17 +132,15 @@ class DataStoreRest extends Middleware\DataStoreAbstract
 
         $rqlLimitNode = $rqlQueryObject->getLimit();
 
-        //TODO: count aggregate fn can't work with limit and offset. Bug!!!
         $rowset = $this->dataStore->query($rqlQueryObject);
         $this->request = $request->withAttribute('responseData', $rowset);
 
         if ($rqlLimitNode) {
             $rqlQueryObject->setLimit(new LimitNode(ReadInterface::LIMIT_INFINITY));
-            $rqlQueryObject->setSelect(new SelectNode([
-                new AggregateFunctionNode('count', $this->dataStore->getIdentifier())
-            ]));
+            $aggregateCountFunc = new AggregateFunctionNode('count', $this->dataStore->getIdentifier());
+            $rqlQueryObject->setSelect(new SelectNode([$aggregateCountFunc]));
             $aggregateCount = $this->dataStore->query($rqlQueryObject);
-            $count = current($aggregateCount)["count->".$this->dataStore->getIdentifier()];
+            $count = current($aggregateCount)["$aggregateCountFunc"];
             $offset = !is_null($rqlLimitNode->getOffset()) ? $rqlLimitNode->getOffset() : '0';
             $limit = !is_null($rqlLimitNode->getLimit()) ?
                 ($rqlLimitNode->getLimit() == ReadInterface::LIMIT_INFINITY ? $count : $rqlLimitNode->getLimit()) :

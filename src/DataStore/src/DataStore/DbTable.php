@@ -126,7 +126,6 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         /** @var Adapter $adapter */
         $adapter = $this->dbTable->getAdapter();
         $sql = $this->getSqlQuery($query);
-        echo $sql;
         try {
             $rowset = $adapter->query($sql, $adapter::QUERY_MODE_EXECUTE);
         } catch (\PDOException $exception) {

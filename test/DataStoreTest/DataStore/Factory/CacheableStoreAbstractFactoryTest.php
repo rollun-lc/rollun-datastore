@@ -8,7 +8,9 @@
 
 namespace rollun\test\datastore\DataStore\Factory;
 
-class CacheableStoreAbstractFactoryTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class CacheableStoreAbstractFactoryTest extends TestCase
 {
     /**
      * @var Returner

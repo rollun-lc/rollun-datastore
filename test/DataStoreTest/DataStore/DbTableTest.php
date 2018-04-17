@@ -170,7 +170,7 @@ class DbTableTest extends AbstractTest
         try {
             $result = $this->object->query($query);
             $this->assertEquals($expected, $result);//Assert false.
-        }catch (PDOException $exception) {
+        }catch (\Throwable $exception) {
             $this->assertTrue(true);
         }
     }

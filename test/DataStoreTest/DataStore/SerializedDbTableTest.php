@@ -139,6 +139,7 @@ class SerializedDbTableTest extends AbstractTest
     {
         $this->_initObject();
         $data = serialize($this->object);
-        $this->object = unserialize($data);
+        $object = unserialize($data);
+        $this->assertEquals($this->object, $object);
     }
 }

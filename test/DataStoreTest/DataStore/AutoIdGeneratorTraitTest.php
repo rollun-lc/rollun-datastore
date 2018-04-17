@@ -2,6 +2,7 @@
 
 namespace rollun\test\datastore\DataStore;
 
+use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Memory;
@@ -9,7 +10,7 @@ use rollun\datastore\DataStore\Traits\AutoIdGeneratorTrait;
 use rollun\utils\IdGenerator;
 use Xiag\Rql\Parser\Query;
 
-class AutoIdGeneratorTraitTest extends \PHPUnit_Framework_TestCase
+class AutoIdGeneratorTraitTest extends TestCase
 {
     /**
      * @var DataStoresInterface with AutoIdGeneratorTrait

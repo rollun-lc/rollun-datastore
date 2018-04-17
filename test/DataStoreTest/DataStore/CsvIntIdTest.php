@@ -53,6 +53,9 @@ class CsvIntIdTest extends CsvBaseTest
         );
     }
 
+    /**
+     * @expectedException \rollun\datastore\DataStore\DataStoreException
+     */
     public function testIntegrityNotSortedData()
     {
         $itemData = $this->_itemsArrayDelault;
@@ -69,10 +72,12 @@ class CsvIntIdTest extends CsvBaseTest
             'fString' => ''
         );
         $this->_initObject($itemData);
-        $this->setExpectedException('\rollun\datastore\DataStore\DataStoreException');
         $this->object->checkIntegrityData();
     }
 
+    /**
+     * @expectedException \rollun\datastore\DataStore\DataStoreException
+     */
     public function testIntegrity_TryingToWriteNotIntegerPrimaryKey()
     {
         $this->_initObject();
@@ -82,7 +87,6 @@ class CsvIntIdTest extends CsvBaseTest
             'fFloat' => 1000.01,
             'fString' => ''
         );
-        $this->setExpectedException('\rollun\datastore\DataStore\DataStoreException');
         $this->object->create($itemData);
     }
 }

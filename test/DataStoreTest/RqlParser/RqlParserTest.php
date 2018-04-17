@@ -10,7 +10,6 @@
 namespace rollun\test\datastore\RqlParser;
 
 use phpDocumentor\Reflection\Types\Object_;
-use PHPUnit_Framework_TestCase;
 use rollun\datastore\Rql\Node\ContainsNode;
 use rollun\datastore\Rql\Node\GroupbyNode;
 use rollun\datastore\Rql\RqlQuery;
@@ -31,8 +30,9 @@ use Xiag\Rql\Parser\Query;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
 use rollun\datastore\Rql\RqlParser;
+use PHPUnit\Framework\TestCase;
 
-class RqlParserTest extends PHPUnit_Framework_TestCase
+class RqlParserTest extends TestCase
 {
 
     /** @var  RqlParser */

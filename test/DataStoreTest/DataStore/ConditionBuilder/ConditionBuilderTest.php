@@ -9,12 +9,13 @@
 
 namespace rollun\test\datastore\DataStore\ConditionBuilder;
 
+use PHPUnit\Framework\TestCase;
 use Xiag\Rql\Parser\DataType\Glob;
 
 /**
  *
  */
-abstract class ConditionBuilderTest extends \PHPUnit_Framework_TestCase
+abstract class ConditionBuilderTest extends TestCase
 {
     /*
      * var PhpConditionBuilder

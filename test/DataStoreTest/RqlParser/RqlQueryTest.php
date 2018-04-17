@@ -9,6 +9,7 @@
 
 namespace rollun\test\datastore\RqlParser;
 
+use PHPUnit\Framework\TestCase;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\OrNode;
@@ -22,7 +23,7 @@ use rollun\datastore\Rql\Node\AggregateSelectNode;
 use rollun\datastore\Rql\RqlQuery;
 use Zend\Db\Adapter\Platform\Oracle;
 
-class RqlQueryTest extends \PHPUnit_Framework_TestCase
+class RqlQueryTest extends TestCase
 {
 
     /** @var  RqlQuery */

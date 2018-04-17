@@ -161,8 +161,8 @@ abstract class DataStoreAbstract implements DataStoresInterface
 
         $fields = [];
         $fields = array_merge($fields, !is_null($query->getSelect() ) ? $query->getSelect()->getFields() : []);
-        $fields = array_merge($fields, !is_null($query->getSort()) ? array_keys($query->getSort()->getFields()) : []);
-        $fields = array_merge($fields, ($query instanceof GroupbyNode && !is_null($query->getGroupby())) ? $query->getGroupby()->getFields() : []);
+        //$fields = array_merge($fields, !is_null($query->getSort()) ? array_keys($query->getSort()->getFields()) : []);
+        //$fields = array_merge($fields, ($query instanceof GroupbyNode && !is_null($query->getGroupby())) ? $query->getGroupby()->getFields() : []);
         if (!empty($fields)) {
             $selectedFields = array_filter($fields, function ($item) {
                 return !$item instanceof AggregateFunctionNode;
