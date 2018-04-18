@@ -94,9 +94,10 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         $constQuestion = 'question_hjc7vjHg6jd8mv8hcy75GFt0c67cnbv74FegxtEDJkcucG64frblmkb';
 
         $glob = parent::getValueFromGlob($globNode);
-
+        $glob = addcslashes($glob, "%_");
+        //$glob = str_replace(["%", "_"], ["\%", "\_"], $glob);
         $regexSQL = strtr(
-            preg_quote(rawurldecode(strtr($glob, ['*' => $constStar, '?' => $constQuestion])), '/'), [$constStar => '%', $constQuestion => '_']
+            /*preg_quote(*/rawurldecode(strtr($glob, ['*' => $constStar, '?' => $constQuestion]))/*, '/')*/, [$constStar => '%', $constQuestion => '_']
         );
 
         return $regexSQL;
@@ -117,10 +118,9 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
                 'The Scalar Operator not suppoted: ' . $nodeName
             );
         }
-        $value = $node->getValue() instanceof \DateTime ? $node->getValue()->format("Y-m-d") : $node->getValue();
+        $value = $node->getValue() instanceof \DateTime ? $node->getValue()->format("Y-m-d H:i:s") : $node->getValue();
         $strQuery = $this->literals['ScalarOperator'][$nodeName]['before']
             . $this->prepareFieldName($node->getField());
-
         if (is_null($value)) {
             if ($nodeName === 'eq') {
                 $strQuery .= "IS NULL";
