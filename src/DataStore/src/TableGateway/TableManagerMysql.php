@@ -12,6 +12,7 @@ namespace rollun\datastore\TableGateway;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\RestException;
 use Zend\Db\Adapter;
+use Zend\Db\Metadata\Object\ColumnObject;
 use Zend\Db\Metadata\Source;
 use Zend\Db\Metadata\Source\Factory;
 use Zend\Db\Sql;
@@ -105,7 +106,7 @@ class TableManagerMysql
 
     /**
      *
-     * @var \Zend\Db\Adapter\AdapterInterface
+     * @var \Zend\Db\Adapter\Adapter
      */
     protected $db;
 
@@ -136,13 +137,36 @@ class TableManagerMysql
     ];
 
     /**
+     * Mapping for mysql type -> config type
+     * @var array
+     */
+    protected $typeMapping = [
+        "bigint" => "BigInteger",
+        "boolean" => "Boolean",
+        "date" => "Date",
+        "datetime" => "Datetime",
+        "int" => "Integer",
+        "time" => "Time",
+        "timestamp" => "Timestamp",
+        "binary" => "Binary",
+        "blob" => "Blob",
+        "char" => "Char",
+        "text" => "Text",
+        "varbinary" => "Varbinary",
+        "varchar" => "Varchar",
+        "decimal" => "Decimal",
+        "float" => "Float",
+        "floating" => "Floating",
+    ];
+
+    /**
      * TableManagerMysql constructor.
      *
-     * @param Adapter\AdapterInterface $db
+     * @param Adapter\Adapter $db
      * @param null $config
      * @throws \ReflectionException
      */
-    public function __construct(Adapter\AdapterInterface $db, $config = null)
+    public function __construct(Adapter\Adapter $db, $config = null)
     {
         $this->db = $db;
         $this->config = $config;
@@ -277,6 +301,7 @@ class TableManagerMysql
         $tableNames = $dbMetadata->getTableNames();
         return in_array($tableName, $tableNames);
     }
+
     /**
      * Checks if the table exists
      *
@@ -340,7 +365,7 @@ class TableManagerMysql
         $isPrimaryKeySet = false;
         $primaryKeys = [];
         foreach ($tableConfigArray as $fieldName => $fieldData) {
-            if(isset($fieldData[static::PRIMARY_KEY])) {
+            if (isset($fieldData[static::PRIMARY_KEY])) {
                 $primaryKeys[] = $fieldName;
                 $isPrimaryKeySet = true;
             }
@@ -377,7 +402,7 @@ class TableManagerMysql
                 $alterTable->addConstraint($foreignKeyInstance);
             }
         }
-        if($isPrimaryKeySet) {
+        if ($isPrimaryKeySet) {
             $table->addConstraint(new Constraint\PrimaryKey(...$primaryKeys));
         } else {
             $table->addConstraint(new Constraint\PrimaryKey('id'));
@@ -453,4 +478,32 @@ class TableManagerMysql
         return $columnsNames;
     }
 
+    /**
+     * @param $tableName
+     * @return array
+     */
+    public function getTableInfo($tableName)
+    {
+        $tableInfo = [];
+
+        $metadata = Factory::createSourceFromAdapter($this->db);
+        $table = $metadata->getTable($tableName);
+
+        /** @var ColumnObject $column */
+        foreach ($table->getColumns() as $column) {
+            $columnInfo = [
+                static::FIELD_TYPE => $this->typeMapping[$column->getDataType()],
+                static::FIELD_PARAMS => [],
+            ];
+            if($column->getIsNullable()) {
+                $columnInfo[static::FIELD_PARAMS]["nullable"] = $column->getIsNullable();
+            }
+            if(!is_null($column->getColumnDefault())) {
+                $columnInfo[static::FIELD_PARAMS]["default"] = $column->getColumnDefault();
+            }
+
+            $tableInfo[$column->getName()] = $columnInfo;
+        }
+        return $tableInfo;
+    }
 }

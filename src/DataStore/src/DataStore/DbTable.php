@@ -402,12 +402,12 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
 
     /**
      * @return array
+     * @throws \ReflectionException
      */
     public function getFieldsInfo()
     {
-        $fieldsInfo = [];
-        $mysqlManager = new TableManagerMysql();
-
+        $mysqlManager = new TableManagerMysql($this->dbTable->getAdapter(), []);
+        $fieldsInfo = $mysqlManager->getTableInfo($this-$this->dbTable->getTable());
         return $fieldsInfo;
     }
 

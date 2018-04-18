@@ -2,6 +2,8 @@
 
 namespace rollun\test\datastore\TableGateway;
 
+use Interop\Container\ContainerInterface;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\TableGateway\TableManagerMysql;
 use Zend\Db\Adapter\Adapter;
@@ -13,7 +15,7 @@ class TableManagerMysqlTest extends TestCase
 {
 
     /**
-     * @var Returner
+     * @var TableManagerMysql
      */
     protected $object;
 
@@ -130,15 +132,15 @@ class TableManagerMysqlTest extends TestCase
         $this->object->createTable($this->tableName, 'test_config_table');
 
         $this->assertSame(
-                '    With columns: ' . PHP_EOL .
-                '        id -> int' . PHP_EOL .
-                '        name -> varchar' . PHP_EOL . PHP_EOL .
-                '    With constraints: ' . PHP_EOL .
-                '        _zf_test_create_table_PRIMARY -> PRIMARY KEY' . PHP_EOL .
-                '            column: id' . PHP_EOL .
-                '        _zf_test_create_table_UniqueKey_test_create_table_name -> UNIQUE' . PHP_EOL .
-                '            column: name' . PHP_EOL
-                , $this->object->getTableInfoStr($this->tableName)
+            '    With columns: ' . PHP_EOL .
+            '        id -> int' . PHP_EOL .
+            '        name -> varchar' . PHP_EOL . PHP_EOL .
+            '    With constraints: ' . PHP_EOL .
+            '        _zf_test_create_table_PRIMARY -> PRIMARY KEY' . PHP_EOL .
+            '            column: id' . PHP_EOL .
+            '        _zf_test_create_table_UniqueKey_test_create_table_name -> UNIQUE' . PHP_EOL .
+            '            column: name' . PHP_EOL
+            , $this->object->getTableInfoStr($this->tableName)
         );
     }
 
@@ -147,19 +149,43 @@ class TableManagerMysqlTest extends TestCase
         $this->object->rewriteTable('table_slave', 'test_config_table_slave');
         $this->object->rewriteTable('table_master', 'test_config_table_mastet');
         $this->assertSame(
-                '    With columns: ' . PHP_EOL .
-                '        id -> int' . PHP_EOL .
-                '        name -> varchar' . PHP_EOL .
-                PHP_EOL .
-                '    With constraints: ' . PHP_EOL .
-                '        _zf_table_master_PRIMARY -> PRIMARY KEY' . PHP_EOL .
-                '            column: id' . PHP_EOL .
-                '        ForeignKey_table_master_name -> FOREIGN KEY' . PHP_EOL .
-                '            column: name => table_slave.id' . PHP_EOL .
-                '            OnDeleteRule: CASCADE' . PHP_EOL .
-                '            OnUpdateRule: NO ACTION' . PHP_EOL
-                , $this->object->getTableInfoStr('table_master')
+            '    With columns: ' . PHP_EOL .
+            '        id -> int' . PHP_EOL .
+            '        name -> varchar' . PHP_EOL .
+            PHP_EOL .
+            '    With constraints: ' . PHP_EOL .
+            '        _zf_table_master_PRIMARY -> PRIMARY KEY' . PHP_EOL .
+            '            column: id' . PHP_EOL .
+            '        ForeignKey_table_master_name -> FOREIGN KEY' . PHP_EOL .
+            '            column: name => table_slave.id' . PHP_EOL .
+            '            OnDeleteRule: CASCADE' . PHP_EOL .
+            '            OnUpdateRule: NO ACTION' . PHP_EOL
+            , $this->object->getTableInfoStr('table_master')
         );
+    }
+
+    /**
+     *
+     * @throws \ReflectionException
+     */
+    public function testTableInfoSuccess()
+    {
+        $this->object->rewriteTable($this->tableName, "test_config_table");
+        $tableInfo = $this->object->getTableInfo($this->tableName);
+        Assert::assertEquals([
+            'id' => [
+                'field_type' => 'Integer',
+                'field_params' => [
+                ]
+            ],
+            'name' => [
+                'field_type' => 'Varchar',
+                'field_params' => [
+                    'nullable' => true,
+                    'default' => 'what?'
+                ],
+            ]
+        ], $tableInfo);
     }
 
 }
