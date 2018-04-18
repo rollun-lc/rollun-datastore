@@ -105,7 +105,7 @@ class TableManagerMysql
 
     /**
      *
-     * @var \Zend\Db\Adapter\Adapter
+     * @var \Zend\Db\Adapter\AdapterInterface
      */
     protected $db;
 
@@ -138,11 +138,11 @@ class TableManagerMysql
     /**
      * TableManagerMysql constructor.
      *
-     * @param Adapter\Adapter $db
+     * @param Adapter\AdapterInterface $db
      * @param null $config
      * @throws \ReflectionException
      */
-    public function __construct(Adapter\Adapter $db, $config = null)
+    public function __construct(Adapter\AdapterInterface $db, $config = null)
     {
         $this->db = $db;
         $this->config = $config;
@@ -206,7 +206,7 @@ class TableManagerMysql
     public function deleteTable($tableName)
     {
         $deleteStatementStr = "DROP TABLE IF EXISTS "
-            . $this->db->platform->quoteIdentifier($tableName);
+            . $this->db->getPlatform()->quoteIdentifier($tableName);
         $deleteStatement = $this->db->query($deleteStatementStr);
         return $deleteStatement->execute();
     }
