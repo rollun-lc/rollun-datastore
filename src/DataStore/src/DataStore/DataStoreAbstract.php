@@ -141,7 +141,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
         //select/groupBy
         if ($query instanceof RqlQuery && $query->getGroupby() != null) {
             $result = $this->queryGroupBy($result, $query);
-            if(!$query->getSort() || empty($query->getSort()->getFields())) {
+            if (!$query->getSort() || empty($query->getSort()->getFields())) {
                 $sort = new SortNode();
                 foreach ($query->getGroupby()->getFields() as $fieldName) {
                     $sort->addField($fieldName, SortNode::SORT_ASC);
@@ -160,7 +160,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
         //TODO: need refactor
 
         $fields = [];
-        $fields = array_merge($fields, !is_null($query->getSelect() ) ? $query->getSelect()->getFields() : []);
+        $fields = array_merge($fields, !is_null($query->getSelect()) ? $query->getSelect()->getFields() : []);
         //$fields = array_merge($fields, !is_null($query->getSort()) ? array_keys($query->getSort()->getFields()) : []);
         //$fields = array_merge($fields, ($query instanceof GroupbyNode && !is_null($query->getGroupby())) ? $query->getGroupby()->getFields() : []);
         if (!empty($fields)) {
@@ -170,13 +170,13 @@ abstract class DataStoreAbstract implements DataStoresInterface
             $fieldsInItems = array_combine(array_values($selectedFields), array_fill(0, count($selectedFields), 0));
             array_map(function ($item) use (&$fieldsInItems) {
                 foreach (array_keys($fieldsInItems) as $fieldName) {
-                    if(isset($item[$fieldName])) {
+                    if (isset($item[$fieldName])) {
                         $fieldsInItems[$fieldName] += 1;
                     }
                 }
             }, $result);
             foreach ($fieldsInItems as $fieldName => $count) {
-                if($count == 0) {
+                if ($count == 0) {
                     throw new DataStoreException("Selected undefined field - $fieldName.");
                 }
             }
@@ -234,7 +234,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
     protected function querySort($data, Query $query)
     {
         $sort = $query->getSort();
-        if (!$sort || empty($sort->getFields())){
+        if (!$sort || empty($sort->getFields())) {
             $sort = new SortNode();
             $sort->addField($this->getIdentifier());
         }
@@ -270,7 +270,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
             $union = current($data);
             foreach ($data as $item) {
                 $diff = array_diff($union, $item);
-                if(!empty($diff)) {
+                if (!empty($diff)) {
                     throw new DataStoreException("Select list is not groupBy clause.");
                 }
             }
@@ -287,7 +287,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
             foreach ($group as $item) {
                 $key = '';
                 foreach ($groupFields as $groupField) {
-                    if(array_key_exists($groupField, $item)) {
+                    if (array_key_exists($groupField, $item)) {
                         $key .= $item[$groupField];
                     }
                 }
@@ -390,17 +390,6 @@ abstract class DataStoreAbstract implements DataStoresInterface
      */
     public function deleteAll()
     {
-        /* $keys = $this->getKeys();
-          $deletedItemsNumber = 0;
-          foreach ($keys as $id) {
-          $deletedNumber = $this->delete($id);
-          if (is_null($deletedNumber)) {
-          return null;
-          }
-          $deletedItemsNumber = $deletedItemsNumber + $deletedNumber;
-          }
-          return $deletedItemsNumber; */
-
         $keys = $this->getKeys();
         $deletedItemsNumber = 0;
         foreach ($keys as $id) {
@@ -460,6 +449,65 @@ abstract class DataStoreAbstract implements DataStoresInterface
     public function getIterator()
     {
         return new DataStoreIterator($this);
+    }
+
+    /**
+     * @inheritdoc
+     * @param Query $query
+     * @param mixed $itemData
+     * @return mixed
+     */
+    public function updateByQuery(Query $query, $itemData)
+    {
+        $updatedItemsData = [];
+        $result = $this->query($query);
+        foreach ($result as $item) {
+            $item = array_merge($item, $itemData);
+            $updatedItemsData[] = $this->update($item);
+        }
+        return $updatedItemsData;
+    }
+
+    /**
+     * @inheritdoc
+     * @param Query $query
+     * @return mixed
+     */
+    public function deleteByQuery(Query $query)
+    {
+        $result = $this->query($query);
+        foreach ($result as $item) {
+            $this->delete($item[$this->getIdentifier()]);
+        }
+        return $result;
+    }
+
+    /**
+     * @inheritdoc
+     * @param array $itemsData
+     * @return array
+     */
+    public function multiUpdate(array $itemsData)
+    {
+        $updatedItemsData = [];
+        foreach ($itemsData as $itemData) {
+            $updatedItemsData[] = $this->update($itemData);
+        }
+        return $updatedItemsData;
+    }
+
+    /**
+     * @inheritdoc
+     * @param array $itemsData
+     * @return array
+     */
+    public function multiCreate(array $itemsData)
+    {
+        $createdItemsData = [];
+        foreach ($itemsData as $itemData) {
+            $createdItemsData[] = $this->create($itemData);
+        }
+        return $createdItemsData;
     }
 
 

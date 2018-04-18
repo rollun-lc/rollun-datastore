@@ -10,6 +10,7 @@
 namespace rollun\datastore\DataStore\ConditionBuilder;
 
 use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
+use rollun\utils\Json\Exception;
 use Xiag\Rql\Parser\DataType\Glob;
 
 /**

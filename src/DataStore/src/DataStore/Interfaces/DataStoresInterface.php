@@ -10,6 +10,7 @@
 namespace rollun\datastore\DataStore\Interfaces;
 
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
+use Xiag\Rql\Parser\Query;
 
 /**
  * Full Interface for DataStores
@@ -52,7 +53,7 @@ interface DataStoresInterface extends ReadInterface
      * If item with PrimaryKey == $itemData["id"] is absent in the store - method  will throw exception,<br>
      * but if $createIfAbsent = true item will be created and this method return inserted item<br>
      * <br>
-     *
+     * @since 7
      * @param array $itemData associated array with PrimaryKey ["id" => 1, "field name" = "foo" ]
      * @param bool $createIfAbsent can item be created if same 'id' is absent in the store
      * @return array updated or inserted item.
@@ -66,6 +67,36 @@ interface DataStoresInterface extends ReadInterface
      * @return array from elements or null is not support
      */
     public function delete($id);
+
+    /**
+     * Update all item which satisfied query filter
+     * Use field from itemData to updated items in storage
+     * @param Query $query
+     * @param mixed $itemData
+     * @return mixed
+     */
+    public function updateByQuery(Query $query, $itemData);
+
+    /**
+     * Delete all items which satisfied query filter
+     * @param Query $query
+     * @return mixed
+     */
+    public function deleteByQuery(Query $query);
+
+    /**
+     * update array of item in storage
+     * @param array $itemsData
+     * @return array
+     */
+    public function multiUpdate(array $itemsData);
+
+    /**
+     * Create (Insert new) array of item in storage
+     * @param array $itemsData
+     * @return array
+     */
+    public function multiCreate(array $itemsData);
 
     /**
      * Delete all Items.
