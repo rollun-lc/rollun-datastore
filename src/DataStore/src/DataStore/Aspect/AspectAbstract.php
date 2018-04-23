@@ -347,7 +347,7 @@ class AspectAbstract implements DataStoresInterface
      */
     public function query(Query $query)
     {
-        $newQuery = $this->preQuery($query);
+        $newQuery = $this->preQuery(clone $query);
         $result = $this->dataStore->query($newQuery);
         return $this->postQuery($result, $newQuery);
 
@@ -400,4 +400,128 @@ class AspectAbstract implements DataStoresInterface
     {
         return $result;
     }
+
+    /**
+     * Update all item which satisfied query filter
+     * Use field from itemData to updated items in storage
+     * @param Query $query
+     * @param mixed $itemData
+     * @return mixed
+     */
+    public function updateByQuery(Query $query, $itemData)
+    {
+        list($query, $itemData) = $this->preUpdateByQuery(clone $query, $itemData);
+        $result = $this->dataStore->updateByQuery($query, $itemData);
+        return $this->postUpdateByQuery($result);
+    }
+
+    /**
+     * @param Query $query
+     * @param $itemData
+     * @return array [$query, $itemData]
+     */
+    public function preUpdateByQuery(Query $query, $itemData)
+    {
+        return [$query, $itemData];
+    }
+
+    /**
+     * @param $result
+     * @return array
+     */
+    public function postUpdateByQuery($result)
+    {
+        return $result;
+    }
+
+    /**
+     * Delete all items which satisfied query filter
+     * @param Query $query
+     * @return mixed
+     */
+    public function deleteByQuery(Query $query)
+    {
+        $query = $this->preDeleteByQuery(clone $query);
+        $result = $this->dataStore->deleteByQuery($query);
+        return $this->postDeleteByQuery($result);
+    }
+
+    /**
+     * @param Query $query
+     * @return Query
+     */
+    public function preDeleteByQuery(Query $query)
+    {
+        return $query;
+    }
+
+    /**
+     * @param $itemsData
+     * @return mixed
+     */
+    public function postDeleteByQuery($itemsData)
+    {
+        return $itemsData;
+    }
+
+    /**
+     * update array of item in storage
+     * @param array $itemsData
+     * @return array
+     */
+    public function multiUpdate(array $itemsData)
+    {
+        $itemsData = $this->preMultiUpdate($itemsData);
+        $result = $this->dataStore->multiUpdate($itemsData);
+        return $this->postMultiUpdate($result);
+    }
+
+    /**
+     * @param array $itemsData
+     * @return array
+     */
+    public function preMultiUpdate(array $itemsData)
+    {
+        return $itemsData;
+    }
+
+    /**
+     * @param array $result
+     * @return array
+     */
+    public function postMultiUpdate(array $result)
+    {
+        return $result;
+    }
+
+    /**
+     * Create (Insert new) array of item in storage
+     * @param array $itemsData
+     * @return array
+     */
+    public function multiCreate(array $itemsData)
+    {
+        $itemsData = $this->preMultiCreate($itemsData);
+        $result = $this->dataStore->multiCreate($itemsData);
+        return $this->postMultiCreate($result);
+    }
+
+    /**
+     * @param array $itemsData
+     * @return array
+     */
+    public function preMultiCreate(array $itemsData)
+    {
+        return $itemsData;
+    }
+
+    /**
+     * @param array $result
+     * @return array
+     */
+    public function postMultiCreate(array $result)
+    {
+        return $result;
+    }
 }
+

@@ -12,6 +12,7 @@ namespace rollun\datastore\TableGateway\Factory;
 use Interop\Container\ContainerInterface;
 use rollun\datastore\AbstractFactoryAbstract;
 use Zend\Db\Metadata\Metadata;
+use Zend\Db\Metadata\Source\Factory;
 use Zend\Db\TableGateway\TableGateway;
 
 /**
@@ -71,7 +72,7 @@ class TableGatewayAbstractFactory extends AbstractFactoryAbstract
         }
         if ($this->setDbAdapter($container, $requestedName)) {
             $dbMetadata = new Metadata($this->db);
-            $this->tableNames = array_merge($dbMetadata->getTableNames(),  $dbMetadata->getViewNames());
+            $this->tableNames = array_merge($dbMetadata->getTableNames(), $dbMetadata->getViewNames());
         }
         return is_array($this->tableNames) && in_array($requestedName, $this->tableNames, true);
     }
@@ -114,13 +115,13 @@ class TableGatewayAbstractFactory extends AbstractFactoryAbstract
     {
         $config = $container->get('config');
 
-        if (isset($config[self::KEY_TABLE_GATEWAY][$requestedName][self::KEY_SQL]) and is_a($config[self::KEY_TABLE_GATEWAY][$requestedName][self::KEY_SQL], 'Zend\Db\Sql\Sql', true)) {
+        if (isset($config[self::KEY_TABLE_GATEWAY][$requestedName][self::KEY_SQL]) &&
+            is_a($config[self::KEY_TABLE_GATEWAY][$requestedName][self::KEY_SQL], 'Zend\Db\Sql\Sql', true)) {
+            trigger_error("Set sql type is deprecated. For multiply create use method multiplyCreate/Update.", E_USER_DEPRECATED);
             $sql = new $config[self::KEY_TABLE_GATEWAY][$requestedName][self::KEY_SQL]($this->db, $requestedName);
             return new TableGateway($requestedName, $this->db, null, null, $sql);
         }
-
         return new TableGateway($requestedName, $this->db);
-
     }
 
     /**
@@ -135,7 +136,7 @@ class TableGatewayAbstractFactory extends AbstractFactoryAbstract
     {
         if (!isset($this->tableNames)) {
             if ($this->setDbAdapter($container)) {
-                $dbMetadata = new Metadata($this->db);
+                $dbMetadata = Factory::createSourceFromAdapter($this->db);
                 $this->tableNames = $dbMetadata->getTableNames();
             } else {
                 $this->tableNames = false;

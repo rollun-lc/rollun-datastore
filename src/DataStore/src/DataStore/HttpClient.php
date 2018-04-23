@@ -103,8 +103,8 @@ class HttpClient extends DataStoreAbstract
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
             throw new DataStoreException(
-            'Status: ' . $response->getStatusCode()
-            . ' - ' . $response->getReasonPhrase()
+                'Status: ' . $response->getStatusCode()
+                . ' - ' . $response->getReasonPhrase()
             );
         }
         return $result;
@@ -167,8 +167,8 @@ class HttpClient extends DataStoreAbstract
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
             throw new DataStoreException(
-            'Status: ' . $response->getStatusCode()
-            . ' - ' . $response->getReasonPhrase()
+                'Status: ' . $response->getStatusCode()
+                . ' - ' . $response->getReasonPhrase()
             );
         }
         return $result;
@@ -196,8 +196,8 @@ class HttpClient extends DataStoreAbstract
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
             throw new DataStoreException(
-            'Status: ' . $response->getStatusCode()
-            . ' - ' . $response->getReasonPhrase()
+                'Status: ' . $response->getStatusCode()
+                . ' - ' . $response->getReasonPhrase()
             );
         }
         return $result;
@@ -224,8 +224,8 @@ class HttpClient extends DataStoreAbstract
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
             throw new DataStoreException(
-            'Status: ' . $response->getStatusCode()
-            . ' - ' . $response->getReasonPhrase()
+                'Status: ' . $response->getStatusCode()
+                . ' - ' . $response->getReasonPhrase()
             );
         }
         return $result;
@@ -245,12 +245,96 @@ class HttpClient extends DataStoreAbstract
             $result = !empty($response->getBody()) ? Serializer::jsonUnserialize($response->getBody()) : null;
         } else {
             throw new DataStoreException(
-            'Status: ' . $response->getStatusCode()
-            . ' - ' . $response->getReasonPhrase()
+                'Status: ' . $response->getStatusCode()
+                . ' - ' . $response->getReasonPhrase()
             );
         }
         return $result;
     }
+
+    /**
+     * @param Query $query
+     * @param mixed $itemData
+     * @return mixed
+     * @throws \rollun\utils\Json\Exception
+     */
+    public function updateByQuery(Query $query, $itemData)
+    {
+        $client = $this->initHttpClient(Request::METHOD_PUT, $query);
+        $client->setRawBody(Serializer::jsonSerialize($itemData));
+        $response = $client->send();
+        if ($response->isOk()) {
+            $result = Serializer::jsonUnserialize($response->getBody());
+        } else {
+            throw new DataStoreException(
+                'Status: ' . $response->getStatusCode()
+                . ' - ' . $response->getReasonPhrase()
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * @param Query $query
+     * @return mixed
+     */
+    public function deleteByQuery(Query $query)
+    {
+        $client = $this->initHttpClient(Request::METHOD_DELETE, $query);
+        $response = $client->send();
+        if ($response->isOk()) {
+            $result = Serializer::jsonUnserialize($response->getBody());
+        } else {
+            throw new DataStoreException(
+                'Status: ' . $response->getStatusCode()
+                . ' - ' . $response->getReasonPhrase()
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * @param array $itemsData
+     * @return array|mixed
+     * @throws \rollun\utils\Json\Exception
+     */
+    public function multiUpdate(array $itemsData)
+    {
+        $client = $this->initHttpClient(Request::METHOD_PUT, null);
+        $client->setRawBody(Serializer::jsonSerialize($itemsData));
+        $response = $client->send();
+        if ($response->isSuccess()) {
+            $result = Serializer::jsonUnserialize($response->getBody());
+        } else {
+            throw new DataStoreException(
+                'Status: ' . $response->getStatusCode()
+                . ' - ' . $response->getReasonPhrase()
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * @param array $itemsData
+     * @return array|mixed
+     * @throws \rollun\utils\Json\Exception
+     */
+    public function multiCreate(array $itemsData)
+    {
+        $client = $this->initHttpClient(Request::METHOD_POST, null);
+        $client->setRawBody(Serializer::jsonSerialize($itemsData));
+        $response = $client->send();
+        if ($response->isSuccess()) {
+            $result = Serializer::jsonUnserialize($response->getBody());
+        } else {
+            throw new DataStoreException(
+                'Status: ' . $response->getStatusCode()
+                . ' - ' . $response->getReasonPhrase()
+            );
+        }
+        return $result;
+    }
+
 
     /**
      * {@inheritdoc}

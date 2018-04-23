@@ -9,6 +9,7 @@
 
 namespace rollun\test\datastore\DataStore;
 
+use PHPUnit\Framework\Assert;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\test\datastore\DataStore\AbstractTest;
 use Zend\Db\Adapter\Adapter;
@@ -69,12 +70,11 @@ class HttpClientTest extends AbstractTest
         $client = new Client($url);
         $client->setHeaders(['Accept' => 'application/json']);
         $client->setOptions(['timeout' => 60]);
-        $headerss = $client->getRequest()->getHeaders();
-        $responce = $client->send();
-        $headers = $responce->getHeaders()->toArray();
-        foreach ($headerExpected as $key => $value) {
-            $this->assertTrue(isset($headers[$key]));
-            $this->assertEquals($value, $headers[$key]);
+        $response = $client->send();
+        $headers = $response->getHeaders()->toArray();
+        foreach ($headerExpected as $header => $value) {
+            Assert::assertArrayHasKey($header, $headers);
+            Assert::assertEquals($value, $headers[$header]);
         }
     }
 

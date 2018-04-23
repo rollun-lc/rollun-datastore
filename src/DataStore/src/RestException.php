@@ -9,6 +9,12 @@
 
 namespace rollun\datastore;
 
+/**
+ * Class RestException
+ * Exception thrown if an error which found in data store http rest part.(datastore-http middleware pipe).
+ * @package rollun\datastore
+ *
+ */
 class RestException extends \RuntimeException
 {
 

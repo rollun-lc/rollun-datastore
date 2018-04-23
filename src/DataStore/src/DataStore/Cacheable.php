@@ -221,4 +221,62 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
             throw new DataStoreException("Refreshable don't haw method deleteAll");
         }
     }
+
+    /**
+     * Update all item which satisfied query filter
+     * Use field from itemData to updated items in storage
+     * @param Query $query
+     * @param mixed $itemData
+     * @return mixed
+     */
+    public function updateByQuery(Query $query, $itemData)
+    {
+        if (method_exists($this->dataSource, "updateByQuery")) {
+            return $this->dataSource->updateByQuery($query, $itemData);
+        } else {
+            throw new DataStoreException("Refreshable don't haw method updateByQuery");
+        }
+    }
+
+    /**
+     * Delete all items which satisfied query filter
+     * @param Query $query
+     * @return mixed
+     */
+    public function deleteByQuery(Query $query)
+    {
+        if (method_exists($this->dataSource, "deleteByQuery")) {
+            return $this->dataSource->deleteByQuery($query);
+        } else {
+            throw new DataStoreException("Refreshable don't haw method deleteByQuery");
+        }
+    }
+
+    /**
+     * update array of item in storage
+     * @param array $itemsData
+     * @return array
+     */
+    public function multiUpdate(array $itemsData)
+    {
+        if (method_exists($this->dataSource, "multiUpdate")) {
+            return $this->dataSource->multiUpdate($itemsData);
+        } else {
+            throw new DataStoreException("Refreshable don't haw method multiUpdate");
+        }
+    }
+
+    /**
+     * Create (Insert new) array of item in storage
+     * @param array $itemsData
+     * @return array
+     */
+    public function multiCreate(array $itemsData)
+    {
+        if (method_exists($this->dataSource, "multiCreate")) {
+            return $this->dataSource->multiCreate($itemsData);
+        } else {
+            throw new DataStoreException("Refreshable don't haw method multiCreate");
+        }
+    }
 }

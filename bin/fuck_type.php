@@ -6,16 +6,10 @@
  * Time: 3:41 PM
  */
 
-function test() {
-    $fieldValue = 1.5;
-
-    if(is_string($fieldValue) && is_integer($fieldValue)){
-        $fieldValue.= "string int\t";
-    }
-    if(!is_string($fieldValue) && is_integer($fieldValue)){
-        $fieldValue.= "only int\t";
-    }
-    return $fieldValue;
+function test(&$testParams) {
+    $testParams = "new data";
 }
 
-echo test();
+$testParams = "data";
+test($testParams);
+echo $testParams;
