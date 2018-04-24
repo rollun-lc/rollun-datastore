@@ -135,6 +135,9 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      */
     public function update($itemData, $createIfAbsent = false)
     {
+        if($createIfAbsent){
+            trigger_error("createIfAbsent is deprecated.", E_USER_DEPRECATED);
+        }
         $identifier = $this->getIdentifier();
         if (!isset($itemData[$identifier])) {
             throw new DataStoreException('Item must have primary key');

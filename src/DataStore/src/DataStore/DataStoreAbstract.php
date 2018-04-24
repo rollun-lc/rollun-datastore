@@ -459,6 +459,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
      */
     public function updateByQuery(Query $query, $itemData)
     {
+        unset($itemData[$this->getIdentifier()]);
         $updatedItemsData = [];
         $result = $this->query($query);
         foreach ($result as $item) {

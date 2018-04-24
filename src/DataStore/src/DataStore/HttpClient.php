@@ -210,6 +210,9 @@ class HttpClient extends DataStoreAbstract
      */
     public function update($itemData, $createIfAbsent = false)
     {
+        if($createIfAbsent){
+            trigger_error("createIfAbsent is deprecated.", E_USER_DEPRECATED);
+        }
         $identifier = $this->getIdentifier();
         if (!isset($itemData[$identifier])) {
             throw new DataStoreException('Item must has primary key');

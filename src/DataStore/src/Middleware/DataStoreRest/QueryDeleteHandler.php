@@ -29,10 +29,6 @@ class QueryDeleteHandler extends AbstractHandler
         $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $canHandle = $canHandle && is_null($primaryKeyValue);
 
-
-        $primaryKeyValue = $request->getAttribute('primaryKeyValue');
-        $canHandle = $canHandle && isset($primaryKeyValue);
-
         return $canHandle;
     }
 

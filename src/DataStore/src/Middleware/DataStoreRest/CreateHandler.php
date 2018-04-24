@@ -32,18 +32,17 @@ class CreateHandler extends AbstractHandler
      */
     protected function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $primaryKeyValue = $request->getAttribute('primaryKeyValue');
-        $primaryKeyIdentifier = $this->dataStore->getIdentifier();
-
+        $isIdExist = false;
         $row = $request->getParsedBody();
-
-        $row = array_merge(array($primaryKeyIdentifier => $primaryKeyValue), $row);
-
+        $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $overwriteMode = $request->getAttribute('overwriteMode');
+        if($primaryKeyValue) {
+            $primaryKeyIdentifier = $this->dataStore->getIdentifier();
+            $row = array_merge(array($primaryKeyIdentifier => $primaryKeyValue), $row);
+            $existingRow = $this->dataStore->read($primaryKeyValue);
 
-        $existingRow = $this->dataStore->read($primaryKeyValue);
-
-        $isIdExist = !empty($existingRow);
+            $isIdExist = !empty($existingRow);
+        }
 
         $response = new Response();
         if (!$isIdExist) {

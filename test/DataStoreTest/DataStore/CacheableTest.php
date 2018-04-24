@@ -8,9 +8,12 @@
 
 namespace rollun\test\datastore\DataStore;
 
+use PHPUnit\Framework\Assert;
 use rollun\datastore\DataSource\DbTableDataSource;
 use rollun\datastore\DataStore\Cacheable;
 use rollun\datastore\DataStore\DbTable;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
+use Xiag\Rql\Parser\Query;
 use Zend\Db\TableGateway\TableGateway;
 
 class CacheableTest extends AbstractTest
@@ -217,31 +220,6 @@ class CacheableTest extends AbstractTest
         );
     }
 
-    public function testUpdate_withtIdwhichAbsent_ButCreateIfAbsent_True()
-    {
-        $this->_initObject();
-        $row = $this->object->update(
-            array(
-                'id' => 1000,
-                'fFloat' => 1000.01,
-                'fString' => 'withtIdwhichAbsent'
-            ), true
-        );
-        $this->object->refresh();
-        $item = $this->object->read(1000);
-        $this->assertEquals(
-            'withtIdwhichAbsent', $item['fString']
-        );
-        unset($row['anotherId']);
-        $this->assertEquals(
-            array(
-                'id' => 1000,
-                'fFloat' => 1000.01,
-                'fString' => 'withtIdwhichAbsent',
-            ), $row
-        );
-    }
-
     public function testDelete_withtId_WhichAbsent()
     {
         $this->_initObject();
@@ -293,6 +271,74 @@ class CacheableTest extends AbstractTest
     public function test_WithZeroString($fString)
     {
         $this->assertTrue(true);//cant create new item
+    }
+
+    public function test_multiplyUpdate()
+    {
+        $this->_initObject($this->_itemsArrayDelault);
+        $updatedItemsArrayExpected = [
+            ['id' => 1, 'fString' => 'val2'],
+            ['id' => 2, 'fString' => 'val3'],
+            ['id' => 3, 'fString' => 'val4'],
+            ['id' => 4, 'fString' => 'val5']
+        ];
+        $data = $this->object->query(new Query());
+        Assert::assertEquals($this->_itemsArrayDelault, $data); //data is initial
+        $updatedItems = $this->object->multiUpdate($updatedItemsArrayExpected);
+        $this->object->refresh();
+        $data = $this->object->query(new Query());
+
+        $identifier = $this->object->getIdentifier();
+        Assert::assertEquals($updatedItems, $data); //data is updated eq data from query
+        foreach ($updatedItemsArrayExpected as $expectedItem) {
+            foreach ($data as $key => $datum) {
+                if($datum[$identifier] == $expectedItem[$identifier]) {
+                    Assert::assertEquals($expectedItem["fString"], $datum["fString"]);
+                }
+            }
+        }
+    }
+
+    public function test_queryDelete()
+    {
+        $this->_initObject($this->_itemsArrayDelault);
+        $data = $this->object->query(new Query());
+        Assert::assertEquals($this->_itemsArrayDelault, $data); //data is initial
+        $query = new Query();
+        $query->setQuery(new EqNode("fString", "val2"));
+        $queryItems = $this->object->query($query);
+        $deletedItems = $this->object->deleteByQuery($query);
+        $this->object->refresh();
+        Assert::assertEquals($queryItems, $deletedItems);
+        $data = $this->object->query($query);
+        Assert::assertEmpty($data, "Items not bee removed by query.");
+    }
+
+    public function test_queryUpdate()
+    {
+        $this->_initObject($this->_itemsArrayDelault);
+        $data = $this->object->query(new Query());
+        Assert::assertEquals($this->_itemsArrayDelault, $data); //data is initial
+
+        $query = new Query();
+        $query->setQuery(new EqNode("fString", "val2"));
+        $updateByQuery = $this->object->updateByQuery($query, ["fString" => "val3"]);
+        $this->object->refresh();
+        $data = $this->object->query($query);
+        Assert::assertEmpty($data, "Items not bee updated by query.");
+
+        $query = new Query();
+        $query->setQuery(new EqNode("fString", "val3"));
+        $data = $this->object->query($query);
+        Assert::assertEquals($data, $updateByQuery);
+        $data = $this->object->query(new Query());
+        Assert::assertEquals([
+            ['id' => 1, 'anotherId' => 10, 'fString' => 'val1', 'fFloat' => 400.0004],
+            ['id' => 2, 'anotherId' => 20, 'fString' => 'val3', 'fFloat' => 300.003],
+            ['id' => 3, 'anotherId' => 40, 'fString' => 'val3', 'fFloat' => 300.003],
+            ['id' => 4, 'anotherId' => 30, 'fString' => 'val3', 'fFloat' => 100.1]
+        ],$data);
+
     }
 
 }

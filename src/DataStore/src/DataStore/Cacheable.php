@@ -119,7 +119,6 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
     public function count()
     {
         return $this->cashStore->count();
-
     }
 
     /**

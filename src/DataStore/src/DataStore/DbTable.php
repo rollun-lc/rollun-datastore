@@ -103,6 +103,9 @@ class DbTable extends DataStoreAbstract
      */
     public function update($itemData, $createIfAbsent = false)
     {
+        if($createIfAbsent){
+            trigger_error("createIfAbsent is deprecated.", E_DEPRECATED);
+        }
         if (!isset($itemData[$this->getIdentifier()])) {
             throw new DataStoreException('Item must has primary key');
         }
