@@ -17,7 +17,7 @@ use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
  * @see AspectAbstractFactory
  * @package rollun\datastore\DataStore\Aspect
  */
-class AspectAbstract implements DataStoresInterface
+abstract class AspectAbstract implements DataStoresInterface
 {
     /** @var DataStoresInterface $dataStore */
     protected $dataStore;

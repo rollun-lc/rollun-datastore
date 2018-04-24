@@ -17,7 +17,7 @@ use rollun\datastore\DataStore\Installers\CsvInstaller;
 use rollun\datastore\DataStore\Installers\DbTableInstaller;
 use rollun\datastore\DataStore\Installers\HttpClientInstaller;
 use rollun\datastore\DataStore\Installers\MemoryInstaller;
-use rollun\datastore\Middleware\DataStoreMiddlewareInstaller;
+use rollun\rest\Middleware\DataStoreMiddlewareInstaller;
 use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use rollun\installer\Install\InstallerAbstract;
 

@@ -9,7 +9,7 @@
 
 namespace rollun\datastore\DataStore;
 
-use rollun\datastore\RestException;
+use rollun\rest\RestException;
 
 /**
  * Exception class

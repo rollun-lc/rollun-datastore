@@ -42,6 +42,7 @@
     "autoload": {
         "psr-4": {
             "rollun\\datastore\\": "src/DataStore/src",
+            "rollun\\rest\\": "src/Rest/src",
             "rollun\\uploader\\": "src/Uploader/src"
         }
     },

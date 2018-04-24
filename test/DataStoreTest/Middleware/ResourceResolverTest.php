@@ -3,7 +3,7 @@
 namespace rollun\test\datastore\Middleware;
 
 use PHPUnit\Framework\TestCase;
-use rollun\datastore\Middleware\ResourceResolver;
+use rollun\rest\Middleware\ResourceResolver;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
 use rollun\datastore\DataStore\Memory;
