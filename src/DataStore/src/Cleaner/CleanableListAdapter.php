@@ -2,6 +2,7 @@
 
 namespace rollun\datastore\Cleaner;
 
+use Exception;
 use rollun\utils\Cleaner\CleanableList\CleanableListInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStoreCleanerException;
@@ -19,6 +20,9 @@ class CleanableListAdapter implements \IteratorAggregate, CleanableListInterface
         $this->datastore = $datastore;
     }
 
+    /**
+     * @param $item
+     */
     public function deleteItem($item)
     {
         $primaryKey = $this->datastore->getIdentifier();

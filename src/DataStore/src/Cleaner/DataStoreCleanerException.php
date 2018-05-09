@@ -13,5 +13,5 @@ use rollun\datastore\DataStore\DataStoreException;
 
 class DataStoreCleanerException extends DataStoreException
 {
-
+    const LOG_LEVEL_DEFAULT = "500";
 }
