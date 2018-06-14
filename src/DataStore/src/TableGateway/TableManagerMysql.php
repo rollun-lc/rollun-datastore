@@ -202,6 +202,8 @@ class TableManagerMysql
      * Deletes Table
      *
      * @todo use zend deleteTable
+     * @param $tableName
+     * @return Adapter\Driver\ResultInterface
      */
     public function deleteTable($tableName)
     {

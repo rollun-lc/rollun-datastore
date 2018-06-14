@@ -11,6 +11,9 @@ namespace rollun\test\datastore\DataStore;
 
 use rollun\datastore\Rql\RqlQuery;
 use rollun\test\datastore\DataStore\AbstractTest;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\NeNode;
+use Xiag\Rql\Parser\Query;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Http\Client;
@@ -176,4 +179,24 @@ class HttpClientTest extends AbstractTest
     }
 
     /*     * ************************** Identifier *********************** */
+
+    /**
+     *
+     */
+    public function test_QueryNe()
+    {
+        $this->_initObject([["id" => 1, "fString" => "(=#:;)"]]);
+        $query = new Query();
+        $eqNode = new EqNode(
+            'fString', '(=#:;)'
+        );
+        $query->setQuery($eqNode);
+        $result = $this->object->query($query);
+        $this->assertEquals(
+            1, count($result)
+        );$this->assertEquals(
+        "(=#:;)", current($result)["fString"]
+        );
+    }
+
 }

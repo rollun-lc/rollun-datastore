@@ -52,12 +52,15 @@ class RqlConditionBuilder extends ConditionBuilderAbstract
      */
     public static function encodeString($value)
     {
+        //
         return strtr(rawurlencode($value), [
             '-' => '%2D',
             '_' => '%5F',
             '.' => '%2E',
             '~' => '%7E',
             '`' => '%60',
+            "(" => "%28",
+            ")" => "%29",
         ]);
     }
 

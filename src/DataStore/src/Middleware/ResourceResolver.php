@@ -75,6 +75,9 @@ class ResourceResolver implements MiddlewareInterface
             '%5F' => '_',
             '%2E' => '.',
             '%7E' => '~',
+            '%60' => '`',
+            "%28" => "(",
+            "%29" => ")",
         ]));
     }
 }
