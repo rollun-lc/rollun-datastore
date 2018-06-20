@@ -10,7 +10,6 @@ namespace rollun\datastore\DataStore;
 
 use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
 use rollun\datastore\DataStore\DbTable;
-use rollun\datastore\DataStore\Traits\IdGeneratorTrait;
 use rollun\dic\InsideConstruct;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\TableGateway\TableGateway;
