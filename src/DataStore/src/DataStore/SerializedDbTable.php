@@ -20,15 +20,9 @@ class SerializedDbTable extends DbTable
 
     protected $tableName;
 
-    public function __construct(TableGateway $dbTable = null)
+    public function __construct(TableGateway $dbTable)
     {
-        if(isset($dbTable)){
-            parent::__construct($dbTable);
-        } else if(isset($this->tableName)) {
-            InsideConstruct::setConstructParams(["dbTable" => $this->tableName]);
-        } else {
-            throw new DataStoreException("dbTable not sent and tableName not exist(from wakeup).");
-        }
+        parent::__construct($dbTable);
         $this->tableName = $this->dbTable->getTable();
     }
 
@@ -42,9 +36,10 @@ class SerializedDbTable extends DbTable
 
     /**
      *
+     * @throws \ReflectionException
      */
     public function __wakeup()
     {
-        $this->__construct(null);
+        InsideConstruct::initWakeup(["dbTable" => $this->tableName]);
     }
 }
