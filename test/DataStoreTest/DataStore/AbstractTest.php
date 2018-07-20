@@ -454,6 +454,16 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testQuery_limitSort() {
+		$this->_initObject();
+		$query = new Query();
+		$query->setLimit(new Node\LimitNode(1));
+		$query->setSort(new Node\SortNode(['anotherId' => Node\SortNode::SORT_ASC]));
+		$this->assertEquals([
+			['id' => 1, 'anotherId' => 10, 'fString' => 'val1', 'fFloat' => 400.0004],
+		],$this->object->query($query));
+	}
+
     public function testQuery_all()
     {
         $this->_initObject();

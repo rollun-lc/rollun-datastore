@@ -19,6 +19,7 @@ use rollun\datastore\DataStore\Interfaces\ReadInterface;
 use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\SelectNode;
+use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\RefreshableInterface;
@@ -179,6 +180,7 @@ class DataStoreRest extends Middleware\DataStoreAbstract
         if ($rqlLimitNode) {
             $rqlQueryObject->setLimit(new LimitNode(ReadInterface::LIMIT_INFINITY));
             $rqlQueryObject->setSelect(new SelectNode([$this->dataStore->getIdentifier()]));
+            $rqlQueryObject->setSort(new SortNode([$this->dataStore->getIdentifier() => SortNode::SORT_ASC]));
             $count = count($this->dataStore->query($rqlQueryObject));
             $offset = !is_null($rqlLimitNode->getOffset()) ? $rqlLimitNode->getOffset() : '0';
             $limit = !is_null($rqlLimitNode->getLimit()) ?
