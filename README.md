@@ -9,7 +9,7 @@
 
 * [Детальная документация](doc/)
 
-* [zaboy Rql](https://github.com/rollun-com/rollun-datastore/blob/master/doc/RQL_PARSER.md)
+* [zaboy Rql](https://github.com/avz-cmf/zaboy-dojo/blob/master/doc/RQL.md)
 
 * [Запуск тестов](https://github.com/rollun-com/rollun-datastore/blob/master/doc/TESTS.md)
 
