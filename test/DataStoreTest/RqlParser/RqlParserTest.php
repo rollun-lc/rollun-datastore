@@ -9,8 +9,10 @@
 
 namespace rollun\test\datastore\RqlParser;
 
-use phpDocumentor\Reflection\Types\Object_;
 use PHPUnit_Framework_TestCase;
+use rollun\datastore\Rql\Node\BinaryNode\IsFalseNode;
+use rollun\datastore\Rql\Node\BinaryNode\IsNullNode;
+use rollun\datastore\Rql\Node\BinaryNode\IsTrueNode;
 use rollun\datastore\Rql\Node\ContainsNode;
 use rollun\datastore\Rql\Node\GroupbyNode;
 use rollun\datastore\Rql\RqlQuery;
@@ -23,7 +25,6 @@ use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\GeNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\GtNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\LeNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\LikeNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\LtNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\NeNode;
 use Xiag\Rql\Parser\Node\SortNode;
@@ -233,6 +234,18 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
             $query = RqlParser::rqlDecode($stringRql);
             $this->assertEquals($this->object->getQuery(), $query->getQuery());
         }
+    }
+
+    public function testBinaryNodes()
+    {
+        $queryByString = RqlParser::rqlDecode("and(isNull(a),isFalse(b),isTrue(c))");
+        $query = new RqlQuery();
+        $query->setQuery(new AndNode([
+            new IsNullNode('a'),
+            new IsFalseNode('b'),
+            new IsTrueNode('c'),
+        ]));
+        $this->assertEquals($query, $queryByString);
     }
 
 }

@@ -72,7 +72,7 @@ class DatastoreCleanerTest extends \PHPUnit_Framework_TestCase
 
     public function test_Clean()
     {
-        $this->object->cleaneList();
+        $this->object->cleanList();
         $this->assertTrue($this->memoryDataStore->has(1));
         $this->assertFalse($this->memoryDataStore->has(2));
         $this->assertFalse($this->memoryDataStore->has(3));

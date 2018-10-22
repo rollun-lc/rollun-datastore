@@ -9,6 +9,9 @@
 
 namespace rollun\test\datastore\DataStore\ConditionBuilder;
 
+use rollun\datastore\Rql\Node\BinaryNode\IsFalseNode;
+use rollun\datastore\Rql\Node\BinaryNode\IsNullNode;
+use rollun\datastore\Rql\Node\BinaryNode\IsTrueNode;
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node;
 use Xiag\Rql\Parser\QueryBuilder;
@@ -93,6 +96,16 @@ class RqlConditionBuilderTest extends ConditionBuilderTest
                         ]))
                         ->getQuery()->getQuery(),
                 'and(eq(a,null()),lt(c,string:d),or(lt(g,5),gt(g,2)),not(ne(h,3)))'
+            ),
+            array(
+                (new QueryBuilder())
+                    ->addQuery(new Node\Query\LogicOperator\AndNode([
+                        new IsNullNode('a'),
+                        new IsTrueNode('b'),
+                        new IsFalseNode('c')
+                    ]))
+                    ->getQuery()->getQuery(),
+                'and(isNull(a),isTrue(b),isFalse(c))'
             ),
         );
     }

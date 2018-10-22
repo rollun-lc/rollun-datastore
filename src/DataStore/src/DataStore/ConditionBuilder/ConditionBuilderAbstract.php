@@ -9,6 +9,7 @@
 
 namespace rollun\datastore\DataStore\ConditionBuilder;
 
+use rollun\datastore\Rql\Node\BinaryNode\BinaryOperatorNodeAbstract;
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node\AbstractQueryNode;
 use Xiag\Rql\Parser\Node\Query\AbstractArrayOperatorNode;
@@ -46,7 +47,7 @@ abstract class ConditionBuilderAbstract
     ];
 
     /**
-     * @var string Contition if Query === null
+     * @var string Condition if Query === null
      */
     protected $emptyCondition = ' true ';
 
@@ -75,17 +76,40 @@ abstract class ConditionBuilderAbstract
     public function makeAbstractQueryOperator(AbstractQueryNode $queryNode)
     {
         switch (true) {
-            case is_a($queryNode, 'Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode', true):
+            case is_a($queryNode, AbstractScalarOperatorNode::class, true):
                 return $this->makeScalarOperator($queryNode);
-            case is_a($queryNode, 'Xiag\Rql\Parser\Node\Query\AbstractLogicOperatorNode', true):
+            case is_a($queryNode, AbstractLogicOperatorNode::class, true):
                 return $this->makeLogicOperator($queryNode);
-            case is_a($queryNode, 'Xiag\Rql\Parser\Node\Query\AbstractArrayOperatorNode', true):
+            case is_a($queryNode, AbstractArrayOperatorNode::class, true):
                 return $this->makeArrayOperator($queryNode);
+            case is_a($queryNode, BinaryOperatorNodeAbstract::class, true):
+                return $this->makeBinaryOperator($queryNode);
             default:
                 throw new DataStoreException(
                     'The Node type not suppoted: ' . $queryNode->getNodeName()
                 );
         }
+    }
+
+    /**
+     * @param BinaryOperatorNodeAbstract $node
+     * @return string
+     */
+    public function makeBinaryOperator(BinaryOperatorNodeAbstract $node)
+    {
+        $nodeName = $node->getNodeName();
+
+        if (!isset($this->literals['BinaryOperator'][$nodeName])) {
+            throw new DataStoreException(
+                'The Binary Operator not supported: ' . $nodeName
+            );
+        }
+
+        $strQuery = $this->literals['BinaryOperator'][$nodeName]['before']
+            . $this->prepareFieldName($node->getField())
+            . $this->literals['BinaryOperator'][$nodeName]['after'];
+
+        return $strQuery;
     }
 
     /**
@@ -100,7 +124,7 @@ abstract class ConditionBuilderAbstract
         $nodeName = $node->getNodeName();
         if (!isset($this->literals['ScalarOperator'][$nodeName])) {
             throw new DataStoreException(
-                'The Scalar Operator not suppoted: ' . $nodeName
+                'The Scalar Operator not supported: ' . $nodeName
             );
         }
         $value = $node->getValue() instanceof \DateTime ? $node->getValue()->format("Y-m-d") : $node->getValue();
@@ -175,7 +199,7 @@ abstract class ConditionBuilderAbstract
         $nodeName = $node->getNodeName();
         if (!isset($this->literals['LogicOperator'][$nodeName])) {
             throw new DataStoreException(
-                'The Logic Operator not suppoted: ' . $nodeName
+                'The Logic Operator not supported: ' . $nodeName
             );
         }
         $arrayQueries = $node->getQueries();
@@ -203,7 +227,7 @@ abstract class ConditionBuilderAbstract
         $nodeName = $node->getNodeName();
         if (!isset($this->literals['ArrayOperator'][$nodeName])) {
             throw new DataStoreException(
-                'The Array Operator not suppoted: ' . $nodeName
+                'The Array Operator not supported: ' . $nodeName
             );
         }
         

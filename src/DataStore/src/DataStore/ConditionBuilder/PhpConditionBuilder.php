@@ -44,6 +44,11 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
                 'between' => ") !=='' && preg_match('/' . trim(",
                 'after' => ',"\'"). \'/i\', $_field) )'
             ],
+        ],
+        'BinaryOperator' => [
+            'isNull' => ['before' => 'is_null(', 'after' => ')'],
+            'isTrue' => ['before' => '(', 'after' => '===true)'],
+            'isFalse' => ['before' => '(', 'after' => '===false)'],
         ]
     ];
 

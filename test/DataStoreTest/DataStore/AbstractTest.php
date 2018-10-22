@@ -11,6 +11,9 @@ namespace rollun\test\datastore\DataStore;
 
 use DateTime;
 use Interop\Container\ContainerInterface;
+use rollun\datastore\Rql\Node\BinaryNode\IsFalseNode;
+use rollun\datastore\Rql\Node\BinaryNode\IsNullNode;
+use rollun\datastore\Rql\Node\BinaryNode\IsTrueNode;
 use rollun\datastore\Rql\RqlParser;
 use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\DataType\Glob;
@@ -21,6 +24,7 @@ use Xiag\Rql\Parser\Node\Query\ScalarOperator;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\GeNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\LeNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\LtNode;
+use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Query;
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\DbTable;
@@ -1228,6 +1232,35 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $object = $this->object->read($expected["id"]);
         //$this->assertSame($expected, $object); same only zeroFirstVal
         $this->assertSame($expected["fString"], $object["fString"]);
+    }
+
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function test_binaryNode()
+    {
+        $this->setUp("exploited1DbTable");
+        $this->_initObject([
+            ['id' => 1, 'fString' => true,],
+            ['id' => 2, 'fString' => null,],
+            ['id' => 3, 'fString' => false,],
+        ]);
+
+        $query = new Query();
+        $query->setSelect(new SelectNode(["id"]));
+
+        $query->setQuery(new IsTrueNode('fString'));
+        $result = $this->object->query($query);
+        $this->assertEquals([['id' => 1]], $result);
+
+        $query->setQuery(new IsNullNode('fString'));
+        $result = $this->object->query($query);
+        $this->assertEquals([['id' => 2]], $result);
+
+        $query->setQuery(new IsFalseNode('fString'));
+        $result = $this->object->query($query);
+        $this->assertEquals([['id' => 3]], $result);
     }
 
     /**

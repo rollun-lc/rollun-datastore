@@ -11,6 +11,9 @@ namespace rollun\test\datastore\DataStore;
 
 use PDOException;
 use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\Rql\Node\BinaryNode\IsFalseNode;
+use rollun\datastore\Rql\Node\BinaryNode\IsNullNode;
+use rollun\datastore\Rql\Node\BinaryNode\IsTrueNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Node\SortNode;
@@ -101,6 +104,8 @@ class DbTableTest extends AbstractTest
                 $fieldType = ', `' . $key . '` DOUBLE PRECISION';
             } elseif (is_null($value)) {
                 $fieldType = ', `' . $key . '` INT';
+            } elseif (is_bool($value)) {
+                $fieldType = ', `' . $key . '` BIT';
             } else {
                 trigger_error("Type of field of array isn't supported.", E_USER_ERROR);
             }
