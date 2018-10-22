@@ -2,17 +2,17 @@
 
 namespace rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator;
 
-use rollun\datastore\Rql\Node\BinaryNode\IsFalseNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
 
-class IsFalseParser extends BinaryTokenParserAbstract
+class EqtNodeParser extends BinaryTokenParserAbstract
 {
     public function getOperatorName()
     {
-        return 'isFalse';
+        return 'isTrue';
     }
 
     protected function createNode(string $field)
     {
-        return new IsFalseNode($field);
+        return new EqtNode($field);
     }
 }

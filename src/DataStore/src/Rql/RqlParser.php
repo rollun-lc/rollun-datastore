@@ -10,9 +10,9 @@
 namespace rollun\datastore\Rql;
 
 use rollun\datastore\Rql\TokenParser\GroupbyTokenParser;
-use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\IsFalseParser;
-use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\IsNullParser;
-use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\IsTrueParser;
+use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqfNodeParser;
+use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqnNodeParser;
+use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqtNodeParser;
 use Xiag\Rql\Parser\ExpressionParser;
 use Xiag\Rql\Parser\Lexer;
 use Xiag\Rql\Parser\Node\SortNode;
@@ -134,9 +134,9 @@ class RqlParser
                 ->addTokenParser(new FiqlMatchTokenParser())
                 ->addTokenParser(new BasicContainsTokenParser())
                 ->addTokenParser(new FiqlContainsTokenParser())
-                ->addTokenParser(new IsTrueParser())
-                ->addTokenParser(new IsNullParser())
-                ->addTokenParser(new IsFalseParser())
+                ->addTokenParser(new EqtNodeParser())
+                ->addTokenParser(new EqnNodeParser())
+                ->addTokenParser(new EqfNodeParser())
                 ->addTokenParser(new BasicMatchTokenParser());
 
         $parser = (new QueryParser((new ExpressionParser())

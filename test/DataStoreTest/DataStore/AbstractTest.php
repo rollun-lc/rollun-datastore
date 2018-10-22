@@ -11,9 +11,9 @@ namespace rollun\test\datastore\DataStore;
 
 use DateTime;
 use Interop\Container\ContainerInterface;
-use rollun\datastore\Rql\Node\BinaryNode\IsFalseNode;
-use rollun\datastore\Rql\Node\BinaryNode\IsNullNode;
-use rollun\datastore\Rql\Node\BinaryNode\IsTrueNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
 use rollun\datastore\Rql\RqlParser;
 use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\DataType\Glob;
@@ -1250,15 +1250,15 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $query = new Query();
         $query->setSelect(new SelectNode(["id"]));
 
-        $query->setQuery(new IsTrueNode('fString'));
+        $query->setQuery(new EqtNode('fString'));
         $result = $this->object->query($query);
         $this->assertEquals([['id' => 1]], $result);
 
-        $query->setQuery(new IsNullNode('fString'));
+        $query->setQuery(new EqnNode('fString'));
         $result = $this->object->query($query);
         $this->assertEquals([['id' => 2]], $result);
 
-        $query->setQuery(new IsFalseNode('fString'));
+        $query->setQuery(new EqfNode('fString'));
         $result = $this->object->query($query);
         $this->assertEquals([['id' => 3]], $result);
     }

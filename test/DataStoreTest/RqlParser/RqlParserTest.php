@@ -10,9 +10,9 @@
 namespace rollun\test\datastore\RqlParser;
 
 use PHPUnit_Framework_TestCase;
-use rollun\datastore\Rql\Node\BinaryNode\IsFalseNode;
-use rollun\datastore\Rql\Node\BinaryNode\IsNullNode;
-use rollun\datastore\Rql\Node\BinaryNode\IsTrueNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
 use rollun\datastore\Rql\Node\ContainsNode;
 use rollun\datastore\Rql\Node\GroupbyNode;
 use rollun\datastore\Rql\RqlQuery;
@@ -241,9 +241,9 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
         $queryByString = RqlParser::rqlDecode("and(isNull(a),isFalse(b),isTrue(c))");
         $query = new RqlQuery();
         $query->setQuery(new AndNode([
-            new IsNullNode('a'),
-            new IsFalseNode('b'),
-            new IsTrueNode('c'),
+            new EqnNode('a'),
+            new EqfNode('b'),
+            new EqtNode('c'),
         ]));
         $this->assertEquals($query, $queryByString);
     }

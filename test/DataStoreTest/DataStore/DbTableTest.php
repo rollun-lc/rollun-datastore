@@ -11,9 +11,9 @@ namespace rollun\test\datastore\DataStore;
 
 use PDOException;
 use rollun\datastore\DataStore\DataStoreException;
-use rollun\datastore\Rql\Node\BinaryNode\IsFalseNode;
-use rollun\datastore\Rql\Node\BinaryNode\IsNullNode;
-use rollun\datastore\Rql\Node\BinaryNode\IsTrueNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Node\SortNode;

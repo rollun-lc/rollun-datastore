@@ -9,9 +9,9 @@
 
 namespace rollun\test\datastore\DataStore\ConditionBuilder;
 
-use rollun\datastore\Rql\Node\BinaryNode\IsFalseNode;
-use rollun\datastore\Rql\Node\BinaryNode\IsNullNode;
-use rollun\datastore\Rql\Node\BinaryNode\IsTrueNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\NotNode;
@@ -108,9 +108,9 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
             array(
                 (new QueryBuilder())
                     ->addQuery(new AndNode([
-                        new IsNullNode('a'),
-                        new IsTrueNode('b'),
-                        new IsFalseNode('c')
+                        new EqnNode('a'),
+                        new EqtNode('b'),
+                        new EqfNode('c')
                     ]))
                     ->getQuery()->getQuery(),
                 '(is_null($item[\'a\']) && ($item[\'b\']===true) && ($item[\'c\']===false))'

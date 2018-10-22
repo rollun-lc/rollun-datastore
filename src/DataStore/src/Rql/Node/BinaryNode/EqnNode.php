@@ -2,7 +2,7 @@
 
 namespace rollun\datastore\Rql\Node\BinaryNode;
 
-class IsNullNode extends BinaryOperatorNodeAbstract
+class EqnNode extends BinaryOperatorNodeAbstract
 {
     public function getNodeName()
     {
