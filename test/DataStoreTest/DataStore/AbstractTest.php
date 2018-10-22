@@ -11,9 +11,11 @@ namespace rollun\test\datastore\DataStore;
 
 use DateTime;
 use Interop\Container\ContainerInterface;
+use rollun\datastore\Rql\Node\AlikeGlobNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
+use rollun\datastore\Rql\Node\LikeGlobNode;
 use rollun\datastore\Rql\RqlParser;
 use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\DataType\Glob;
@@ -1261,6 +1263,38 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $query->setQuery(new EqfNode('fString'));
         $result = $this->object->query($query);
         $this->assertEquals([['id' => 3]], $result);
+    }
+
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function test_likeNode()
+    {
+        $this->setUp("exploited1DbTable");
+        $this->_initObject([
+            ['id' => 1, 'fString' => 'abcd',],
+            ['id' => 2, 'fString' => 'AbcD',],
+            ['id' => 3, 'fString' => 'ABCD',],
+        ]);
+
+        $query = new Query();
+        $query->setSelect(new SelectNode(["id"]));
+
+        $query->setQuery(new AlikeGlobNode('fString', 'abcd'));
+        $result = $this->object->query($query);
+        $this->assertEquals([['id' => 1]], $result);
+
+        $query->setQuery(new LikeGlobNode('fString', 'abcd'));
+        $result = $this->object->query($query);
+        $this->assertEquals(
+            [
+                ['id' => 1],
+                ['id' => 2],
+                ['id' => 3],
+            ],
+            $result
+        );
     }
 
     /**

@@ -39,6 +39,11 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
             'le' => ['before' => '(', 'between' => '<=', 'after' => ')'],
             'lt' => ['before' => '(', 'between' => '<', 'after' => ')'],
             'like' => ['before' => '( ($_field = ', 'between' => ") !=='' && preg_match(", 'after' => ', $_field) )'],
+            'alike' => [
+                'before' => '( ($_field = ',
+                'between' => ") !=='' && preg_match(",
+                'after' => '. \'i\', $_field) )'
+            ],
             'contains' => [
                 'before' => '( ($_field = ',
                 'between' => ") !=='' && preg_match('/' . trim(",
@@ -117,7 +122,7 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
         if ($anchorEnd) {
             $regex = $regex . '$';
         }
-        return '/' . $regex . '/i';
+        return '/' . $regex . '/';
     }
 
 }

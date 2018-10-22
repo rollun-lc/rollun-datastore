@@ -9,6 +9,7 @@
 
 namespace rollun\test\datastore\DataStore\ConditionBuilder;
 
+use rollun\datastore\Rql\Node\AlikeGlobNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
@@ -41,13 +42,13 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
     public function providerGetValueFromGlob()
     {
         return array(
-            array('abc', '/^abc$/i'),
-            array('*abc', '/abc$/i'),
-            array('abc*', '/^abc/i'),
-            array('a*b?c', '/^a.*b.c$/i'),
-            array('?abc', '/^.abc$/i'),
-            array('abc?', '/^abc.$/i'),
-            array(rawurlencode('Шщ +-*._'), '/^Шщ \+\-\*\._$/i'),
+            array('abc', '/^abc$/'),
+            array('*abc', '/abc$/'),
+            array('abc*', '/^abc/'),
+            array('a*b?c', '/^a.*b.c$/'),
+            array('?abc', '/^.abc$/'),
+            array('abc?', '/^abc.$/'),
+            array(rawurlencode('Шщ +-*._'), '/^Шщ \+\-\*\._$/'),
         );
     }
 
@@ -71,7 +72,7 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
                     ->addQuery(new GeNode('f', 6))
                     ->addQuery(new LikeNode('g', new Glob('*abc?')))
                     ->getQuery()->getQuery(),
-                '(($item[\'a\']==1) && ($item[\'b\']!=2) && ($item[\'c\']<3) && ($item[\'d\']>4) && ($item[\'e\']<=5) && ($item[\'f\']>=6) && ( ($_field = $item[\'g\']) !==\'\' && preg_match(\'/abc.$/i\', $_field) ))'
+                '(($item[\'a\']==1) && ($item[\'b\']!=2) && ($item[\'c\']<3) && ($item[\'d\']>4) && ($item[\'e\']<=5) && ($item[\'f\']>=6) && ( ($_field = $item[\'g\']) !==\'\' && preg_match(\'/abc.$/\', $_field) ))'
             ),
             array(
                 (new QueryBuilder())
@@ -114,6 +115,12 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
                     ]))
                     ->getQuery()->getQuery(),
                 '(is_null($item[\'a\']) && ($item[\'b\']===true) && ($item[\'c\']===false))'
+            ),
+            array(
+                (new QueryBuilder())
+                    ->addQuery(new AlikeGlobNode('a', '*abc?'))
+                    ->getQuery()->getQuery(),
+                '( ($_field = $item[\'a\']) !==\'\' && preg_match(\'/abc.$/\'. \'i\', $_field) )'
             ),
         );
     }

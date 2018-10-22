@@ -4,7 +4,7 @@ namespace rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator;
 
 use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
 
-class EqnNodeParser extends BinaryTokenParserAbstract
+class EqnTokenParser extends BinaryTokenParserAbstract
 {
     public function getOperatorName()
     {

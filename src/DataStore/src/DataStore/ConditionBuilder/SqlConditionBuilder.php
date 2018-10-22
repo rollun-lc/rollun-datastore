@@ -40,6 +40,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
             'le' => ['before' => '(', 'between' => '<=', 'after' => ')'],
             'lt' => ['before' => '(', 'between' => '<', 'after' => ')'],
             'like' => ['before' => '(', 'between' => ' LIKE ', 'after' => ')'],
+            'alike' => ['before' => '(', 'between' => ' LIKE BINARY ', 'after' => ')'],
             'contains' => ['before' => '(', 'between' => ' LIKE \'%', 'after' => '%\')'],
         ],
         'BinaryOperator' => [

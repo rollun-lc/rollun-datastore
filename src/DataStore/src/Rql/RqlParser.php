@@ -10,9 +10,9 @@
 namespace rollun\datastore\Rql;
 
 use rollun\datastore\Rql\TokenParser\GroupbyTokenParser;
-use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqfNodeParser;
-use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqnNodeParser;
-use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqtNodeParser;
+use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqfTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqnTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqtTokenParser;
 use Xiag\Rql\Parser\ExpressionParser;
 use Xiag\Rql\Parser\Lexer;
 use Xiag\Rql\Parser\Node\SortNode;
@@ -27,9 +27,11 @@ use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator\MatchTokenParser as BasicMatchTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator\ContainsTokenParser as BasicContainsTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator\LikeGlobTokenParser as BasicLikeGlobTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator\AlikeGlobTokenParser as BasicAlikeGlobTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\MatchTokenParser as FiqlMatchTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\ContainsTokenParser as FiqlContainsTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\LikeGlobTokenParser as FiqlLikeGlobTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\AlikeGlobTokenParser as FiqlAlikeGlobTokenParser;
 use rollun\datastore\Rql\TokenParser\SelectTokenParser;
 
 class RqlParser
@@ -120,6 +122,7 @@ class RqlParser
                 ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LeTokenParser())
                 ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\GeTokenParser())
                 ->addTokenParser(new BasicLikeGlobTokenParser())
+                ->addTokenParser(new BasicAlikeGlobTokenParser())
                 //->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LikeTokenParser())
                 ->addTokenParser(new TokenParser\Query\Fiql\ArrayOperator\InTokenParser())
                 ->addTokenParser(new TokenParser\Query\Fiql\ArrayOperator\OutTokenParser())
@@ -130,13 +133,14 @@ class RqlParser
                 ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LeTokenParser())
                 ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\GeTokenParser())
                 ->addTokenParser(new FiqlLikeGlobTokenParser())
+                ->addTokenParser(new FiqlAlikeGlobTokenParser())
                 //->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LikeTokenParser())
                 ->addTokenParser(new FiqlMatchTokenParser())
                 ->addTokenParser(new BasicContainsTokenParser())
                 ->addTokenParser(new FiqlContainsTokenParser())
-                ->addTokenParser(new EqtNodeParser())
-                ->addTokenParser(new EqnNodeParser())
-                ->addTokenParser(new EqfNodeParser())
+                ->addTokenParser(new EqtTokenParser())
+                ->addTokenParser(new EqnTokenParser())
+                ->addTokenParser(new EqfTokenParser())
                 ->addTokenParser(new BasicMatchTokenParser());
 
         $parser = (new QueryParser((new ExpressionParser())

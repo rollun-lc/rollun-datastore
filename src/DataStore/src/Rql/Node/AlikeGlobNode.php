@@ -1,0 +1,26 @@
+<?php
+
+namespace rollun\datastore\Rql\Node;
+
+use Xiag\Rql\Parser\DataType\Glob;
+
+class AlikeGlobNode extends AlikeNode
+{
+    /**
+     * @param string $field
+     * @param mixed $value
+     */
+    public function __construct($field, $value)
+    {
+        $value = $value instanceof Glob ? $value : new Glob($value);
+        parent::__construct($field, $value);
+    }
+    /**
+     * @param mixed $value
+     * @return void
+     */
+    public function setValue($value)
+    {
+        $this->value = $value instanceof Glob ? $value : new Glob($value);
+    }
+}

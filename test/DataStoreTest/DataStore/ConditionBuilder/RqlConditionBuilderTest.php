@@ -9,6 +9,7 @@
 
 namespace rollun\test\datastore\DataStore\ConditionBuilder;
 
+use rollun\datastore\Rql\Node\AlikeGlobNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
@@ -102,10 +103,11 @@ class RqlConditionBuilderTest extends ConditionBuilderTest
                     ->addQuery(new Node\Query\LogicOperator\AndNode([
                         new EqnNode('a'),
                         new EqtNode('b'),
-                        new EqfNode('c')
+                        new EqfNode('c'),
+                        new AlikeGlobNode('a', '*abc?'),
                     ]))
                     ->getQuery()->getQuery(),
-                'and(isNull(a),isTrue(b),isFalse(c))'
+                'and(isNull(a),isTrue(b),isFalse(c),alike(a,string:*abc?))'
             ),
         );
     }
