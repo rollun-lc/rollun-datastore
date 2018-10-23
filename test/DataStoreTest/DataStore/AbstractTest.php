@@ -11,6 +11,12 @@ namespace rollun\test\datastore\DataStore;
 
 use DateTime;
 use Interop\Container\ContainerInterface;
+use rollun\datastore\Rql\Node\AlikeGlobNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
+use rollun\datastore\Rql\Node\BinaryNode\IeNode;
+use rollun\datastore\Rql\Node\LikeGlobNode;
 use rollun\datastore\Rql\RqlParser;
 use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\DataType\Glob;
@@ -21,6 +27,7 @@ use Xiag\Rql\Parser\Node\Query\ScalarOperator;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\GeNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\LeNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\LtNode;
+use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Query;
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\DbTable;
@@ -1228,6 +1235,94 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $object = $this->object->read($expected["id"]);
         //$this->assertSame($expected, $object); same only zeroFirstVal
         $this->assertSame($expected["fString"], $object["fString"]);
+    }
+
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function test_binaryTrueFalseNodes()
+    {
+        $this->setUp("exploited1DbTable");
+        $this->_initObject([
+            ['id' => 1, 'fString' => true,],
+            ['id' => 2, 'fString' => false,],
+        ]);
+
+        $query = new Query();
+        $query->setSelect(new SelectNode(["id"]));
+
+        $query->setQuery(new EqtNode('fString'));
+        $result = $this->object->query($query);
+        $this->assertEquals([['id' => 1]], $result);
+
+        $query->setQuery(new EqfNode('fString'));
+        $result = $this->object->query($query);
+        $this->assertEquals([['id' => 2],], $result);
+    }
+
+    public function test_binaryNullNode()
+    {
+        $this->setUp("exploited1DbTable");
+        $this->_initObject([
+            ['id' => 1, 'fString' => 'dsad',],
+            ['id' => 2, 'fString' => null,],
+        ]);
+        $query = new Query();
+        $query->setSelect(new SelectNode(["id"]));
+
+        $query->setQuery(new EqnNode('fString'));
+        $result = $this->object->query($query);
+        $this->assertEquals([['id' => 2]], $result);
+    }
+
+    public function test_binaryIsEmptyNode()
+    {
+        $this->setUp("exploited1DbTable");
+        $this->_initObject([
+            ['id' => 1, 'fString' => 5,],
+            ['id' => 2, 'fString' => 0,],
+            ['id' => 3, 'fString' => null,],
+        ]);
+
+        $query = new Query();
+        $query->setSelect(new SelectNode(["id"]));
+
+        $query->setQuery(new IeNode('fString'));
+        $result = $this->object->query($query);
+        $this->assertEquals([
+            ['id' => 2],
+            ['id' => 3],
+        ], $result);
+    }
+
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function test_likeNode()
+    {
+        $this->setUp("exploited1DbTable");
+        $this->_initObject([
+            ['id' => 1, 'fString' => 'abcd',],
+            ['id' => 2, 'fString' => 'AbcD',],
+            ['id' => 3, 'fString' => 'ABCD',],
+        ]);
+
+        $query = new Query();
+        $query->setSelect(new SelectNode(["id"]));
+
+        $query->setQuery(new AlikeGlobNode('fString', 'abcd'));
+        $result = $this->object->query($query);
+        $this->assertEquals([
+            ['id' => 1],
+            ['id' => 2],
+            ['id' => 3],
+        ], $result);
+
+        $query->setQuery(new LikeGlobNode('fString', 'abcd'));
+        $result = $this->object->query($query);
+        $this->assertEquals([['id' => 1]], $result);
     }
 
     /**

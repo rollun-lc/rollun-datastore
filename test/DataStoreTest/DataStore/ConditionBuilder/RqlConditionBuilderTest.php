@@ -9,6 +9,11 @@
 
 namespace rollun\test\datastore\DataStore\ConditionBuilder;
 
+use rollun\datastore\Rql\Node\AlikeGlobNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
+use rollun\datastore\Rql\Node\BinaryNode\IeNode;
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node;
 use Xiag\Rql\Parser\QueryBuilder;
@@ -93,6 +98,18 @@ class RqlConditionBuilderTest extends ConditionBuilderTest
                         ]))
                         ->getQuery()->getQuery(),
                 'and(eq(a,null()),lt(c,string:d),or(lt(g,5),gt(g,2)),not(ne(h,3)))'
+            ),
+            array(
+                (new QueryBuilder())
+                    ->addQuery(new Node\Query\LogicOperator\AndNode([
+                        new EqnNode('a'),
+                        new EqtNode('b'),
+                        new EqfNode('c'),
+                        new IeNode('d'),
+                        new AlikeGlobNode('a', '*abc?'),
+                    ]))
+                    ->getQuery()->getQuery(),
+                'and(eqn(a),eqt(b),eqf(c),ie(d),alike(a,string:*abc?))'
             ),
         );
     }

@@ -38,12 +38,28 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
             'gt' => ['before' => '(', 'between' => '>', 'after' => ')'],
             'le' => ['before' => '(', 'between' => '<=', 'after' => ')'],
             'lt' => ['before' => '(', 'between' => '<', 'after' => ')'],
-            'like' => ['before' => '( ($_field = ', 'between' => ") !=='' && preg_match(", 'after' => ', $_field) )'],
+            'like' => [
+                'before' => '( ($_field = ',
+                'between' => ") !=='' && preg_match(",
+                'after' => ', $_field) )'
+            ],
+            'alike' => [
+                'before' => '( ($_field = ',
+                'between' => ") !=='' && preg_match(",
+                'after' => '. \'i\', $_field) )'
+            ],
             'contains' => [
                 'before' => '( ($_field = ',
                 'between' => ") !=='' && preg_match('/' . trim(",
                 'after' => ',"\'"). \'/i\', $_field) )'
             ],
+        ],
+        'BinaryOperator' => [
+            'eqn' => ['before' => 'is_null(', 'after' => ')'],
+            // TODO: make strict comparison (to implement it need to make data stores typed)
+            'eqt' => ['before' => '(', 'after' => '==true)'],
+            'eqf' => ['before' => '(', 'after' => '==false)'],
+            'ie' => ['before' => 'empty(', 'after' => ')'],
         ]
     ];
 
@@ -112,7 +128,7 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
         if ($anchorEnd) {
             $regex = $regex . '$';
         }
-        return '/' . $regex . '/i';
+        return '/' . $regex . '/';
     }
 
 }

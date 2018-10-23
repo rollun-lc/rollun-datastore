@@ -9,8 +9,13 @@
 
 namespace rollun\test\datastore\DataStore\ConditionBuilder;
 
+use rollun\datastore\Rql\Node\AlikeGlobNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
+use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
+use rollun\datastore\Rql\Node\BinaryNode\IeNode;
+use rollun\datastore\Rql\Node\LikeGlobNode;
 use Xiag\Rql\Parser\DataType\Glob;
-use Xiag\Rql\Parser\Node;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\NotNode;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\OrNode;
@@ -39,13 +44,13 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
     public function providerGetValueFromGlob()
     {
         return array(
-            array('abc', '/^abc$/i'),
-            array('*abc', '/abc$/i'),
-            array('abc*', '/^abc/i'),
-            array('a*b?c', '/^a.*b.c$/i'),
-            array('?abc', '/^.abc$/i'),
-            array('abc?', '/^abc.$/i'),
-            array(rawurlencode('Шщ +-*._'), '/^Шщ \+\-\*\._$/i'),
+            array('abc', '/^abc$/'),
+            array('*abc', '/abc$/'),
+            array('abc*', '/^abc/'),
+            array('a*b?c', '/^a.*b.c$/'),
+            array('?abc', '/^.abc$/'),
+            array('abc?', '/^abc.$/'),
+            array(rawurlencode('Шщ +-*._'), '/^Шщ \+\-\*\._$/'),
         );
     }
 
@@ -67,9 +72,12 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
                     ->addQuery(new GtNode('d', 4))
                     ->addQuery(new LeNode('e', 5))
                     ->addQuery(new GeNode('f', 6))
-                    ->addQuery(new LikeNode('g', new Glob('*abc?')))
+                    ->addQuery(new LikeGlobNode('g', new Glob('*abc?')))
+                    ->addQuery(new AlikeGlobNode('k', new Glob('*dc?')))
                     ->getQuery()->getQuery(),
-                '(($item[\'a\']==1) && ($item[\'b\']!=2) && ($item[\'c\']<3) && ($item[\'d\']>4) && ($item[\'e\']<=5) && ($item[\'f\']>=6) && ( ($_field = $item[\'g\']) !==\'\' && preg_match(\'/abc.$/i\', $_field) ))'
+                '(($item[\'a\']==1) && ($item[\'b\']!=2) && ($item[\'c\']<3) && ($item[\'d\']>4) && ($item[\'e\']<=5) && ' .
+                '($item[\'f\']>=6) && ( ($_field = $item[\'g\']) !==\'\' && preg_match(\'/abc.$/\', $_field) )' .
+                ' && ( ($_field = $item[\'k\']) !==\'\' && preg_match(\'/dc.$/\'. \'i\', $_field) ))'
             ),
             array(
                 (new QueryBuilder())
@@ -102,6 +110,23 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
                     ]))
                     ->getQuery()->getQuery(),
                 '(($item[\'a\']==null) && ($item[\'c\']<\'d\') && (($item[\'g\']<5) || ($item[\'g\']>2)) && ( !(($item[\'h\']!=3)) ))'
+            ),
+            array(
+                (new QueryBuilder())
+                    ->addQuery(new AndNode([
+                        new EqnNode('a'),
+                        new EqtNode('b'),
+                        new EqfNode('c'),
+                        new IeNode('d')
+                    ]))
+                    ->getQuery()->getQuery(),
+                '(is_null($item[\'a\']) && ($item[\'b\']==true) && ($item[\'c\']==false) && empty($item[\'d\']))'
+            ),
+            array(
+                (new QueryBuilder())
+                    ->addQuery(new AlikeGlobNode('a', '*abc?'))
+                    ->getQuery()->getQuery(),
+                '( ($_field = $item[\'a\']) !==\'\' && preg_match(\'/abc.$/\'. \'i\', $_field) )'
             ),
         );
     }

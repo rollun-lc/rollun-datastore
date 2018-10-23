@@ -1,0 +1,25 @@
+<?php
+
+namespace rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator;
+
+use rollun\datastore\Rql\Node\AlikeNode;
+use Xiag\Rql\Parser\TokenParser\Query\Basic\AbstractScalarOperatorTokenParser;
+
+class AlikeTokenParser extends AbstractScalarOperatorTokenParser
+{
+    /**
+     * @inheritdoc
+     */
+    protected function getOperatorName()
+    {
+        return 'alike';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function createNode($field, $value)
+    {
+        return new AlikeNode($field, $value);
+    }
+}

@@ -10,10 +10,17 @@
 namespace rollun\datastore\Rql;
 
 use rollun\datastore\Rql\TokenParser\GroupbyTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqfTokenParser as BasicEqfTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqnTokenParser as BasicEqnTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqtTokenParser as BasicEqtTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\IeTokenParser as BasicIeTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Fiql\BinaryOperator\EqfTokenParser as FiqlEqfTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Fiql\BinaryOperator\EqnTokenParser as FiqlEqnTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Fiql\BinaryOperator\EqtTokenParser as FiqlEqtTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Fiql\BinaryOperator\IeTokenParser as FiqlIeTokenParser;
 use Xiag\Rql\Parser\ExpressionParser;
 use Xiag\Rql\Parser\Lexer;
 use Xiag\Rql\Parser\Node\SortNode;
-use Xiag\Rql\Parser\Parser;
 use Xiag\Rql\Parser\Query;
 use Xiag\Rql\Parser\TokenParser;
 use Xiag\Rql\Parser\TokenParserGroup;
@@ -24,9 +31,11 @@ use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator\MatchTokenParser as BasicMatchTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator\ContainsTokenParser as BasicContainsTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator\LikeGlobTokenParser as BasicLikeGlobTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator\AlikeGlobTokenParser as BasicAlikeGlobTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\MatchTokenParser as FiqlMatchTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\ContainsTokenParser as FiqlContainsTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\LikeGlobTokenParser as FiqlLikeGlobTokenParser;
+use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\AlikeGlobTokenParser as FiqlAlikeGlobTokenParser;
 use rollun\datastore\Rql\TokenParser\SelectTokenParser;
 
 class RqlParser
@@ -117,6 +126,13 @@ class RqlParser
                 ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LeTokenParser())
                 ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\GeTokenParser())
                 ->addTokenParser(new BasicLikeGlobTokenParser())
+                ->addTokenParser(new BasicAlikeGlobTokenParser())
+                ->addTokenParser(new BasicContainsTokenParser())
+                ->addTokenParser(new BasicEqtTokenParser())
+                ->addTokenParser(new BasicEqnTokenParser())
+                ->addTokenParser(new BasicEqfTokenParser())
+                ->addTokenParser(new BasicIeTokenParser())
+                ->addTokenParser(new BasicMatchTokenParser())
                 //->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LikeTokenParser())
                 ->addTokenParser(new TokenParser\Query\Fiql\ArrayOperator\InTokenParser())
                 ->addTokenParser(new TokenParser\Query\Fiql\ArrayOperator\OutTokenParser())
@@ -127,11 +143,14 @@ class RqlParser
                 ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LeTokenParser())
                 ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\GeTokenParser())
                 ->addTokenParser(new FiqlLikeGlobTokenParser())
+                ->addTokenParser(new FiqlAlikeGlobTokenParser())
                 //->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LikeTokenParser())
                 ->addTokenParser(new FiqlMatchTokenParser())
-                ->addTokenParser(new BasicContainsTokenParser())
                 ->addTokenParser(new FiqlContainsTokenParser())
-                ->addTokenParser(new BasicMatchTokenParser());
+                ->addTokenParser(new FiqlEqtTokenParser())
+                ->addTokenParser(new FiqlEqnTokenParser())
+                ->addTokenParser(new FiqlEqfTokenParser())
+                ->addTokenParser(new FiqlIeTokenParser());
 
         $parser = (new QueryParser((new ExpressionParser())
                 ->registerTypeCaster('string', new TypeCaster\StringTypeCaster())
