@@ -38,7 +38,11 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
             'gt' => ['before' => '(', 'between' => '>', 'after' => ')'],
             'le' => ['before' => '(', 'between' => '<=', 'after' => ')'],
             'lt' => ['before' => '(', 'between' => '<', 'after' => ')'],
-            'like' => ['before' => '( ($_field = ', 'between' => ") !=='' && preg_match(", 'after' => ', $_field) )'],
+            'like' => [
+                'before' => '( ($_field = ',
+                'between' => ") !=='' && preg_match(",
+                'after' => ', $_field) )'
+            ],
             'alike' => [
                 'before' => '( ($_field = ',
                 'between' => ") !=='' && preg_match(",
@@ -52,8 +56,9 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
         ],
         'BinaryOperator' => [
             'isNull' => ['before' => 'is_null(', 'after' => ')'],
-            'isTrue' => ['before' => '(', 'after' => '===true)'],
-            'isFalse' => ['before' => '(', 'after' => '===false)'],
+            // TODO: make strict comparison (to implement it need to make data stores typed)
+            'isTrue' => ['before' => '(', 'after' => '==true)'],
+            'isFalse' => ['before' => '(', 'after' => '==false)'],
         ]
     ];
 

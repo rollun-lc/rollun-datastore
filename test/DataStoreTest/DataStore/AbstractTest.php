@@ -1240,13 +1240,12 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function test_binaryNode()
+    public function test_binaryTrueFalseNodes()
     {
         $this->setUp("exploited1DbTable");
         $this->_initObject([
             ['id' => 1, 'fString' => true,],
-            ['id' => 2, 'fString' => null,],
-            ['id' => 3, 'fString' => false,],
+            ['id' => 2, 'fString' => false,],
         ]);
 
         $query = new Query();
@@ -1256,13 +1255,24 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $result = $this->object->query($query);
         $this->assertEquals([['id' => 1]], $result);
 
+        $query->setQuery(new EqfNode('fString'));
+        $result = $this->object->query($query);
+        $this->assertEquals([['id' => 2],], $result);
+    }
+
+    public function test_binaryNullNode()
+    {
+        $this->setUp("exploited1DbTable");
+        $this->_initObject([
+            ['id' => 1, 'fString' => 'dsad',],
+            ['id' => 2, 'fString' => null,],
+        ]);
+        $query = new Query();
+        $query->setSelect(new SelectNode(["id"]));
+
         $query->setQuery(new EqnNode('fString'));
         $result = $this->object->query($query);
         $this->assertEquals([['id' => 2]], $result);
-
-        $query->setQuery(new EqfNode('fString'));
-        $result = $this->object->query($query);
-        $this->assertEquals([['id' => 3]], $result);
     }
 
     /**
@@ -1283,18 +1293,15 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
 
         $query->setQuery(new AlikeGlobNode('fString', 'abcd'));
         $result = $this->object->query($query);
-        $this->assertEquals([['id' => 1]], $result);
+        $this->assertEquals([
+            ['id' => 1],
+            ['id' => 2],
+            ['id' => 3],
+        ], $result);
 
         $query->setQuery(new LikeGlobNode('fString', 'abcd'));
         $result = $this->object->query($query);
-        $this->assertEquals(
-            [
-                ['id' => 1],
-                ['id' => 2],
-                ['id' => 3],
-            ],
-            $result
-        );
+        $this->assertEquals([['id' => 1]], $result);
     }
 
     /**

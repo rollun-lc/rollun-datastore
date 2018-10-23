@@ -49,19 +49,23 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
         $this->queryObject = new RqlQuery();
 
         $this->queryObject->setQuery(
-                new AndNode([
             new AndNode([
-                new EqNode('q', null),
-                new NeNode('q', null),
-                new LeNode('q', 'r'),
-                new GeNode('q', 'u')
-                    ]),
-            new OrNode([
-                new LtNode('q', 't'),
-                new GtNode('q', 'y'),
-                new InNode('q', ['a', 's', 'd', 'f', 'g'])
-                    ])
+                new AndNode([
+                    new EqNode('q', null),
+                    new NeNode('q', null),
+                    new LeNode('q', 'r'),
+                    new GeNode('q', 'u'),
+                    new EqnNode('a'),
+                    new EqfNode('b'),
+                    new EqtNode('c'),
+                    new AlikeGlobNode('d', '*abc?'),
+                ]),
+                new OrNode([
+                    new LtNode('q', 't'),
+                    new GtNode('q', 'y'),
+                    new InNode('q', ['a', 's', 'd', 'f', 'g'])
                 ])
+            ])
         );
 
         $this->queryObject->setSelect(new AggregateSelectNode([
@@ -74,7 +78,7 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
         $this->queryObject->setSort(new SortNode(['q' => -1, 'w' => 1, 'e' => 1]));
         $this->queryObject->setLimit(new LimitNode(20, 30));
 
-        $this->rqlString = "and(and(eq(q,null()),ne(q,null()),le(q,r),ge(q,u)),or(lt(q,t),gt(q,y),in(q,(a,s,d,f,g))))";
+        $this->rqlString = "and(and(eq(q,null()),ne(q,null()),le(q,r),ge(q,u),isNull(a),isFalse(b),isTrue(c),alike(d,*abc?)),or(lt(q,t),gt(q,y),in(q,(a,s,d,f,g))))";
         $this->rqlString .= "&limit(20,30)";
         $this->rqlString .= "&sort(-q,+w,e)";
         $this->rqlString .= "&select(q,max(q),min(q),count(q))";
@@ -89,7 +93,7 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
 
     public function testRqlEncode()
     {
-        $this->rqlString = "and(and(eq(q,null()),ne(q,null()),le(q,string:r),ge(q,string:u)),or(lt(q,string:t),gt(q,string:y),in(q,(string:a,string:s,string:d,string:f,string:g))))";
+        $this->rqlString = "and(and(eq(q,null()),ne(q,null()),le(q,string:r),ge(q,string:u),isNull(a),isFalse(b),isTrue(c),alike(d,string:*abc?)),or(lt(q,string:t),gt(q,string:y),in(q,(string:a,string:s,string:d,string:f,string:g))))";
         $this->rqlString .= "&limit(20,30)";
         $this->rqlString .= "&sort(-q,+w,+e)";
         $this->rqlString .= "&select(q,max(q),min(q),count(q))";
@@ -235,18 +239,5 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
             $query = RqlParser::rqlDecode($stringRql);
             $this->assertEquals($this->object->getQuery(), $query->getQuery());
         }
-    }
-
-    public function testBinaryNodes()
-    {
-        $queryByString = RqlParser::rqlDecode("and(isNull(a),isFalse(b),isTrue(c),alike(d,*abc?))");
-        $query = new RqlQuery();
-        $query->setQuery(new AndNode([
-            new EqnNode('a'),
-            new EqfNode('b'),
-            new EqtNode('c'),
-            new AlikeGlobNode('d', '*abc?'),
-        ]));
-        $this->assertEquals($query, $queryByString);
     }
 }

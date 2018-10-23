@@ -93,6 +93,8 @@ class SerializedDbTableTest extends AbstractTest
                 $fieldType = ', `' . $key . '` DOUBLE PRECISION';
             } elseif (is_null($value)) {
                 $fieldType = ', `' . $key . '` INT';
+            } elseif (is_bool($value)) {
+                $fieldType = ', `' . $key . '` BIT';
             } else {
                 trigger_error("Type of field of array isn't supported.", E_USER_ERROR);
             }

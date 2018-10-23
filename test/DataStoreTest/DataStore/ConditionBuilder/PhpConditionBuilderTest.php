@@ -13,6 +13,7 @@ use rollun\datastore\Rql\Node\AlikeGlobNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
+use rollun\datastore\Rql\Node\LikeGlobNode;
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\NotNode;
@@ -70,9 +71,12 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
                     ->addQuery(new GtNode('d', 4))
                     ->addQuery(new LeNode('e', 5))
                     ->addQuery(new GeNode('f', 6))
-                    ->addQuery(new LikeNode('g', new Glob('*abc?')))
+                    ->addQuery(new LikeGlobNode('g', new Glob('*abc?')))
+                    ->addQuery(new AlikeGlobNode('k', new Glob('*dc?')))
                     ->getQuery()->getQuery(),
-                '(($item[\'a\']==1) && ($item[\'b\']!=2) && ($item[\'c\']<3) && ($item[\'d\']>4) && ($item[\'e\']<=5) && ($item[\'f\']>=6) && ( ($_field = $item[\'g\']) !==\'\' && preg_match(\'/abc.$/\', $_field) ))'
+                '(($item[\'a\']==1) && ($item[\'b\']!=2) && ($item[\'c\']<3) && ($item[\'d\']>4) && ($item[\'e\']<=5) && ' .
+                '($item[\'f\']>=6) && ( ($_field = $item[\'g\']) !==\'\' && preg_match(\'/abc.$/\', $_field) )' .
+                ' && ( ($_field = $item[\'k\']) !==\'\' && preg_match(\'/dc.$/\'. \'i\', $_field) ))'
             ),
             array(
                 (new QueryBuilder())
@@ -114,7 +118,7 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
                         new EqfNode('c')
                     ]))
                     ->getQuery()->getQuery(),
-                '(is_null($item[\'a\']) && ($item[\'b\']===true) && ($item[\'c\']===false))'
+                '(is_null($item[\'a\']) && ($item[\'b\']==true) && ($item[\'c\']==false))'
             ),
             array(
                 (new QueryBuilder())
