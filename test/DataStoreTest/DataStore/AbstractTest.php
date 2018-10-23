@@ -15,6 +15,7 @@ use rollun\datastore\Rql\Node\AlikeGlobNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
+use rollun\datastore\Rql\Node\BinaryNode\IeNode;
 use rollun\datastore\Rql\Node\LikeGlobNode;
 use rollun\datastore\Rql\RqlParser;
 use rollun\datastore\Rql\RqlQuery;
@@ -1273,6 +1274,26 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $query->setQuery(new EqnNode('fString'));
         $result = $this->object->query($query);
         $this->assertEquals([['id' => 2]], $result);
+    }
+
+    public function test_binaryIsEmptyNode()
+    {
+        $this->setUp("exploited1DbTable");
+        $this->_initObject([
+            ['id' => 1, 'fString' => 5,],
+            ['id' => 2, 'fString' => 0,],
+            ['id' => 3, 'fString' => null,],
+        ]);
+
+        $query = new Query();
+        $query->setSelect(new SelectNode(["id"]));
+
+        $query->setQuery(new IeNode('fString'));
+        $result = $this->object->query($query);
+        $this->assertEquals([
+            ['id' => 2],
+            ['id' => 3],
+        ], $result);
     }
 
     /**

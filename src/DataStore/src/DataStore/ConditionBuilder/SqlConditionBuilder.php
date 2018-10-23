@@ -9,6 +9,7 @@
 
 namespace rollun\datastore\DataStore\ConditionBuilder;
 
+use rollun\datastore\Rql\Node\BinaryNode\BinaryOperatorNodeAbstract;
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
 use rollun\datastore\DataStore\DataStoreException;
@@ -47,6 +48,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
             'eqn' => ['before' => '(', 'after' => 'is NULL)'],
             'eqt' => ['before' => '(', 'after' => 'is TRUE)'],
             'eqf' => ['before' => '(', 'after' => 'is FALSE)'],
+            'ie' => ['before' => '(', 'after' => ')'],
         ]
     ];
 
@@ -121,15 +123,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         $strQuery = $this->literals['ScalarOperator'][$nodeName]['before']
             . $this->prepareFieldName($node->getField());
 
-        if (is_null($value)) {
-            if ($nodeName === 'eq') {
-                $strQuery .= "IS NULL";
-            } else if ($nodeName === 'ne') {
-                $strQuery .= "IS NOT NULL";
-            } else {
-                throw new DataStoreException("Can't use `null` for " . $nodeName . ". Only for `eq` or `ne`");
-            }
-        } else if ($nodeName === 'contains') {
+        if ($nodeName === 'contains') {
             $strQuery .= $this->literals['ScalarOperator'][$nodeName]['between'] .
                 trim($this->prepareFieldValue($value), '\'');
         } else {
@@ -138,6 +132,30 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         }
 
         $strQuery .= $this->literals['ScalarOperator'][$nodeName]['after'];
+
+        return $strQuery;
+    }
+
+    public function makeBinaryOperator(BinaryOperatorNodeAbstract $node)
+    {
+        $nodeName = $node->getNodeName();
+
+        if (!isset($this->literals['BinaryOperator'][$nodeName])) {
+            throw new DataStoreException(
+                'The Binary Operator not suppoted: ' . $nodeName
+            );
+        }
+
+        $strQuery = $this->literals['BinaryOperator'][$nodeName]['before'];
+        $field = $this->prepareFieldName($node->getField());
+
+        if ($nodeName === 'ie') {
+            $strQuery .= $field . 'IS NULL OR ' . $field . ' IS FALSE';
+        } else {
+            $strQuery .= $field;
+        }
+
+        $strQuery .= $this->literals['BinaryOperator'][$nodeName]['after'];
 
         return $strQuery;
     }

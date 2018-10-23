@@ -59,6 +59,7 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
             // TODO: make strict comparison (to implement it need to make data stores typed)
             'eqt' => ['before' => '(', 'after' => '==true)'],
             'eqf' => ['before' => '(', 'after' => '==false)'],
+            'ie' => ['before' => 'empty(', 'after' => ')'],
         ]
     ];
 

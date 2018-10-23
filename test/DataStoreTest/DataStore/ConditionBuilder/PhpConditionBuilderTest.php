@@ -13,6 +13,7 @@ use rollun\datastore\Rql\Node\AlikeGlobNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
+use rollun\datastore\Rql\Node\BinaryNode\IeNode;
 use rollun\datastore\Rql\Node\LikeGlobNode;
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;
@@ -115,10 +116,11 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
                     ->addQuery(new AndNode([
                         new EqnNode('a'),
                         new EqtNode('b'),
-                        new EqfNode('c')
+                        new EqfNode('c'),
+                        new IeNode('d')
                     ]))
                     ->getQuery()->getQuery(),
-                '(is_null($item[\'a\']) && ($item[\'b\']==true) && ($item[\'c\']==false))'
+                '(is_null($item[\'a\']) && ($item[\'b\']==true) && ($item[\'c\']==false) && empty($item[\'d\']))'
             ),
             array(
                 (new QueryBuilder())

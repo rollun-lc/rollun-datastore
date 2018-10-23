@@ -47,6 +47,7 @@ class RqlConditionBuilder extends ConditionBuilderAbstract
             'eqn' => ['before' => 'eqn(', 'after' => ')'],
             'eqt' => ['before' => 'eqt(', 'after' => ')'],
             'eqf' => ['before' => 'eqf(', 'after' => ')'],
+            'ie' => ['before' => 'ie(', 'after' => ')'],
         ]
     ];
     protected $emptyCondition = '';
