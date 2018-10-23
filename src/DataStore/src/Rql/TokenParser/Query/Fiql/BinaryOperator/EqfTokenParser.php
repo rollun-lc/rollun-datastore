@@ -8,7 +8,7 @@ class EqfTokenParser extends BinaryTokenParserAbstract
 {
     public function getOperatorNames()
     {
-        return ['isFalse'];
+        return ['eqf'];
     }
 
     protected function createNode(string $field)

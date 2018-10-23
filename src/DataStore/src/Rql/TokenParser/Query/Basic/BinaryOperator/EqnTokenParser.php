@@ -8,7 +8,7 @@ class EqnTokenParser extends BinaryTokenParserAbstract
 {
     public function getOperatorName()
     {
-        return 'isNull';
+        return 'eqn';
     }
 
     protected function createNode(string $field)

@@ -55,10 +55,10 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
             ],
         ],
         'BinaryOperator' => [
-            'isNull' => ['before' => 'is_null(', 'after' => ')'],
+            'eqn' => ['before' => 'is_null(', 'after' => ')'],
             // TODO: make strict comparison (to implement it need to make data stores typed)
-            'isTrue' => ['before' => '(', 'after' => '==true)'],
-            'isFalse' => ['before' => '(', 'after' => '==false)'],
+            'eqt' => ['before' => '(', 'after' => '==true)'],
+            'eqf' => ['before' => '(', 'after' => '==false)'],
         ]
     ];
 

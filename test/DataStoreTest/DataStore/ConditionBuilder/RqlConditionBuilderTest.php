@@ -107,7 +107,7 @@ class RqlConditionBuilderTest extends ConditionBuilderTest
                         new AlikeGlobNode('a', '*abc?'),
                     ]))
                     ->getQuery()->getQuery(),
-                'and(isNull(a),isTrue(b),isFalse(c),alike(a,string:*abc?))'
+                'and(eqn(a),eqt(b),eqf(c),alike(a,string:*abc?))'
             ),
         );
     }

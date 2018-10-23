@@ -6,6 +6,6 @@ class EqtNode extends BinaryOperatorNodeAbstract
 {
     public function getNodeName()
     {
-        return 'isTrue';
+        return 'eqt';
     }
 }

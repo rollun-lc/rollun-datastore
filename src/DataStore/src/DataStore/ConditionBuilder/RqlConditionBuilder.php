@@ -44,9 +44,9 @@ class RqlConditionBuilder extends ConditionBuilderAbstract
             'contains' => ['before' => 'contains(', 'between' => ',', 'after' => ')'],
         ],
         'BinaryOperator' => [
-            'isNull' => ['before' => 'isNull(', 'after' => ')'],
-            'isTrue' => ['before' => 'isTrue(', 'after' => ')'],
-            'isFalse' => ['before' => 'isFalse(', 'after' => ')'],
+            'eqn' => ['before' => 'eqn(', 'after' => ')'],
+            'eqt' => ['before' => 'eqt(', 'after' => ')'],
+            'eqf' => ['before' => 'eqf(', 'after' => ')'],
         ]
     ];
     protected $emptyCondition = '';

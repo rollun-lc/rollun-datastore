@@ -6,6 +6,6 @@ class EqfNode extends BinaryOperatorNodeAbstract
 {
     public function getNodeName()
     {
-        return 'isFalse';
+        return 'eqf';
     }
 }
