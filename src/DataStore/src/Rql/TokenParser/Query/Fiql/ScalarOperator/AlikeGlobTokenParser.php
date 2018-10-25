@@ -3,16 +3,16 @@
 namespace rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator;
 
 use rollun\datastore\Rql\Node\AlikeGlobNode;
-use Xiag\Rql\Parser\TokenParser\Query\Basic\AbstractScalarOperatorTokenParser;
+use Xiag\Rql\Parser\TokenParser\Query\Fiql\AbstractScalarOperatorTokenParser;
 
 class AlikeGlobTokenParser extends AbstractScalarOperatorTokenParser
 {
     /**
      * @inheritdoc
      */
-    protected function getOperatorName()
+    protected function getOperatorNames()
     {
-        return 'alike';
+        return ['alike'];
     }
 
     /**

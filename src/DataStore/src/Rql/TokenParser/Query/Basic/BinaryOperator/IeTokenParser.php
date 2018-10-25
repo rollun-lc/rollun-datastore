@@ -6,7 +6,7 @@ use rollun\datastore\Rql\Node\BinaryNode\IeNode;
 
 class IeTokenParser extends BinaryTokenParserAbstract
 {
-    public function getOperatorName()
+    protected function getOperatorName()
     {
         return 'ie';
     }
