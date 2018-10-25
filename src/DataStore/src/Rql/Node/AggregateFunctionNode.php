@@ -55,6 +55,4 @@ class AggregateFunctionNode extends AbstractNode
     {
         return sprintf("%s(%s)", $this->function, $this->field);
     }
-
-
 }

@@ -2,17 +2,48 @@
 
 namespace test\unit\DataStore\Rql\Node\BinaryNode;
 
+use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
 
-class EqnNodeTestTest extends BinaryOperatorNodeAbstractTest
+class EqnNodeTestTest extends TestCase
 {
-    public function createObject($field)
+    protected function createObject($field)
     {
-        $this->object = new EqnNode($field);
+        return new EqnNode($field);
     }
 
-    public function getNodeName(): string
+    public function dataProvider()
     {
-        return 'eqn';
+        return [
+            ['fieldName']
+        ];
+    }
+
+    /**
+     * @dataProvider dataProvider
+     * @param $field
+     */
+    public function testConstruct($field)
+    {
+        $object = $this->createObject($field);
+        $this->assertEquals($field, $object->getField());
+    }
+
+    public function testSetField()
+    {
+        $field = 'fieldName1';
+        $object = $this->createObject('fieldName2');
+        $object->setField($field);
+        $this->assertEquals($field, $object->getField());
+    }
+
+    /**
+     * @dataProvider dataProvider
+     * @param $field
+     */
+    public function testGetNodeName($field)
+    {
+        $object = $this->createObject($field);
+        $this->assertEquals($object->getNodeName(), 'eqn');
     }
 }

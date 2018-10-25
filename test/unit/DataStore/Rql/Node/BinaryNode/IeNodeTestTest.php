@@ -2,17 +2,48 @@
 
 namespace test\unit\DataStore\Rql\Node\BinaryNode;
 
+use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node\BinaryNode\IeNode;
 
-class IeNodeTestTest extends BinaryOperatorNodeAbstractTest
+class IeNodeTestTest extends TestCase
 {
-    public function createObject($field)
+    protected function createObject($field)
     {
-        $this->object = new IeNode($field);
+        return new IeNode($field);
     }
 
-    public function getNodeName(): string
+    public function dataProvider()
     {
-        return 'ie';
+        return [
+            ['fieldName']
+        ];
+    }
+
+    public function testSetField()
+    {
+        $field = 'fieldName1';
+        $object = $this->createObject('fieldName2');
+        $object->setField($field);
+        $this->assertEquals($field, $object->getField());
+    }
+
+    /**
+     * @dataProvider dataProvider
+     * @param $field
+     */
+    public function testConstruct($field)
+    {
+        $object = $this->createObject($field);
+        $this->assertEquals($field, $object->getField());
+    }
+
+    /**
+     * @dataProvider dataProvider
+     * @param $field
+     */
+    public function testGetNodeName($field)
+    {
+        $object = $this->createObject($field);
+        $this->assertEquals($object->getNodeName(), 'ie');
     }
 }
