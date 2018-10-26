@@ -4,7 +4,7 @@ namespace rollun\datastore\DataStore;
 
 use InvalidArgumentException;
 use ReflectionClass;
-use rollun\datastore\DataStore\Interfaces\TypeInterface;
+use rollun\datastore\DataStore\Type\TypeInterface;
 
 class BaseDto
 {
@@ -13,7 +13,7 @@ class BaseDto
      * @return BaseDto
      * @throws \ReflectionException
      */
-    public static function buildFromType(array $data)
+    public static function createInstance(array $data)
     {
         $reflection = new ReflectionClass(static::class);
         $reflectionParameters = $reflection->getConstructor()->getParameters();

@@ -126,7 +126,7 @@ echo $user->getId(); // 1 (int)
 echo $user->getName(); // 'name' (string)
 ```
 
-Зачастую data store нужно передать отформатированые каким то образом данные получаные из TDO. 
+Зачастую data store нужно передать отформатированые каким то образом данные получаные из DTO. 
 Для этого удобно использовать форматеры. Форматеры (formatter) реализуют интерфейс FormatterInterface.
 
 Пример:
@@ -148,13 +148,13 @@ class StringFormatter implements FormatterInterface
 }
 
 // The same as 'new UserDto($id, $name)'
-$user = UserDto::buildFromType([
+$user = UserDto::createInstance([
     'id' => $id,
     'name' => $name
 ]);
 ```
 
-Для описания типа и форматтера для каждоного столбца используеться схема.
+Для описания типа и форматтера для каждоного столбца используеться схемаи храниться она в реализации data store.
 
 Пример:
 
