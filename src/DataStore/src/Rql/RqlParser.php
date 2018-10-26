@@ -206,8 +206,8 @@ class RqlParser
     protected function makeGroupby(RqlQuery $query)
     {
         $groupBy = '';
-        if ($query->getGroupby() != null) {
-            $fields = $query->getGroupby()->getFields();
+        if ($query->getGroupBy() != null) {
+            $fields = $query->getGroupBy()->getFields();
             $groupBy = '&groupby(';
             foreach ($fields as $field) {
                 $groupBy .= $field . ',';

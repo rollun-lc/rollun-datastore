@@ -40,7 +40,7 @@ class AggregateSelectNodeTest extends TestCase
         $this->assertEquals($object->getNodeName(), 'select');
     }
 
-    public function testGetAddFields()
+    public function testAddFields()
     {
         $fields = [
             'fieldName1' => 'direction1',

@@ -213,7 +213,7 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
      */
     protected function setGroupby(Select $selectSQL, RqlQuery $query)
     {
-        $groupByFields = $query->getGroupby()->getFields();
+        $groupByFields = $query->getGroupBy()->getFields();
         $selectionFields = $query->getSelect()->getFields();
         foreach ($selectionFields as &$field) {
             if (!in_array($field, $groupByFields) && !($field instanceof AggregateFunctionNode)) {
@@ -221,7 +221,7 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
             }
         }
         $query->setSelect(new AggregateSelectNode($selectionFields));
-        $selectSQL->group($query->getGroupby()->getFields());
+        $selectSQL->group($query->getGroupBy()->getFields());
         return $selectSQL;
     }
 
@@ -457,7 +457,7 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
         $selectSQL->where($conditionBuilder($query->getQuery()));
         $selectSQL = $this->setSelectOrder($selectSQL, $query);
         $selectSQL = $this->setSelectLimitOffset($selectSQL, $query);
-        $selectSQL = ($query instanceof RqlQuery && $query->getGroupby() != null) ?
+        $selectSQL = ($query instanceof RqlQuery && $query->getGroupBy() != null) ?
             $this->setGroupby($selectSQL, $query) : $selectSQL;
         $selectSQL = $this->setSelectColumns($selectSQL, $query);
         $selectSQL = $this->setSelectJoin($selectSQL, $query);

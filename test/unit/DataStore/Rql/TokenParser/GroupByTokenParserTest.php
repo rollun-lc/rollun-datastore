@@ -4,7 +4,7 @@ namespace test\unit\DataStore\Rql\TokenParser;
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
-use rollun\datastore\Rql\Node\GroupbyNode;
+use rollun\datastore\Rql\Node\GroupByNode;
 use rollun\datastore\Rql\TokenParser\GroupbyTokenParser;
 use Xiag\Rql\Parser\Token;
 use Xiag\Rql\Parser\TokenStream;
@@ -33,7 +33,7 @@ class GroupByTokenParserTest extends TestCase
      */
     public function testParse($fields)
     {
-        $node = new GroupbyNode($fields);
+        $node = new GroupByNode($fields);
         $tokenStream = $this->getMockTokenStream($fields);
         $this->assertEquals($this->createObject()->parse($tokenStream), $node);
     }

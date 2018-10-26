@@ -119,7 +119,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
             $data = $this->queryWhere($query, $limit, $offset);
             $result = $this->querySort($data, $query);
         }
-        if ($query instanceof RqlQuery && $query->getGroupby() != null) {
+        if ($query instanceof RqlQuery && $query->getGroupBy() != null) {
             $result = $this->queryGroupBy($result, $query);
         } else {
             $result = $this->querySelect($result, $query);
@@ -199,7 +199,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
 
     protected function queryGroupBy($result, RqlQuery $query)
     {
-        $groupFields = $query->getGroupby()->getFields();
+        $groupFields = $query->getGroupBy()->getFields();
         $selectionFields = $query->getSelect()->getFields();
         foreach ($selectionFields as &$field) {
             if (!in_array($field, $groupFields) && !($field instanceof AggregateFunctionNode)) {

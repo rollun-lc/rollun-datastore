@@ -16,7 +16,7 @@ use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
 use rollun\datastore\Rql\Node\BinaryNode\IeNode;
 use rollun\datastore\Rql\Node\ContainsNode;
-use rollun\datastore\Rql\Node\GroupbyNode;
+use rollun\datastore\Rql\Node\GroupByNode;
 use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
@@ -185,7 +185,7 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
     {
         $queryByString = RqlParser::rqlDecode("groupby(id)");
         $query = new RqlQuery();
-        $query->setGroupby(new GroupbyNode(['id']));
+        $query->setGroupBy(new GroupByNode(['id']));
         $this->assertEquals($query, $queryByString);
     }
 
@@ -201,7 +201,7 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
                     ]),
             new NeNode('name', 'q1$3'),
         ]));
-        $query->setGroupby(new GroupbyNode(['id']));
+        $query->setGroupBy(new GroupByNode(['id']));
         $this->assertEquals($query, $queryByString);
     }
 
