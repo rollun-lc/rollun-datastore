@@ -1,44 +1,50 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore;
 
-use rollun\datastore\DataStore\DataStoreAbstract;
-use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\ConditionBuilder\PhpConditionBuilder;
 
 /**
- * DataStores as array
+ * Represent php array as datastore
  *
- * @todo delete string 74
- * @see http://en.wikipedia.org/wiki/Create,_read,_update_and_delete
- * @category   rest
- * @package    zaboy
+ * Class Memory
+ * @package rollun\datastore\DataStore
  */
 class Memory extends DataStoreAbstract
 {
+    /**
+     * Collected items
+     *
+     * @var array
+     */
+    protected $items = [];
 
     /**
-     * @var array Collected items
+     * Required fields
+     *
+     * @var array
      */
-    protected $items = array();
+    protected $fields;
 
-    public function __construct()
+    /**
+     * Memory constructor.
+     * @param array $fields
+     */
+    public function __construct(array $fields = [])
     {
+        if (!count($fields)) {
+            trigger_error("Array of required columns is not specified", E_USER_DEPRECATED);
+        }
+
+        $this->fields = $fields;
         $this->conditionBuilder = new PhpConditionBuilder;
     }
 
-//** Interface "rollun\datastore\DataStore\Interfaces\ReadInterface" **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function read($id)
@@ -51,94 +57,99 @@ class Memory extends DataStoreAbstract
         }
     }
 
-// ** Interface "rollun\datastore\DataStore\Interfaces\DataStoresInterface"  **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function create($itemData, $rewriteIfExist = false)
     {
+        // TODO: move to abstract
+        /*if ($rewriteIfExist) {
+            trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
+        }*/
+
         $identifier = $this->getIdentifier();
-        if (!isset($itemData[$identifier])) {
+        $id = isset($itemData[$identifier]) ? $itemData[$identifier] : null;
+
+        if ($id) {
+            if (isset($this->items[$id]) && !$rewriteIfExist) {
+                throw new DataStoreException("Item with id '{$itemData[$identifier]}' already exist");
+            }
+
+            $this->checkIdentifierType($id);
+        } else {
             $this->items[] = $itemData;
             $itemsKeys = array_keys($this->items);
             $id = array_pop($itemsKeys);
-        } elseif (!$rewriteIfExist && isset($this->items[$itemData[$identifier]])) {
-            throw new DataStoreException('Item is already exist with "id" =  ' . $itemData[$identifier]);
-        } else {
-            $id = $itemData[$identifier];
-            $this->checkIdentifierType($id);
-            $this->items[$id] = array_merge(array($identifier => $id), $itemData);
         }
+
         $this->items[$id] = array_merge(array($identifier => $id), $itemData);
+
         return $this->items[$id];
     }
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function update($itemData, $createIfAbsent = false)
     {
+        // TODO: move to abstract
+        /*if ($createIfAbsent) {
+            trigger_error("Option 'createIfAbsent' is no more use", E_USER_DEPRECATED);
+        }*/
+
         $identifier = $this->getIdentifier();
+
         if (!isset($itemData[$identifier])) {
             throw new DataStoreException('Item must has primary key');
         }
-        $id = $itemData[$identifier];
-        $this->checkIdentifierType($id);
 
-        switch (true) {
-            case!isset($this->items[$id]) && !$createIfAbsent:
-                $errorMsg = 'Can\'t update item with "id" = ' . $id;
-                throw new DataStoreException($errorMsg);
-            case!isset($this->items[$id]) && $createIfAbsent:
-                $this->items[$id] = array_merge(array($identifier => $id), $itemData);
-                break;
-            case isset($this->items[$id]):
-                unset($itemData[$id]);
-                $this->items[$id] = array_merge($this->items[$id], $itemData);
-                break;
+        $this->checkIdentifierType($itemData[$identifier]);
+        $identifier = $this->getIdentifier();
+        $id = $itemData[$identifier];
+
+        if (isset($this->items[$id])) {
+            unset($itemData[$id]);
+            $this->items[$id] = $itemData;
+        } else {
+            if ($createIfAbsent) {
+                $this->items[$id] = $itemData;
+            } else {
+                throw new DataStoreException("Item with id '$id' doesn't exist");
+            }
         }
+
         return $this->items[$id];
     }
 
     /**
      * {@inheritdoc}
-     *
-     * {@inheritdoc}
      */
     public function delete($id)
     {
-
         $this->checkIdentifierType($id);
+
         if (isset($this->items[$id])) {
             $item = $this->items[$id];
             unset($this->items[$id]);
 
+            return $item;
         }
-        return isset($item) ? $item : null;
+
+        return null;
     }
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function deleteAll()
     {
         $deletedItemsCount = count($this->items);
-        $this->items = array();
+        $this->items = [];
+
         return $deletedItemsCount;
     }
 
-// ** Interface "/Coutable"  **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function count()
@@ -146,11 +157,7 @@ class Memory extends DataStoreAbstract
         return count($this->items);
     }
 
-// ** Interface "/IteratorAggregate"  **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function getIterator()
@@ -158,11 +165,7 @@ class Memory extends DataStoreAbstract
         return new \ArrayIterator($this->items);
     }
 
-// ** protected  **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     protected function getKeys()
@@ -170,4 +173,24 @@ class Memory extends DataStoreAbstract
         return array_keys($this->items);
     }
 
+    /**
+     * Check if item data match with expected columns (data store fields)
+     *
+     * @param $itemData
+     * @return mixed
+     */
+    protected function validateItemData($itemData)
+    {
+        if (!count($this->fields)) {
+            return $itemData;
+        }
+
+        foreach ($itemData as $field => $value) {
+            if (!in_array($field, $this->fields)) {
+                throw new DataStoreException("Undefined field '$field' in data store");
+            }
+        }
+
+        return $itemData;
+    }
 }

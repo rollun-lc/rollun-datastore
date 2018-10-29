@@ -13,7 +13,7 @@ class BaseDto
      * @return BaseDto
      * @throws \ReflectionException
      */
-    public static function createInstance(array $data)
+    public static function createFromArray(array $data)
     {
         $reflection = new ReflectionClass(static::class);
         $reflectionParameters = $reflection->getConstructor()->getParameters();

@@ -10,4 +10,11 @@ interface TypeInterface
      * @return mixed
      */
     public function toTypeValue();
+
+    /**
+     * Return type name
+     *
+     * @return mixed
+     */
+    public static function getTypeName();
 }
