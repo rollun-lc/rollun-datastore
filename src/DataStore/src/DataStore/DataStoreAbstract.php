@@ -87,10 +87,12 @@ abstract class DataStoreAbstract implements DataStoresInterface
     /**
      * Throw Exception if type of Identifier is wrong
      *
-     * @param mix $id
+     * @param mixed $id
      */
     protected function checkIdentifierType($id)
     {
+        // TODO: trigger deprecated error
+
         $idType = gettype($id);
         if ($idType == 'integer' || $idType == 'double' || $idType == 'string') {
             return;

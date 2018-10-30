@@ -10,6 +10,22 @@ use rollun\datastore\DataStore\ConditionBuilder\PhpConditionBuilder;
 
 /**
  * Represent php array as datastore
+ * All items store in protected property $item (actually it is a RAM)
+ * To easy search item id matches $item key
+ *
+ * Example:
+ * [
+ *      1 => [
+ *          // identifier can be another
+ *          'id' => 1,
+ *          'name' => 'name1',
+ *      ],
+ *      37 => [
+ *          // identifier can be another
+ *          'id' => 37,
+ *          'name' => 'name2',
+ *      ],
+ * ]
  *
  * Class Memory
  * @package rollun\datastore\DataStore
@@ -62,11 +78,11 @@ class Memory extends DataStoreAbstract
      */
     public function create($itemData, $rewriteIfExist = false)
     {
-        // TODO: move to abstract
-        /*if ($rewriteIfExist) {
+        if ($rewriteIfExist) {
             trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
-        }*/
+        }
 
+        $this->checkOnExistingColumns($itemData);
         $identifier = $this->getIdentifier();
         $id = isset($itemData[$identifier]) ? $itemData[$identifier] : null;
 
@@ -92,11 +108,11 @@ class Memory extends DataStoreAbstract
      */
     public function update($itemData, $createIfAbsent = false)
     {
-        // TODO: move to abstract
-        /*if ($createIfAbsent) {
+        if ($createIfAbsent) {
             trigger_error("Option 'createIfAbsent' is no more use", E_USER_DEPRECATED);
-        }*/
+        }
 
+        $this->checkOnExistingColumns($itemData);
         $identifier = $this->getIdentifier();
 
         if (!isset($itemData[$identifier])) {
@@ -104,17 +120,19 @@ class Memory extends DataStoreAbstract
         }
 
         $this->checkIdentifierType($itemData[$identifier]);
-        $identifier = $this->getIdentifier();
         $id = $itemData[$identifier];
 
         if (isset($this->items[$id])) {
+            foreach ($itemData as $field => $value) {
+                $this->items[$id][$field] = $value;
+            }
+
             unset($itemData[$id]);
-            $this->items[$id] = $itemData;
         } else {
             if ($createIfAbsent) {
                 $this->items[$id] = $itemData;
             } else {
-                throw new DataStoreException("Item with id '$id' doesn't exist");
+                throw new DataStoreException("Item doesn't exist with id = $id");
             }
         }
 
@@ -162,6 +180,8 @@ class Memory extends DataStoreAbstract
      */
     public function getIterator()
     {
+        trigger_error("Datastore is not iterable no more", E_USER_DEPRECATED);
+
         return new \ArrayIterator($this->items);
     }
 
@@ -179,7 +199,7 @@ class Memory extends DataStoreAbstract
      * @param $itemData
      * @return mixed
      */
-    protected function validateItemData($itemData)
+    protected function checkOnExistingColumns($itemData)
     {
         if (!count($this->fields)) {
             return $itemData;
