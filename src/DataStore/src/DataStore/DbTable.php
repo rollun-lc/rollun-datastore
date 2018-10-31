@@ -10,8 +10,7 @@ use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
 use Xiag\Rql\Parser\Query;
-use Zend\Db\Adapter\Adapter;
-use Zend\Db\ResultSet\ResultSet;
+use Zend\Db\Adapter\ParameterContainer;
 use Zend\Db\Sql\Select;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -41,16 +40,12 @@ class DbTable extends DataStoreAbstract
     public function __construct(TableGateway $dbTable, SqlQueryBuilder $sqlQueryBuilder = null)
     {
         $this->dbTable = $dbTable;
-        $this->sqlQueryBuilder = $sqlQueryBuilder;
-    }
 
-    protected function getSqlQueryBuilder()
-    {
         if ($this->sqlQueryBuilder === null) {
-            return new SqlQueryBuilder($this->dbTable->getAdapter(), $this->dbTable->table);
+            $this->sqlQueryBuilder = new SqlQueryBuilder($this->dbTable->getAdapter(), $this->dbTable->table);
+        } else {
+            $this->sqlQueryBuilder = $sqlQueryBuilder;
         }
-
-        return $this->sqlQueryBuilder;
     }
 
     /**
@@ -70,7 +65,7 @@ class DbTable extends DataStoreAbstract
             $adapter->getDriver()->getConnection()->commit();
         } catch (\Throwable $e) {
             $adapter->getDriver()->getConnection()->rollback();
-            throw new DataStoreException('Can\'t insert item ' . $e->getMessage(), 0, $e);
+            throw new DataStoreException("Can't insert item. {$e->getMessage()}", 0, $e);
         }
 
         return $insertedItem;
@@ -92,6 +87,7 @@ class DbTable extends DataStoreAbstract
         if (isset($itemData[$this->getIdentifier()])) {
             $insertedItem = $this->read($itemData[$this->getIdentifier()]);
         } else {
+            trigger_error("Getting last id using db is deprecate", E_USER_DEPRECATED);
             $id = $this->dbTable->getLastInsertValue();
             $insertedItem = $this->read($id);
         }
@@ -116,23 +112,24 @@ class DbTable extends DataStoreAbstract
         $adapter->getDriver()->getConnection()->beginTransaction();
 
         try {
-            $result = $this->updateItem($this->dbTable, $itemData, $createIfAbsent);
+            $result = $this->updateItem($itemData, $createIfAbsent);
             $adapter->getDriver()->getConnection()->commit();
         } catch (\Throwable $e) {
+
+
             $adapter->getDriver()->getConnection()->rollback();
-            throw new DataStoreException('Can\'t update item', 0, $e);
+            throw new DataStoreException("Can't update item. {$e->getMessage()}", 0, $e);
         }
 
         return $result;
     }
 
     /**
-     * @param string[] $identifiers
-     * @return \Zend\Db\Adapter\Driver\StatementInterface|ResultSet
+     * @param array $identifiers
+     * @return \Zend\Db\Adapter\Driver\ResultInterface
      */
     private function selectForUpdate(array $identifiers)
     {
-        /** @var Adapter $adapter */
         $adapter = $this->dbTable->getAdapter();
         $valTemplate = '';
 
@@ -141,35 +138,37 @@ class DbTable extends DataStoreAbstract
         }
 
         $valTemplate = trim($valTemplate, ",");
-        $queryString = "SELECT " . Select::SQL_STAR
+        $sqlString = "SELECT " . Select::SQL_STAR
             . " FROM {$adapter->getPlatform()->quoteIdentifier($this->dbTable->getTable())}"
             . " WHERE {$adapter->getPlatform()->quoteIdentifier($this->getIdentifier())} IN ($valTemplate)"
             . " FOR UPDATE";
 
-        return $adapter->query($queryString, $identifiers);
+        $statement = $adapter->getDriver()->createStatement($sqlString);
+        $statement->setParameterContainer(new ParameterContainer($identifiers));
+
+        return $statement->execute();
     }
 
     /**
-     * @param TableGateway $tableGateway
      * @param $itemData
      * @param bool $createIfAbsent
      * @return array
      */
-    protected function updateItem(TableGateway $tableGateway, $itemData, $createIfAbsent = false)
+    protected function updateItem($itemData, $createIfAbsent = false)
     {
         $identifier = $this->getIdentifier();
         $id = $itemData[$identifier];
         $this->checkIdentifierType($id);
 
         // Is row with this index exist ?
-        $rowSet = $this->selectForUpdate([$id]);
-        $isExist = !is_null($rowSet->current());
+        $result = $this->selectForUpdate([$id]);
+        $isExist = $result->count();
 
         if (!$isExist && $createIfAbsent) {
-            $tableGateway->insert($itemData);
+            $this->dbTable->insert($itemData);
         } elseif ($isExist) {
             unset($itemData[$identifier]);
-            $tableGateway->update($itemData, array($identifier => $id));
+            $this->dbTable->update($itemData, array($identifier => $id));
         } else {
             throw new DataStoreException("Can't update item with id = $id");
         }
@@ -182,13 +181,12 @@ class DbTable extends DataStoreAbstract
      */
     public function query(Query $query)
     {
-        /** @var Adapter $adapter */
         $adapter = $this->dbTable->getAdapter();
-        $sqlBuilder = new SqlQueryBuilder($adapter, $this->dbTable->getTable());
-        $sqlString = $sqlBuilder->buildSql($query);
+        $sqlString = $this->sqlQueryBuilder->buildSql($query);
 
         try {
-            $rowSet = $adapter->query($sqlString, $adapter::QUERY_MODE_EXECUTE);
+            $statement = $adapter->getDriver()->createStatement($sqlString);
+            $resultSet = $statement->execute();
         } catch (\PDOException $exception) {
             throw new DataStoreException(
                 "Error by execute '$sqlString' query to {$this->getDbTable()->getTable()}.",
@@ -196,7 +194,13 @@ class DbTable extends DataStoreAbstract
             );
         }
 
-        return $rowSet->toArray();
+        $result = [];
+
+        foreach ($resultSet as $itemData) {
+            $result[] = $itemData;
+        }
+
+        return $result;
     }
 
     /**
@@ -247,16 +251,15 @@ class DbTable extends DataStoreAbstract
      */
     public function count()
     {
-        /** @var Adapter $adapter */
         $adapter = $this->dbTable->getAdapter();
 
-        /* @var $rowSet ResultSet */
-        $rowSet = $adapter->query(
-            "SELECT COUNT(*) AS count FROM " . $adapter->platform->quoteIdentifier($this->dbTable->getTable()),
-            $adapter::QUERY_MODE_EXECUTE
-        );
+        $sql = "SELECT COUNT(*) AS count FROM "
+            . $adapter->getPlatform()->quoteIdentifier($this->dbTable->getTable());
 
-        return $rowSet->current()['count'];
+        $statement = $adapter->getDriver()->createStatement($sql);
+        $result = $statement->execute();
+
+        return $result->current()['count'];
     }
 
     /**
@@ -307,10 +310,12 @@ class DbTable extends DataStoreAbstract
         $select = $this->dbTable->getSql()->select();
         $select->columns(array($identifier));
 
-        /* @var $rowSet ResultSet */
-        $rowSet = $this->dbTable->selectWith($select);
-        $keysArrays = $rowSet->toArray();
-        $keys = array_column($keysArrays, $identifier);
+        $resultSet = $this->dbTable->selectWith($select);
+        $keys = [];
+
+        foreach ($resultSet as $key => $result) {
+            $keys[] = $key;
+        }
 
         return $keys;
     }

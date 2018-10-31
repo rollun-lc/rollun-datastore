@@ -208,7 +208,6 @@ class MemoryTest extends TestCase
                 ]
             ]
         );
-        $object->count();
         $this->assertEquals(2,  $object->count());
     }
 

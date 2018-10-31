@@ -424,6 +424,8 @@ abstract class DataStoreAbstract implements DataStoresInterface
      */
     public function getIterator()
     {
+        trigger_error("Datastore is not iterable no more", E_USER_DEPRECATED);
+
         return new DataStoreIterator($this);
     }
 

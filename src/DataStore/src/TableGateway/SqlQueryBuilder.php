@@ -6,24 +6,23 @@
 
 namespace rollun\datastore\TableGateway;
 
-use rollun\datastore\DataStore\ConditionBuilder\MysqlConditionBuilder;
+use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\RqlQuery;
-use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
-use Zend\Db\Adapter\Platform\Mysql;
-use Zend\Db\Sql\Platform\AbstractPlatform;
+use Zend\Db\Adapter\AdapterInterface;
 use Zend\Db\Sql\Predicate\Expression;
 use Zend\Db\Sql\Select;
+use Zend\Db\Sql\Sql;
 
 class SqlQueryBuilder
 {
     /**
-     * @var AbstractPlatform
+     * @var AdapterInterface
      */
-    private $platform;
+    private $adapter;
 
     /**
      * @var string
@@ -31,30 +30,26 @@ class SqlQueryBuilder
     private $tableName;
 
     /**
-     * @var MysqlConditionBuilder
+     * @var SqlConditionBuilder
      */
     protected $sqlConditionBuilder;
 
     /**
      * SqlQueryBuilder constructor.
-     * @param AbstractPlatform $platform
+     * @param AdapterInterface $adapter
      * @param $tableName
-     * @param MysqlConditionBuilder|null $sqlConditionBuilder
+     * @param SqlConditionBuilder|null $sqlConditionBuilder
      */
-    public function __construct(AbstractPlatform $platform, $tableName, MysqlConditionBuilder $sqlConditionBuilder = null)
+    public function __construct(AdapterInterface $adapter, $tableName, SqlConditionBuilder $sqlConditionBuilder = null)
     {
-        $this->platform = $platform;
+        $this->adapter = $adapter;
         $this->tableName = $tableName;
-        $this->sqlConditionBuilder = $sqlConditionBuilder;
-    }
 
-    protected function getSqlConditionBuilder()
-    {
         if ($this->sqlConditionBuilder === null) {
-            return new MysqlConditionBuilder(new Mysql(), $this->tableName);
+            $this->sqlConditionBuilder = new SqlConditionBuilder($this->adapter, $this->tableName);
+        } else {
+            $this->sqlConditionBuilder = $sqlConditionBuilder;
         }
-
-        return $this->sqlConditionBuilder;
     }
 
     /**
@@ -92,18 +87,17 @@ class SqlQueryBuilder
             return $selectSQL;
         }
 
-        $sortFields = $sort->getFields();
+        $orders = [];
 
-        foreach ($sortFields as $ordKey => $ordVal) {
-            if (!preg_match('/[\w]+\.[\w]+/', $ordKey)) {
-                $ordKey = $this->tableName . '.' . $ordKey;
-            }
-            if ((int)$ordVal === SortNode::SORT_DESC) {
-                $selectSQL->order($ordKey . ' ' . Select::ORDER_DESCENDING);
+        foreach ($sort->getFields() as $field => $direction) {
+            if ($direction == 1 || strtolower($direction) == 'asc') {
+                $orders[$field] = Select::ORDER_ASCENDING;
             } else {
-                $selectSQL->order($ordKey . ' ' . Select::ORDER_ASCENDING);
+                $orders[$field] = Select::ORDER_DESCENDING;
             }
         }
+
+        $selectSQL->order($orders);
 
         return $selectSQL;
     }
@@ -154,10 +148,13 @@ class SqlQueryBuilder
     public function buildSql(Query $query): string
     {
         try {
-            $selectSql = new Select($this->tableName);
+            $sql = new Sql($this->adapter);
+
+            /** @var Select $selectSql */
+            $selectSql = $sql->select($this->tableName);
 
             // Create select with where conditions
-            $selectSql->where($this->getSqlConditionBuilder()->__invoke($query->getQuery()));
+            $selectSql->where($this->sqlConditionBuilder->__invoke($query->getQuery()));
 
             // Set order
             $selectSql = $this->setSelectOrder($selectSql, $query);
@@ -173,7 +170,7 @@ class SqlQueryBuilder
             $selectSql = $this->setSelectColumns($selectSql, $query);
 
             // Create sql query
-            $sql = $this->platform->setSubject($selectSql)->getSqlString();
+            $sql = $sql->buildSqlString($selectSql);
 
             // Replace double ` char to single.
             $sql = str_replace(["`(", ")`", "``"], ['(', ')', "`"], $sql);
