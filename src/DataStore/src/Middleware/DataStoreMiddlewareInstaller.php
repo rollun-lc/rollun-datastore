@@ -1,9 +1,7 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 13.03.17
- * Time: 11:32
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\Middleware;
@@ -14,7 +12,6 @@ use rollun\actionrender\Factory\MiddlewarePipeAbstractFactory;
 use rollun\actionrender\Installers\ActionRenderInstaller;
 use rollun\actionrender\Installers\BasicRenderInstaller;;
 
-use rollun\actionrender\MiddlewareDeterminator\AttributeParam;
 use rollun\actionrender\MiddlewareDeterminator\Factory\AbstractMiddlewareDeterminatorAbstractFactory;
 use rollun\actionrender\MiddlewareDeterminator\Factory\AttributeParamAbstractFactory;
 use rollun\actionrender\MiddlewareDeterminator\Factory\HeaderSwitchAbstractFactory;

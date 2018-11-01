@@ -1,23 +1,19 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\Middleware\Factory;
 
 use rollun\datastore\DataStore\DataStoreException;
-use rollun\datastore\Middleware\DataStoreAbstract;
 use rollun\datastore\Middleware\DataStoreRest;
 use Zend\Stratigility\MiddlewareInterface;
 use Interop\Container\ContainerInterface;
 use rollun\datastore\AbstractFactoryAbstract;
 
 /**
- * Factory for middleware which contane DataStore
+ * Factory for middleware which contain DataStore
  *
  * config
  * <code>
