@@ -48,7 +48,6 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
     public function getIterator()
     {
         return $this->cashStore->getIterator();
-
     }
 
     /**
@@ -62,7 +61,6 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
     public function getIdentifier()
     {
         return $this->cashStore->getIdentifier();
-
     }
 
     /**

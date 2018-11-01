@@ -138,10 +138,10 @@ class DbTable extends DataStoreAbstract
         }
 
         $valTemplate = trim($valTemplate, ",");
-        $sqlString = "SELECT " . Select::SQL_STAR
-            . " FROM {$adapter->getPlatform()->quoteIdentifier($this->dbTable->getTable())}"
-            . " WHERE {$adapter->getPlatform()->quoteIdentifier($this->getIdentifier())} IN ($valTemplate)"
-            . " FOR UPDATE";
+        $sqlString = "SELECT " . Select::SQL_STAR;
+        $sqlString .= " FROM {$adapter->getPlatform()->quoteIdentifier($this->dbTable->getTable())}";
+        $sqlString .= " WHERE {$adapter->getPlatform()->quoteIdentifier($this->getIdentifier())} IN ($valTemplate)";
+        $sqlString .= " FOR UPDATE";
 
         $statement = $adapter->getDriver()->createStatement($sqlString);
         $statement->setParameterContainer(new ParameterContainer($identifiers));
@@ -168,7 +168,7 @@ class DbTable extends DataStoreAbstract
             $this->dbTable->insert($itemData);
         } elseif ($isExist) {
             unset($itemData[$identifier]);
-            $this->dbTable->update($itemData, array($identifier => $id));
+            $this->dbTable->update($itemData, [$identifier => $id]);
         } else {
             throw new DataStoreException("Can't update item with id = $id");
         }
@@ -190,7 +190,8 @@ class DbTable extends DataStoreAbstract
         } catch (\PDOException $exception) {
             throw new DataStoreException(
                 "Error by execute '$sqlString' query to {$this->getDbTable()->getTable()}.",
-                500, $exception
+                500,
+                $exception
             );
         }
 
@@ -213,7 +214,7 @@ class DbTable extends DataStoreAbstract
         $element = $this->read($id);
 
         if ($element) {
-            $this->dbTable->delete(array($identifier => $id));
+            $this->dbTable->delete([$identifier => $id]);
         }
 
         return $element;
@@ -226,7 +227,7 @@ class DbTable extends DataStoreAbstract
     {
         $this->checkIdentifierType($id);
         $identifier = $this->getIdentifier();
-        $rowSet = $this->dbTable->select(array($identifier => $id));
+        $rowSet = $this->dbTable->select([$identifier => $id]);
         $row = $rowSet->current();
 
         if (isset($row)) {
@@ -243,6 +244,7 @@ class DbTable extends DataStoreAbstract
     {
         $where = '1=1';
         $deletedItemsCount = $this->dbTable->delete($where);
+
         return $deletedItemsCount;
     }
 
@@ -253,8 +255,7 @@ class DbTable extends DataStoreAbstract
     {
         $adapter = $this->dbTable->getAdapter();
 
-        $sql = "SELECT COUNT(*) AS count FROM "
-            . $adapter->getPlatform()->quoteIdentifier($this->dbTable->getTable());
+        $sql = "SELECT COUNT(*) AS count FROM " . $adapter->getPlatform()->quoteIdentifier($this->dbTable->getTable());
 
         $statement = $adapter->getDriver()->createStatement($sql);
         $result = $statement->execute();
@@ -272,9 +273,12 @@ class DbTable extends DataStoreAbstract
         $multiInsertTableGw->getAdapter()->getDriver()->getConnection()->beginTransaction();
 
         try {
-            $identifiers = array_map(function ($item) {
-                return $item[$this->getIdentifier()];
-            }, $itemsData);
+            $identifiers = array_map(
+                function ($item) {
+                    return $item[$this->getIdentifier()];
+                },
+                $itemsData
+            );
 
             $multiInsertTableGw->insert($itemsData);
             $query = new Query();
@@ -284,9 +288,7 @@ class DbTable extends DataStoreAbstract
             $multiInsertTableGw->getAdapter()->getDriver()->getConnection()->rollback();
 
             throw new DataStoreException(
-                "Exception by multi create to table {$this->dbTable->table}.",
-                500,
-                $throwable
+                "Exception by multi create to table {$this->dbTable->table}.", 500, $throwable
             );
         }
 
@@ -308,7 +310,7 @@ class DbTable extends DataStoreAbstract
     {
         $identifier = $this->getIdentifier();
         $select = $this->dbTable->getSql()->select();
-        $select->columns(array($identifier));
+        $select->columns([$identifier]);
 
         $resultSet = $this->dbTable->selectWith($select);
         $keys = [];

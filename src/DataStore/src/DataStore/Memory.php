@@ -98,7 +98,7 @@ class Memory extends DataStoreAbstract
             $id = array_pop($itemsKeys);
         }
 
-        $this->items[$id] = array_merge(array($identifier => $id), $itemData);
+        $this->items[$id] = array_merge([$identifier => $id], $itemData);
 
         return $this->items[$id];
     }
