@@ -6,15 +6,13 @@
 
 namespace rollun\datastore\DataStore;
 
-use rollun\datastore\RestException;
-
 /**
  * Exception class
  *
  * @category   rest
  * @package    zaboy
  */
-class DataStoreException extends RestException
+class DataStoreException extends \Exception
 {
 
 }

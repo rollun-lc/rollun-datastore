@@ -67,8 +67,10 @@ class RqlParser
     }
 
     /**
-     * @param $rqlQueryString . Static method for decode qrl string. Work without rawurlencode str.
-     * @return RqlQuery|Query
+     * Static method for decode qrl string. Work without rawurlencode str
+     *
+     * @param $rqlQueryString .
+     * @return Query
      */
     public static function rqlDecode($rqlQueryString)
     {

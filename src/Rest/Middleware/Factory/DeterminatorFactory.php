@@ -9,10 +9,10 @@ namespace rollun\rest\Middleware\Factory;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
-class DataStoreRestFactory implements FactoryInterface
+class DeterminatorFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $service =
+        $middlewarePluginManager = $container->get(Mid)
     }
 }

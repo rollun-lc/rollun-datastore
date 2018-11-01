@@ -6,7 +6,31 @@
 
 namespace rollun\rest\Middleware;
 
-class Deteminator
-{
+use Interop\Http\ServerMiddleware\DelegateInterface;
+use Interop\Http\ServerMiddleware\MiddlewareInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use rollun\datastore\DataStore\DataStorePluginManager;
 
+class Determinator implements MiddlewareInterface
+{
+    /**
+     * @var DataStorePluginManager
+     */
+    protected $dataStorePluginManager;
+
+    public function __construct(DataStorePluginManager $dataStorePluginManager)
+    {
+        $this->dataStorePluginManager = $dataStorePluginManager;
+    }
+
+    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
+    {
+        $requestedName = $request->getAttribute("resourceName");
+        $dataStore = $this->dataStorePluginManager->get($requestedName);
+
+        $dataStoreRest = new DataStoreRest($dataStore);
+        $response = $dataStoreRest->process($request, $delegate);
+
+        return $response;
+    }
 }
