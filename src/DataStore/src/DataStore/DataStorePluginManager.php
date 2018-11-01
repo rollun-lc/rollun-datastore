@@ -4,9 +4,9 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\datastore\Middleware;
+namespace rollun\datastore\DataStore;
 
-class DataStoreResolver
+class DataStorePluginManager
 {
 
 }
