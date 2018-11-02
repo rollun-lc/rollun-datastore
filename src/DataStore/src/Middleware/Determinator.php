@@ -4,13 +4,17 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\rest\Middleware;
+namespace rollun\datastore\Middleware;
 
 use Interop\Http\ServerMiddleware\DelegateInterface;
 use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\DataStorePluginManager;
 
+/**
+ * Class Determinator
+ * @package rollun\datastore\Middleware
+ */
 class Determinator implements MiddlewareInterface
 {
     /**
@@ -18,11 +22,22 @@ class Determinator implements MiddlewareInterface
      */
     protected $dataStorePluginManager;
 
+    /**
+     * Determinator constructor.
+     * @param DataStorePluginManager $dataStorePluginManager
+     */
     public function __construct(DataStorePluginManager $dataStorePluginManager)
     {
         $this->dataStorePluginManager = $dataStorePluginManager;
     }
 
+    /**
+     * Simple hack to simplify determination data store and executing middleware with it
+     *
+     * @param ServerRequestInterface $request
+     * @param DelegateInterface $delegate
+     * @return \Psr\Http\Message\ResponseInterface
+     */
     public function process(ServerRequestInterface $request, DelegateInterface $delegate)
     {
         $requestedName = $request->getAttribute("resourceName");

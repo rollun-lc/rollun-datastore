@@ -13,9 +13,7 @@ $cacheConfig = [
 $aggregator = new ConfigAggregator([
     \Zend\Db\ConfigProvider::class,
     \Zend\Validator\ConfigProvider::class,
-    \Zend\Expressive\ConfigProvider::class,
     \Zend\Expressive\Router\ConfigProvider::class,
-    \rollun\actionrender\ConfigProvider::class,
     \rollun\datastore\ConfigProvider::class,
     // Include cache configuration
     new ArrayProvider($cacheConfig),

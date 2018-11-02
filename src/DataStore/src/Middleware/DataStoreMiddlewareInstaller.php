@@ -4,12 +4,10 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\rest\Middleware;
+namespace rollun\datastore\Middleware;
 
-use rollun\actionrender\Factory\MiddlewarePipeAbstractFactory;
 use rollun\datastore\DataStore\DataStorePluginManager;
 use rollun\datastore\DataStore\DataStorePluginManagerFactory;
-use rollun\rest\Middleware\Factory\DeterminatorFactory;
 use rollun\installer\Install\InstallerAbstract;
 use Zend\ServiceManager\Factory\InvokableFactory;
 
@@ -28,16 +26,6 @@ class DataStoreMiddlewareInstaller extends InstallerAbstract
                     RequestDecoder::class => InvokableFactory::class,
                     DataStoreRest::class => DeterminatorFactory::class,
                     DataStorePluginManager::class => DataStorePluginManagerFactory::class,
-                ],
-            ],
-            MiddlewarePipeAbstractFactory::KEY => [
-                'api-datastore' => [
-                    MiddlewarePipeAbstractFactory::KEY_MIDDLEWARES => [
-                        Middleware\ResourceResolver::class,
-                        Middleware\RequestDecoder::class,
-                        Middleware\DataStoreRest::class,
-                        Middleware\JsonRenderer::class,
-                    ],
                 ],
             ],
             'routes' => [
@@ -83,23 +71,9 @@ class DataStoreMiddlewareInstaller extends InstallerAbstract
         $config = $this->container->get('config');
 
         return (isset($config['dependencies']['factories'])
-            && in_array(
-                ImplicitDataStoreMiddlewareAbstractFactory::class,
-                $config['dependencies']['abstract_factories']
-            )
             && in_array(ResourceResolver::class, $config['dependencies']['factories'])
             && in_array(RequestDecoder::class, $config['dependencies']['factories'])
-            && isset($config[LazyLoadMiddlewareAbstractFactory::KEY]['dataStoreLazyLoadPipe'])
-            && isset($config[ActionRenderAbstractFactory::KEY]['api-datastore']));
-    }
-
-    public function getDependencyInstallers()
-    {
-        return [
-            BasicRenderInstaller::class,
-            ActionRenderInstaller::class,
-            AttributeParamInstaller::class,
-            HeaderSwitchInstaller::class,
-        ];
+            && in_array(DataStoreRest::class, $config['dependencies']['factories'])
+            && in_array(DataStorePluginManager::class, $config['dependencies']['factories']));
     }
 }

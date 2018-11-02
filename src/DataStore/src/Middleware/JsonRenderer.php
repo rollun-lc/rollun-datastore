@@ -4,7 +4,7 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\rest\Middleware;
+namespace rollun\datastore\Middleware;
 
 use Interop\Http\ServerMiddleware\DelegateInterface;
 use Interop\Http\ServerMiddleware\MiddlewareInterface;
@@ -16,12 +16,20 @@ use Zend\Diactoros\Response\JsonResponse;
  * Create json http response
  *
  * Class JsonRenderer
- * @package rollun\rest\Middleware
+ * @package rollun\datastore\Middleware
  */
 class JsonRenderer implements MiddlewareInterface
 {
+    /**
+     *  This constant specify key, which use to save response data
+     */
     const RESPONSE_DATA = "responseData";
 
+    /**
+     * @param ServerRequestInterface $request
+     * @param DelegateInterface $delegate
+     * @return ResponseInterface|JsonResponse
+     */
     public function process(ServerRequestInterface $request, DelegateInterface $delegate)
     {
         $data = $request->getAttribute(static::RESPONSE_DATA);

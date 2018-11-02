@@ -4,13 +4,13 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\rest\Middleware\DataStoreRest;
+namespace rollun\datastore\Middleware\Handler;
 
 use Interop\Http\ServerMiddleware\DelegateInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use rollun\rest\Middleware\DataStoreAbstract;
-use rollun\rest\Middleware\JsonRenderer;
+use rollun\datastore\Middleware\DataStoreAbstract;
+use rollun\datastore\Middleware\JsonRenderer;
 
 abstract class AbstractHandler extends DataStoreAbstract
 {

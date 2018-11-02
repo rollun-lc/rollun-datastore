@@ -4,7 +4,7 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\rest\Middleware\DataStoreRest;
+namespace rollun\datastore\Middleware\Handler;
 
 use Interop\Http\ServerMiddleware\DelegateInterface;
 use Interop\Http\ServerMiddleware\MiddlewareInterface;
@@ -14,8 +14,9 @@ use rollun\rest\RestException;
 
 /**
  * Rise exception if request is not valid.
+ *
  * Class Validator
- * @package rollun\rest\Middleware\DataStoreRest
+ * @package rollun\datastore\Middleware\Handler
  */
 class Validator implements MiddlewareInterface
 {

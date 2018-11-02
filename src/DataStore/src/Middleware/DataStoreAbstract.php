@@ -4,13 +4,13 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\rest\Middleware;
+namespace rollun\datastore\Middleware;
 
 use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 
 /**
- * Middleware which contane DataStore
+ * Abstract middleware with injected data store
  *
  * @category   rest
  * @package    zaboy

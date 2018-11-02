@@ -4,7 +4,7 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\rest\Middleware;
+namespace rollun\datastore\Middleware;
 
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use Zend\Stratigility\MiddlewarePipe;
@@ -14,7 +14,7 @@ use Zend\Stratigility\MiddlewarePipe;
  * Each 'REST method handler' check if it can handle this request.
  *
  * Class DataStoreRest
- * @package rollun\rest\Middleware
+ * @package rollun\datastore\Middleware
  */
 class DataStoreRest extends MiddlewarePipe
 {

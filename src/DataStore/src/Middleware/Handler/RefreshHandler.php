@@ -4,7 +4,7 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\rest\Middleware\DataStoreRest;
+namespace rollun\datastore\Middleware\Handler;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -12,6 +12,10 @@ use rollun\datastore\DataStore\Interfaces\RefreshableInterface;
 use rollun\rest\RestException;
 use Zend\Diactoros\Response;
 
+/**
+ * Class RefreshHandler
+ * @package rollun\datastore\Middleware\Handler
+ */
 class RefreshHandler extends AbstractHandler
 {
     /**

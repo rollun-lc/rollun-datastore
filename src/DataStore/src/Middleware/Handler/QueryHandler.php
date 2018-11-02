@@ -4,7 +4,7 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\rest\Middleware\DataStoreRest;
+namespace rollun\datastore\Middleware\Handler;
 
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
@@ -17,6 +17,10 @@ use Xiag\Rql\Parser\Query;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 
+/**
+ * Class QueryHandler
+ * @package rollun\datastore\Middleware\Handler
+ */
 class QueryHandler extends AbstractHandler
 {
     /**
