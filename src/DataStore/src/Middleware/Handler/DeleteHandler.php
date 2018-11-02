@@ -9,7 +9,6 @@ namespace rollun\datastore\Middleware\Handler;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
-use Zend\Diactoros\Stream;
 
 /**
  * Class DeleteHandler
@@ -20,14 +19,14 @@ class DeleteHandler extends AbstractHandler
     /**
      * {@inheritdoc}
      */
-    protected function canHandle(ServerRequestInterface $request): bool
+    public function canHandle(ServerRequestInterface $request): bool
     {
         $canHandle = $request->getMethod() === "DELETE";
 
         $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $canHandle = $canHandle && isset($primaryKeyValue);
 
-        return $canHandle;
+        return $canHandle && $this->isRqlQueryEmpty($request);
     }
 
     /**
@@ -44,8 +43,7 @@ class DeleteHandler extends AbstractHandler
             $response = $response->withStatus(204);
         }
 
-        $stream = fopen("data://text/plain;base64," . base64_encode(serialize($items)), 'r');
-        $response = $response->withBody(new Stream($stream));
+        $response = $response->withBody($this->createStream($items));
 
         return $response;
     }

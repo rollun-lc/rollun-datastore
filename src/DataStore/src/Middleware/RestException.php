@@ -4,7 +4,7 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\rest;
+namespace rollun\datastore\Middleware;
 
 /**
  * Exception thrown if an error which found in data store http rest part (datastore-http middleware pipe).

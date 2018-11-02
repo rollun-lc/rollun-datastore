@@ -28,14 +28,6 @@ class DataStoreMiddlewareInstaller extends InstallerAbstract
                     DataStorePluginManager::class => DataStorePluginManagerFactory::class,
                 ],
             ],
-            'routes' => [
-                [
-                    'name' => 'api-datastore',
-                    'path' => '/api/datastore[/{resourceName}[/{id}]]',
-                    'middleware' => 'api-datastore',
-                    'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-                ],
-            ],
         ];
     }
 

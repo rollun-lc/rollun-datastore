@@ -1,20 +1,16 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 13.03.17
- * Time: 11:32
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\Installers;
 
 use rollun\datastore\DataStore\Factory\CacheableAbstractFactory;
-use rollun\datastore\DataStore\Factory\MemoryAbstractFactory;
 use rollun\installer\Install\InstallerAbstract;
 
 class CacheableInstaller extends InstallerAbstract
 {
-
     /**
      * install
      * @return array

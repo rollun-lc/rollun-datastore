@@ -9,7 +9,7 @@ namespace rollun\datastore\Middleware\Handler;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\Interfaces\RefreshableInterface;
-use rollun\rest\RestException;
+use rollun\datastore\Middleware\RestException;
 use Zend\Diactoros\Response;
 
 /**
@@ -21,9 +21,9 @@ class RefreshHandler extends AbstractHandler
     /**
      * {@inheritdoc}
      */
-    protected function canHandle(ServerRequestInterface $request): bool
+    public function canHandle(ServerRequestInterface $request): bool
     {
-        return $request->getMethod() === "PATCH";
+        return $request->getMethod() === "PATCH" && $this->isRqlQueryEmpty($request);
     }
 
     /**

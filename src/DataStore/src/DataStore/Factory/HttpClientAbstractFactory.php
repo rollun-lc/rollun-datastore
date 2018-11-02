@@ -4,12 +4,11 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\rest\DataStore\Factory;
+namespace rollun\datastore\DataStore\Factory;
 
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStoreException;
-use rollun\datastore\DataStore\Factory\DataStoreAbstractFactory;
-use rollun\rest\DataStore\HttpClient;
+use rollun\datastore\DataStore\HttpClient;
 use Zend\Http\Client;
 
 /**

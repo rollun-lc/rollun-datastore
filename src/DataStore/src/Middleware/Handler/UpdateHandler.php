@@ -9,7 +9,6 @@ namespace rollun\datastore\Middleware\Handler;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
-use Zend\Diactoros\Stream;
 
 /**
  * Class UpdateHandler
@@ -20,7 +19,7 @@ class UpdateHandler extends AbstractHandler
     /**
      * {@inheritdoc}
      */
-    protected function canHandle(ServerRequestInterface $request): bool
+    public function canHandle(ServerRequestInterface $request): bool
     {
         $canHandle = $request->getMethod() === "PUT";
 
@@ -37,7 +36,7 @@ class UpdateHandler extends AbstractHandler
                 true
             );
 
-        return $canHandle;
+        return $canHandle && $this->isRqlQueryEmpty($request);
     }
 
     /**
@@ -53,11 +52,10 @@ class UpdateHandler extends AbstractHandler
         $overwriteMode = $request->getAttribute('overwriteMode');
         $isIdExist = !empty($this->dataStore->read($primaryKeyValue));
 
-        $response = new Response();
         $newItem = $this->dataStore->update($item, $overwriteMode);
 
-        $stream = fopen("data://text/plain;base64," . base64_encode(serialize($newItem)), 'r');
-        $response = $response->withBody(new Stream($stream));
+        $response = new Response();
+        $response = $response->withBody($this->createStream($newItem));
 
         if ($overwriteMode && !$isIdExist) {
             $response = $response->withStatus(201);

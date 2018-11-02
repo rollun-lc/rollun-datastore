@@ -71,8 +71,8 @@ class Validator implements MiddlewareInterface
                     'Method must be GET, PUT, POST, PATCH or DELETE. ' . $request->getMethod() . ' given'
                 );
         }
-        $response = $delegate->process($request);
 
+        $response = $delegate->process($request);
         return $response;
     }
 }

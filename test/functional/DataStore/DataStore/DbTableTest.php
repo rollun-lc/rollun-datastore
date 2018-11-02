@@ -4,7 +4,7 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace functional\DataStore\DataStore;
+namespace rollun\test\functional\DataStore\Middleware\Handler;
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_Error_Deprecated;

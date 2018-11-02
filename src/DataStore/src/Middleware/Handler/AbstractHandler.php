@@ -11,6 +11,9 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\Middleware\DataStoreAbstract;
 use rollun\datastore\Middleware\JsonRenderer;
+use rollun\datastore\Rql\RqlQuery;
+use Xiag\Rql\Parser\Query;
+use Zend\Diactoros\Stream;
 
 abstract class AbstractHandler extends DataStoreAbstract
 {
@@ -56,5 +59,33 @@ abstract class AbstractHandler extends DataStoreAbstract
         $response = $delegate->process($request);
 
         return $response;
+    }
+
+    /**
+     * Create stream with base64 encoded data
+     *
+     * @param $data
+     * @return Stream
+     */
+    protected function createStream($data)
+    {
+        $stream = fopen("data://text/plain;base64," . base64_encode(serialize($data)), 'r');
+
+        return new Stream($stream);
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return bool
+     */
+    protected function isRqlQueryEmpty($request): bool
+    {
+        $query = $request->getAttribute('rqlQueryObject');
+
+        return (is_null($query)
+            || (is_null($query->getLimit())
+                && is_null($query->getSort())
+                && is_null($query->getSelect())
+                && is_null($query->getQuery())));
     }
 }

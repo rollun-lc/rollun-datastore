@@ -1,9 +1,7 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 13.03.17
- * Time: 10:26
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\Installers;
@@ -13,11 +11,9 @@ use rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory;
 use rollun\datastore\TableGateway\Factory\TableManagerMysqlFactory;
 use rollun\installer\Install\InstallerAbstract;
 use rollun\utils\DbInstaller;
-use Zend\Db\Adapter\AdapterAbstractServiceFactory;
 
 class DbTableInstaller extends InstallerAbstract
 {
-
     /**
      * install
      * @return array

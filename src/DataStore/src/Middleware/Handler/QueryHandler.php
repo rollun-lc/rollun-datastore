@@ -6,7 +6,6 @@
 
 namespace rollun\datastore\Middleware\Handler;
 
-use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
@@ -15,7 +14,6 @@ use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Query;
 use Zend\Diactoros\Response;
-use Zend\Diactoros\Stream;
 
 /**
  * Class QueryHandler
@@ -26,16 +24,12 @@ class QueryHandler extends AbstractHandler
     /**
      * {@inheritdoc}
      */
-    protected function canHandle(ServerRequestInterface $request): bool
+    public function canHandle(ServerRequestInterface $request): bool
     {
         $canHandle = $request->getMethod() === "GET";
         $query = $request->getAttribute('rqlQueryObject');
 
-        if (isset($query) && !($query instanceof Query)) {
-            throw new InvalidArgumentException(
-                'Expected ' . Query::class . ', ' . gettype($query) . ' given'
-            );
-        }
+        $canHandle = $canHandle && ($query instanceof Query);
 
         $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $canHandle = $canHandle && is_null($primaryKeyValue);
@@ -48,44 +42,41 @@ class QueryHandler extends AbstractHandler
      */
     protected function handle(ServerRequestInterface $request): ResponseInterface
     {
-        /** @var Query $rqlQueryObject */
-        $rqlQueryObject = $request->getAttribute('rqlQueryObject');
-        $rqlLimitNode = $rqlQueryObject->getLimit();
+        /** @var Query $rqlQuery */
+        $rqlQuery = $request->getAttribute('rqlQueryObject');
+        $limitNode = $rqlQuery->getLimit();
 
-        $rowSet = $this->dataStore->query($rqlQueryObject);
+        $rowSet = $this->dataStore->query($rqlQuery);
 
-        if ($rqlLimitNode) {
-            $rqlQueryObject->setLimit(new LimitNode(ReadInterface::LIMIT_INFINITY));
+        if ($limitNode) {
+            $rqlQuery->setLimit(new LimitNode(ReadInterface::LIMIT_INFINITY));
             $aggregateCountFunction = new AggregateFunctionNode('count', $this->dataStore->getIdentifier());
 
-            $rqlQueryObject->setSelect(new SelectNode([$aggregateCountFunction]));
-            $aggregateCount = $this->dataStore->query($rqlQueryObject);
+            $rqlQuery->setSelect(new SelectNode([$aggregateCountFunction]));
+            $aggregateCount = $this->dataStore->query($rqlQuery);
 
             $count = current($aggregateCount)["$aggregateCountFunction"];
 
-            if (is_null($rqlLimitNode->getOffset())) {
+            if (is_null($limitNode->getOffset())) {
                 $offset = '0';
             } else {
-                $offset = $rqlLimitNode->getOffset();
+                $offset = $limitNode->getOffset();
             }
 
-            if ($rqlLimitNode->getLimit() == ReadInterface::LIMIT_INFINITY) {
-                $limit = $rqlLimitNode->getLimit();
+            if ($limitNode->getLimit() == ReadInterface::LIMIT_INFINITY) {
+                $limit = $limitNode->getLimit();
             } else {
                 $limit = $count;
             }
 
-            $contentRange = "items $offset-$limit/$count";
+            $contentRange = "items $offset-" . ($offset + $limit) . "/$count";
         } else {
             $count = count($rowSet);
             $contentRange = "items 0-$count/$count";
         }
 
         $response = new Response();
-
-        $stream = fopen("data://text/plain;base64," . base64_encode(serialize($rowSet)), 'r');
-        $response = $response->withBody(new Stream($stream));
-
+        $response = $response->withBody($this->createStream($rowSet));
         $response = $response->withHeader('Content-Range', $contentRange);
 
         return $response;

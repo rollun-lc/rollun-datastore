@@ -9,7 +9,6 @@ namespace rollun\datastore\Middleware\Handler;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
-use Zend\Diactoros\Stream;
 
 /**
  * Class CreateHandler
@@ -20,7 +19,7 @@ class CreateHandler extends AbstractHandler
     /**
      * {@inheritdoc}
      */
-    protected function canHandle(ServerRequestInterface $request): bool
+    public function canHandle(ServerRequestInterface $request): bool
     {
         $canHandle = $request->getMethod() === "POST";
         $row = $request->getParsedBody();
@@ -31,12 +30,12 @@ class CreateHandler extends AbstractHandler
             && array_reduce(
                 array_keys($row),
                 function ($carry, $item) {
-                    return $carry && !is_integer($item);
+                    return $carry && is_string($item);
                 },
                 true
             );
 
-        return $canHandle;
+        return $canHandle && $this->isRqlQueryEmpty($request);
     }
 
     /**
@@ -65,8 +64,7 @@ class CreateHandler extends AbstractHandler
         }
 
         $newItem = $this->dataStore->create($row, $overwriteMode);
-        $stream = fopen("data://text/plain;base64," . base64_encode(serialize($newItem)), 'r');
-        $response = $response->withBody(new Stream($stream));
+        $response = $response->withBody($this->createStream($newItem));
 
         return $response;
     }

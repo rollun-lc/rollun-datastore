@@ -4,7 +4,7 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace functional\DataStore\TableGateway;
+namespace rollun\test\functional\DataStore\Middleware\Handler;
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node\AlikeGlobNode;
