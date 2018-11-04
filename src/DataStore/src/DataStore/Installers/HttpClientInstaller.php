@@ -1,21 +1,16 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: victorsecuring
- * Date: 11.03.17
- * Time: 11:55 AM
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
-namespace rollun\datastore\DataStore\Installers;
+namespace rollun\rest\DataStore\Installers;
 
-
-use rollun\datastore\DataStore\Factory\HttpClientAbstractFactory;
-use rollun\datastore\Middleware\Factory\DataStoreAbstractFactory;
 use rollun\installer\Install\InstallerAbstract;
+use rollun\rest\DataStore\Factory\HttpClientAbstractFactory;
 
 class HttpClientInstaller extends InstallerAbstract
 {
-
     /**
      * install
      * @return array
@@ -27,7 +22,7 @@ class HttpClientInstaller extends InstallerAbstract
                 'abstract_factories' => [
                     HttpClientAbstractFactory::class,
                 ],
-            ]
+            ],
         ];
     }
 
@@ -43,8 +38,9 @@ class HttpClientInstaller extends InstallerAbstract
     public function isInstall()
     {
         $config = $this->container->get('config');
-        return (isset($config['dependencies']['abstract_factories']) &&
-            in_array(HttpClientAbstractFactory::class, $config['dependencies']['abstract_factories']));
+
+        return (isset($config['dependencies']['abstract_factories'])
+            && in_array(HttpClientAbstractFactory::class, $config['dependencies']['abstract_factories']));
     }
 
     /**
@@ -61,6 +57,7 @@ class HttpClientInstaller extends InstallerAbstract
             default:
                 $description = "Does not exist.";
         }
+
         return $description;
     }
 }

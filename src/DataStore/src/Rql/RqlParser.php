@@ -67,8 +67,10 @@ class RqlParser
     }
 
     /**
-     * @param $rqlQueryString . Static method for decode qrl string. Work without rawurlencode str.
-     * @return RqlQuery|Query
+     * Static method for decode qrl string. Work without rawurlencode str
+     *
+     * @param $rqlQueryString .
+     * @return Query
      */
     public static function rqlDecode($rqlQueryString)
     {
@@ -206,8 +208,8 @@ class RqlParser
     protected function makeGroupby(RqlQuery $query)
     {
         $groupBy = '';
-        if ($query->getGroupby() != null) {
-            $fields = $query->getGroupby()->getFields();
+        if ($query->getGroupBy() != null) {
+            $fields = $query->getGroupBy()->getFields();
             $groupBy = '&groupby(';
             foreach ($fields as $field) {
                 $groupBy .= $field . ',';

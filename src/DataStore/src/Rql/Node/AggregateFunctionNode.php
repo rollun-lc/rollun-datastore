@@ -8,9 +8,9 @@
 
 namespace rollun\datastore\Rql\Node;
 
-use Xiag\Rql\Parser\AbstractNode;
+use Xiag\Rql\Parser\Node\AbstractQueryNode;
 
-class AggregateFunctionNode extends AbstractNode
+class AggregateFunctionNode extends AbstractQueryNode
 {
     private $function;
 
@@ -55,6 +55,4 @@ class AggregateFunctionNode extends AbstractNode
     {
         return sprintf("%s(%s)", $this->function, $this->field);
     }
-
-
 }

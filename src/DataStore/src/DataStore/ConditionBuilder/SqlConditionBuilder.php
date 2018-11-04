@@ -45,9 +45,9 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
             'contains' => ['before' => '(', 'between' => ' LIKE \'%', 'after' => '%\')'],
         ],
         'BinaryOperator' => [
-            'eqn' => ['before' => '(', 'after' => 'is NULL)'],
-            'eqt' => ['before' => '(', 'after' => 'is TRUE)'],
-            'eqf' => ['before' => '(', 'after' => 'is FALSE)'],
+            'eqn' => ['before' => '(', 'after' => ' IS NULL)'],
+            'eqt' => ['before' => '(', 'after' => ' IS TRUE)'],
+            'eqf' => ['before' => '(', 'after' => ' IS FALSE)'],
             'ie' => ['before' => '(', 'after' => ')'],
         ]
     ];

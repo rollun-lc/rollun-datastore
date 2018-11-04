@@ -6,7 +6,7 @@ use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
 
 class EqnTokenParser extends BinaryTokenParserAbstract
 {
-    public function getOperatorName()
+    protected function getOperatorName()
     {
         return 'eqn';
     }

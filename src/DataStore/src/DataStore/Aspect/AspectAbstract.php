@@ -58,10 +58,10 @@ class AspectAbstract implements DataStoresInterface
      *
      * By default does nothing
      *
-     * @param \Iterator $iterator
-     * @return \Iterator
+     * @param \Traversable $iterator
+     * @return \Traversable
      */
-    protected function postGetIterator(\Iterator $iterator)
+    protected function postGetIterator(\Traversable $iterator)
     {
         return $iterator;
     }
@@ -100,6 +100,7 @@ class AspectAbstract implements DataStoresInterface
      * @param $result
      * @param $itemData
      * @param $rewriteIfExist
+     * @return mixed
      */
     protected function postCreate($result, $itemData, $rewriteIfExist)
     {

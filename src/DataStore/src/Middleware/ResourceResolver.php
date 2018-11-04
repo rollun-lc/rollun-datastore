@@ -1,10 +1,7 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\Middleware;
@@ -14,32 +11,31 @@ use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-
 /**
  * Extracts resource name and row id from URL or from request attributes
  *
- * <b>Used request attributes: </b>
- * <ul>
- * <li>resourceName</li>
- * <li>primaryKeyValue</li>
- * </ul>
- * If URL is </br>'site,com/api/rest/RESOURCE-NAME/ROWS-ID'</br>
- * request->getAttribute('resourceName') returns 'RESOURCE-NAME'</br>
- * request->getAttribute('primaryKeyValue') returns 'ROWS-ID'</br>
- * </br>
- * If URL is </br>'site,com/restapi/RESOURCE-NAME?a=1&limit(2,5)'
- * request->getAttribute('resourceName') returns 'RESOURCE-NAME'</br>
- * request->getAttribute('primaryKeyValue') returns null</br>
+ * Used request attributes:
+ * - resourceName (data store service name)
+ * - primaryKeyValue (primary key value to fetch record for record)
  *
- * @category   rest
- * @package    zaboy
+ * Examples:
+ *
+ * - if URL is http://example.com/api/datastore/RESOURCE-NAME/ROW-ID
+ *  $request->getAttribute('resourceName') returns 'RESOURCE-NAME'
+ *  $request->getAttribute('primaryKeyValue') returns 'ROW-ID'
+ *
+ * - if URL is http://example.com/api/datastore/RESOURCE-NAME?eq(a,1)&limit(2,5)
+ *  $request->getAttribute('resourceName') returns 'RESOURCE-NAME
+ *  $request->getAttribute('primaryKeyValue') returns null
+ *
+ * Class ResourceResolver
+ * @package rollun\datastore\Middleware
  */
 class ResourceResolver implements MiddlewareInterface
 {
-
     /**
-     * Process an incoming server request and return a response, optionally delegating
-     * to the next middleware component to create the response.
+     * Process an incoming server request and return a response.
+     * Optionally delegating to the next middleware component to create the response.
      *
      * @param ServerRequestInterface $request
      * @param DelegateInterface $delegate
@@ -48,7 +44,7 @@ class ResourceResolver implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, DelegateInterface $delegate)
     {
-        if (null !== $request->getAttribute("resourceName")) {
+        if ($request->getAttribute("resourceName") !== null) {
             //Router have set "resourceName". It work in expressive.
             $id = empty($request->getAttribute("id")) ? null : $this->decodeString($request->getAttribute("id"));
             $request = $request->withAttribute('primaryKeyValue', $id);
@@ -70,11 +66,16 @@ class ResourceResolver implements MiddlewareInterface
 
     private function decodeString($value)
     {
-        return rawurldecode(strtr($value, [
-            '%2D' => '-',
-            '%5F' => '_',
-            '%2E' => '.',
-            '%7E' => '~',
-        ]));
+        return rawurldecode(
+            strtr(
+                $value,
+                [
+                    '%2D' => '-',
+                    '%5F' => '_',
+                    '%2E' => '.',
+                    '%7E' => '~',
+                ]
+            )
+        );
     }
 }

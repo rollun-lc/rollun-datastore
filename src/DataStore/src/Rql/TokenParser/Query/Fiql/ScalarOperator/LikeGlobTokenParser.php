@@ -18,7 +18,7 @@ class LikeGlobTokenParser extends AbstractScalarOperatorTokenParser
      */
     protected function getOperatorNames()
     {
-        return 'like';
+        return ['like'];
     }
 
     /**

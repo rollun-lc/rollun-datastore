@@ -1,9 +1,7 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 04.07.16
- * Time: 11:46
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore;
@@ -15,7 +13,6 @@ use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 
 class Cacheable implements DataStoresInterface, RefreshableInterface
 {
-
     /** @var  DataStoresInterface */
     protected $cashStore;
 
@@ -48,7 +45,6 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
     public function getIterator()
     {
         return $this->cashStore->getIterator();
-
     }
 
     /**
@@ -62,7 +58,6 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
     public function getIdentifier()
     {
         return $this->cashStore->getIdentifier();
-
     }
 
     /**
@@ -76,7 +71,6 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
      */
     public function read($id)
     {
-
         return $this->cashStore->read($id);
     }
 
@@ -88,7 +82,6 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
      */
     public function has($id)
     {
-
         return $this->cashStore->has($id);
     }
 
@@ -104,7 +97,6 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
         } else {
             throw new DataStoreException("Not return data by DataSource");
         }
-
     }
 
     /**
@@ -119,11 +111,10 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
     public function count()
     {
         return $this->cashStore->count();
-
     }
 
     /**
-     * By default, insert new (by create) Item.
+     * By default, insert new (by create) item.
      *
      * It can't overwrite existing item by default.
      * You can get item "id" for created item us result this function.

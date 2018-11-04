@@ -87,10 +87,12 @@ abstract class DataStoreAbstract implements DataStoresInterface
     /**
      * Throw Exception if type of Identifier is wrong
      *
-     * @param mix $id
+     * @param mixed $id
      */
     protected function checkIdentifierType($id)
     {
+        // TODO: trigger deprecated error
+
         $idType = gettype($id);
         if ($idType == 'integer' || $idType == 'double' || $idType == 'string') {
             return;
@@ -119,7 +121,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
             $data = $this->queryWhere($query, $limit, $offset);
             $result = $this->querySort($data, $query);
         }
-        if ($query instanceof RqlQuery && $query->getGroupby() != null) {
+        if ($query instanceof RqlQuery && $query->getGroupBy() != null) {
             $result = $this->queryGroupBy($result, $query);
         } else {
             $result = $this->querySelect($result, $query);
@@ -199,7 +201,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
 
     protected function queryGroupBy($result, RqlQuery $query)
     {
-        $groupFields = $query->getGroupby()->getFields();
+        $groupFields = $query->getGroupBy()->getFields();
         $selectionFields = $query->getSelect()->getFields();
         foreach ($selectionFields as &$field) {
             if (!in_array($field, $groupFields) && !($field instanceof AggregateFunctionNode)) {
@@ -422,6 +424,8 @@ abstract class DataStoreAbstract implements DataStoresInterface
      */
     public function getIterator()
     {
+        trigger_error("Datastore is not iterable no more", E_USER_DEPRECATED);
+
         return new DataStoreIterator($this);
     }
 
