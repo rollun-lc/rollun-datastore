@@ -55,12 +55,12 @@ class ReadHandlerTest extends BaseHandlerTest
         $this->assertFalse($object->canHandle($request));
     }
 
-    public function testCanHandleFailCauseFieldType()
+    public function testCanHandleFailCausePrimaryKey()
     {
         $request = new ServerRequest();
         $request = $request->withMethod('GET');
-        $request = $request->withAttribute('primaryKeyValue', 1);
-        $request = $request->withAttribute('rqlQueryObject', new RqlQuery('eq(a,1)'));
+        $request = $request->withAttribute('primaryKeyValue', null);
+        $request = $request->withAttribute('rqlQueryObject', new RqlQuery(''));
 
         $object = $this->createObject();
         $this->assertFalse($object->canHandle($request));
@@ -73,10 +73,8 @@ class ReadHandlerTest extends BaseHandlerTest
         $request = $request->withAttribute('primaryKeyValue', 1);
         $request = $request->withAttribute('rqlQueryObject', new RqlQuery('eq(a,1)'));
 
-        $response = $this->createResponse(200);
-
         $object = $this->createObject();
-        $this->assertDelegateCall($response, $request, $object);
+        $this->assertFalse($object->canHandle($request));
     }
 
     public function testProcess()

@@ -18,7 +18,7 @@ use rollun\datastore\Middleware\JsonRenderer;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 
-class BaseHandlerTest extends TestCase
+abstract class BaseHandlerTest extends TestCase
 {
     /**
      * @param string $identifier

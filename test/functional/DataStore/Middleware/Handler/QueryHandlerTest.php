@@ -6,7 +6,6 @@
 
 namespace rollun\test\functional\DataStore\Middleware\Handler;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
 use PHPUnit_Framework_MockObject_MockObject;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
@@ -72,7 +71,7 @@ class QueryHandlerTest extends BaseHandlerTest
         $this->assertFalse($object->canHandle($request));
     }
 
-    public function testProcessWithCanNotHandleCausePrimaryKey()
+    public function testCanHandleCausePrimaryKey()
     {
         $request = new ServerRequest();
         $request = $request->withMethod('GET');
@@ -80,15 +79,7 @@ class QueryHandlerTest extends BaseHandlerTest
         $request = $request->withAttribute('primaryKeyValue', 1);
 
         $object = $this->createObject();
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->getMockBuilder(DelegateInterface::class)
-            ->getMock();
-
-        $object->process($request, $delegateMock);
-        $response = $this->createResponse(200);
-
-        $object = $this->createObject();
-        $this->assertDelegateCall($response, $request, $object);
+        $this->assertFalse($object->canHandle($request));
     }
 
     public function queryDataProvider()

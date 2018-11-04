@@ -11,7 +11,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\Middleware\DataStoreAbstract;
 use rollun\datastore\Middleware\JsonRenderer;
-use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\Query;
 use Zend\Diactoros\Stream;
 
@@ -82,10 +81,13 @@ abstract class AbstractHandler extends DataStoreAbstract
     {
         $query = $request->getAttribute('rqlQueryObject');
 
-        return (is_null($query)
-            || (is_null($query->getLimit())
-                && is_null($query->getSort())
-                && is_null($query->getSelect())
-                && is_null($query->getQuery())));
+        if (!($query instanceof Query)) {
+            return false;
+        }
+
+        return is_null($query->getLimit())
+            && is_null($query->getSort())
+            && is_null($query->getSelect())
+            && is_null($query->getQuery());
     }
 }

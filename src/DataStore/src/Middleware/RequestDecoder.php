@@ -11,7 +11,6 @@ use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\utils\Json\Serializer;
-use rollun\rest\RestException;
 use rollun\datastore\Rql\RqlParser;
 
 /**
@@ -23,8 +22,8 @@ use rollun\datastore\Rql\RqlParser;
  * - rqlQueryObject ($request->getAttribute('rqlQueryObject') returns Query object)
  * - Limit
  *
- * @category   rest
- * @package    zaboy
+ * Class RequestDecoder
+ * @package rollun\datastore\Middleware
  */
 class RequestDecoder implements MiddlewareInterface
 {
@@ -35,7 +34,6 @@ class RequestDecoder implements MiddlewareInterface
      * @param ServerRequestInterface $request
      * @param DelegateInterface $delegate
      * @return ResponseInterface
-     * @throws RestException
      */
     public function process(ServerRequestInterface $request, DelegateInterface $delegate)
     {

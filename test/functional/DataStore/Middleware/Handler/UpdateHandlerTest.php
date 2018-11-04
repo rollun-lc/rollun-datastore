@@ -93,7 +93,23 @@ class UpdateHandlerTest extends BaseHandlerTest
         $this->assertFalse($object->canHandle($request));
     }
 
-    public function testProcessItemDoesNotExistWithoutOverrideMode()
+    public function attributeDataProvider()
+    {
+        return [
+            [200, true, true],
+            [201, true, false],
+            [200, false, true],
+            [200, false, false],
+        ];
+    }
+
+    /**
+     * @dataProvider attributeDataProvider
+     * @param $status
+     * @param $overwriteMode
+     * @param $readReturn
+     */
+    public function testProcess($status, $overwriteMode, $readReturn)
     {
         $item = [
             'id' => 1,
@@ -103,14 +119,16 @@ class UpdateHandlerTest extends BaseHandlerTest
         $request = new ServerRequest();
         $request = $request->withMethod('PUT');
         $request = $request->withAttribute('primaryKeyValue', $item['id']);
+        $request = $request->withAttribute('overwriteMode', $overwriteMode);
+        $request = $request->withParsedBody($item);
 
-        $response = $this->createResponse(200, [], $item);
+        $response = $this->createResponse($status, [], $item);
 
         $dataStore = $this->createDataStoreEmptyMock();
         $dataStore->expects($this->once())
             ->method('read')
             ->with($item['id'])
-            ->willReturn(null);
+            ->willReturn($readReturn);
 
         $dataStore->expects($this->once())
             ->method('update')

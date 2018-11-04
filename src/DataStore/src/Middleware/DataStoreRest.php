@@ -7,6 +7,7 @@
 namespace rollun\datastore\Middleware;
 
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\Middleware\Handler;
 use Zend\Stratigility\MiddlewarePipe;
 
 /**
@@ -32,13 +33,12 @@ class DataStoreRest extends MiddlewarePipe
         parent::__construct();
         $this->dataStore = $dataStore;
 
-        $this->pipe(new DataStoreRest\Validator());
-        $this->pipe(new DataStoreRest\QueryHandler($this->dataStore));
-        $this->pipe(new DataStoreRest\ReadHandler($this->dataStore));
-        $this->pipe(new DataStoreRest\CreateHandler($this->dataStore));
-        $this->pipe(new DataStoreRest\UpdateHandler($this->dataStore));
-        $this->pipe(new DataStoreRest\RefreshHandler($this->dataStore));
-        $this->pipe(new DataStoreRest\DeleteHandler($this->dataStore));
-        $this->pipe(new DataStoreRest\HtmlView());
+        $this->pipe(new Handler\QueryHandler($this->dataStore));
+        $this->pipe(new Handler\ReadHandler($this->dataStore));
+        $this->pipe(new Handler\CreateHandler($this->dataStore));
+        $this->pipe(new Handler\UpdateHandler($this->dataStore));
+        $this->pipe(new Handler\RefreshHandler($this->dataStore));
+        $this->pipe(new Handler\DeleteHandler($this->dataStore));
+        $this->pipe(new Handler\ErrorHandler());
     }
 }
