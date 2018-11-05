@@ -14,8 +14,10 @@ use rollun\datastore\DataStore\Factory\CsvAbstractFactory;
 use rollun\datastore\DataStore\Factory\DbTableAbstractFactory;
 use rollun\datastore\DataStore\Factory\HttpClientAbstractFactory;
 use rollun\datastore\DataStore\Factory\MemoryAbstractFactory;
-use rollun\datastore\Middleware\DataStoreRest;
-use rollun\datastore\Middleware\DeterminatorFactory;
+use rollun\datastore\Middleware\DataStoreApi;
+use rollun\datastore\Middleware\Determinator;
+use rollun\datastore\Middleware\Factory\DataStoreApiFactory;
+use rollun\datastore\Middleware\Factory\DeterminatorFactory;
 use rollun\datastore\Middleware\RequestDecoder;
 use rollun\datastore\Middleware\ResourceResolver;
 use rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory;
@@ -51,7 +53,8 @@ class ConfigProvider
             'factories' => [
                 ResourceResolver::class => InvokableFactory::class,
                 RequestDecoder::class => InvokableFactory::class,
-                DataStoreRest::class => DeterminatorFactory::class,
+                Determinator::class => DeterminatorFactory::class,
+                DataStoreApi::class => DataStoreApiFactory::class,
                 DataStorePluginManager::class => DataStorePluginManagerFactory::class,
 
                 'TableManagerMysql' => TableManagerMysqlFactory::class,

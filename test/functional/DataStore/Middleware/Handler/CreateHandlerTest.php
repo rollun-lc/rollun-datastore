@@ -50,6 +50,7 @@ class CreateHandlerTest extends BaseHandlerTest
      */
     public function testCanUpdateFailCauseMethod($notValidMethod)
     {
+
         $request = new ServerRequest();
         $request = $request->withMethod($notValidMethod);
         $request = $request->withAttribute('rqlQueryObject', new RqlQuery(''));
@@ -117,7 +118,7 @@ class CreateHandlerTest extends BaseHandlerTest
             ->willReturn($item);
 
         $object = $this->createObject($dataStore);
-        $this->assertDelegateCall($response, $request, $object);
+        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object);
     }
 
     public function testProcessWithoutOverwriteMode()
@@ -146,7 +147,7 @@ class CreateHandlerTest extends BaseHandlerTest
             ->willReturn($item);
 
         $object = $this->createObject($dataStore);
-        $this->assertDelegateCall($response, $request, $object);
+        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object);
     }
 
     public function testProcessWithoutExistingPrimaryKeyAndRowDoesNotExist()
@@ -177,7 +178,7 @@ class CreateHandlerTest extends BaseHandlerTest
             ->willReturn($item);
 
         $object = $this->createObject($dataStore);
-        $this->assertDelegateCall($response, $request, $object);
+        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object);
     }
 
     /**

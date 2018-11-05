@@ -82,7 +82,7 @@ abstract class AbstractHandler extends DataStoreAbstract
         $query = $request->getAttribute('rqlQueryObject');
 
         if (!($query instanceof Query)) {
-            return false;
+            return true;
         }
 
         return is_null($query->getLimit())

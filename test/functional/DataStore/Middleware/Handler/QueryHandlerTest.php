@@ -122,7 +122,7 @@ class QueryHandlerTest extends BaseHandlerTest
         );
 
         $object = $this->createObject($dataStore);
-        $this->assertDelegateCall($response, $request, $object);
+        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object);
     }
 
     /**

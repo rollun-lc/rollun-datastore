@@ -11,15 +11,16 @@ use Zend\Stratigility\MiddlewarePipe;
 class DataStoreApi extends MiddlewarePipe
 {
     /**
-     * Main enter point for data store api pipeline
-     *
      * DataStoreApi constructor.
+     * @param Determinator $dataStoreDeterminator
      */
-    public function __construct()
+    public function __construct(Determinator $dataStoreDeterminator)
     {
-        $this->pipe(ResourceResolver::class);
-        $this->pipe(RequestDecoder::class);
-        $this->pipe(DataStoreRest::class);
-        $this->pipe(JsonRenderer::class);
+        parent::__construct();
+
+        $this->pipe(new ResourceResolver());
+        $this->pipe(new RequestDecoder());
+        $this->pipe($dataStoreDeterminator);
+        $this->pipe(new JsonRenderer());
     }
 }

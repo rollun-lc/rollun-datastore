@@ -79,7 +79,7 @@ class RefreshHandlerTest extends BaseHandlerTest
             ->method('refresh');
 
         $object = $this->createObject($dataStore);
-        $this->assertDelegateCall($response, $request, $object);
+        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object);
     }
 
     public function testProcessFail()

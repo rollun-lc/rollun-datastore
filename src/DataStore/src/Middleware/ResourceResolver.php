@@ -33,6 +33,18 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class ResourceResolver implements MiddlewareInterface
 {
+    const BASE_PATH = '/api/datastore';
+
+    /**
+     * @var string
+     */
+    protected $basePath;
+
+    public function __construct($basePath = null)
+    {
+        $this->basePath = $basePath ?? self::BASE_PATH;
+    }
+
     /**
      * Process an incoming server request and return a response.
      * Optionally delegating to the next middleware component to create the response.
@@ -45,13 +57,16 @@ class ResourceResolver implements MiddlewareInterface
     public function process(ServerRequestInterface $request, DelegateInterface $delegate)
     {
         if ($request->getAttribute("resourceName") !== null) {
-            //Router have set "resourceName". It work in expressive.
+            // Router have set "resourceName". It work in expressive.
             $id = empty($request->getAttribute("id")) ? null : $this->decodeString($request->getAttribute("id"));
             $request = $request->withAttribute('primaryKeyValue', $id);
         } else {
-            //"resourceName" isn't set. It work in stratigility.
+            // "resourceName" isn't set. It work in stratigility.
             $path = $request->getUri()->getPath();
-            preg_match('/^[\/]?([\w\~\-\_]+)([\/]([-%_A-Za-z0-9]+))?/', $path, $matches);
+            $basePath = preg_quote(rtrim($this->basePath,'/'), '/');
+            $pattern = "/{$basePath}\/([\w\~\-\_]+)([\/]([-%_A-Za-z0-9]+))?\/?$/";
+            preg_match($pattern, $path, $matches);
+
             $resourceName = isset($matches[1]) ? $matches[1] : null;
             $request = $request->withAttribute('resourceName', $resourceName);
 

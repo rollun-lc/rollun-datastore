@@ -4,10 +4,11 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\datastore\Middleware;
+namespace rollun\datastore\Middleware\Factory;
 
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStorePluginManager;
+use rollun\datastore\Middleware\Determinator;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
