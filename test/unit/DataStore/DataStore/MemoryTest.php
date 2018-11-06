@@ -11,6 +11,14 @@ use PHPUnit_Framework_Error_Deprecated;
 use ReflectionClass;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Memory;
+use rollun\datastore\Rql\Node\AggregateFunctionNode;
+use rollun\datastore\Rql\RqlQuery;
+use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;
+use Xiag\Rql\Parser\Node\Query\LogicOperator\NotNode;
+use Xiag\Rql\Parser\Node\Query\LogicOperator\OrNode;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\GeNode;
+use Xiag\Rql\Parser\Node\SelectNode;
 
 class MemoryTest extends TestCase
 {
@@ -133,6 +141,93 @@ class MemoryTest extends TestCase
             'name' => 'name',
             'notExistingField' => 'anyValue',
         ]);
+    }
+
+    public function testQuery()
+    {
+        $rqlQuery = new RqlQuery();
+        $rqlQuery->setQuery(
+            new AndNode([
+                new OrNode([
+                    new GeNode('id', 3)
+                ]),
+                new NotNode([new EqNode('id', 4)])
+            ])
+        );
+        $rqlQuery->setSelect(new SelectNode([
+            'id',
+            'name',
+            'surname',
+        ]));
+
+        $expectedItems = [
+            [
+                'id' => 3,
+                'name' => "name3",
+                'surname' => "surname3",
+            ],
+            [
+                'id' => 5,
+                'name' => "name5",
+                'surname' => "surname5",
+            ],
+            [
+                'id' => 6,
+                'name' => "name6",
+                'surname' => "surname6",
+            ],
+        ];
+
+        $object = $this->createObject();
+        $reflection = new ReflectionClass($object);
+        $items = [];
+
+        foreach (range(1,6) as $id) {
+            $items[] = [
+                'id' => $id,
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ];
+        }
+
+        $property = $reflection->getProperty('items');
+        $property->setAccessible(true);
+        $property->setValue($object, $items);
+
+        $items = $object->query($rqlQuery);
+        $this->assertEquals($items, $expectedItems);
+    }
+
+    public function testQueryWithAggregationFunctions()
+    {
+        $rqlQuery = new RqlQuery();
+        $rqlQuery->setSelect(new SelectNode([
+            new AggregateFunctionNode('count', 'id')
+        ]));
+
+        $object = $this->createObject();
+        $reflection = new ReflectionClass($object);
+        $items = [];
+
+        foreach (range(1,3) as $id) {
+            $items[] = [
+                'id' => $id,
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ];
+        }
+
+        $property = $reflection->getProperty('items');
+        $property->setAccessible(true);
+        $property->setValue($object, $items);
+
+        $items = $object->query($rqlQuery);
+        $this->assertEquals($items, [['count(id)' => 3]]);
+    }
+
+    public function testReadNotExistingItem()
+    {
+        $this->assertEquals(null, $this->createObject()->read(1));
     }
 
     public function testRead()

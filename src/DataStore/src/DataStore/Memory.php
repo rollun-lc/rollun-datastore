@@ -194,10 +194,9 @@ class Memory extends DataStoreAbstract
     }
 
     /**
-     * Check if item data match with expected columns (data store fields)
-     *
      * @param $itemData
      * @return mixed
+     * @throws DataStoreException
      */
     protected function checkOnExistingColumns($itemData)
     {

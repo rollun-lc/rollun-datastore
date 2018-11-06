@@ -50,14 +50,14 @@ class UpdateHandler extends AbstractHandler
 
         $item = array_merge([$primaryKeyIdentifier => $primaryKeyValue], $item);
         $overwriteMode = $request->getAttribute('overwriteMode');
-        $isIdExist = !empty($this->dataStore->read($primaryKeyValue));
+        $isItemExist = !empty($this->dataStore->read($primaryKeyValue));
 
         $newItem = $this->dataStore->update($item, $overwriteMode);
 
         $response = new Response();
         $response = $response->withBody($this->createStream($newItem));
 
-        if ($overwriteMode && !$isIdExist) {
+        if ($overwriteMode && !$isItemExist) {
             $response = $response->withStatus(201);
         }
 

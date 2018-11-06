@@ -7,6 +7,7 @@
 namespace rollun\test\functional\DataStore\Middleware\Handler;
 
 use PHPUnit\Framework\TestCase;
+use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\Node\AlikeGlobNode;
 use rollun\datastore\Rql\Node\AlikeNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
@@ -31,6 +32,7 @@ use Xiag\Rql\Parser\Node\Query\ScalarOperator\LeNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\LikeNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\LtNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\NeNode;
+use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Node\SortNode;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Adapter\Driver\ConnectionInterface;
@@ -203,6 +205,22 @@ class SqlQueryBuilderTest extends TestCase
         $groupBy = "GROUP BY `a`, `b`";
 
         $this->assertEquals($select . $where . $groupBy, $object->buildSql($rqlQuery));
+    }
+
+    public function testBuildSqlWithSelectNode()
+    {
+        $tableName = 'table';
+        $object = new SqlQueryBuilder($this->mockAdapter, $tableName);
+
+        $rqlQuery = new RqlQuery();
+        $rqlQuery->setSelect(
+            new SelectNode([
+                new AggregateFunctionNode('count', 'a')
+            ])
+        );
+
+        $sql = "SELECT count(a) AS `count(a)` FROM `table` WHERE '1' = '1'";
+        $this->assertEquals($sql, $object->buildSql($rqlQuery));
     }
 
     public function testAllNodeType()

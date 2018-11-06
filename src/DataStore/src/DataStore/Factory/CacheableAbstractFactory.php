@@ -1,10 +1,7 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\Factory;
@@ -16,7 +13,6 @@ use rollun\datastore\DataStore\Memory;
 
 class CacheableAbstractFactory extends DataStoreAbstractFactory
 {
-
     const KEY_DATASOURCE = 'dataSource';
 
     const KEY_CACHEABLE = 'cacheable';
@@ -29,14 +25,15 @@ class CacheableAbstractFactory extends DataStoreAbstractFactory
 
     public function canCreate(ContainerInterface $container, $requestedName)
     {
-
         $config = $container->get('config');
+
         if (!isset($config[self::KEY_DATASTORE][$requestedName][self::KEY_CLASS])) {
             $result = false;
         } else {
             $requestedClassName = $config[self::KEY_DATASTORE][$requestedName][self::KEY_CLASS];
             $result = is_a($requestedClassName, $this::$KEY_DATASTORE_CLASS, true);
         }
+
         return $result;
     }
 
@@ -57,25 +54,27 @@ class CacheableAbstractFactory extends DataStoreAbstractFactory
         if ($this::$KEY_IN_CREATE) {
             throw new DataStoreException("Create will be called without pre call canCreate method");
         }
+
         $this::$KEY_IN_CREATE = 1;
 
         $config = $container->get('config');
         $serviceConfig = $config[self::KEY_DATASTORE][$requestedName];
         $requestedClassName = $serviceConfig[self::KEY_CLASS];
+
         if (isset($serviceConfig[self::KEY_DATASOURCE])) {
             if ($container->has($serviceConfig[self::KEY_DATASOURCE])) {
                 $getAll = $container->get($serviceConfig[self::KEY_DATASOURCE]);
             } else {
                 $this::$KEY_IN_CREATE = 0;
+
                 throw new DataStoreException(
-                'There is DataSource not created ' . $requestedName . 'in config \'dataStore\''
+                "There is DataSource not created {$requestedName} in config 'dataStore'"
                 );
             }
         } else {
             $this::$KEY_IN_CREATE = 0;
-            throw new DataStoreException(
-            'There is DataSource for ' . $requestedName . 'in config \'dataStore\''
-            );
+
+            throw new DataStoreException("There is DataSource for {$requestedName} in config 'dataStore'");
         }
 
         if (isset($serviceConfig[self::KEY_CACHEABLE])) {
@@ -83,8 +82,9 @@ class CacheableAbstractFactory extends DataStoreAbstractFactory
                 $cashStore = $container->get($serviceConfig[self::KEY_CACHEABLE]);
             } else {
                 $this::$KEY_IN_CREATE = 0;
+
                 throw new DataStoreException(
-                'There is DataSource for ' . $serviceConfig[self::KEY_CACHEABLE] . 'in config \'dataStore\''
+                "There is DataSource for {$serviceConfig[self::KEY_CACHEABLE]} in config 'dataStore'"
                 );
             }
         } else {
@@ -93,13 +93,13 @@ class CacheableAbstractFactory extends DataStoreAbstractFactory
 
         $this::$KEY_IN_CREATE = 0;
 
-        //$cashStore = isset($serviceConfig['cashStore']) ?  new $serviceConfig['cashStore']() : null;
         /** @var Cacheable $cashable */
         $cashable = new $requestedClassName($getAll, $cashStore);
+
         if(isset($serviceConfig[self::KEY_IS_REFRESH]) && $serviceConfig[self::KEY_IS_REFRESH]) {
             $cashable->refresh();
         }
+
         return $cashable;
     }
-
 }

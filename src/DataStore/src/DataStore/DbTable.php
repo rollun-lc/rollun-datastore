@@ -152,7 +152,8 @@ class DbTable extends DataStoreAbstract
     /**
      * @param $itemData
      * @param bool $createIfAbsent
-     * @return array
+     * @return array|mixed|null
+     * @throws DataStoreException
      */
     protected function updateItem($itemData, $createIfAbsent = false)
     {
@@ -265,7 +266,8 @@ class DbTable extends DataStoreAbstract
 
     /**
      * @param array $itemsData
-     * @return array
+     * @return array|array[]
+     * @throws DataStoreException
      */
     public function multiCreate(array $itemsData)
     {

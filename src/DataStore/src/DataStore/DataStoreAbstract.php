@@ -249,64 +249,64 @@ abstract class DataStoreAbstract implements DataStoresInterface
             $resultArray = array();
             $compareArray = array();
 
-            foreach ($selectNode->getFields() as $field) {
-                if ($field instanceof AggregateFunctionNode) {
-                    switch ($field->getFunction()) {
+            foreach ($selectNode->getFields() as $fieldNode) {
+                if ($fieldNode instanceof AggregateFunctionNode) {
+                    switch ($fieldNode->getFunction()) {
                         case 'count': {
                                 $arr = [];
                                 foreach ($data as $item) {
-                                    if (isset($item[$field->getField()])) {
-                                        $arr[] = $item[$field->getField()];
+                                    if (isset($item[$fieldNode->getField()])) {
+                                        $arr[] = $item[$fieldNode->getField()];
                                     }
                                 }
-                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [count($arr)];
+                                $compareArray[$fieldNode->__toString()] = [count($arr)];
                                 break;
                             }
                         case 'max': {
                                 $firstItem = array_pop($data);
-                                $max = $firstItem[$field->getField()];
+                                $max = $firstItem[$fieldNode->getField()];
                                 foreach ($data as $item) {
-                                    $max = $max < $item[$field->getField()] ? $item[$field->getField()] : $max;
+                                    $max = $max < $item[$fieldNode->getField()] ? $item[$fieldNode->getField()] : $max;
                                 }
                                 array_push($data, $firstItem);
-                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [$max];
+                                $compareArray[$fieldNode->__toString()] = [$max];
                                 break;
                             }
                         case 'min': {
                                 $firstItem = array_pop($data);
-                                $min = $firstItem[$field->getField()];
+                                $min = $firstItem[$fieldNode->getField()];
                                 foreach ($data as $item) {
-                                    $min = $min > $item[$field->getField()] ? $item[$field->getField()] : $min;
+                                    $min = $min > $item[$fieldNode->getField()] ? $item[$fieldNode->getField()] : $min;
                                 }
                                 array_push($data, $firstItem);
-                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [$min];
+                                $compareArray[$fieldNode->__toString()] = [$min];
                                 break;
                             }
                         case 'sum': {
                                 $sum = 0;
                                 foreach ($data as $item) {
-                                    $sum += isset($item[$field->getField()]) ? $item[$field->getField()] : 0;
+                                    $sum += isset($item[$fieldNode->getField()]) ? $item[$fieldNode->getField()] : 0;
                                 }
-                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [$sum];
+                                $compareArray[$fieldNode->__toString()] = [$sum];
                                 break;
                             }
                         case 'avg': {
                                 $sum = 0;
                                 $count = 0;
                                 foreach ($data as $item) {
-                                    $sum += isset($item[$field->getField()]) ? $item[$field->getField()] : 0;
-                                    $count += isset($item[$field->getField()]) ? 1 : 0;
+                                    $sum += isset($item[$fieldNode->getField()]) ? $item[$fieldNode->getField()] : 0;
+                                    $count += isset($item[$fieldNode->getField()]) ? 1 : 0;
                                 }
-                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [$sum / $count];
+                                $compareArray[$fieldNode->__toString()] = [$sum / $count];
                                 break;
                             }
                     }
                 } else {
                     $dataLine = [];
                     foreach ($data as $item) {
-                        $dataLine[] = $item[$field];
+                        $dataLine[] = $item[$fieldNode];
                     }
-                    $compareArray[$field] = $dataLine;
+                    $compareArray[$fieldNode] = $dataLine;
                 }
             }
             $min = null;

@@ -11,8 +11,19 @@ use PHPUnit_Framework_Error_Deprecated;
 use Psr\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\DbTable;
+use rollun\datastore\Rql\Node\AggregateFunctionNode;
+use rollun\datastore\Rql\Node\LikeGlobNode;
+use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\datastore\TableGateway\TableManagerMysql;
+use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;
+use Xiag\Rql\Parser\Node\Query\LogicOperator\NotNode;
+use Xiag\Rql\Parser\Node\Query\LogicOperator\OrNode;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\GeNode;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\LeNode;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\LikeNode;
+use Xiag\Rql\Parser\Node\SelectNode;
 use Zend\Db\TableGateway\TableGateway;
 
 class DbTableTest extends TestCase
@@ -61,6 +72,11 @@ class DbTableTest extends TestCase
         $this->container = include './config/container.php';
         $adapter = $container->get('db');
         $this->mysqlManager = new TableManagerMysql($adapter);
+
+        if ($this->mysqlManager->hasTable($this->tableName)) {
+            $this->mysqlManager->deleteTable($this->tableName);
+        }
+
         $this->mysqlManager->createTable($this->tableName, $this->tableConfig);
         $this->tableGateway = new TableGateway($this->tableName, $adapter);
     }
@@ -155,6 +171,74 @@ class DbTableTest extends TestCase
             'id' => 1,
             'name' => 'name'
         ]);
+    }
+
+    public function testQuery()
+    {
+        $rqlQuery = new RqlQuery();
+        $rqlQuery->setQuery(
+            new AndNode([
+                new OrNode([
+                    new GeNode('id', 3)
+                ]),
+                new NotNode([new EqNode('id', 4)])
+            ])
+        );
+        $rqlQuery->setSelect(new SelectNode([
+            'id',
+            'name',
+            'surname',
+        ]));
+
+        $expectedItems = [
+            [
+                'id' => 3,
+                'name' => "name3",
+                'surname' => "surname3",
+            ],
+            [
+                'id' => 5,
+                'name' => "name5",
+                'surname' => "surname5",
+            ],
+            [
+                'id' => 6,
+                'name' => "name6",
+                'surname' => "surname6",
+            ],
+        ];
+
+        foreach (range(1,6) as $id) {
+            $this->create([
+                'id' => $id,
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ]);
+        }
+
+        $object = $this->createObject();
+        $items = $object->query($rqlQuery);
+        $this->assertEquals($items, $expectedItems);
+    }
+
+    public function testQueryWithAggregationFunctions()
+    {
+        $rqlQuery = new RqlQuery();
+        $rqlQuery->setSelect(new SelectNode([
+            new AggregateFunctionNode('count', 'id')
+        ]));
+
+        foreach (range(1,3) as $id) {
+            $this->create([
+                'id' => $id,
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ]);
+        }
+
+        $object = $this->createObject();
+        $items = $object->query($rqlQuery);
+        $this->assertEquals($items, [['count(id)' => 3]]);
     }
 
     public function testRead()

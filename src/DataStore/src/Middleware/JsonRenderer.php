@@ -33,6 +33,7 @@ class JsonRenderer implements MiddlewareInterface
     public function process(ServerRequestInterface $request, DelegateInterface $delegate)
     {
         $data = $request->getAttribute(static::RESPONSE_DATA);
+        $data = !empty($data) ? $data : '';
 
         /** @var ResponseInterface $response */
         $response = $request->getAttribute(ResponseInterface::class) ?: null;
@@ -50,10 +51,6 @@ class JsonRenderer implements MiddlewareInterface
         foreach ($headers as $header => $value) {
             $response = $response->withHeader($header, $value);
         }
-
-        $request = $request->withAttribute(ResponseInterface::class, $response);
-
-        $response = $delegate->process($request);
 
         return $response;
     }

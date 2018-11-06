@@ -6,20 +6,28 @@
 
 namespace rollun\test\functional\DataStore\Middleware;
 
+use Interop\Http\ServerMiddleware\DelegateInterface;
 use Psr\Http\Message\ResponseInterface;
 use rollun\datastore\Middleware\JsonRenderer;
+use Zend\Diactoros\Response\JsonResponse;
 use Zend\Diactoros\ServerRequest;
-use Zend\Diactoros\Stream;
 
 class JsonRendererTest extends BaseMiddlewareTest
 {
     public function testProcessSuccessWithoutResponseInAttribute()
     {
         $request = new ServerRequest();
-        $response = $this->createResponse(200, ['content-type' => 'application/json'], []);
+        $response = new JsonResponse('', 200, ['content-type' => 'application/json']);
 
         $object = new JsonRenderer();
-        $this->assertDelegateCallWithResponseAssertion($response, $request, $object);
+
+        /** @var DelegateInterface $delegateMock */
+        $delegateMock = $this->createMock(DelegateInterface::class);
+
+        $this->assertJsonResponseEquals(
+            $response,
+            $object->process($request, $delegateMock)
+        );
     }
 
     public function testProcessSuccessWithResponseInAttribute()
@@ -30,14 +38,32 @@ class JsonRendererTest extends BaseMiddlewareTest
         ];
         $data = ['someData'];
 
-        $response = $this->createResponse(300, array_merge(['content-type' => 'application/json'], $headers));
+        $response = new JsonResponse($data, 200, $headers);
         $request = new ServerRequest();
         $request = $request->withAttribute(ResponseInterface::class, $response);
         $request = $request->withAttribute(JsonRenderer::RESPONSE_DATA, $data);
 
-        $response = $response->withBody(new Stream("data://text/plain;base64," . base64_encode(serialize($data))));
-
         $object = new JsonRenderer();
-        $this->assertDelegateCallWithResponseAssertion($response, $request, $object);
+
+        /** @var DelegateInterface $delegateMock */
+        $delegateMock = $this->createMock(DelegateInterface::class);
+
+        $this->assertJsonResponseEquals(
+            $response,
+            $object->process($request, $delegateMock)
+        );
+    }
+
+    public function assertJsonResponseEquals(ResponseInterface $expected, ResponseInterface $actual)
+    {
+        $this->assertEquals(
+            $expected->getBody()
+                ->getContents(),
+            $actual->getBody()
+                ->getContents()
+        );
+
+        $this->assertEquals($expected->getHeaders(), $actual->getHeaders());
+        $this->assertEquals($expected->getStatusCode(), $actual->getStatusCode());
     }
 }

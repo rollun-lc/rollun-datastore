@@ -57,6 +57,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
             $this->filename = realpath(
                 sys_get_temp_dir() . DIRECTORY_SEPARATOR . trim($filename, DIRECTORY_SEPARATOR)
             );
+
             if (!is_file($this->filename)) {
                 throw new DataStoreException('The specified source file does not exist');
             }
@@ -80,8 +81,6 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     }
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function read($id = null)
@@ -112,6 +111,8 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      */
     public function getIterator()
     {
+        trigger_error("Datastore is not iterable no more", E_USER_DEPRECATED);
+
         return new CsvIterator($this);
     }
 
@@ -366,7 +367,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     {
         $item = array_flip($this->columns);
 
-        foreach ($item as $key => &$value) {
+        foreach ($item as $key => $value) {
             if (isset($itemData[$key])) {
                 $item[$key] = $itemData[$key];
             } else {

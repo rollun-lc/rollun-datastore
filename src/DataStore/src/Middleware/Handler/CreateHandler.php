@@ -43,7 +43,7 @@ class CreateHandler extends AbstractHandler
      */
     protected function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $isIdExist = false;
+        $isItemExist = false;
         $row = $request->getParsedBody();
         $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $overwriteMode = $request->getAttribute('overwriteMode');
@@ -52,12 +52,12 @@ class CreateHandler extends AbstractHandler
             $primaryKeyIdentifier = $this->dataStore->getIdentifier();
             $row = array_merge([$primaryKeyIdentifier => $primaryKeyValue], $row);
             $existingRow = $this->dataStore->read($primaryKeyValue);
-            $isIdExist = !empty($existingRow);
+            $isItemExist = !empty($existingRow);
         }
 
         $response = new Response();
 
-        if (!$isIdExist) {
+        if (!$isItemExist) {
             $response = $response->withStatus(201);
             $location = $request->getUri()->getPath();
             $response = $response->withHeader('Location', $location);

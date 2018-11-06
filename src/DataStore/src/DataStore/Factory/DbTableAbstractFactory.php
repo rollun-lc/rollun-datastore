@@ -1,10 +1,7 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\Factory;
@@ -44,7 +41,6 @@ use Zend\Db\TableGateway\TableGateway;
  */
 class DbTableAbstractFactory extends DataStoreAbstractFactory
 {
-
     const KEY_TABLE_NAME = 'tableName';
     const KEY_TABLE_GATEWAY = 'tableGateway';
     const KEY_DB_ADAPTER = 'dbAdapter';
@@ -68,6 +64,7 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
         if ($this::$KEY_IN_CREATE) {
             throw new DataStoreException("Create will be called without pre call canCreate method");
         }
+
         $this::$KEY_IN_CREATE = 1;
 
         $config = $container->get('config');
@@ -76,6 +73,7 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
         $tableGateway = $this->getTableGateway($container, $serviceConfig, $requestedName);
 
         $this::$KEY_IN_CREATE = 0;
+
         return new $requestedClassName($tableGateway);
     }
 
@@ -86,11 +84,12 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
                 $tableGateway = $container->get($serviceConfig[self::KEY_TABLE_GATEWAY]);
             } else {
                 $this::$KEY_IN_CREATE = 0;
+
                 throw new DataStoreException(
                 'Can\'t create ' . $serviceConfig[self::KEY_TABLE_GATEWAY]
                 );
             }
-        } else if (isset($serviceConfig[self::KEY_TABLE_NAME])) {
+        } elseif (isset($serviceConfig[self::KEY_TABLE_NAME])) {
             $tableName = $serviceConfig[self::KEY_TABLE_NAME];
 
             $dbServiceName = isset($serviceConfig[self::KEY_DB_ADAPTER]) ? $serviceConfig[self::KEY_DB_ADAPTER] : 'db';
@@ -100,16 +99,19 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
                 $tableGateway = new TableGateway($tableName, $db);
             } else {
                 $this::$KEY_IN_CREATE = 0;
+
                 throw new DataStoreException(
                 'Can\'t create Zend\Db\TableGateway\TableGateway for ' . $tableName
                 );
             }
         } else {
             $this::$KEY_IN_CREATE = 0;
+
             throw new DataStoreException(
             'There is not table name for ' . $requestedName . 'in config \'dataStore\''
             );
         }
+
         return $tableGateway;
     }
 
