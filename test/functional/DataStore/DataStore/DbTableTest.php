@@ -12,7 +12,6 @@ use Psr\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
-use rollun\datastore\Rql\Node\LikeGlobNode;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\datastore\TableGateway\TableManagerMysql;
@@ -21,8 +20,6 @@ use Xiag\Rql\Parser\Node\Query\LogicOperator\NotNode;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\OrNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\GeNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\LeNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\LikeNode;
 use Xiag\Rql\Parser\Node\SelectNode;
 use Zend\Db\TableGateway\TableGateway;
 

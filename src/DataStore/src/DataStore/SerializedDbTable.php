@@ -6,6 +6,7 @@
 
 namespace rollun\datastore\DataStore;
 
+use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\dic\InsideConstruct;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -13,16 +14,9 @@ class SerializedDbTable extends DbTable
 {
     protected $tableName;
 
-    public function __construct(TableGateway $dbTable = null)
+    public function __construct(TableGateway $dbTable, SqlQueryBuilder $sqlQueryBuilder = null)
     {
-        if (isset($dbTable)) {
-            parent::__construct($dbTable);
-        } elseif (isset($this->tableName)) {
-            InsideConstruct::setConstructParams(["dbTable" => $this->tableName]);
-        } else {
-            throw new DataStoreException("dbTable not sent and tableName not exist(from wakeup).");
-        }
-
+        parent::__construct($dbTable, $sqlQueryBuilder);
         $this->tableName = $this->dbTable->getTable();
     }
 
@@ -35,10 +29,15 @@ class SerializedDbTable extends DbTable
     }
 
     /**
-     *
+     * @throws DataStoreException
      */
     public function __wakeup()
     {
-        $this->__construct(null);
+        try {
+            InsideConstruct::initWakeup(["dbTable" => $this->tableName]);
+            InsideConstruct::initWakeup(["sqlQueryBuilder" => SqlQueryBuilder::class]);
+        } catch (\Throwable $e) {
+            throw new DataStoreException("Can't deserialize itself", 0, $e);
+        }
     }
 }

@@ -52,14 +52,14 @@ class CsvBaseTest extends TestCase
     public function testCreateSuccess()
     {
         $item = [
-            'id' => 1,
+            'id' => '1',
             'name' => 'name',
             'surname' => 'surname',
         ];
 
         $object = $this->createObject();
         $object->create($item);
-        $this->assertEquals($item, $this->read($item['id']));
+        $this->assertSame($item, $object->read($item['id']));
     }
 
     public function testCreateFailItemExistAndWithoutOverwrite()
@@ -340,6 +340,27 @@ class CsvBaseTest extends TestCase
         $object = $this->createObject();
         PHPUnit_Framework_Error_Deprecated::$enabled = true;
         $object->getIterator();
+    }
+
+    public function testTypesSuccess()
+    {
+        $items = [
+            'id' => 1,
+            'name' => "name",
+            'surname' => "surname",
+        ];
+
+        $object = $this->createObject();
+        $object->create($items);
+        $this->assertSame($items, $object->delete(1));
+
+        $items['id'] = '01';
+        $object->create($items);
+        $this->assertSame($items, $object->delete(1));
+
+        $items['id'] = '1';
+        $object->create($items);
+        $this->assertNotSame($items, $object->delete(1));
     }
 
     protected function read($id, $delimiter = ',')

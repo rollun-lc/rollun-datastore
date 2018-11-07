@@ -8,6 +8,10 @@ namespace rollun\datastore\DataStore;
 
 use Symfony\Component\Filesystem\LockHandler;
 
+/**
+ * Class CsvIntId
+ * @package rollun\datastore\DataStore
+ */
 class CsvIntId extends CsvBase
 {
     /**
@@ -80,8 +84,8 @@ class CsvIntId extends CsvBase
     }
 
     /**
-     * Generates an unique identifier
-     * @return int
+     * @return null|string
+     * @throws DataStoreException
      */
     protected function generatePrimaryKey()
     {
@@ -125,8 +129,6 @@ class CsvIntId extends CsvBase
     }
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     protected function checkIdentifierType($id)

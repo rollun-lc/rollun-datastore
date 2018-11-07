@@ -85,13 +85,16 @@ class HttpClient extends DataStoreAbstract
     public function read($id)
     {
         $this->checkIdentifierType($id);
-        $client = $this->initHttpClient(Request::METHOD_GET, null, $id);
+        $uri = $this->createUri(null, $id);
+        $client = $this->initHttpClient(Request::METHOD_GET, $uri);
         $response = $client->send();
 
         if ($response->isOk()) {
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
-            throw new DataStoreException($this->getClientExceptionMessage($response, "Can't read item with id = $id."));
+            throw new DataStoreException(
+                $this->getClientExceptionMessage($response, "Can't read item with id = $id.")
+            );
         }
 
         return $result;
@@ -101,22 +104,14 @@ class HttpClient extends DataStoreAbstract
      * Create http client
      *
      * @param string $method ('GET', 'HEAD', 'POST', 'PUT', 'DELETE')
-     * @param Query|null $query
-     * @param null $id
+     * @param string $uri
      * @param bool $ifMatch
      * @return Client
      */
-    protected function initHttpClient($method, Query $query = null, $id = null, $ifMatch = false)
+    protected function initHttpClient(string $method, string $uri, $ifMatch = false)
     {
-        $url = !$id ? $this->url : $this->url . '/' . $this->encodeString($id);
-
-        if (isset($query)) {
-            $rqlString = RqlParser::rqlEncode($query);
-            $url = $url . '?' . $rqlString;
-        }
-
         $httpClient = clone $this->client;
-        $httpClient->setUri($url);
+        $httpClient->setUri($uri);
         $httpClient->setOptions($this->options);
 
         $headers['Content-Type'] = 'application/json';
@@ -138,6 +133,22 @@ class HttpClient extends DataStoreAbstract
         return $httpClient;
     }
 
+    protected function createUri(Query $query = null, $id = null)
+    {
+        $uri = $this->url;
+
+        if (isset($id)) {
+            $uri = $this->url . '/' . $this->encodeString($id);
+        }
+
+        if (isset($query)) {
+            $rqlString = RqlParser::rqlEncode($query);
+            $uri = $uri . '?' . $rqlString;
+        }
+
+        return $uri;
+    }
+
     /**
      * @param $value
      * @return string
@@ -152,7 +163,7 @@ class HttpClient extends DataStoreAbstract
      */
     public function query(Query $query)
     {
-        $client = $this->initHttpClient(Request::METHOD_GET, $query);
+        $client = $this->initHttpClient(Request::METHOD_GET, $this->createUri($query));
         $response = $client->send();
 
         if ($response->isOk()) {
@@ -161,7 +172,7 @@ class HttpClient extends DataStoreAbstract
             throw new DataStoreException(
                 $this->getClientExceptionMessage(
                     $response,
-                    "Can't execute query = " . RqlParser::rqlEncode($query) . "."
+                    "Can't execute query = '" . RqlParser::rqlEncode($query) . "'."
                 )
             );
         }
@@ -178,13 +189,13 @@ class HttpClient extends DataStoreAbstract
 
         if (isset($itemData[$identifier])) {
             $id = $itemData[$identifier];
-            $this->checkIdentifierType($id);
+            $this->checkIdentifierType($itemData[$identifier]);
         } else {
             trigger_error("Getting last id using db is deprecate", E_USER_DEPRECATED);
             $id = null;
         }
 
-        $client = $this->initHttpClient(Request::METHOD_POST, null, $id, $rewriteIfExist);
+        $client = $this->initHttpClient(Request::METHOD_POST, $this->url, $rewriteIfExist);
         $json = Serializer::jsonSerialize($itemData);
         $client->setRawBody($json);
         $response = $client->send();
@@ -216,8 +227,10 @@ class HttpClient extends DataStoreAbstract
 
         $id = $itemData[$identifier];
         $this->checkIdentifierType($id);
+        $uri = $this->createUri(null, $itemData[$identifier]);
+        unset($itemData[$identifier]);
 
-        $client = $this->initHttpClient(Request::METHOD_PUT, null, $id, $createIfAbsent);
+        $client = $this->initHttpClient(Request::METHOD_PUT, $uri, $createIfAbsent);
         $client->setRawBody(Serializer::jsonSerialize($itemData));
         $response = $client->send();
 
@@ -241,7 +254,7 @@ class HttpClient extends DataStoreAbstract
     public function delete($id)
     {
         $this->checkIdentifierType($id);
-        $client = $this->initHttpClient(Request::METHOD_DELETE, null, $id);
+        $client = $this->initHttpClient(Request::METHOD_DELETE, $this->createUri(null, $id));
         $response = $client->send();
 
         if ($response->isSuccess()) {
@@ -276,7 +289,7 @@ class HttpClient extends DataStoreAbstract
         $body = '';
 
         if (strlen($response->getBody()) < 255) {
-            $body = " Body: {$response->getReasonPhrase()}";
+            $body = " Body: {$response->getBody()}";
         }
 
         return $message . " Status: {$response->getStatusCode()}." . " ReasonPhrase: {$response->getReasonPhrase()}." . $body;

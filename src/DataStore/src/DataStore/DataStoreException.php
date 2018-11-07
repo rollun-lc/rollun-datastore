@@ -7,10 +7,8 @@
 namespace rollun\datastore\DataStore;
 
 /**
- * Exception class
- *
- * @category   rest
- * @package    zaboy
+ * Class DataStoreException
+ * @package rollun\datastore\DataStore
  */
 class DataStoreException extends \Exception
 {

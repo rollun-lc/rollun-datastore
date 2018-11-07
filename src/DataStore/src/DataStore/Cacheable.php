@@ -163,7 +163,7 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
         if (method_exists($this->dataSource, "update")) {
             return $this->dataSource->update($itemData, $createIfAbsent);
         } else {
-            throw new DataStoreException("Refreshable don't haw method delete");
+            throw new DataStoreException("Refreshable don't haw method update");
         }
     }
 
@@ -209,7 +209,7 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
         if (method_exists($this->dataSource, "delete")) {
             return $this->dataSource->delete($id);
         } else {
-            throw new DataStoreException("Refreshable don't haw method deleteAll");
+            throw new DataStoreException("Refreshable don't haw method delete");
         }
     }
 }
