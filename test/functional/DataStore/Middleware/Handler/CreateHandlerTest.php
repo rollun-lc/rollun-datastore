@@ -6,7 +6,9 @@
 
 namespace rollun\test\functional\DataStore\Middleware\Handler;
 
+use Interop\Http\ServerMiddleware\DelegateInterface;
 use Psr\Http\Message\UriInterface;
+use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\Middleware\Handler\CreateHandler;
 use rollun\datastore\Rql\RqlQuery;
@@ -123,12 +125,14 @@ class CreateHandlerTest extends BaseHandlerTest
 
     public function testProcessWithoutOverwriteMode()
     {
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage("Item with id '1' already exist");
+
         $item = [
             'id' => 1,
             'name' => 'name',
         ];
 
-        $response = $this->createResponse(200, [], $item);
         $request = new ServerRequest();
         $request = $request->withMethod('POST');
         $request = $request->withParsedBody($item);
@@ -141,13 +145,11 @@ class CreateHandlerTest extends BaseHandlerTest
             ->with($item['id'])
             ->willReturn($item);
 
-        $dataStore->expects($this->once())
-            ->method('create')
-            ->with($item, false)
-            ->willReturn($item);
-
         $object = $this->createObject($dataStore);
-        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object);
+
+        /** @var DelegateInterface $delegateMock */
+        $delegateMock = $this->getMockBuilder(DelegateInterface::class)->getMock();
+        $object->process($request, $delegateMock);
     }
 
     public function testProcessWithoutExistingPrimaryKeyAndRowDoesNotExist()

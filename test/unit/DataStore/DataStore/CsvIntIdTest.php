@@ -19,7 +19,20 @@ class CsvIntIdTest extends CsvBaseTest
         return new CsvIntId($this->filename, $delimiter, $lockHandler);
     }
 
-    public function testTypes()
+    public function testCreateSuccess()
+    {
+        $item = [
+            'id' => 1,
+            'name' => 'name',
+            'surname' => 'surname',
+        ];
+
+        $object = $this->createObject();
+        $object->create($item);
+        $this->assertSame($item, $object->read($item['id']));
+    }
+
+    public function testTypesSuccess()
     {
         $items = [
             'id' => 1,

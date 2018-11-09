@@ -1,10 +1,7 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\ConditionBuilder;
@@ -16,9 +13,8 @@ use rollun\datastore\DataStore\DataStoreException;
 use Zend\Db\Adapter\AdapterInterface;
 
 /**
- * {@inheritdoc}
- *
- * {@inheritdoc}
+ * Class SqlConditionBuilder
+ * @package rollun\datastore\DataStore\ConditionBuilder
  */
 class SqlConditionBuilder extends ConditionBuilderAbstract
 {
@@ -31,7 +27,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         ],
         'ArrayOperator' => [
             'in' => ['before' => '(', 'between' => ' IN (', 'delimiter' => ',', 'after' => '))'],
-            'out' => ['before' => '(', 'between' => ' NOT IN (', 'delimiter' => ',', 'after' => '))']
+            'out' => ['before' => '(', 'between' => ' NOT IN (', 'delimiter' => ',', 'after' => '))'],
         ],
         'ScalarOperator' => [
             'eq' => ['before' => '(', 'between' => '=', 'after' => ')'],
@@ -49,7 +45,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
             'eqt' => ['before' => '(', 'after' => ' IS TRUE)'],
             'eqf' => ['before' => '(', 'after' => ' IS FALSE)'],
             'ie' => ['before' => '(', 'after' => ')'],
-        ]
+        ],
     ];
 
     /**
@@ -68,26 +64,21 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
     public function __construct(AdapterInterface $dbAdapter, $tableName)
     {
         $this->db = $dbAdapter;
-        $this->emptyCondition = $this->prepareFieldValue(1)
-            . ' = '
-            . $this->prepareFieldValue(1);
+        $this->emptyCondition = $this->prepareFieldValue(1) . ' = ' . $this->prepareFieldValue(1);
         $this->tableName = $tableName;
     }
 
     /**
      * {@inheritdoc}
-     *
-     * {@inheritdoc}
      */
     public function prepareFieldValue($fieldValue)
     {
         $fieldValue = parent::prepareFieldValue($fieldValue);
+
         return $this->db->platform->quoteValue($fieldValue);
     }
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function getValueFromGlob(Glob $globNode)
@@ -98,7 +89,8 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         $glob = parent::getValueFromGlob($globNode);
 
         $regexSQL = strtr(
-            preg_quote(rawurldecode(strtr($glob, ['*' => $constStar, '?' => $constQuestion])), '/'), [$constStar => '%', $constQuestion => '_']
+            preg_quote(rawurldecode(strtr($glob, ['*' => $constStar, '?' => $constQuestion])), '/'),
+            [$constStar => '%', $constQuestion => '_']
         );
 
         return $regexSQL;
@@ -114,21 +106,23 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
     public function makeScalarOperator(AbstractScalarOperatorNode $node)
     {
         $nodeName = $node->getNodeName();
+
         if (!isset($this->literals['ScalarOperator'][$nodeName])) {
             throw new DataStoreException(
                 'The Scalar Operator not suppoted: ' . $nodeName
             );
         }
-        $value = $node->getValue() instanceof \DateTime ? $node->getValue()->format("Y-m-d") : $node->getValue();
-        $strQuery = $this->literals['ScalarOperator'][$nodeName]['before']
-            . $this->prepareFieldName($node->getField());
+
+        $value = $node->getValue() instanceof \DateTime ? $node->getValue()
+            ->format("Y-m-d") : $node->getValue();
+
+        $strQuery = $this->literals['ScalarOperator'][$nodeName]['before'] . $this->prepareFieldName($node->getField());
 
         if ($nodeName === 'contains') {
-            $strQuery .= $this->literals['ScalarOperator'][$nodeName]['between'] .
-                trim($this->prepareFieldValue($value), '\'');
-        } else {
             $strQuery .= $this->literals['ScalarOperator'][$nodeName]['between']
-                . $this->prepareFieldValue($value);
+                . trim($this->prepareFieldValue($value), '\'');
+        } else {
+            $strQuery .= $this->literals['ScalarOperator'][$nodeName]['between'] . $this->prepareFieldValue($value);
         }
 
         $strQuery .= $this->literals['ScalarOperator'][$nodeName]['after'];
@@ -162,8 +156,6 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
 
     /**
      * {@inheritdoc}
-     *
-     * {@inheritdoc}
      */
     public function prepareFieldName($fieldName)
     {
@@ -180,6 +172,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
             $fieldName = $this->db->platform->quoteIdentifierInFragment("{$name[0]}.{$name[1]}");
             //$fieldName = $this->db->platform->quoteIdentifier($name[0]) . '.' . $this->db->platform->quoteIdentifier($name[1]);
         }
+
         return $fieldName;
 
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace test\integration\DataStore\Rql;
+namespace test\functional\DataStore\Rql;
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node;

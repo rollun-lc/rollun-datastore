@@ -11,19 +11,13 @@ use PHPUnit_Framework_Error_Deprecated;
 use rollun\datastore\DataStore\CsvBase;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Iterators\CsvIterator;
-use rollun\datastore\Rql\Node\AggregateFunctionNode;
-use rollun\datastore\Rql\RqlQuery;
 use Symfony\Component\Filesystem\LockHandler;
-use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;
-use Xiag\Rql\Parser\Node\Query\LogicOperator\NotNode;
-use Xiag\Rql\Parser\Node\Query\LogicOperator\OrNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\GeNode;
-use Xiag\Rql\Parser\Node\SelectNode;
 
 class CsvBaseTest extends TestCase
 {
-    /** @var string */
+    /**
+     * @var string
+     */
     protected $filename;
 
     protected $columns = ['id', 'name', 'surname'];
@@ -253,74 +247,6 @@ class CsvBaseTest extends TestCase
         foreach ($range as $id) {
             $this->assertEquals($this->read($id), []);
         }
-    }
-
-    public function testQuerySuccess()
-    {
-        $rqlQuery = new RqlQuery();
-        $rqlQuery->setQuery(
-            new AndNode([
-                new OrNode([
-                    new GeNode('id', 3)
-                ]),
-                new NotNode([new EqNode('id', 4)])
-            ])
-        );
-        $rqlQuery->setSelect(new SelectNode([
-            'id',
-            'name',
-            'surname',
-        ]));
-
-        $expectedItems = [
-            [
-                'id' => 3,
-                'name' => "name3",
-                'surname' => "surname3",
-            ],
-            [
-                'id' => 5,
-                'name' => "name5",
-                'surname' => "surname5",
-            ],
-            [
-                'id' => 6,
-                'name' => "name6",
-                'surname' => "surname6",
-            ],
-        ];
-
-        foreach (range(1,6) as $id) {
-            $this->create([
-                'id' => $id,
-                'name' => "name{$id}",
-                'surname' => "surname{$id}",
-            ]);
-        }
-
-        $object = $this->createObject();
-        $items = $object->query($rqlQuery);
-        $this->assertEquals($items, $expectedItems);
-    }
-
-    public function testQueryWithAggregationFunctions()
-    {
-        $rqlQuery = new RqlQuery();
-        $rqlQuery->setSelect(new SelectNode([
-            new AggregateFunctionNode('count', 'id')
-        ]));
-
-        foreach (range(1,3) as $id) {
-            $this->create([
-                'id' => $id,
-                'name' => "name{$id}",
-                'surname' => "surname{$id}",
-            ]);
-        }
-
-        $object = $this->createObject();
-        $items = $object->query($rqlQuery);
-        $this->assertEquals($items, [['count(id)' => 3]]);
     }
 
     public function testGetIdentifier()

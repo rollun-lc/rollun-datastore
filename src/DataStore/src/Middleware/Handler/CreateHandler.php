@@ -8,6 +8,7 @@ namespace rollun\datastore\Middleware\Handler;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use rollun\datastore\DataStore\DataStoreException;
 use Zend\Diactoros\Response;
 
 /**
@@ -43,23 +44,32 @@ class CreateHandler extends AbstractHandler
      */
     protected function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $isItemExist = false;
         $row = $request->getParsedBody();
-        $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $overwriteMode = $request->getAttribute('overwriteMode');
+        $primaryKeyIdentifier = $this->dataStore->getIdentifier();
+        $isRowExist = false;
 
-        if ($primaryKeyValue) {
-            $primaryKeyIdentifier = $this->dataStore->getIdentifier();
+        if (isset($row[$primaryKeyIdentifier])) {
+            $primaryKeyValue = $row[$primaryKeyIdentifier];
+        } else {
+            $primaryKeyValue = $request->getAttribute('primaryKeyValue');
             $row = array_merge([$primaryKeyIdentifier => $primaryKeyValue], $row);
-            $existingRow = $this->dataStore->read($primaryKeyValue);
-            $isItemExist = !empty($existingRow);
         }
 
         $response = new Response();
 
-        if (!$isItemExist) {
+        if ($primaryKeyValue) {
+            $isRowExist = !empty($this->dataStore->read($primaryKeyValue));
+
+            if ($isRowExist && !$overwriteMode) {
+                throw new DataStoreException("Item with id '{$primaryKeyValue}' already exist");
+            }
+        }
+
+        if (!$isRowExist) {
             $response = $response->withStatus(201);
-            $location = $request->getUri()->getPath();
+            $location = $request->getUri()
+                ->getPath();
             $response = $response->withHeader('Location', $location);
         }
 

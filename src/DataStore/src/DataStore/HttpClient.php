@@ -116,7 +116,6 @@ class HttpClient extends DataStoreAbstract
 
         $headers['Content-Type'] = 'application/json';
         $headers['Accept'] = 'application/json';
-        $headers['APP_ENV'] = constant('APP_ENV');
 
         if ($ifMatch) {
             $headers['If-Match'] = '*';
@@ -289,9 +288,10 @@ class HttpClient extends DataStoreAbstract
         $body = '';
 
         if (strlen($response->getBody()) < 255) {
-            $body = " Body: {$response->getBody()}";
+            $body = " Body: '{$response->getBody()}'.";
         }
 
-        return $message . " Status: {$response->getStatusCode()}." . " ReasonPhrase: {$response->getReasonPhrase()}." . $body;
+        return $message . " Status: '{$response->getStatusCode()}'."
+            . " ReasonPhrase: '{$response->getReasonPhrase()}'." . $body;
     }
 }

@@ -1,10 +1,7 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\ConditionBuilder;
@@ -18,32 +15,24 @@ use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
 use rollun\datastore\DataStore\DataStoreException;
 
 /**
- * Make string with conditions for Query
+ * Transform rql query nodes to sql, php, and rql
  *
- * Format of this string depends on implementation
- *
- * @todo Data type fore Xiag\Rql\Parser\DataType\DateTime
- * @see PhpConditionBuilder
- * @see PhpConditionBuilder
- * @see SqlConditionBuilder
- * @category   rest
- * @package    zaboy
+ * Class ConditionBuilderAbstract
+ * @package rollun\datastore\DataStore\ConditionBuilder
  */
 abstract class ConditionBuilderAbstract
 {
-
     protected $literals = [
-        'LogicOperator' => [
-        ],
+        'LogicOperator' => [],
         'ArrayOperator' => [
-            'in' => ['before' => '(', 'between' => ',(', 'delimiter' => ',', 'after' => '))']
+            'in' => ['before' => '(', 'between' => ',(', 'delimiter' => ',', 'after' => '))'],
         ],
         'ScalarOperator' => [
             'ge' => ['before' => '(', 'between' => '>=', 'after' => ')'],
             'gt' => ['before' => '(', 'between' => '>', 'after' => ')'],
             'le' => ['before' => '(', 'between' => '<=', 'after' => ')'],
             'lt' => ['before' => '(', 'between' => '<', 'after' => ')'],
-        ]
+        ],
     ];
 
     /**
@@ -76,18 +65,16 @@ abstract class ConditionBuilderAbstract
     public function makeAbstractQueryOperator(AbstractQueryNode $queryNode)
     {
         switch (true) {
-            case is_a($queryNode, AbstractScalarOperatorNode::class, true):
+            case ($queryNode instanceOf AbstractScalarOperatorNode):
                 return $this->makeScalarOperator($queryNode);
-            case is_a($queryNode, AbstractLogicOperatorNode::class, true):
+            case ($queryNode instanceOf AbstractLogicOperatorNode):
                 return $this->makeLogicOperator($queryNode);
-            case is_a($queryNode, AbstractArrayOperatorNode::class, true):
+            case ($queryNode instanceOf AbstractArrayOperatorNode):
                 return $this->makeArrayOperator($queryNode);
-            case is_a($queryNode, BinaryOperatorNodeAbstract::class, true):
+            case ($queryNode instanceOf BinaryOperatorNodeAbstract):
                 return $this->makeBinaryOperator($queryNode);
             default:
-                throw new DataStoreException(
-                    'The Node type not suppoted: ' . $queryNode->getNodeName()
-                );
+                throw new DataStoreException('The Node type not suppoted: ' . $queryNode->getNodeName());
         }
     }
 
@@ -122,18 +109,22 @@ abstract class ConditionBuilderAbstract
     public function makeScalarOperator(AbstractScalarOperatorNode $node)
     {
         $nodeName = $node->getNodeName();
+
         if (!isset($this->literals['ScalarOperator'][$nodeName])) {
             throw new DataStoreException(
                 'The Scalar Operator not supported: ' . $nodeName
             );
         }
-        $value = $node->getValue() instanceof \DateTime ? $node->getValue()->format("Y-m-d") : $node->getValue();
+
+        $value = $node->getValue() instanceof \DateTime ? $node->getValue()
+            ->format("Y-m-d") : $node->getValue();
 
         $strQuery = $this->literals['ScalarOperator'][$nodeName]['before']
             . $this->prepareFieldName($node->getField())
             . $this->literals['ScalarOperator'][$nodeName]['between']
             . $this->prepareFieldValue($value)
             . $this->literals['ScalarOperator'][$nodeName]['after'];
+
         return $strQuery;
     }
 
@@ -160,7 +151,7 @@ abstract class ConditionBuilderAbstract
      */
     public function prepareFieldValue($fieldValue)
     {
-        if (is_a($fieldValue, 'Xiag\Rql\Parser\DataType\Glob', true)) {
+        if ($fieldValue instanceof Glob) {
             return $this->getValueFromGlob($fieldValue);
         } else {
             return $fieldValue;
@@ -184,6 +175,7 @@ abstract class ConditionBuilderAbstract
         $globProperty->setAccessible(true);
         $glob = $globProperty->getValue($globNode);
         $globProperty->setAccessible(false);
+
         return $glob;
     }
 
@@ -197,21 +189,25 @@ abstract class ConditionBuilderAbstract
     public function makeLogicOperator(AbstractLogicOperatorNode $node)
     {
         $nodeName = $node->getNodeName();
+
         if (!isset($this->literals['LogicOperator'][$nodeName])) {
             throw new DataStoreException(
                 'The Logic Operator not supported: ' . $nodeName
             );
         }
+
         $arrayQueries = $node->getQueries();
         $strQuery = $this->literals['LogicOperator'][$nodeName]['before'];
+
         foreach ($arrayQueries as $queryNode) {
             /* @var $queryNode AbstractQueryNode */
-            $strQuery = $strQuery
-                . $this->makeAbstractQueryOperator($queryNode)
+            $strQuery = $strQuery . $this->makeAbstractQueryOperator($queryNode)
                 . $this->literals['LogicOperator'][$nodeName]['between'];
         }
+
         $strQuery = rtrim($strQuery, $this->literals['LogicOperator'][$nodeName]['between']);
         $strQuery = $strQuery . $this->literals['LogicOperator'][$nodeName]['after'];
+
         return $strQuery;
     }
 
@@ -225,25 +221,27 @@ abstract class ConditionBuilderAbstract
     public function makeArrayOperator(AbstractArrayOperatorNode $node)
     {
         $nodeName = $node->getNodeName();
+
         if (!isset($this->literals['ArrayOperator'][$nodeName])) {
             throw new DataStoreException(
                 'The Array Operator not supported: ' . $nodeName
             );
         }
-        
+
         $arrayValues = $node->getValues();
         $strQuery = $this->literals['ArrayOperator'][$nodeName]['before']
-                    . $this->prepareFieldName($node->getField())
-                    . $this->literals['ArrayOperator'][$nodeName]['between'];
-        
+            . $this->prepareFieldName($node->getField())
+            . $this->literals['ArrayOperator'][$nodeName]['between'];
+
         foreach ($arrayValues as $value) {
             $strQuery = $strQuery
                 . $this->prepareFieldValue($value)
                 . $this->literals['ArrayOperator'][$nodeName]['delimiter'];
         }
+
         $strQuery = rtrim($strQuery, $this->literals['ArrayOperator'][$nodeName]['delimiter']);
         $strQuery = $strQuery . $this->literals['ArrayOperator'][$nodeName]['after'];
+
         return $strQuery;
     }
-
 }

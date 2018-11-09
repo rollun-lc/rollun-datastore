@@ -1,15 +1,10 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\Interfaces;
-
-use rollun\datastore\DataStore\Interfaces\ReadInterface;
 
 /**
  * Full Interface for DataStores
@@ -20,7 +15,6 @@ use rollun\datastore\DataStore\Interfaces\ReadInterface;
  */
 interface DataStoresInterface extends ReadInterface
 {
-
     /**
      * By default, insert new (by create) Item.
      *

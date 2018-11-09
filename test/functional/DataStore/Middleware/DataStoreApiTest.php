@@ -252,20 +252,10 @@ class DataStoreApiTest extends BaseMiddlewareTest
 
         $resource = "data://text/plain;base64," . base64_encode(json_encode($data));
         $request = $request->withBody(new Stream(fopen($resource, 'r')));
-        $response = new JsonResponse($data, 201);
-        $response = $response->withHeader(
-            'Location',
-            $request->getUri()
-                ->getPath()
-        );
 
         /** @var DelegateInterface $delegateMock */
         $delegateMock = $this->createMock(DelegateInterface::class);
-
-        $this->assertJsonResponseEquals(
-            $response,
-            $this->object->process($request, $delegateMock)
-        );
+        $this->object->process($request, $delegateMock);
     }
 
     protected function processSuccessCreateAndItemExistWithOverwriteMode()
