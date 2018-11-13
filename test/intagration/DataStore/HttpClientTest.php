@@ -82,7 +82,7 @@ class HttpClientTest extends BaseDataStoreTest
     protected function createObject(): DataStoresInterface
     {
         $dataStoreService = 'dbDataStore';
-        $url = getenv('HTTP_CLIENT_URL');
+        $url = getenv('HOST');
         $url .= "api/datastore/{$dataStoreService}";
         $client = new Client();
 

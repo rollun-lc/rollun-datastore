@@ -4,10 +4,10 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\rest\DataStore\Installers;
+namespace rollun\datastore\DataStore\Installers;
 
+use rollun\datastore\DataStore\Factory\HttpClientAbstractFactory;
 use rollun\installer\Install\InstallerAbstract;
-use rollun\rest\DataStore\Factory\HttpClientAbstractFactory;
 
 class HttpClientInstaller extends InstallerAbstract
 {

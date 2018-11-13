@@ -1016,7 +1016,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $resp = $this->object->query($query);
         $this->assertEquals(1, count($resp));
         //$this->assertEquals(4, $resp[0]['count(id)']);
-        $this->assertEquals(4, $resp[0]['id->count']);
+        $this->assertEquals(4, $resp[0]['count(id)']);
     }
 
     public function testSelectAggregateFunction_Max_True()
@@ -1028,7 +1028,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $resp = $this->object->query($query);
         $this->assertEquals(1, count($resp));
         // $this->assertEquals(4, $resp[0]['max(id)']);
-        $this->assertEquals(4, $resp[0]['id->max']);
+        $this->assertEquals(4, $resp[0]['max(id)']);
     }
 
     public function testSelectAggregateFunction_Min_True()
@@ -1040,7 +1040,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $resp = $this->object->query($query);
         $this->assertEquals(1, count($resp));
         //$this->assertEquals(1, $resp[0]['min(id)']);
-        $this->assertEquals(1, $resp[0]['id->min']);
+        $this->assertEquals(1, $resp[0]['min(id)']);
     }
 
     public function testSelectAggregateFunction_Sum_True()
@@ -1052,7 +1052,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $resp = $this->object->query($query);
         $this->assertEquals(1, count($resp));
         //$this->assertEquals(1, $resp[0]['min(id)']);
-        $this->assertEquals(10, $resp[0]['id->sum']);
+        $this->assertEquals(10, $resp[0]['sum(id)']);
     }
 
     public function testSelectAggregateFunction_Avg_True()
@@ -1064,7 +1064,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $resp = $this->object->query($query);
         $this->assertEquals(1, count($resp));
         //$this->assertEquals(1, $resp[0]['min(id)']);
-        $this->assertEquals(2.5, $resp[0]['id->avg']);
+        $this->assertEquals(2.5, $resp[0]['avg(id)']);
     }
 
     public function testSelectAggregateFunction_Combo_True()
@@ -1078,7 +1078,6 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $aggregateSumId = new AggregateFunctionNode('sum', 'id');
         $aggregateAvgId = new AggregateFunctionNode('avg', 'id');
 
-        $query->setLimit(new Node\LimitNode(2, 1));
         $query->setQuery(new ScalarOperator\EqNode('fString', 'val2'));
         $query->setSelect(new AggregateSelectNode([
             $aggregateCount,
@@ -1092,13 +1091,13 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(1, count($resp));
 
-        $this->assertEquals(2, $resp[0]['id->count']);
+        $this->assertEquals(3, $resp[0]['count(id)']);
         //$this->assertEquals(2, $resp[0]['count(id)']);
-        $this->assertEquals(4, $resp[0]['id->max']);
+        $this->assertEquals(4, $resp[0]['max(id)']);
         //$this->assertEquals(4, $resp[0]['max(id)']);
-        $this->assertEquals(3, $resp[0]['id->min']);
-        $this->assertEquals(7, $resp[0]['id->sum']);
-        $this->assertEquals(3.5, $resp[0]['id->avg']);
+        $this->assertEquals(2, $resp[0]['min(id)']);
+        $this->assertEquals(9, $resp[0]['sum(id)']);
+        $this->assertEquals(3.0000, $resp[0]['avg(id)']);
         //$this->assertEquals(3, $resp[0]['min(id)']);
         //$this->assertEquals(40, $resp[0]['anotherId']);
     }
@@ -1119,8 +1118,8 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->object->query(new RqlQuery("select(count(id),fString)&groupby(fString)"));
         $this->assertEquals(2, count($result));
-        $this->assertEquals(['fString' => 'val1', 'id->count' => 1], $result[0]);
-        $this->assertEquals(['fString' => 'val2', 'id->count' => 3], $result[1]);
+        $this->assertEquals(['fString' => 'val1', 'count(id)' => 1], $result[0]);
+        $this->assertEquals(['fString' => 'val2', 'count(id)' => 3], $result[1]);
     }
 
     /* ######################### GROUP BY ################################ */
@@ -1131,8 +1130,8 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->object->query(new RqlQuery("select(id,fString)&groupby(fString)"));
         $this->assertEquals(2, count($result));
-        $this->assertEquals(['fString' => 'val1', 'id->count' => 1], $result[0]);
-        $this->assertEquals(['fString' => 'val2', 'id->count' => 3], $result[1]);
+        $this->assertEquals(['fString' => 'val1', 'count(id)' => 1], $result[0]);
+        $this->assertEquals(['fString' => 'val2', 'count(id)' => 3], $result[1]);
     }
 
     public function test_testGroupByTwoColumns()
@@ -1154,23 +1153,23 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->object->query(new RqlQuery("select(count(surname),max(age))&groupby(surname,age)"));
         $expected = [
-            ['age->max' => 44, 'surname->count' => 1],
-            ['age->max' => 30, 'surname->count' => 1],
-            ['age->max' => 25, 'surname->count' => 2],
-            ['age->max' => 44, 'surname->count' => 1],
-            ['age->max' => 10, 'surname->count' => 2],
-            ['age->max' => 20, 'surname->count' => 1],
-            ['age->max' => 30, 'surname->count' => 2],
+            ['max(age)' => 44, 'count(surname)' => 1],
+            ['max(age)' => 30, 'count(surname)' => 1],
+            ['max(age)' => 25, 'count(surname)' => 2],
+            ['max(age)' => 44, 'count(surname)' => 1],
+            ['max(age)' => 10, 'count(surname)' => 2],
+            ['max(age)' => 20, 'count(surname)' => 1],
+            ['max(age)' => 30, 'count(surname)' => 2],
         ];
 
         $sort = function ($item0, $item1) {
-            if ($item0['age->max'] === $item1['age->max']) {
-                if ($item0['surname->count'] === $item1['surname->count']) {
+            if ($item0['max(age)'] === $item1['max(age)']) {
+                if ($item0['count(surname)'] === $item1['count(surname)']) {
                     return 0;
                 }
-                return ($item0['surname->count'] < $item1['surname->count']) ? -1 : 1;
+                return ($item0['count(surname)'] < $item1['count(surname)']) ? -1 : 1;
             }
-            return ($item0['age->max'] < $item1['age->max']) ? -1 : 1;
+            return ($item0['max(age)'] < $item1['max(age)']) ? -1 : 1;
         };
         $expected = uasort($expected, $sort);
         $result = uasort($result, $sort);
