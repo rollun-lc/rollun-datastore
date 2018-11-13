@@ -7,10 +7,10 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rollun\test\datastore\DataStore;
+namespace rollun\test\DataStoreTest\DataStore;
 
 use rollun\datastore\Rql\RqlQuery;
-use rollun\test\datastore\DataStore\AbstractTest;
+use rollun\test\DataStoreTest\DataStore\AbstractTest;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Http\Client;

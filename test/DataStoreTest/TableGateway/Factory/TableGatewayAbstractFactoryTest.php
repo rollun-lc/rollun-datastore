@@ -1,6 +1,6 @@
 <?php
 
-namespace rollun\test\datastore\TableGateway\Factory;
+namespace rollun\test\DataStoreTest\TableGateway\Factory;
 
 use Interop\Container\ContainerInterface;
 use rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory;

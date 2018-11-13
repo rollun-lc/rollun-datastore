@@ -1,8 +1,8 @@
 <?php
 
-namespace rollun\test\datastore\DataStore\Aspect;
+namespace rollun\test\DataStoreTest\DataStore\Aspect;
 
-use rollun\test\datastore\DataStore\AbstractTest;
+use rollun\test\DataStoreTest\DataStore\AbstractTest;
 
 class AspectTest extends AbstractTest
 {

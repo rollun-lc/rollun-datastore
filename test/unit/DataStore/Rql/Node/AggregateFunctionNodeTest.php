@@ -1,6 +1,6 @@
 <?php
 
-namespace test\unit\DataStore\Rql\Node;
+namespace rollun\test\unit\DataStore\Rql\Node;
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;

@@ -1,6 +1,6 @@
 <?php
 
-namespace rollun\test\datastore\Middleware;
+namespace rollun\test\DataStoreTest\Middleware;
 
 use rollun\datastore\Middleware\ResourceResolver;
 use Zend\Diactoros\Response;

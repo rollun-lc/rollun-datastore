@@ -3,6 +3,8 @@ global $argv;
 
 error_reporting(E_ALL | E_STRICT);
 
+PHPUnit_Framework_Error_Deprecated::$enabled = false;
+
 // Change to the project root, to simplify resolving paths
 chdir(dirname(__DIR__));
 

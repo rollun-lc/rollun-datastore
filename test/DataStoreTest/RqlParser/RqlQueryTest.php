@@ -7,7 +7,7 @@
  * Time: 10:51 AM
  */
 
-namespace rollun\test\datastore\RqlParser;
+namespace rollun\test\DataStoreTest\RqlParser;
 
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;

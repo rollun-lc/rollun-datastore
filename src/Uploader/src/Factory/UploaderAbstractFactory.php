@@ -1,18 +1,21 @@
 <?php
-
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
 namespace rollun\uploader\Callback\Factory;
 
-
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use rollun\uploader\Uploader;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 
+/**
+ * Class UploaderAbstractFactory
+ * @package rollun\uploader\Callback\Factory
+ */
 class UploaderAbstractFactory implements AbstractFactoryInterface
 {
     const KEY = UploaderAbstractFactory::class;
@@ -37,20 +40,15 @@ class UploaderAbstractFactory implements AbstractFactoryInterface
         } catch (ContainerExceptionInterface $e) {
             return false;
         }
-        return (
-        isset($config[static::KEY][$requestedName])
-        );
+
+        return (isset($config[static::KEY][$requestedName]));
     }
 
     /**
-     * Create an object
-     *
-     * @param  ContainerInterface $container
-     * @param  string $requestedName
-     * @param  null|array $options
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     * @param array|null $options
      * @return Uploader
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
@@ -58,6 +56,7 @@ class UploaderAbstractFactory implements AbstractFactoryInterface
         $serviceConfig = $config[static::KEY][$requestedName];
         $sourceDataIteratorAggregator = $container->get($serviceConfig[static::KEY_SOURCE_DATA_ITERATOR_AGGREGATOR]);
         $destinationDataStore = $container->get($serviceConfig[static::KEY_DESTINATION_DATA_STORE]);
+
         return new Uploader($sourceDataIteratorAggregator, $destinationDataStore);
     }
 }

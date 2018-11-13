@@ -18,7 +18,7 @@ abstract class ConditionBuilderTest extends TestCase
 
     abstract public function providerGetValueFromGlob();
 
-    abstract public function provider__invoke();
+    abstract public function providerInvoke();
 
     /**
      * @dataProvider providerPrepareFieldName
@@ -46,14 +46,13 @@ abstract class ConditionBuilderTest extends TestCase
     }
 
     /**
-     * @dataProvider provider__invoke
+     * @dataProvider providerInvoke
      * @param $rootQueryNode
      * @param $out
      */
-    public function test__invoke($rootQueryNode, $out)
+    public function testInvoke($rootQueryNode, $out)
     {
-        $condition = $this->createObject()
-            ->__invoke($rootQueryNode);
+        $condition = $this->createObject()->__invoke($rootQueryNode);
         $this->assertEquals($out, $condition);
     }
 }

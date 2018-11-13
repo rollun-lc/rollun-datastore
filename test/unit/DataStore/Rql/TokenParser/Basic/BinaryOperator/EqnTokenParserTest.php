@@ -1,6 +1,6 @@
 <?php
 
-namespace test\unit\DataStore\Rql\TokenParser\Basic\BinaryOperator;
+namespace rollun\test\unit\DataStore\Rql\TokenParser\Basic\BinaryOperator;
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;

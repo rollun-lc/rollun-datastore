@@ -58,7 +58,7 @@ class SqlConditionBuilderTest extends ConditionBuilderTest
         ];
     }
 
-    public function provider__invoke()
+    public function providerInvoke()
     {
         return [
             [null, "'1' = '1'"],

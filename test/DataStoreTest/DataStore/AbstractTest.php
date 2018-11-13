@@ -7,7 +7,7 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rollun\test\datastore\DataStore;
+namespace rollun\test\DataStoreTest\DataStore;
 
 use DateTime;
 use Interop\Container\ContainerInterface;

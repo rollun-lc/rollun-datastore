@@ -4,7 +4,7 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace test\unit\DataStore\DataStore\Aspect;
+namespace rollun\test\unit\DataStore\DataStore\Aspect;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;

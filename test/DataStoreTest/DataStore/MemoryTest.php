@@ -6,7 +6,7 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rollun\test\datastore\DataStore;
+namespace rollun\test\DataStoreTest\DataStore;
 
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Memory;

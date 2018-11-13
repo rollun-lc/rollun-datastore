@@ -7,7 +7,7 @@
  * Time: 12:59
  */
 
-namespace rollun\test\datastore\DataStore\ConditionBuilder;
+namespace rollun\test\DataStoreTest\DataStore\ConditionBuilder;
 
 use rollun\datastore\Rql\Node\AlikeGlobNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqfNode;

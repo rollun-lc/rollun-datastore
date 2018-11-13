@@ -1,6 +1,6 @@
 <?php
 
-namespace rollun\test\datastore\TableGateway\Factory;
+namespace rollun\test\DataStoreTest\TableGateway\Factory;
 
 use rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory;
 use rollun\datastore\TableGateway\TableManagerMysql;

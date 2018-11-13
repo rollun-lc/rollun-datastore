@@ -6,7 +6,7 @@
  * Time: 14:08
  */
 
-namespace rollun\test\datastore\DataStore\Factory;
+namespace rollun\test\DataStoreTest\DataStore\Factory;
 
 class CacheableStoreAbstractFactoryTest extends \PHPUnit_Framework_TestCase
 {

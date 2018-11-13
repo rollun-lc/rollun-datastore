@@ -7,7 +7,7 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace rollun\test\datastore\DataStore\ConditionBuilder;
+namespace rollun\test\DataStoreTest\DataStore\ConditionBuilder;
 
 use Xiag\Rql\Parser\DataType\Glob;
 

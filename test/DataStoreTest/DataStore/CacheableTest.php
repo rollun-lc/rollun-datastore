@@ -6,7 +6,7 @@
  * Time: 12:32
  */
 
-namespace rollun\test\datastore\DataStore;
+namespace rollun\test\DataStoreTest\DataStore;
 
 use rollun\datastore\DataSource\DbTableDataSource;
 use rollun\datastore\DataStore\Cacheable;

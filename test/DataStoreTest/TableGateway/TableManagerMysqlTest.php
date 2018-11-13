@@ -1,6 +1,6 @@
 <?php
 
-namespace rollun\test\datastore\TableGateway;
+namespace rollun\test\DataStoreTest\TableGateway;
 
 use rollun\datastore\TableGateway\TableManagerMysql;
 use Zend\Db\Adapter\Adapter;

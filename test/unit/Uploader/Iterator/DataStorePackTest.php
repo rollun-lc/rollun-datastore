@@ -2,6 +2,7 @@
 
 namespace rollun\test\uploader\Uploader;
 
+use PHPUnit_Framework_Error_Deprecated;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Memory;
 use rollun\uploader\Iterator\DataStorePack as DataStorePackIterator;
@@ -18,13 +19,18 @@ class DataStorePackTest extends TestCase
 
     public function setUp()
     {
+        PHPUnit_Framework_Error_Deprecated::$enabled = false;
         $this->dataStore = new Memory();
+
         foreach (range(1, 10) as $num) {
-            $this->dataStore->create([
-                "id" => $num,
-                "name" => "name$num"
-            ]);
+            $this->dataStore->create(
+                [
+                    "id" => $num,
+                    "name" => "name$num",
+                ]
+            );
         }
+
         $this->object = new DataStorePackIterator($this->dataStore);
     }
 
@@ -35,8 +41,6 @@ class DataStorePackTest extends TestCase
         $this->assertEquals($expected, $item);
     }
 
-    /**
-     */
     public function testSeek()
     {
         foreach ($this->dataStore->query(new Query()) as $expected) {

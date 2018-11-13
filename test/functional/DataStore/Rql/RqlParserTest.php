@@ -1,15 +1,12 @@
 <?php
-
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 06.06.16
- * Time: 17:01
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
-namespace rollun\test\datastore\RqlParser;
+namespace rollun\test\DataStoreTest\RqlParser;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node\AlikeGlobNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
@@ -35,14 +32,14 @@ use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
 use rollun\datastore\Rql\RqlParser;
 
-class RqlParserTest extends PHPUnit_Framework_TestCase
+class RqlParserTest extends TestCase
 {
-
     /** @var  RqlParser */
     private $object;
 
     /** @var  Query */
     private $queryObject;
+
     private $rqlString;
 
     public function setUp()
@@ -50,32 +47,42 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
         $this->queryObject = new RqlQuery();
 
         $this->queryObject->setQuery(
-            new AndNode([
-                new AndNode([
-                    new EqNode('q', null),
-                    new NeNode('q', null),
-                    new LeNode('q', 'r'),
-                    new GeNode('q', 'u'),
-                    new EqnNode('a'),
-                    new EqfNode('b'),
-                    new EqtNode('c'),
-                    new AlikeGlobNode('d', '*abc?'),
-                    new IeNode('f'),
-                ]),
-                new OrNode([
-                    new LtNode('q', 't'),
-                    new GtNode('q', 'y'),
-                    new InNode('q', ['a', 's', 'd', 'f', 'g'])
-                ])
-            ])
+            new AndNode(
+                [
+                    new AndNode(
+                        [
+                            new EqNode('q', null),
+                            new NeNode('q', null),
+                            new LeNode('q', 'r'),
+                            new GeNode('q', 'u'),
+                            new EqnNode('a'),
+                            new EqfNode('b'),
+                            new EqtNode('c'),
+                            new AlikeGlobNode('d', '*abc?'),
+                            new IeNode('f'),
+                        ]
+                    ),
+                    new OrNode(
+                        [
+                            new LtNode('q', 't'),
+                            new GtNode('q', 'y'),
+                            new InNode('q', ['a', 's', 'd', 'f', 'g']),
+                        ]
+                    ),
+                ]
+            )
         );
 
-        $this->queryObject->setSelect(new AggregateSelectNode([
-            'q',
-            (new AggregateFunctionNode('max', 'q')),
-            (new AggregateFunctionNode('min', 'q')),
-            (new AggregateFunctionNode('count', 'q')),
-        ]));
+        $this->queryObject->setSelect(
+            new AggregateSelectNode(
+                [
+                    'q',
+                    (new AggregateFunctionNode('max', 'q')),
+                    (new AggregateFunctionNode('min', 'q')),
+                    (new AggregateFunctionNode('count', 'q')),
+                ]
+            )
+        );
 
         $this->queryObject->setSort(new SortNode(['q' => -1, 'w' => 1, 'e' => 1]));
         $this->queryObject->setLimit(new LimitNode(20, 30));
@@ -114,52 +121,50 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
 
     public function testRqlEncodeStringNodeEq()
     {
-//                $query = new Query();
-//        $query->setQuery(
-//                new EqNode("a", "01")
-//        );
         $queryObject = RqlParser::rqlDecode("eq(a,string:01)");
         $rqlString = RqlParser::rqlEncode($queryObject);
         $this->assertEquals("eq(a,string:01)", $rqlString);
     }
 
-    public function test__preparingQuery__oneNode()
+    public function testPreparingQueryOneNode()
     {
         $rqlString = RqlParser::rqlDecode("eq(email,aaa@gmail.com)");
         $query = new RqlQuery();
         $query->setQuery(new EqNode('email', 'aaa@gmail.com'));
-
-
         $this->assertEquals($query, $rqlString);
     }
 
-    public function test__preparingQuery__inNode()
+    public function testPreparingQueryInNode()
     {
         $rqlString = RqlParser::rqlDecode("in(email,(aaa@gmail.com,qwe,zxc))");
         $query = new RqlQuery();
         $query->setQuery(new InNode('email', ['aaa@gmail.com', 'qwe', 'zxc']));
-
-
         $this->assertEquals($query, $rqlString);
     }
 
-    public function test__preparingQuery__insertedQuery()
+    public function testPreparingQueryInsertedQuery()
     {
         $rqlString = RqlParser::rqlDecode('and(eq(email,aaa@gmail.com),or(le(age,1\,4),ge(age,1\.8)),ne(name,q1$3))');
         $query = new RqlQuery();
-        $query->setQuery(new AndNode([
-            new EqNode('email', 'aaa@gmail.com'),
-            new OrNode([
-                new LeNode('age', '1,4'),
-                new GeNode('age', '1.8'),
-                    ]),
-            new NeNode('name', 'q1$3'),
-        ]));
+        $query->setQuery(
+            new AndNode(
+                [
+                    new EqNode('email', 'aaa@gmail.com'),
+                    new OrNode(
+                        [
+                            new LeNode('age', '1,4'),
+                            new GeNode('age', '1.8'),
+                        ]
+                    ),
+                    new NeNode('name', 'q1$3'),
+                ]
+            )
+        );
 
         $this->assertEquals($query, $rqlString);
     }
 
-    public function test__preparingQuery__withSelect()
+    public function testPreparingQueryWithSelect()
     {
         $rqlString = RqlParser::rqlDecode("eq(email,aaa@gmail.com)&select(name,age,email)");
         $query = new RqlQuery();
@@ -169,7 +174,7 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($query, $rqlString);
     }
 
-    public function test__preparingQuery__fullQuery()
+    public function testPreparingQueryFullQuery()
     {
         $rqlString = RqlParser::rqlDecode("eq(email,aaa@gmail.com)&limit(10,15)&sort(-name)&select(name,age,email)");
         $query = new RqlQuery();
@@ -181,7 +186,7 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($query, $rqlString);
     }
 
-    public function test__groupbyOnly()
+    public function testGroupbyOnly()
     {
         $queryByString = RqlParser::rqlDecode("groupby(id)");
         $query = new RqlQuery();
@@ -189,23 +194,31 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($query, $queryByString);
     }
 
-    public function test__groupbyWithQuery()
+    public function testGroupbyWithQuery()
     {
-        $queryByString = RqlParser::rqlDecode('and(eq(email,aaa@gmail.com),or(le(age,1\,4),ge(age,1\.8)),ne(name,q1$3))&groupby(id)');
+        $queryByString = RqlParser::rqlDecode(
+            'and(eq(email,aaa@gmail.com),or(le(age,1\,4),ge(age,1\.8)),ne(name,q1$3))&groupby(id)'
+        );
         $query = new RqlQuery();
-        $query->setQuery(new AndNode([
-            new EqNode('email', 'aaa@gmail.com'),
-            new OrNode([
-                new LeNode('age', '1,4'),
-                new GeNode('age', '1.8'),
-                    ]),
-            new NeNode('name', 'q1$3'),
-        ]));
+        $query->setQuery(
+            new AndNode(
+                [
+                    new EqNode('email', 'aaa@gmail.com'),
+                    new OrNode(
+                        [
+                            new LeNode('age', '1,4'),
+                            new GeNode('age', '1.8'),
+                        ]
+                    ),
+                    new NeNode('name', 'q1$3'),
+                ]
+            )
+        );
         $query->setGroupBy(new GroupByNode(['id']));
         $this->assertEquals($query, $queryByString);
     }
 
-    public function test__containsOnly()
+    public function testContainsOnly()
     {
         $queryByString = RqlParser::rqlDecode("contains(id,1v23)");
         $query = new RqlQuery();
@@ -213,7 +226,7 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($query, $queryByString);
     }
 
-    public function test__matchOnly()
+    public function testMatchOnly()
     {
         $queryByString = RqlParser::rqlDecode("match(id,1v23)");
         $query = new RqlQuery();
@@ -221,7 +234,7 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($query, $queryByString);
     }
 
-    public function testSpecCharSuccess()
+    public function testSpecialCharsSuccess()
     {
         $this->object = new Query();
         $this->object->setQuery(new EqNode("name", "asd(asd)asd"));
@@ -233,6 +246,7 @@ class RqlParserTest extends PHPUnit_Framework_TestCase
     public function testArrayNode()
     {
         $values = [];
+
         foreach (range(0, 100) as $index) {
             $values[] = "asd(a{$index}d)asd";
             $this->object = new Query();

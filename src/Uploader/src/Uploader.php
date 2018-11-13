@@ -1,14 +1,18 @@
 <?php
-
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
 namespace rollun\uploader;
 
 use IteratorAggregate;
-use rollun\callback\Callback\CallbackInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
-use rollun\dic\InsideConstruct;
-use rollun\uploader\SeekableIterator;
 
+/**
+ * Class Uploader
+ * @package rollun\uploader
+ */
 class Uploader
 {
     /**
@@ -42,9 +46,11 @@ class Uploader
     public function upload()
     {
         $iterator = $this->sourceDataIteratorAggregator->getIterator();
+
         if (isset($this->key) && $iterator instanceof SeekableIterator) {
             $iterator->seek($this->key); //set iterator to last position.
         }
+
         foreach ($iterator as $key => $value) {
             $this->key = $key;
             $this->destinationDataStore->create($value, true);
@@ -52,7 +58,7 @@ class Uploader
     }
 
     /**
-     * @param $v
+     * @param null $v
      */
     public function __invoke($v = null)
     {

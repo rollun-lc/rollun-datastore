@@ -1,7 +1,12 @@
 <?php
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
-namespace rollun\test\uploader\Uploader;
+namespace rollun\test\unit\Uploader;
 
+use PHPUnit_Framework_Error_Deprecated;
 use rollun\datastore\DataStore\Memory;
 use rollun\uploader\Uploader;
 use PHPUnit\Framework\TestCase;
@@ -20,29 +25,25 @@ class UploaderTest extends TestCase
 
     public function setUp()
     {
+        PHPUnit_Framework_Error_Deprecated::$enabled = false;
         $this->inMemDataStore = new Memory();
         $this->outMemDataStore = new Memory();
         $this->object = new Uploader($this->outMemDataStore, $this->inMemDataStore);
     }
 
-
     /**
-     *
+     * @return array
      */
     public function outDataProvider()
     {
         return [
-            [
-                [
-
-                ]
-            ],
+            [[]],
             [
                 [
                     ["id" => 1, "name" => "name1"],
                     ["id" => 2, "name" => "name2"],
                     ["id" => 3, "name" => "name3"],
-                ]
+                ],
             ],
         ];
     }
@@ -57,23 +58,21 @@ class UploaderTest extends TestCase
         foreach ($outData as $datum) {
             $this->outMemDataStore->create($datum);
         }
+
         $this->object->upload();
-        $this->assertEquals(
-            $this->outMemDataStore->query(new Query()),
-            $this->inMemDataStore->query(new Query())
-        );
+        $this->assertEquals($this->outMemDataStore->query(new Query()), $this->inMemDataStore->query(new Query()));
     }
 
-    /**
-     *
-     */
-    public function test__sleep()
+    public function testDleep()
     {
         $result = $this->object->__sleep();
-        $this->assertEquals([
-            "iteratorAggregate",
-            "destinationDataStore",
-            "key",
-        ], $result);
+        $this->assertEquals(
+            [
+                "iteratorAggregate",
+                "destinationDataStore",
+                "key",
+            ],
+            $result
+        );
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace test\unit\DataStore\Rql;
+namespace rollun\test\unit\DataStore\Rql;
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node\BinaryNode\EqtNode;

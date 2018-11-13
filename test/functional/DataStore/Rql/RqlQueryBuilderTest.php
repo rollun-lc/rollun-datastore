@@ -1,6 +1,10 @@
 <?php
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
-namespace test\functional\DataStore\Rql;
+namespace rollun\test\functional\DataStore\Rql;
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node;

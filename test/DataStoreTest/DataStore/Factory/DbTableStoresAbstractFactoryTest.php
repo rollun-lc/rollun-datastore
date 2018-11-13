@@ -1,6 +1,6 @@
 <?php
 
-namespace rollun\test\datastore\DataStore\Factory;
+namespace rollun\test\DataStoreTest\DataStore\Factory;
 
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore;

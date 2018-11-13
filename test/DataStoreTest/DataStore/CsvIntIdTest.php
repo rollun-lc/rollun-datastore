@@ -1,8 +1,8 @@
 <?php
 
-namespace rollun\test\datastore\DataStore;
+namespace rollun\test\DataStoreTest\DataStore;
 
-use rollun\test\datastore\DataStore\CsvBaseTest;
+use rollun\test\DataStoreTest\DataStore\CsvBaseTest;
 
 class CsvIntIdTest extends CsvBaseTest
 {

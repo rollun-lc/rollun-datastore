@@ -1,6 +1,6 @@
 <?php
 
-namespace test\unit\DataStore\Rql\TokenParser\Fiql\ScalarOperator;
+namespace rollun\test\unit\DataStore\Rql\TokenParser\Fiql\ScalarOperator;
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;

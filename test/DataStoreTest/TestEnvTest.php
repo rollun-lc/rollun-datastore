@@ -6,7 +6,7 @@
  * Time: 1:57 PM
  */
 
-namespace rollun\test\datastore;
+namespace rollun\test\DataStoreTest;
 
 class TestEnvTest extends \PHPUnit_Framework_TestCase
 {

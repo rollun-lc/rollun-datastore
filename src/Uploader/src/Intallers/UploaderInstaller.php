@@ -1,20 +1,16 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 13.03.17
- * Time: 11:32
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\uploader\Installers;
 
-use rollun\datastore\DataStore\Factory\CsvAbstractFactory;
 use rollun\installer\Install\InstallerAbstract;
 use rollun\uploader\Callback\Factory\UploaderAbstractFactory;
 
 class UploaderInstaller extends InstallerAbstract
 {
-
     /**
      * install
      * @return array
@@ -26,7 +22,7 @@ class UploaderInstaller extends InstallerAbstract
                 'abstract_factories' => [
                     UploaderAbstractFactory::class,
                 ],
-            ]
+            ],
         ];
     }
 
@@ -52,13 +48,15 @@ class UploaderInstaller extends InstallerAbstract
             default:
                 $description = "Does not exist.";
         }
+
         return $description;
     }
 
     public function isInstall()
     {
         $config = $this->container->get('config');
-        return (isset($config['dependencies']['abstract_factories']) &&
-            in_array(UploaderAbstractFactory::class, $config['dependencies']['abstract_factories']));
+
+        return (isset($config['dependencies']['abstract_factories'])
+            && in_array(UploaderAbstractFactory::class, $config['dependencies']['abstract_factories']));
     }
 }
