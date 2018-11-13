@@ -329,7 +329,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     public function getAll()
     {
         if (filesize($this->filename) <= static::MAX_FILE_SIZE_FOR_CACHE) {
-            $return = $this->query(new Query);
+            $return = $this->query(new Query());
         } else {
             $return = $this->getIterator();
         }

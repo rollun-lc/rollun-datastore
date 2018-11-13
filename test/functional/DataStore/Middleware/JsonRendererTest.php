@@ -17,7 +17,7 @@ class JsonRendererTest extends BaseMiddlewareTest
     public function testProcessSuccessWithoutResponseInAttribute()
     {
         $request = new ServerRequest();
-        $response = new JsonResponse('', 200, ['content-type' => 'application/json']);
+        $response = new JsonResponse(null, 200, ['content-type' => 'application/json']);
 
         $object = new JsonRenderer();
 

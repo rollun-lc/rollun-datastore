@@ -1,4 +1,8 @@
 <?php
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
 namespace rollun\datastore\DataStore\Aspect;
 
@@ -42,7 +46,6 @@ class AspectAbstract implements DataStoresInterface
     }
 
     /**
-     * {@inheritdoc}
      *
      * {@inheritdoc}
      */
@@ -50,6 +53,7 @@ class AspectAbstract implements DataStoresInterface
     {
         $this->preGetIterator();
         $iterator = $this->dataStore->getIterator();
+
         return $this->postGetIterator($iterator);
     }
 
@@ -89,6 +93,7 @@ class AspectAbstract implements DataStoresInterface
     {
         $newData = $this->preCreate($itemData, $rewriteIfExist);
         $result = $this->dataStore->create($newData, $rewriteIfExist);
+
         return $this->postCreate($result, $newData, $rewriteIfExist);
     }
 
@@ -130,6 +135,7 @@ class AspectAbstract implements DataStoresInterface
     {
         $newData = $this->preUpdate($itemData, $createIfAbsent);
         $result = $this->dataStore->update($newData, $createIfAbsent);
+
         return $this->postUpdate($result, $newData, $createIfAbsent);
     }
 
@@ -168,6 +174,7 @@ class AspectAbstract implements DataStoresInterface
     {
         $this->preDelete($id);
         $result = $this->dataStore->delete($id);
+
         return $this->postDelete($result, $id);
     }
 
@@ -203,6 +210,7 @@ class AspectAbstract implements DataStoresInterface
     {
         $this->preDeleteAll();
         $result = $this->dataStore->deleteAll();
+
         return $this->postDeleteAll($result);
     }
 
@@ -237,6 +245,7 @@ class AspectAbstract implements DataStoresInterface
     {
         $this->preGetIdentifier();
         $result = $this->dataStore->getIdentifier();
+
         return $this->postGetIdentifier($result);
     }
 
@@ -273,6 +282,7 @@ class AspectAbstract implements DataStoresInterface
     {
         $this->preRead($id);
         $result = $this->dataStore->read($id);
+
         return $this->postRead($result, $id);
     }
 
@@ -311,6 +321,7 @@ class AspectAbstract implements DataStoresInterface
         $this->preHas($id);
         $result = $this->dataStore->has($id);
         $this->postHas($result, $id);
+
         return $result;
     }
 
@@ -350,8 +361,8 @@ class AspectAbstract implements DataStoresInterface
     {
         $newQuery = $this->preQuery($query);
         $result = $this->dataStore->query($newQuery);
-        return $this->postQuery($result, $newQuery);
 
+        return $this->postQuery($result, $newQuery);
     }
 
     /**
@@ -386,6 +397,7 @@ class AspectAbstract implements DataStoresInterface
     {
         $this->preCount();
         $result = $this->dataStore->count();
+
         return $this->postCount($result);
     }
 

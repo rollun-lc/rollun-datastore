@@ -33,7 +33,7 @@ class JsonRenderer implements MiddlewareInterface
     public function process(ServerRequestInterface $request, DelegateInterface $delegate)
     {
         $data = $request->getAttribute(static::RESPONSE_DATA);
-        $data = !empty($data) ? $data : '';
+        $data = !empty($data) ? $data : null;
 
         /** @var ResponseInterface $response */
         $response = $request->getAttribute(ResponseInterface::class) ?: null;

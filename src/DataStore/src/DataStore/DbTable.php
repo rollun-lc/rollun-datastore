@@ -115,8 +115,6 @@ class DbTable extends DataStoreAbstract
             $result = $this->updateItem($itemData, $createIfAbsent);
             $adapter->getDriver()->getConnection()->commit();
         } catch (\Throwable $e) {
-
-
             $adapter->getDriver()->getConnection()->rollback();
             throw new DataStoreException("Can't update item. {$e->getMessage()}", 0, $e);
         }
@@ -290,7 +288,9 @@ class DbTable extends DataStoreAbstract
             $multiInsertTableGw->getAdapter()->getDriver()->getConnection()->rollback();
 
             throw new DataStoreException(
-                "Exception by multi create to table {$this->dbTable->table}.", 500, $throwable
+                "Exception by multi create to table {$this->dbTable->table}.",
+                500,
+                $throwable
             );
         }
 

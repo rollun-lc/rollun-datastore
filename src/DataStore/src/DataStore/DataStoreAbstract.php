@@ -134,10 +134,8 @@ abstract class DataStoreAbstract implements DataStoresInterface
         $conditionBuilder = $this->conditionBuilder;
         $condition = $conditionBuilder($query->getQuery());
 
-        $whereFunctionBody = PHP_EOL . '$result = ' . PHP_EOL . rtrim(
-                $condition,
-                PHP_EOL
-            ) . ';' . PHP_EOL . 'return $result;';
+        $whereFunctionBody = PHP_EOL . '$result = ' . PHP_EOL
+            . rtrim($condition, PHP_EOL) . ';' . PHP_EOL . 'return $result;';
 
         $whereFunction = create_function('$item', $whereFunctionBody);
         $suitableItemsNumber = 0;
@@ -261,68 +259,71 @@ abstract class DataStoreAbstract implements DataStoresInterface
                 if ($fieldNode instanceof AggregateFunctionNode) {
                     switch ($fieldNode->getFunction()) {
                         case 'count':
-                            {
-                                $arr = [];
-                                foreach ($data as $item) {
-                                    if (isset($item[$fieldNode->getField()])) {
-                                        $arr[] = $item[$fieldNode->getField()];
-                                    }
+                            $arr = [];
+
+                            foreach ($data as $item) {
+                                if (isset($item[$fieldNode->getField()])) {
+                                    $arr[] = $item[$fieldNode->getField()];
                                 }
-                                $compareArray[$fieldNode->__toString()] = [count($arr)];
-                                break;
                             }
+
+                            $compareArray[$fieldNode->__toString()] = [count($arr)];
+                            break;
                         case 'max':
-                            {
-                                $firstItem = array_pop($data);
-                                $max = $firstItem[$fieldNode->getField()];
-                                foreach ($data as $item) {
-                                    $max = $max < $item[$fieldNode->getField()] ? $item[$fieldNode->getField()] : $max;
-                                }
-                                array_push($data, $firstItem);
-                                $compareArray[$fieldNode->__toString()] = [$max];
-                                break;
+                            $firstItem = array_pop($data);
+                            $max = $firstItem[$fieldNode->getField()];
+
+                            foreach ($data as $item) {
+                                $max = $max < $item[$fieldNode->getField()] ? $item[$fieldNode->getField()] : $max;
                             }
+
+                            array_push($data, $firstItem);
+                            $compareArray[$fieldNode->__toString()] = [$max];
+                            break;
                         case 'min':
-                            {
-                                $firstItem = array_pop($data);
-                                $min = $firstItem[$fieldNode->getField()];
-                                foreach ($data as $item) {
-                                    $min = $min > $item[$fieldNode->getField()] ? $item[$fieldNode->getField()] : $min;
-                                }
-                                array_push($data, $firstItem);
-                                $compareArray[$fieldNode->__toString()] = [$min];
-                                break;
+                            $firstItem = array_pop($data);
+                            $min = $firstItem[$fieldNode->getField()];
+
+                            foreach ($data as $item) {
+                                $min = $min > $item[$fieldNode->getField()] ? $item[$fieldNode->getField()] : $min;
                             }
+
+                            array_push($data, $firstItem);
+                            $compareArray[$fieldNode->__toString()] = [$min];
+                            break;
                         case 'sum':
-                            {
-                                $sum = 0;
-                                foreach ($data as $item) {
-                                    $sum += isset($item[$fieldNode->getField()]) ? $item[$fieldNode->getField()] : 0;
-                                }
-                                $compareArray[$fieldNode->__toString()] = [$sum];
-                                break;
+                            $sum = 0;
+
+                            foreach ($data as $item) {
+                                $sum += isset($item[$fieldNode->getField()]) ? $item[$fieldNode->getField()] : 0;
                             }
+
+                            $compareArray[$fieldNode->__toString()] = [$sum];
+                            break;
                         case 'avg':
-                            {
-                                $sum = 0;
-                                $count = 0;
-                                foreach ($data as $item) {
-                                    $sum += isset($item[$fieldNode->getField()]) ? $item[$fieldNode->getField()] : 0;
-                                    $count += isset($item[$fieldNode->getField()]) ? 1 : 0;
-                                }
-                                $compareArray[$fieldNode->__toString()] = [$sum / $count];
-                                break;
+                            $sum = 0;
+                            $count = 0;
+
+                            foreach ($data as $item) {
+                                $sum += isset($item[$fieldNode->getField()]) ? $item[$fieldNode->getField()] : 0;
+                                $count += isset($item[$fieldNode->getField()]) ? 1 : 0;
                             }
+
+                            $compareArray[$fieldNode->__toString()] = [$sum / $count];
+                            break;
                     }
                 } else {
                     $dataLine = [];
+
                     foreach ($data as $item) {
                         $dataLine[] = $item[$fieldNode];
                     }
+
                     $compareArray[$fieldNode] = $dataLine;
                 }
             }
             $min = null;
+
             foreach ($compareArray as $column) {
                 if (!isset($min)) {
                     $min = count($column);
@@ -330,11 +331,14 @@ abstract class DataStoreAbstract implements DataStoresInterface
                     $min = count($column);
                 }
             }
+
             for ($i = 0; $i < $min; ++$i) {
                 $item = [];
+
                 foreach ($compareArray as $fieldName => $column) {
                     $item[$fieldName] = $column[$i];
                 }
+
                 $resultArray[] = $item;
             }
 
@@ -342,51 +346,31 @@ abstract class DataStoreAbstract implements DataStoresInterface
         }
     }
 
-    // ** Interface "/Coutable"  **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     abstract public function create($itemData, $rewriteIfExist = false);
 
-    // ** Interface "/IteratorAggregate"  **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     abstract public function update($itemData, $createIfAbsent = false);
 
-    // ** protected  **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function deleteAll()
     {
-        /* $keys = $this->getKeys();
-          $deletedItemsNumber = 0;
-          foreach ($keys as $id) {
-          $deletedNumber = $this->delete($id);
-          if (is_null($deletedNumber)) {
-          return null;
-          }
-          $deletedItemsNumber = $deletedItemsNumber + $deletedNumber;
-          }
-          return $deletedItemsNumber; */
-
         $keys = $this->getKeys();
         $deletedItemsNumber = 0;
+
         foreach ($keys as $id) {
             $deletedItems = $this->delete($id);
+
             if (is_null($deletedItems)) {
                 return null;
             }
+
             $deletedItemsNumber++;
         }
 
@@ -396,7 +380,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
     /**
      * Return array of keys or empty array
      *
-     * @return array array of keys or empty array
+     * @return array
      */
     protected function getKeys()
     {
@@ -406,6 +390,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
         $query->setSelect($selectNode);
         $queryResult = $this->query($query);
         $keysArray = [];
+
         foreach ($queryResult as $row) {
             $keysArray[] = $row[$identifier];
         }
@@ -415,15 +400,13 @@ abstract class DataStoreAbstract implements DataStoresInterface
 
     /**
      * {@inheritdoc}
-     *
-     * {@inheritdoc}
      */
-    abstract function delete($id);
+    abstract public function delete($id);
 
     /**
-     * Interface "/Coutable"
+     * Interface 'Countable'
      *
-     * @see /coutable
+     * @see Countable
      * @return int
      */
     public function count()
@@ -445,5 +428,4 @@ abstract class DataStoreAbstract implements DataStoresInterface
 
         return new DataStoreIterator($this);
     }
-
 }

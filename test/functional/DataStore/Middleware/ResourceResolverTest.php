@@ -107,7 +107,7 @@ class ResourceResolverTest extends BaseMiddlewareTest
 
     protected function getAssertionCallback($resourceName, $primaryKeyValue)
     {
-        $toString = function($var) {
+        $toString = function ($var) {
             if ($var === null) {
                 return $var;
             }

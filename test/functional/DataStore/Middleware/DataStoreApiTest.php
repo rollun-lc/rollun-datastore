@@ -471,7 +471,9 @@ class DataStoreApiTest extends BaseMiddlewareTest
         $request = $request->withUri($uri);
 
         $response = new JsonResponse(
-            [$data1], 200, [
+            [$data1],
+            200,
+            [
                 'Content-Range' => 'items 0-1/1',
             ]
         );
@@ -508,7 +510,9 @@ class DataStoreApiTest extends BaseMiddlewareTest
         $request = $request->withUri($uri);
 
         $response = new JsonResponse(
-            [$data1], 200, [
+            [$data1],
+            200,
+            [
                 'Content-Range' => 'items 0-1/1',
             ]
         );

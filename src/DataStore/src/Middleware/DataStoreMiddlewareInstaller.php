@@ -65,7 +65,6 @@ class DataStoreMiddlewareInstaller extends InstallerAbstract
      */
     public function uninstall()
     {
-
     }
 
     /**

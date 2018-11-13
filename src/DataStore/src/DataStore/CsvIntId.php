@@ -77,7 +77,6 @@ class CsvIntId extends CsvBase
         if (!copy($tmpFile, $this->filename)) {
             unlink($tmpFile);
             throw new DataStoreException("Failed to write the results to a file.");
-
         }
 
         unlink($tmpFile);

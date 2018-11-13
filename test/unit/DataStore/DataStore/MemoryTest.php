@@ -33,7 +33,7 @@ class MemoryTest extends TestCase
         ];
         $object = $this->createObject([], false);
         $object->create($item);
-        $this->assertAttributeEquals([1 =>$item], 'items', $object);
+        $this->assertAttributeEquals([1 => $item], 'items', $object);
     }
 
     public function testCreateFailWithItemExist()
@@ -161,7 +161,8 @@ class MemoryTest extends TestCase
         $reflection = new ReflectionClass($object);
         $property = $reflection->getProperty('items');
         $property->setAccessible(true);
-        $property->setValue($object,
+        $property->setValue(
+            $object,
             [
                 1 => [
                     'id' => 1,
@@ -179,7 +180,8 @@ class MemoryTest extends TestCase
         $reflection = new ReflectionClass($object);
         $property = $reflection->getProperty('items');
         $property->setAccessible(true);
-        $property->setValue($object,
+        $property->setValue(
+            $object,
             [
                 1 => [
                     'id' => 1,
@@ -201,7 +203,8 @@ class MemoryTest extends TestCase
         $reflection = new ReflectionClass($object);
         $property = $reflection->getProperty('items');
         $property->setAccessible(true);
-        $property->setValue($object,
+        $property->setValue(
+            $object,
             [
                 1 => [
                     'id' => 1,
@@ -213,7 +216,7 @@ class MemoryTest extends TestCase
                 ]
             ]
         );
-        $this->assertEquals(2,  $object->count());
+        $this->assertEquals(2, $object->count());
     }
 
     public function testGetIteratorIsDeprecated()

@@ -10,8 +10,8 @@ namespace rollun\datastore\DataStore\Interfaces;
  * Full Interface for DataStores
  *
  * @see http://en.wikipedia.org/wiki/Create,_read,_update_and_delete
- * @category   rest
- * @package    zaboy
+ * Interface DataStoresInterface
+ * @package rollun\datastore\DataStore\Interfaces
  */
 interface DataStoresInterface extends ReadInterface
 {

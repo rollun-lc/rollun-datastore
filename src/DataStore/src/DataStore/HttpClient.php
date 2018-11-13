@@ -76,7 +76,7 @@ class HttpClient extends DataStoreAbstract
             $this->options = array_intersect_key($options, array_flip($supportedKeys));
         }
 
-        $this->conditionBuilder = new RqlConditionBuilder;
+        $this->conditionBuilder = new RqlConditionBuilder();
     }
 
     /**
@@ -176,7 +176,7 @@ class HttpClient extends DataStoreAbstract
             );
         }
 
-        return $result;
+        return empty($result) ? [] : $result;
     }
 
     /**

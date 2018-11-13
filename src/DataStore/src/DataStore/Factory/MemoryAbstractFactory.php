@@ -29,8 +29,8 @@ use rollun\datastore\DataStore\Memory;
  * ]
  * </code>
  *
- * @category   rest
- * @package    zaboy
+ * Class MemoryAbstractFactory
+ * @package rollun\datastore\DataStore\Factory
  */
 class MemoryAbstractFactory extends DataStoreAbstractFactory
 {
@@ -41,15 +41,10 @@ class MemoryAbstractFactory extends DataStoreAbstractFactory
     const KEY_REQUIRED_COLUMNS = 'requiredColumns';
 
     /**
-     * Create and return an instance of the DataStore.
-     *
-     * 'use Zend\ServiceManager\AbstractFactoryInterface;' for V2 to
-     * 'use Zend\ServiceManager\Factory\AbstractFactoryInterface;' for V3
-     *
      * @param  ContainerInterface $container
      * @param  string $requestedName
      * @param  array $options
-     * @return DataStoresInterface
+     * @return Memory
      * @throws DataStoreException
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)

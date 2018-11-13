@@ -46,7 +46,11 @@ class HttpClientAbstractFactory extends DataStoreAbstractFactory
     protected static $KEY_IN_CREATE = 0;
 
     /**
-     * {@inheritdoc}
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     * @param array|null $options
+     * @return HttpClient
+     * @throws DataStoreException
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {

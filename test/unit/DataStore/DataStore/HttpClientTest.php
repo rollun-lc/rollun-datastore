@@ -149,7 +149,6 @@ class HttpClientTest extends TestCase
         $object = $this->createObject($clientMock, $url);
 
         $this->assertEquals($object->update($itemsWithId, 1), $itemsWithId);
-
     }
 
     public function testUpdateFail()

@@ -1,26 +1,30 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 15.05.17
- * Time: 17:46
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\Traits;
 
 use rollun\datastore\DataStore\DataStoreException;
 
+/**
+ * Use this trait to disable 'create' method in datastore
+ *
+ * Trait NoSupportCreateTrait
+ * @package rollun\datastore\DataStore\Traits
+ */
 trait NoSupportCreateTrait
 {
     /**
-     *{@inheritdoc}
-     * @param array $itemData associated array with or without PrimaryKey ["id" => 1, "field name" = "foo" ]
-     * @param bool $rewriteIfExist can item be rewrited if same 'id' exist
-     * @return array created item or method will throw exception
+     * @param $itemData
+     * @param bool $rewriteIfExist
      * @throws DataStoreException
      */
     public function create($itemData, $rewriteIfExist = false)
     {
+        trigger_error(NoSupportCreateTrait::class . ' trait is deprecated', E_USER_DEPRECATED);
+
         throw new DataStoreException("Method don't support.");
     }
 }

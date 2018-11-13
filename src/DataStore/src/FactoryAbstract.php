@@ -1,10 +1,7 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore;
@@ -14,14 +11,11 @@ use Interop\Container\ContainerInterface;
 
 abstract class FactoryAbstract implements FactoryInterface
 {
-
     /**
-     * Alias for "createService"
-     *
      * @param ContainerInterface $container
-     * @param $requestedName
+     * @param string $requestedName
      * @param array|null $options
-     * @return mixed
+     * @return object
      */
     abstract public function __invoke(ContainerInterface $container, $requestedName, array $options = null);
 }

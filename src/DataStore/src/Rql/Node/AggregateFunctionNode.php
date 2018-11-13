@@ -51,7 +51,7 @@ class AggregateFunctionNode extends AbstractQueryNode
         return $this->field;
     }
 
-    function __toString()
+    public function __toString()
     {
         return sprintf("%s(%s)", $this->function, $this->field);
     }

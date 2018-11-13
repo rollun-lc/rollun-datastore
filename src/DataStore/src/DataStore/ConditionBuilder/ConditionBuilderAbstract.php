@@ -15,7 +15,7 @@ use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
 use rollun\datastore\DataStore\DataStoreException;
 
 /**
- * Transform rql query nodes to sql, php, and rql
+ * Transform rql query nodes to sql, php and rql
  *
  * Class ConditionBuilderAbstract
  * @package rollun\datastore\DataStore\ConditionBuilder
@@ -65,20 +65,22 @@ abstract class ConditionBuilderAbstract
     public function makeAbstractQueryOperator(AbstractQueryNode $queryNode)
     {
         switch (true) {
-            case ($queryNode instanceOf AbstractScalarOperatorNode):
+            case ($queryNode instanceof AbstractScalarOperatorNode):
                 return $this->makeScalarOperator($queryNode);
-            case ($queryNode instanceOf AbstractLogicOperatorNode):
+            case ($queryNode instanceof AbstractLogicOperatorNode):
                 return $this->makeLogicOperator($queryNode);
-            case ($queryNode instanceOf AbstractArrayOperatorNode):
+            case ($queryNode instanceof AbstractArrayOperatorNode):
                 return $this->makeArrayOperator($queryNode);
-            case ($queryNode instanceOf BinaryOperatorNodeAbstract):
+            case ($queryNode instanceof BinaryOperatorNodeAbstract):
                 return $this->makeBinaryOperator($queryNode);
             default:
-                throw new DataStoreException('The Node type not suppoted: ' . $queryNode->getNodeName());
+                throw new DataStoreException('The Node type not supported: ' . $queryNode->getNodeName());
         }
     }
 
     /**
+     * Make string with conditions for binary operators
+     *
      * @param BinaryOperatorNodeAbstract $node
      * @return string
      */

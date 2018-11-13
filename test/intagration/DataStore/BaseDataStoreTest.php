@@ -11,7 +11,9 @@ use PHPUnit_Framework_Error_Deprecated;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
+use rollun\datastore\Rql\Node\LikeGlobNode;
 use rollun\datastore\Rql\RqlQuery;
+use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\NotNode;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\OrNode;
@@ -85,26 +87,31 @@ abstract class BaseDataStoreTest extends TestCase
     public function testCreateWithRewrite()
     {
         $object = $this->createObject();
-        $id = $this->identifierToType(1);
 
-        $item = [
-            'id' => $id,
-            'name' => 'name',
-            'surname' => 'surname',
+        $item1 = [
+            'id' => $this->identifierToType(1),
+            'name' => 'name1',
+            'surname' => 'surname1',
         ];
 
-        $object->create($item);
-        $object->create($item, 1);
+        $item2 = [
+            'id' => $this->identifierToType(1),
+            'name' => 'name2',
+            'surname' => 'surname2',
+        ];
+
+        $object->create($item1);
+        $object->create($item2, 1);
+        $this->assertEquals($item2, $object->read(1));
     }
 
     public function testUpdateItemDoesNotExistException()
     {
         $this->expectException(DataStoreException::class);
         $object = $this->createObject();
-        $id = $this->identifierToType(1);
 
         $item = [
-            'id' => $id,
+            'id' => $this->identifierToType(1),
             'name' => 'name',
             'surname' => 'surname',
         ];
@@ -115,10 +122,9 @@ abstract class BaseDataStoreTest extends TestCase
     public function testUpdateWithCreate()
     {
         $object = $this->createObject();
-        $id = $this->identifierToType(1);
 
         $item = [
-            'id' => $id,
+            'id' => $this->identifierToType(1),
             'name' => 'name',
             'surname' => 'surname',
         ];
@@ -126,52 +132,45 @@ abstract class BaseDataStoreTest extends TestCase
         $object->update($item, 1);
     }
 
-    public function testDeleteAll()
-    {
-        $count = 10;
-        $object = $this->createObject();
-        $range = range(1, $count);
-
-        foreach ($range as $id) {
-            $object->create([
-                'id' => $this->identifierToType($id),
-                'name' => 'name',
-                'surname' => 'surname',
-            ]);
-        }
-
-        $this->assertEquals($count, $object->deleteAll());
-    }
-
-    public function testQuerySuccess()
+    public function testQueryCombineWhereClauseSuccess()
     {
         $object = $this->createObject();
 
-        foreach (range(1,6) as $id) {
-            $object->create([
-                'id' => $id,
-                'name' => "name{$id}",
-                'surname' => "surname{$id}",
-            ]);
+        foreach (range(1, 6) as $id) {
+            $object->create(
+                [
+                    'id' => $this->identifierToType($id),
+                    'name' => "name{$id}",
+                    'surname' => "surname{$id}",
+                ]
+            );
         }
 
         $rqlQuery = new RqlQuery();
         $rqlQuery->setQuery(
-            new AndNode([
-                new OrNode([
+            new AndNode(
+                [
+                    new OrNode(
+                        [
+                            new GeNode('id', 3),
+                            new LeNode('id', 7),
+                        ]
+                    ),
+                    new NotNode([new EqNode('id', 4)]),
                     new GeNode('id', 3),
-                    new LeNode('id', 7),
-                ]),
-                new NotNode([new EqNode('id', 4)]),
-                new GeNode('id', 3),
-            ])
+                ]
+            )
         );
 
-        $rqlQuery->setSelect(new SelectNode([
-            'id',
-            'name',
-            'surname',
-        ]));
+        $rqlQuery->setSelect(
+            new SelectNode(
+                [
+                    'id',
+                    'name',
+                    'surname',
+                ]
+            )
+        );
 
         $expectedItems = [
             [
@@ -195,28 +194,165 @@ abstract class BaseDataStoreTest extends TestCase
         $this->assertEquals($expectedItems, $items);
     }
 
-    public function testQueryWithAggregationFunctions()
+    public function testQueryWithAggregationFunctionsSuccess()
     {
         $rqlQuery = new RqlQuery();
-        $rqlQuery->setSelect(new SelectNode([
-            new AggregateFunctionNode('count', 'id')
-        ]));
+        $rqlQuery->setSelect(
+            new SelectNode(
+                [
+                    new AggregateFunctionNode('count', 'id'),
+                ]
+            )
+        );
 
         $object = $this->createObject();
-        foreach (range(1,3) as $id) {
-            $object->create([
-                'id' => $id,
-                'name' => "name{$id}",
-                'surname' => "surname{$id}",
-            ]);
+        foreach (range(1, 3) as $id) {
+            $object->create(
+                [
+                    'id' => $this->identifierToType($id),
+                    'name' => "name{$id}",
+                    'surname' => "surname{$id}",
+                ]
+            );
         }
 
         $items = $object->query($rqlQuery);
         $this->assertEquals($items, [['count(id)' => 3]]);
     }
 
-    public function testGetIdentifier()
+    public function testQueryWithLimitAndOffsetSuccess()
     {
-        $this->assertEquals('id', $this->createObject()->getIdentifier());
+        $rqlQuery = new RqlQuery();
+        $rqlQuery->setLimit(new LimitNode(2, 2));
+
+        $object = $this->createObject();
+        foreach (range(1, 5) as $id) {
+            $object->create(
+                [
+                    'id' => $this->identifierToType($id),
+                    'name' => "name{$id}",
+                    'surname' => "surname{$id}",
+                ]
+            );
+        }
+
+        $items = $object->query($rqlQuery);
+        $this->assertEquals(
+            $items,
+            [
+                [
+                    'id' => 3,
+                    'name' => "name3",
+                    'surname' => "surname3",
+                ],
+                [
+                    'id' => 4,
+                    'name' => "name4",
+                    'surname' => "surname4",
+                ],
+            ]
+        );
+    }
+
+    public function testQueryWithGlobValuesSuccess()
+    {
+        $rqlQuery = new RqlQuery();
+        $rqlQuery->setQuery(
+            new AndNode(
+                [
+                    new LikeGlobNode('surname', '?surname?'),
+                    new LikeGlobNode('name', 'name*'),
+                ]
+            )
+        );
+        $items = [];
+
+        $object = $this->createObject();
+
+        foreach (range(1, 5) as $id) {
+            $item = [
+                'id' => $this->identifierToType($id),
+                'name' => "name{$id}{$id}{$id}",
+                'surname' => "{$id}surname{$id}",
+            ];
+
+            $object->create($item);
+            $items[] = $item;
+        }
+
+        $this->assertEquals($object->query($rqlQuery), $items);
+    }
+
+    public function testQueryWithEmptySuccess()
+    {
+        $this->assertEquals($this->createObject()->query(new RqlQuery()), []);
+    }
+
+    public function testGetIdentifierSuccess()
+    {
+        $this->assertEquals(
+            'id',
+            $this->createObject()
+                ->getIdentifier()
+        );
+    }
+
+    public function testHasSuccess()
+    {
+        $object = $this->createObject();
+        $object->create([
+            'id' => 1,
+            'name' => "name1",
+            'surname' => "surname1",
+        ]);
+
+        $this->assertTrue($object->has(1));
+        $this->assertFalse($object->has(2));
+    }
+
+    public function testDeleteSuccess()
+    {
+        $this->assertEquals(null, $this->createObject()->delete(1));
+    }
+
+    public function testCountSuccess()
+    {
+        $object = $this->createObject();
+        $count = 5;
+
+        foreach (range(1, 5) as $id) {
+            $object->create([
+                'id' => $this->identifierToType($id),
+                'name' => "name{$id}{$id}{$id}",
+                'surname' => "{$id}surname{$id}",
+            ]);
+        }
+
+        $this->assertTrue($object instanceof \Countable);
+        $this->assertEquals($object->count(), $count);
+        $object->deleteAll();
+        $this->assertEquals($object->count(), 0);
+    }
+
+    public function testIterableSuccess()
+    {
+        $object = $this->createObject();
+        $items = [];
+
+        foreach (range(1, 5) as $id) {
+            $item = [
+                'id' => $this->identifierToType($id),
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ];
+
+            $object->create($item);
+            $items[$id] = $item;
+        }
+
+        foreach ($object as $item) {
+            $id = $item[$object->getIdentifier()];
+            $this->assertEquals($object->read($id), $item);
+        }
     }
 }

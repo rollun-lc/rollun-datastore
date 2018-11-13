@@ -59,7 +59,7 @@ class RqlConditionBuilderTest extends ConditionBuilderTest
         ];
     }
 
-    public function provider__invoke()
+    public function providerInvoke()
     {
         return [
             [null, ''],

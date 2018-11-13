@@ -55,7 +55,7 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
         ];
     }
 
-    public function provider__invoke()
+    public function providerInvoke()
     {
         return [
             [null, ' true '],
@@ -82,8 +82,8 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
             ],
             [
                 (new QueryBuilder())->addQuery(
-                        new AndNode(
-                            [
+                    new AndNode(
+                        [
                                 new EqNode('a', 'b'),
                                 new LtNode('c', 'd'),
                                 new OrNode(
@@ -93,8 +93,8 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
                                     ]
                                 ),
                             ]
-                        )
                     )
+                )
                     ->addQuery(
                         new NotNode(
                             [
@@ -108,8 +108,8 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
             ],
             [
                 (new QueryBuilder())->addQuery(
-                        new AndNode(
-                            [
+                    new AndNode(
+                        [
                                 new EqNode('a', null),
                                 new LtNode('c', 'd'),
                                 new OrNode(
@@ -119,8 +119,8 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
                                     ]
                                 ),
                             ]
-                        )
                     )
+                )
                     ->addQuery(
                         new NotNode(
                             [
@@ -134,15 +134,15 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
             ],
             [
                 (new QueryBuilder())->addQuery(
-                        new AndNode(
-                            [
+                    new AndNode(
+                        [
                                 new EqnNode('a'),
                                 new EqtNode('b'),
                                 new EqfNode('c'),
                                 new IeNode('d'),
                             ]
-                        )
                     )
+                )
                     ->getQuery()
                     ->getQuery(),
                 '(is_null($item[\'a\']) && ($item[\'b\']==true) && ($item[\'c\']==false) && empty($item[\'d\']))',

@@ -18,7 +18,6 @@ use Zend\Db\Adapter\AdapterInterface;
  */
 class SqlConditionBuilder extends ConditionBuilderAbstract
 {
-
     protected $literals = [
         'LogicOperator' => [
             'and' => ['before' => '(', 'between' => ' AND ', 'after' => ')'],
@@ -54,6 +53,9 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
      */
     protected $db;
 
+    /**
+     * @var string
+     */
     protected $tableName;
 
     /**
@@ -89,7 +91,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         $glob = parent::getValueFromGlob($globNode);
 
         $regexSQL = strtr(
-            preg_quote(rawurldecode(strtr($glob, ['*' => $constStar, '?' => $constQuestion])), '/'),
+            rawurldecode(strtr($glob, ['*' => $constStar, '?' => $constQuestion])),
             [$constStar => '%', $constQuestion => '_']
         );
 
@@ -97,11 +99,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
     }
 
     /**
-     * Make string with conditions for ScalarOperatorNode
-     *
-     * @param AbstractScalarOperatorNode $node
-     * @return string
-     * @throws DataStoreException
+     * {@inheritdoc}
      */
     public function makeScalarOperator(AbstractScalarOperatorNode $node)
     {
@@ -130,6 +128,9 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         return $strQuery;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function makeBinaryOperator(BinaryOperatorNodeAbstract $node)
     {
         $nodeName = $node->getNodeName();
@@ -161,19 +162,16 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
     {
         if (!strpos($fieldName, '.')) {
             if ($fieldName == 'id') {
-                $fieldName = $this->db->platform->quoteIdentifierInFragment("{$this->tableName}.{$fieldName}");
-                /*$fieldName = $this->db->platform->quoteIdentifier($this->tableName) .  '.' .$this->db->platform->quoteIdentifier($fieldName);*/
+                $fieldName = $this->db->getPlatform()->quoteIdentifierInFragment("{$this->tableName}.{$fieldName}");
             } else {
-                $fieldName = $this->db->platform->quoteIdentifierInFragment("{$fieldName}");
+                $fieldName = $this->db->getPlatform()->quoteIdentifierInFragment("{$fieldName}");
             }
         } else {
-            //TODO: force set tableName!!!!!
+            // TODO: force set table
             $name = explode('.', $fieldName);
-            $fieldName = $this->db->platform->quoteIdentifierInFragment("{$name[0]}.{$name[1]}");
-            //$fieldName = $this->db->platform->quoteIdentifier($name[0]) . '.' . $this->db->platform->quoteIdentifier($name[1]);
+            $fieldName = $this->db->getPlatform()->quoteIdentifierInFragment("{$name[0]}.{$name[1]}");
         }
 
         return $fieldName;
-
     }
 }

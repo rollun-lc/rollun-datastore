@@ -10,7 +10,7 @@
 namespace rollun\datastore\TableGateway;
 
 use rollun\datastore\DataStore\DataStoreException;
-use rollun\datastore\RestException;
+use Exception;
 use Zend\Db\Adapter;
 use Zend\Db\Metadata\Source;
 use Zend\Db\Metadata\Source\Factory;
@@ -167,7 +167,7 @@ class TableManagerMysql
      * @param string $tableConfig
      * @return mixed
      * @throws DataStoreException
-     * @throws RestException
+     * @throws Exception
      * @throws \ReflectionException
      */
     public function createTable($tableName, $tableConfig = null)
@@ -305,7 +305,7 @@ class TableManagerMysql
      *
      * @param $tableConfig
      * @return mixed
-     * @throws RestException
+     * @throws Exception
      */
     public function getTableConfig($tableConfig)
     {
@@ -314,7 +314,7 @@ class TableManagerMysql
             if (isset($config[self::KEY_TABLES_CONFIGS][$tableConfig])) {
                 $tableConfig = $config[self::KEY_TABLES_CONFIGS][$tableConfig];
             } else {
-                throw new RestException('$tableConfig mast be an array or key in config');
+                throw new Exception('$tableConfig mast be an array or key in config');
             }
         }
         return $tableConfig;
@@ -326,7 +326,7 @@ class TableManagerMysql
      * @param $tableName
      * @param $tableConfig
      * @return Adapter\Driver\StatementInterface|\Zend\Db\ResultSet\ResultSet
-     * @throws RestException
+     * @throws Exception
      * @throws \ReflectionException
      */
     protected function create($tableName, $tableConfig = null)
@@ -340,7 +340,7 @@ class TableManagerMysql
         $isPrimaryKeySet = false;
         $primaryKeys = [];
         foreach ($tableConfigArray as $fieldName => $fieldData) {
-            if(isset($fieldData[static::PRIMARY_KEY])) {
+            if (isset($fieldData[static::PRIMARY_KEY])) {
                 $primaryKeys[] = $fieldName;
                 $isPrimaryKeySet = true;
             }
@@ -367,17 +367,17 @@ class TableManagerMysql
                 $onUpdateRule = isset($fieldData[self::FOREIGN_KEY]['onUpdateRule']) ?
                     $fieldData[self::FOREIGN_KEY]['onUpdateRule'] : null;
                 $foreignKeyInstance = new Constraint\ForeignKey(
-                    $foreignKeyConstraintName
-                    , [$fieldName]
-                    , $fieldData[self::FOREIGN_KEY]['referenceTable']
-                    , $fieldData[self::FOREIGN_KEY]['referenceColumn']
-                    , $onDeleteRule
-                    , $onUpdateRule
+                    $foreignKeyConstraintName,
+                    [$fieldName],
+                    $fieldData[self::FOREIGN_KEY]['referenceTable'],
+                    $fieldData[self::FOREIGN_KEY]['referenceColumn'],
+                    $onDeleteRule,
+                    $onUpdateRule
                 );
                 $alterTable->addConstraint($foreignKeyInstance);
             }
         }
-        if($isPrimaryKeySet) {
+        if ($isPrimaryKeySet) {
             $table->addConstraint(new Constraint\PrimaryKey(...$primaryKeys));
         } else {
             $table->addConstraint(new Constraint\PrimaryKey('id'));
@@ -413,7 +413,7 @@ class TableManagerMysql
                 $fieldParamsDefault = $this->parameters['PrecisionColumn'];
                 break;
             default:
-                throw new RestException('Unknown field type:' . $fieldType);
+                throw new Exception('Unknown field type:' . $fieldType);
         }
         $fieldParams = [];
         foreach ($fieldParamsDefault as $key => $value) {
@@ -452,5 +452,4 @@ class TableManagerMysql
 
         return $columnsNames;
     }
-
 }

@@ -116,7 +116,6 @@ class MultiInsert extends Insert
         $values = [];
 
         foreach ($this->columns as $column => $value) {
-
             $columns[] = $platform->quoteIdentifier($column);
             foreach ($value as $key => $item) {
                 /* if (is_scalar($item) && $parameterContainer) {
@@ -148,5 +147,4 @@ class MultiInsert extends Insert
 
         return $sql;
     }
-
 }

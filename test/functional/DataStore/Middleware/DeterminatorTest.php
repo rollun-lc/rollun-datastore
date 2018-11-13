@@ -58,7 +58,8 @@ class DeterminatorTest extends TestCase
         $this->expectException(TypeError::class);
         $serviceName = 'dataStoreService';
 
-        $notDataStore = new class {};
+        $notDataStore = new class {
+        };
 
         /** @var DataStorePluginManager|PHPUnit_Framework_MockObject_MockObject $dataStorePluginManagerMock */
         $dataStorePluginManagerMock = $this->getMockBuilder(DataStorePluginManager::class)

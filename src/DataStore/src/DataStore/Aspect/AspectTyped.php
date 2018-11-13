@@ -1,4 +1,8 @@
 <?php
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
 namespace rollun\datastore\DataStore\Aspect;
 
@@ -33,8 +37,7 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
     {
         parent::__construct($dataStore);
 
-        foreach ($scheme as $fieldInfo)
-        {
+        foreach ($scheme as $fieldInfo) {
             if (!isset($fieldInfo['type']) || !is_a($fieldInfo['type'], TypeInterface::class, true)) {
                 throw new InvalidArgumentException("Invalid option 'type' in scheme");
             }
@@ -108,8 +111,7 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
     {
         $itemData = [];
 
-        foreach ($this->scheme as $fieldName => $fieldInfo)
-        {
+        foreach ($this->scheme as $fieldName => $fieldInfo) {
             $getter = 'get' . ucfirst($fieldName);
 
             if (!method_exists($dto, $getter)) {
@@ -135,8 +137,7 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
      */
     protected function arrayToDto(array $itemData)
     {
-        foreach ($itemData as $field => $value)
-        {
+        foreach ($itemData as $field => $value) {
             if (!isset($this->scheme[$field])) {
                 throw new InvalidArgumentException("Undefined field '$field' in scheme");
             }

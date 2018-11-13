@@ -40,7 +40,6 @@ class DbTableInstaller extends InstallerAbstract
      */
     public function uninstall()
     {
-
     }
 
     /**

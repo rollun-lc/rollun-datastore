@@ -40,7 +40,7 @@ class DataStorePack implements SeekableIterator
         $this->dataStore = $dataStore;
         $this->limit = $limit;
         $initItem = $this->dataStore->query($this->getInitQuery());
-        if(!empty($initItem)) {
+        if (!empty($initItem)) {
             $this->current = current($initItem);
         }
     }
@@ -48,7 +48,8 @@ class DataStorePack implements SeekableIterator
     /**
      *
      */
-    protected function getInitQuery() {
+    protected function getInitQuery()
+    {
         $query = new Query();
         $query->setLimit(new LimitNode(1));
         $query->setSort(new SortNode([
@@ -60,9 +61,10 @@ class DataStorePack implements SeekableIterator
     /**
      * Return query with limit and offset
      */
-    protected function getQuery() {
+    protected function getQuery()
+    {
         $query = new Query();
-        if($this->valid()) {
+        if ($this->valid()) {
             $query->setQuery(new GtNode($this->dataStore->getIdentifier(), $this->key()));
         }
         $query->setLimit(new LimitNode($this->limit));

@@ -40,7 +40,8 @@ class DeterminatorFactoryTest extends TestCase
     {
         $this->expectException(TypeError::class);
         $requestedName = DataStorePluginManager::class;
-        $notDataStorePluginManagerMock = new class {};
+        $notDataStorePluginManagerMock = new class {
+        };
 
         /** @var ContainerInterface|PHPUnit_Framework_MockObject_MockObject $containerMock */
         $containerMock = $this->getMockBuilder(ContainerInterface::class)->getMock();

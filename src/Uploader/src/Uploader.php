@@ -42,7 +42,7 @@ class Uploader
     public function upload()
     {
         $iterator = $this->sourceDataIteratorAggregator->getIterator();
-        if(isset($this->key) && $iterator instanceof SeekableIterator) {
+        if (isset($this->key) && $iterator instanceof SeekableIterator) {
             $iterator->seek($this->key); //set iterator to last position.
         }
         foreach ($iterator as $key => $value) {

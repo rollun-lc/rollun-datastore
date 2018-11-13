@@ -36,7 +36,6 @@ class UploaderInstaller extends InstallerAbstract
      */
     public function uninstall()
     {
-
     }
 
     /**

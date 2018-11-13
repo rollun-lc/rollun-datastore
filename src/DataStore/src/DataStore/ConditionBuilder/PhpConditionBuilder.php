@@ -71,6 +71,7 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
     public function prepareFieldValue($fieldValue)
     {
         $fieldValue = parent::prepareFieldValue($fieldValue);
+
         switch (true) {
             case is_bool($fieldValue):
                 $fieldValue = (bool)$fieldValue ? true : false;

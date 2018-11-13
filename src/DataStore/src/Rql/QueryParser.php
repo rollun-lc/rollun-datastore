@@ -17,5 +17,4 @@ class QueryParser extends Parser
     {
         return new RqlQueryBuilder();
     }
-
 }

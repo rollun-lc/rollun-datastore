@@ -1,26 +1,30 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 15.05.17
- * Time: 17:47
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\Traits;
 
 use rollun\datastore\DataStore\DataStoreException;
 
+/**
+ * Use this trait to disable 'update' method in datastore
+ *
+ * Trait NoSupportUpdateTrait
+ * @package rollun\datastore\DataStore\Traits
+ */
 trait NoSupportUpdateTrait
 {
     /**
-     *{@inheritdoc}
-     * @param array $itemData associated array with PrimaryKey ["id" => 1, "field name" = "foo" ]
-     * @param bool $createIfAbsent can item be created if same 'id' is absent in the store
-     * @return array updated or inserted item.
+     * @param $itemData
+     * @param bool $createIfAbsent
      * @throws DataStoreException
      */
     public function update($itemData, $createIfAbsent = false)
     {
+        trigger_error(NoSupportUpdateTrait::class . ' trait is deprecated', E_USER_DEPRECATED);
+
         throw new DataStoreException("Method don't support.");
     }
 }

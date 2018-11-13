@@ -32,7 +32,6 @@ class CacheableInstaller extends InstallerAbstract
      */
     public function uninstall()
     {
-
     }
 
     /**

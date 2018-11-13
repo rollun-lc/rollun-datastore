@@ -32,7 +32,6 @@ class MemoryInstaller extends InstallerAbstract
      */
     public function uninstall()
     {
-
     }
 
     /**

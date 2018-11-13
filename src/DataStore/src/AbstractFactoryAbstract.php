@@ -106,5 +106,4 @@ abstract class AbstractFactoryAbstract implements AbstractFactoryInterface
     {
         return $this->__invoke($serviceLocator, $requestedName);
     }
-
 }

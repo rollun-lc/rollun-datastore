@@ -29,5 +29,4 @@ class RqlQueryBuilder extends QueryBuilder
         }
         return parent::addNode($node);
     }
-
 }

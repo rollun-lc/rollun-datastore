@@ -47,6 +47,12 @@ class HttpClientTest extends BaseDataStoreTest
         ],
     ];
 
+    /**
+     * Run "php -S localhost:9000 -t test/assets" in project root directory
+     *
+     * @throws \ReflectionException
+     * @throws \rollun\datastore\DataStore\DataStoreException
+     */
     public function setUp()
     {
         parent::setUp();

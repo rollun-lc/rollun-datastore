@@ -55,6 +55,4 @@ class RqlQuery extends Query
     {
         return $this->groupBy;
     }
-
-
 }

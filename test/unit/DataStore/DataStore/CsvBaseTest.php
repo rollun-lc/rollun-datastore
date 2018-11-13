@@ -232,7 +232,7 @@ class CsvBaseTest extends TestCase
 
     public function testDeleteAll()
     {
-        $range = range(1,10);
+        $range = range(1, 10);
 
         foreach ($range as $id) {
             $this->create([

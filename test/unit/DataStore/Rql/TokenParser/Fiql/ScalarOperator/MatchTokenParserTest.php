@@ -76,5 +76,4 @@ class MatchTokenParserTest extends TestCase
             ->with($this->equalTo($type))
             ->will($this->returnValue(new Token($type, '', 0)));
     }
-
 }

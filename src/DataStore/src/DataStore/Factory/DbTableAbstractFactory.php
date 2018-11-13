@@ -9,54 +9,46 @@ namespace rollun\datastore\DataStore\Factory;
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\DbTable;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use Zend\Db\TableGateway\TableGateway;
 
 /**
  * Create and return an instance of the DataStore which based on DbTable
- *
  * This Factory depends on Container (which should return an 'config' as array)
  *
  * The configuration can contain:
  * <code>
- *    'db' => [
- *        'driver' => 'Pdo_Mysql',
- *        'host' => 'localhost',
- *        'database' => '',
- *    ]
- * 'DataStore' => [
- *
- *     'DbTable' => [
- *         'class' => 'mydatabase',
- *         'tableName' => 'mytableName',
- *         'dbAdapter' => 'db' // Service Name. 'db' by default
- *     ]
- * ]
+ *  'db' => [
+ *      'driver' => 'Pdo_Mysql',
+ *      'host' => 'localhost',
+ *      'database' => '',
+ *  ],
+ *  'dataStore' => [
+ *      'DbTable' => [
+ *          'class' => \rollun\datastore\DataStore\DbTable::class,
+ *          'tableName' => 'mytableName',
+ *          'dbAdapter' => 'db' // Service Name. 'db' by default
+ *      ]
+ *  ]
  * </code>
  *
- * @uses zend-db
- * @see https://github.com/zendframework/zend-db
- * @category   rest
- * @package    zaboy
+ * Class DbTableAbstractFactory
+ * @package rollun\datastore\DataStore\Factory
  */
 class DbTableAbstractFactory extends DataStoreAbstractFactory
 {
     const KEY_TABLE_NAME = 'tableName';
     const KEY_TABLE_GATEWAY = 'tableGateway';
     const KEY_DB_ADAPTER = 'dbAdapter';
+
     public static $KEY_DATASTORE_CLASS = DbTable::class;
+
     protected static $KEY_IN_CREATE = 0;
 
     /**
-     * Create and return an instance of the DataStore.
-     *
-     * 'use Zend\ServiceManager\AbstractFactoryInterface;' for V2 to
-     * 'use Zend\ServiceManager\Factory\AbstractFactoryInterface;' for V3
-     *
-     * @param  ContainerInterface $container
-     * @param  string $requestedName
-     * @param  array $options
-     * @return DataStoresInterface
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     * @param array|null $options
+     * @return DbTable
      * @throws DataStoreException
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
@@ -77,6 +69,13 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
         return new $requestedClassName($tableGateway);
     }
 
+    /**
+     * @param ContainerInterface $container
+     * @param $serviceConfig
+     * @param $requestedName
+     * @return TableGateway
+     * @throws DataStoreException
+     */
     protected function getTableGateway(ContainerInterface $container, $serviceConfig, $requestedName)
     {
         if (isset($serviceConfig[self::KEY_TABLE_GATEWAY])) {
@@ -86,7 +85,7 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
                 $this::$KEY_IN_CREATE = 0;
 
                 throw new DataStoreException(
-                'Can\'t create ' . $serviceConfig[self::KEY_TABLE_GATEWAY]
+                    'Can\'t create ' . $serviceConfig[self::KEY_TABLE_GATEWAY]
                 );
             }
         } elseif (isset($serviceConfig[self::KEY_TABLE_NAME])) {
@@ -101,18 +100,17 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
                 $this::$KEY_IN_CREATE = 0;
 
                 throw new DataStoreException(
-                'Can\'t create Zend\Db\TableGateway\TableGateway for ' . $tableName
+                    'Can\'t create Zend\Db\TableGateway\TableGateway for ' . $tableName
                 );
             }
         } else {
             $this::$KEY_IN_CREATE = 0;
 
             throw new DataStoreException(
-            'There is not table name for ' . $requestedName . 'in config \'dataStore\''
+                'There is not table name for ' . $requestedName . 'in config \'dataStore\''
             );
         }
 
         return $tableGateway;
     }
-
 }

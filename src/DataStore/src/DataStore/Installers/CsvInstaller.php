@@ -32,7 +32,6 @@ class CsvInstaller extends InstallerAbstract
      */
     public function uninstall()
     {
-
     }
 
     /**

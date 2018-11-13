@@ -54,7 +54,7 @@ class SqlConditionBuilderTest extends ConditionBuilderTest
             ['a*b?c', 'a%b_c'],
             ['?abc', '_abc'],
             ['abc?', 'abc_'],
-            [rawurlencode('Шщ +-*._'), 'Шщ \+\-\*\._'],
+            [rawurlencode('Шщ +-*._~'), 'Шщ +-*._~'],
         ];
     }
 

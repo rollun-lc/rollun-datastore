@@ -231,10 +231,10 @@ class DbTableTest extends TestCase
         $this->create($itemData2);
 
         $object = $this->createObject();
-        $this->assertEquals(2,  $object->count());
+        $this->assertEquals(2, $object->count());
 
         $this->create($itemData3);
-        $this->assertEquals(3,  $object->count());
+        $this->assertEquals(3, $object->count());
     }
 
     public function testGetIteratorIsDeprecated()

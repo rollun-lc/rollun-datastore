@@ -57,7 +57,7 @@ class Memory extends DataStoreAbstract
         }
 
         $this->fields = $fields;
-        $this->conditionBuilder = new PhpConditionBuilder;
+        $this->conditionBuilder = new PhpConditionBuilder();
     }
 
     /**

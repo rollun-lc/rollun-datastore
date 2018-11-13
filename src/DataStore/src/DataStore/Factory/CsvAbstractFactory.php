@@ -11,6 +11,24 @@ use rollun\datastore\DataStore\CsvBase;
 use Symfony\Component\Filesystem\LockHandler;
 use rollun\datastore\DataStore\DataStoreException;
 
+/**
+ * Create and return an instance of the array in CsvBase
+ * This Factory depends on Container (which should return an 'config' as array)
+ *
+ * The configuration can contain:
+ * <code>
+ * 'dataStore' => [
+ *      'testCacheable' => [
+ *          'class' => \rollun\datastore\DataStore\CsvBase::class,
+ *          'filename' => 'someFile',
+ *          'delimiter' => ',' // optional
+ *      ]
+ * ]
+ * </code>
+ *
+ * Class CsvAbstractFactory
+ * @package rollun\datastore\DataStore\Factory
+ */
 class CsvAbstractFactory extends DataStoreAbstractFactory
 {
     const KEY_FILENAME = 'filename';

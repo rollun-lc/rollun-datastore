@@ -32,7 +32,6 @@ class HttpClientInstaller extends InstallerAbstract
      */
     public function uninstall()
     {
-
     }
 
     public function isInstall()
