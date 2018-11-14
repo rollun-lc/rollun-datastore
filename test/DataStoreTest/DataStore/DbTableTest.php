@@ -145,40 +145,4 @@ class DbTableTest extends AbstractTest
             $dbTable->insert($record);
         }
     }
-
-    /**
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     */
-    public function test_exploit()
-    {
-        $expected = [
-            ['id' => 1, 'fString' => 'val1',],
-            ['id' => 2, 'fString' => 'val2',],
-            ['id' => 3, 'fString' => 'val3',],
-            ['id' => 4, 'fString' => 'val4',],
-        ];
-        $this->setUp("exploited1DbTable");
-        $this->_initObject([
-            ['id' => 5, 'fString' => 'val5',],
-            ['id' => 6, 'fString' => 'val6',],
-            ['id' => 7, 'fString' => 'val7',],
-            ['id' => 8, 'fString' => 'val8',],
-        ]);
-        $this->setUp("exploited2DbTable");
-        $this->_initObject($expected);
-
-        $query = new Query();
-        $query->setSelect(new SelectNode(["id", "fString"]));
-        //$query->setQuery(new EqNode("id` IN (SELECT id FROM test_res_http) OR `id", "val"));
-        $query->setQuery(new EqNode("id` = 1) UNION SELECT id, fString FROM ".static::TABLE_EXPLOIT_1_NAME.";#`id", "val"));
-        try {
-            $result = $this->object->query($query);
-            $this->assertEquals($expected, $result);//Assert false.
-        }catch (PDOException $exception) {
-            $this->assertTrue(true);
-        }
-    }
-
-    /* * ************************** Identifier *********************** */
 }

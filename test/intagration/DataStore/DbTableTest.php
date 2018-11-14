@@ -53,13 +53,22 @@ class DbTableTest extends BaseDataStoreTest
         ],
     ];
 
+    /**
+     * @return ContainerInterface
+     */
+    public function getContainer()
+    {
+        if ($this->container === null) {
+            $this->container = include './config/container.php';
+        }
+
+        return $this->container;
+    }
+
     public function setUp()
     {
         parent::setUp();
-
-        /** @var ContainerInterface $container */
-        $this->container = include './config/container.php';
-        $adapter = $container->get('db');
+        $adapter = $this->getContainer()->get('db');
         $this->mysqlManager = new TableManagerMysql($adapter);
 
         if ($this->mysqlManager->hasTable($this->tableName)) {
@@ -77,7 +86,7 @@ class DbTableTest extends BaseDataStoreTest
 
     public function createObject(): DataStoresInterface
     {
-        $adapter = $this->container->get('db');
+        $adapter = $this->getContainer()->get('db');
         $sqlQueryBuilder = new SqlQueryBuilder($adapter, $this->tableName);
 
         return new DbTable($this->tableGateway, $sqlQueryBuilder);

@@ -25,8 +25,9 @@ use Zend\Db\TableGateway\TableGateway;
  *  'dataStore' => [
  *      'DbTable' => [
  *          'class' => \rollun\datastore\DataStore\DbTable::class,
- *          'tableName' => 'mytableName',
- *          'dbAdapter' => 'db' // Service Name. 'db' by default
+ *          'tableName' => 'myTableName',
+ *          'dbAdapter' => 'db' // service name, optional
+ *          'sqlQueryBuilder' => 'sqlQueryBuilder' // service name, optional
  *      ]
  *  ]
  * </code>
@@ -39,6 +40,7 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
     const KEY_TABLE_NAME = 'tableName';
     const KEY_TABLE_GATEWAY = 'tableGateway';
     const KEY_DB_ADAPTER = 'dbAdapter';
+    const KEY_SQL_QUERY_BUILDER = 'sqlQueryBuilder';
 
     public static $KEY_DATASTORE_CLASS = DbTable::class;
 
@@ -66,7 +68,13 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
 
         $this::$KEY_IN_CREATE = 0;
 
-        return new $requestedClassName($tableGateway);
+        if (isset($config[self::KEY_SQL_QUERY_BUILDER])) {
+            $sqlQueryBuilder = $container->get($config[self::KEY_SQL_QUERY_BUILDER]);
+        } else {
+            $sqlQueryBuilder = null;
+        }
+
+        return new $requestedClassName($tableGateway, $sqlQueryBuilder);
     }
 
     /**

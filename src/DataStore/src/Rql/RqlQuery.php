@@ -1,9 +1,7 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: victorsecuring
- * Date: 26.11.16
- * Time: 11:43 AM
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\Rql;

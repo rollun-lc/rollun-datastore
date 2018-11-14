@@ -65,7 +65,7 @@ class DbTableMultiInsertTest extends DbTableTest
     {
         $this->_initObject();
         $data = [];
-        foreach (range(1, 20000) as $i) {
+        foreach (range(5, 20000) as $i) {
             $data[] = [
                 $this->object->getIdentifier() => $i,
                 'fFloat' => 1000.01 + $i,
@@ -82,7 +82,6 @@ class DbTableMultiInsertTest extends DbTableTest
      */
     protected function _initObject($data = null)
     {
-
         if (is_null($data)) {
             $data = $this->_itemsArrayDelault;
         }

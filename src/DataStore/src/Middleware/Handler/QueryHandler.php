@@ -10,6 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
+use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Query;
@@ -45,40 +46,38 @@ class QueryHandler extends AbstractHandler
         /** @var Query $rqlQuery */
         $rqlQuery = $request->getAttribute('rqlQueryObject');
         $limitNode = $rqlQuery->getLimit();
-
-        $rowSet = $this->dataStore->query($rqlQuery);
+        $items = $this->dataStore->query($rqlQuery);
+        $total = $this->getTotalItems($rqlQuery);
 
         if ($limitNode) {
-            $rqlQuery->setLimit(new LimitNode(ReadInterface::LIMIT_INFINITY));
-            $aggregateCountFunction = new AggregateFunctionNode('count', $this->dataStore->getIdentifier());
-
-            $rqlQuery->setSelect(new SelectNode([$aggregateCountFunction]));
-            $aggregateCount = $this->dataStore->query($rqlQuery);
-
-            $count = current($aggregateCount)["$aggregateCountFunction"];
-
-            if (is_null($limitNode->getOffset())) {
-                $offset = '0';
-            } else {
-                $offset = $limitNode->getOffset();
-            }
-
-            if ($limitNode->getLimit() == ReadInterface::LIMIT_INFINITY) {
-                $limit = $limitNode->getLimit();
-            } else {
-                $limit = $count;
-            }
-
-            $contentRange = "items $offset-" . ($offset + $limit) . "/$count";
+            $offset = $limitNode->getOffset() ?? 0;
         } else {
-            $count = count($rowSet);
-            $contentRange = "items 0-$count/$count";
+            $offset = 0;
         }
 
         $response = new Response();
-        $response = $response->withBody($this->createStream($rowSet));
+        $response = $response->withBody($this->createStream($items));
+
+        $contentRange = "items " . ($offset + 1) . "-" . ($offset + count($items)) . "/$total";
         $response = $response->withHeader('Content-Range', $contentRange);
 
         return $response;
+    }
+
+    /**
+     * Get total count items in data store
+     *
+     * @param Query $rqlQuery
+     * @return mixed
+     */
+    protected function getTotalItems(Query $rqlQuery)
+    {
+        $rqlQuery->setLimit(new LimitNode(ReadInterface::LIMIT_INFINITY));
+        $aggregateCountFunction = new AggregateFunctionNode('count', $this->dataStore->getIdentifier());
+
+        $rqlQuery->setSelect(new SelectNode([$aggregateCountFunction]));
+        $aggregateCount = $this->dataStore->query($rqlQuery);
+
+        return current($aggregateCount)["$aggregateCountFunction"];
     }
 }

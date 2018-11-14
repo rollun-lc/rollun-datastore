@@ -76,9 +76,6 @@ class HttpClientTest extends TestCase
         $url = '';
 
         $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessage(
-            "Can't create item with id = 1. Status: . " . "ReasonPhrase: . Body: " . Serializer::jsonSerialize($body)
-        );
 
         $clientMock = $this->createClientMock('POST', $url, [], 1);
         $clientMock->expects($this->once())
@@ -155,9 +152,6 @@ class HttpClientTest extends TestCase
     {
         $body = 'body';
         $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessage(
-            "Can't update item with id = 1. Status: . " . "ReasonPhrase: . Body: " . Serializer::jsonSerialize($body)
-        );
         $items = ['name' => 'name'];
         $itemsWithId = array_merge($items, ['id' => 1]);
 
@@ -208,10 +202,6 @@ class HttpClientTest extends TestCase
         $url = '';
 
         $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessage(
-            "Can't read item with id = 1. Status: . " . "ReasonPhrase: . Body: " . Serializer::jsonSerialize($body)
-        );
-
         $clientMock = $this->createClientMock('GET', $url . '/1', []);
 
         $response = $this->createResponse($body);
@@ -258,12 +248,6 @@ class HttpClientTest extends TestCase
         $url = '';
 
         $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessage(
-            "Can't execute query = '{$rqlQuery}'. Status: . " . "ReasonPhrase: . Body: " . Serializer::jsonSerialize(
-                $body
-            )
-        );
-
         $clientMock = $this->createClientMock('GET', "{$url}?{$rqlQuery}", []);
 
         $response = $this->createResponse($body);
@@ -306,13 +290,6 @@ class HttpClientTest extends TestCase
         $url = '';
 
         $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessage(
-            "Can't delete item with id = {$items['id']}. Status: . " .
-            "ReasonPhrase: . Body: " . Serializer::jsonSerialize(
-                $body
-            )
-        );
-
         $clientMock = $this->createClientMock('DELETE', "{$url}/{$items['id']}", []);
 
         $response = $this->createResponse($body);
@@ -390,7 +367,6 @@ class HttpClientTest extends TestCase
 
         $headers['Content-Type'] = 'application/json';
         $headers['Accept'] = 'application/json';
-        $headers['APP_ENV'] = constant('APP_ENV');
 
         if ($ifMatch) {
             $headers['If-Match'] = '*';

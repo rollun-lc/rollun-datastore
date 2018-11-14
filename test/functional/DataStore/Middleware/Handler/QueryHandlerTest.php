@@ -128,50 +128,36 @@ class QueryHandlerTest extends BaseHandlerTest
     /**
      * @param RqlQuery $rqlQuery
      * @param DataStoresInterface|PHPUnit_Framework_MockObject_MockObject $dataStore
-     * @param $rowSet
+     * @param $items
      * @return string
      */
-    protected function getContentRange(RqlQuery $rqlQuery, DataStoresInterface $dataStore, $rowSet)
+    protected function getContentRange(RqlQuery $rqlQuery, DataStoresInterface $dataStore, $items)
     {
         $limitNode = $rqlQuery->getLimit();
+        $aggregateCount = [['count(id)' => 5]];
+        $identifier = 'id';
+
+        $rqlQuery->setLimit(new LimitNode(ReadInterface::LIMIT_INFINITY));
+        $aggregateCountFunction = new AggregateFunctionNode('count', $identifier);
+        $rqlQuery->setSelect(new SelectNode([$aggregateCountFunction]));
+
+        $dataStore->expects($this->at(1))
+            ->method('getIdentifier')
+            ->willReturn($identifier);
+
+        $dataStore->expects($this->at(2))
+            ->method('query')
+            ->with($rqlQuery)
+            ->willReturn($aggregateCount);
+
+        $total = current($aggregateCount)["$aggregateCountFunction"];
 
         if ($limitNode) {
-            $aggregateCount = [['count(id)' => 5]];
-            $identifier = 'id';
-
-            $rqlQuery->setLimit(new LimitNode(ReadInterface::LIMIT_INFINITY));
-            $aggregateCountFunction = new AggregateFunctionNode('count', $identifier);
-            $rqlQuery->setSelect(new SelectNode([$aggregateCountFunction]));
-
-            $dataStore->expects($this->at(1))
-                ->method('getIdentifier')
-                ->willReturn($identifier);
-
-            $dataStore->expects($this->at(2))
-                ->method('query')
-                ->with($rqlQuery)
-                ->willReturn($aggregateCount);
-
-            $count = current($aggregateCount)["$aggregateCountFunction"];
-
-            if (is_null($limitNode->getOffset())) {
-                $offset = '0';
-            } else {
-                $offset = $limitNode->getOffset();
-            }
-
-            if ($limitNode->getLimit() == ReadInterface::LIMIT_INFINITY) {
-                $limit = $limitNode->getLimit();
-            } else {
-                $limit = $count;
-            }
-
-            $contentRange = "items $offset-" . ($offset + $limit) . "/$count";
+            $offset = $limitNode->getOffset() ?? 0;
         } else {
-            $count = count($rowSet);
-            $contentRange = "items 0-$count/$count";
+            $offset = 0;
         }
 
-        return $contentRange;
+        return "items " . ($offset + 1) . "-" . ($offset + count($items)) . "/$total";
     }
 }

@@ -201,6 +201,10 @@ abstract class BaseDataStoreTest extends TestCase
             new SelectNode(
                 [
                     new AggregateFunctionNode('count', 'id'),
+                    new AggregateFunctionNode('max', 'id'),
+                    new AggregateFunctionNode('min', 'id'),
+                    new AggregateFunctionNode('sum', 'id'),
+                    new AggregateFunctionNode('avg', 'id'),
                 ]
             )
         );
@@ -217,7 +221,18 @@ abstract class BaseDataStoreTest extends TestCase
         }
 
         $items = $object->query($rqlQuery);
-        $this->assertEquals($items, [['count(id)' => 3]]);
+        $this->assertEquals(
+            $items,
+            [
+                [
+                    'count(id)' => 3,
+                    'max(id)' => 3,
+                    'min(id)' => 1,
+                    'sum(id)' => 6,
+                    'avg(id)' => 2,
+                ],
+            ]
+        );
     }
 
     public function testQueryWithLimitAndOffsetSuccess()
@@ -285,7 +300,11 @@ abstract class BaseDataStoreTest extends TestCase
 
     public function testQueryWithEmptySuccess()
     {
-        $this->assertEquals($this->createObject()->query(new RqlQuery()), []);
+        $this->assertEquals(
+            $this->createObject()
+                ->query(new RqlQuery()),
+            []
+        );
     }
 
     public function testGetIdentifierSuccess()
@@ -300,11 +319,13 @@ abstract class BaseDataStoreTest extends TestCase
     public function testHasSuccess()
     {
         $object = $this->createObject();
-        $object->create([
-            'id' => 1,
-            'name' => "name1",
-            'surname' => "surname1",
-        ]);
+        $object->create(
+            [
+                'id' => 1,
+                'name' => "name1",
+                'surname' => "surname1",
+            ]
+        );
 
         $this->assertTrue($object->has(1));
         $this->assertFalse($object->has(2));
@@ -312,7 +333,10 @@ abstract class BaseDataStoreTest extends TestCase
 
     public function testDeleteSuccess()
     {
-        $this->assertEquals(null, $this->createObject()->delete(1));
+        $this->assertEquals(null,
+            $this->createObject()
+                ->delete(1)
+        );
     }
 
     public function testCountSuccess()
@@ -321,11 +345,13 @@ abstract class BaseDataStoreTest extends TestCase
         $count = 5;
 
         foreach (range(1, 5) as $id) {
-            $object->create([
-                'id' => $this->identifierToType($id),
-                'name' => "name{$id}{$id}{$id}",
-                'surname' => "{$id}surname{$id}",
-            ]);
+            $object->create(
+                [
+                    'id' => $this->identifierToType($id),
+                    'name' => "name{$id}{$id}{$id}",
+                    'surname' => "{$id}surname{$id}",
+                ]
+            );
         }
 
         $this->assertTrue($object instanceof \Countable);

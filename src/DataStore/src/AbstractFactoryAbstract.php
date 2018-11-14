@@ -1,19 +1,13 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore;
 
-//use Zend\ServiceManager\Factory\AbstractFactoryInterface;
-//uncomment it ^^ for Zend\ServiceManager V3
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use Zend\ServiceManager\Factory\AbstractFactoryInterface;
-//comment it ^^ for Zend\ServiceManager V3
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Interop\Container\ContainerInterface;
 
@@ -38,7 +32,6 @@ use Interop\Container\ContainerInterface;
  */
 abstract class AbstractFactoryAbstract implements AbstractFactoryInterface
 {
-
     const KEY_CLASS = 'class';
 
     /**

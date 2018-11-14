@@ -1,10 +1,7 @@
 <?php
-
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 06.06.16
- * Time: 10:29
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\Rql\TokenParser;
@@ -17,10 +14,8 @@ use Xiag\Rql\Parser\TokenStream;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
 
-
 class SelectTokenParser extends AbstractTokenParser
 {
-
     private $allowedFunctions;
 
     public function __construct(array $allowedFunctions)
@@ -36,9 +31,6 @@ class SelectTokenParser extends AbstractTokenParser
     public function parse(TokenStream $tokenStream)
     {
         $fields = [];
-        
-        $a = $tokenStream->expect(Token::T_OPERATOR, 'select');
-        $b = $tokenStream->expect(Token::T_OPEN_PARENTHESIS);
 
         do {
             if (($aggregate = $tokenStream->nextIf(Token::T_OPERATOR, $this->allowedFunctions)) !== null) {

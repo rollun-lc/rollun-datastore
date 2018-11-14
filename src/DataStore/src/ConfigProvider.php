@@ -7,6 +7,7 @@
 namespace rollun\datastore;
 
 use rollun\datastore\DataStore\Aspect\Factory\AspectAbstractFactory;
+use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilderAbstractFactory;
 use rollun\datastore\DataStore\DataStorePluginManager;
 use rollun\datastore\DataStore\DataStorePluginManagerFactory;
 use rollun\datastore\DataStore\Factory\CacheableAbstractFactory;
@@ -20,6 +21,7 @@ use rollun\datastore\Middleware\Factory\DataStoreApiFactory;
 use rollun\datastore\Middleware\Factory\DeterminatorFactory;
 use rollun\datastore\Middleware\RequestDecoder;
 use rollun\datastore\Middleware\ResourceResolver;
+use rollun\datastore\TableGateway\Factory\SqlQueryBuilderAbstractFactory;
 use rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory;
 use rollun\datastore\TableGateway\Factory\TableManagerMysqlFactory;
 use rollun\datastore\TableGateway\TableManagerMysql;
@@ -72,6 +74,8 @@ class ConfigProvider
                 AspectAbstractFactory::class,
 
                 TableGatewayAbstractFactory::class,
+                SqlConditionBuilderAbstractFactory::class,
+                SqlQueryBuilderAbstractFactory::class,
             ],
         ];
     }

@@ -47,10 +47,7 @@ class SerializedDbTableTest extends AbstractTest
         parent::setUp();
         $this->dbTableName = $this->config['testDbTable']['tableName'];
         $this->adapter = $this->container->get('db');
-        $this->object = $this->container->get('testDbTable');
-        //serialize
-        $data = serialize($this->object);
-        $this->object = unserialize($data);
+        $this->object = $this->container->get('testDbTableSerialized');
     }
 
     /**

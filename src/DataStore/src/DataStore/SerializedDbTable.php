@@ -34,10 +34,12 @@ class SerializedDbTable extends DbTable
     public function __wakeup()
     {
         try {
-            InsideConstruct::initWakeup(["dbTable" => $this->tableName]);
-            InsideConstruct::initWakeup(["sqlQueryBuilder" => SqlQueryBuilder::class]);
+            InsideConstruct::initWakeup([
+                "dbTable" => $this->tableName,
+                "sqlQueryBuilder" => SqlQueryBuilder::class,
+            ]);
         } catch (\Throwable $e) {
-            throw new DataStoreException("Can't deserialize itself", 0, $e);
+            throw new DataStoreException("Can't deserialize itself. Reason: {$e->getMessage()}", 0, $e);
         }
     }
 }

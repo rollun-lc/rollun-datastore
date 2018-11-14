@@ -54,6 +54,7 @@ class DbTable extends DataStoreAbstract
     public function create($itemData, $rewriteIfExist = false)
     {
         if ($rewriteIfExist) {
+            // TODO: 'rewriteIfExist' do not work with multiply insert
             trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
         }
 

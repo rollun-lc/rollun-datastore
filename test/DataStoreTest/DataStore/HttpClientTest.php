@@ -44,15 +44,15 @@ class HttpClientTest extends AbstractTest
         return [
             [
                 "limit(1)",
-                ["Content-Range" => "items 0-1/4"]
+                ["Content-Range" => "items 1-1/4"]
             ],
             [
                 "limit(3,1)",
-                ["Content-Range" => "items 1-3/4"]
+                ["Content-Range" => "items 2-4/4"]
             ],
             [
                 "",
-                ["Content-Range" => "items 0-4/4"]
+                ["Content-Range" => "items 1-4/4"]
             ]
         ];
     }
@@ -71,6 +71,7 @@ class HttpClientTest extends AbstractTest
         $client->setOptions(['timeout' => 60]);
         $headerss = $client->getRequest()->getHeaders();
         $responce = $client->send();
+        $a = $responce->getBody();
         $headers = $responce->getHeaders()->toArray();
         foreach ($headerExpected as $key => $value) {
             $this->assertTrue(isset($headers[$key]));

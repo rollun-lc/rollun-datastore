@@ -1,13 +1,10 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: victorsecuring
- * Date: 14.01.17
- * Time: 11:01 AM
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\Rql;
-
 
 use Xiag\Rql\Parser\Parser;
 

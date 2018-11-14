@@ -1,9 +1,7 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 21.07.16
- * Time: 13:39
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\TableGateway\DbSql;
@@ -21,6 +19,7 @@ class MultiInsertSql extends Sql
                 $this->table
             ));
         }
+
         return new MultiInsert(($table) ?: $this->table);
     }
 }

@@ -822,16 +822,6 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($resultExpected, $resultAccept);
     }
 
-    public function testQuery_Is_Null_True()
-    {
-        $this->_initObject($this->_itemsArrayWithIsNull);
-        $query = new Query();
-        $isNullNode = new ScalarOperator\EqNode('isNull', null);
-        $query->setQuery($isNullNode);
-        $queryArray = $this->object->query($query);
-        $this->assertEquals(4, count($queryArray));
-    }
-
     public function testQuery_Is_not_Null_True()
     {
         $this->_initObject($this->_itemsArrayWithIsNull);
@@ -1128,7 +1118,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     {
         $this->_initObject($this->_itemsArrayDelault);
 
-        $result = $this->object->query(new RqlQuery("select(id,fString)&groupby(fString)"));
+        $result = $this->object->query(new RqlQuery("select(count(id),fString)&groupby(fString)"));
         $this->assertEquals(2, count($result));
         $this->assertEquals(['fString' => 'val1', 'count(id)' => 1], $result[0]);
         $this->assertEquals(['fString' => 'val2', 'count(id)' => 3], $result[1]);
@@ -1242,7 +1232,6 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
      */
     public function test_binaryTrueFalseNodes()
     {
-        $this->setUp("exploited1DbTable");
         $this->_initObject([
             ['id' => 1, 'fString' => true,],
             ['id' => 2, 'fString' => false,],
@@ -1262,7 +1251,6 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
 
     public function test_binaryNullNode()
     {
-        $this->setUp("exploited1DbTable");
         $this->_initObject([
             ['id' => 1, 'fString' => 'dsad',],
             ['id' => 2, 'fString' => null,],
@@ -1277,7 +1265,6 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
 
     public function test_binaryIsEmptyNode()
     {
-        $this->setUp("exploited1DbTable");
         $this->_initObject([
             ['id' => 1, 'fString' => 5,],
             ['id' => 2, 'fString' => 0,],
@@ -1301,7 +1288,6 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
      */
     public function test_likeNode()
     {
-        $this->setUp("exploited1DbTable");
         $this->_initObject([
             ['id' => 1, 'fString' => 'abcd',],
             ['id' => 2, 'fString' => 'AbcD',],
