@@ -53,7 +53,7 @@ class CsvBaseTest extends TestCase
 
         $object = $this->createObject();
         $object->create($item);
-        $this->assertSame($item, $object->read($item['id']));
+        $this->assertEquals($item, $object->read($item['id']));
     }
 
     public function testCreateFailItemExistAndWithoutOverwrite()

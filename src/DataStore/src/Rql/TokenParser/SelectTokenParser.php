@@ -32,6 +32,9 @@ class SelectTokenParser extends AbstractTokenParser
     {
         $fields = [];
 
+        $tokenStream->expect(Token::T_OPERATOR, 'select');
+        $tokenStream->expect(Token::T_OPEN_PARENTHESIS);
+
         do {
             if (($aggregate = $tokenStream->nextIf(Token::T_OPERATOR, $this->allowedFunctions)) !== null) {
                 $tokenStream->expect(Token::T_OPEN_PARENTHESIS);

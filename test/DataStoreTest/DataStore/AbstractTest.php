@@ -1233,8 +1233,8 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     public function test_binaryTrueFalseNodes()
     {
         $this->_initObject([
-            ['id' => 1, 'fString' => true,],
-            ['id' => 2, 'fString' => false,],
+            ['id' => 1, 'fString' => 1,],
+            ['id' => 2, 'fString' => 0,],
         ]);
 
         $query = new Query();
