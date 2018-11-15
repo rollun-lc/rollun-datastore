@@ -27,7 +27,7 @@ use Zend\Db\Sql\Ddl\CreateTable;
  * Creates, deletes and rewrites table and gets its info
  *
  * Usage:
- * <code>
+s * <code>
  *  $tableData = [
  *      'fieldName1' => [
  *          'field_type' => 'Integer',

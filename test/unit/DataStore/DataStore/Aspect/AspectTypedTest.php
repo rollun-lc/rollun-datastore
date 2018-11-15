@@ -13,7 +13,9 @@ use rollun\datastore\DataStore\Aspect\AspectTyped;
 use rollun\datastore\DataStore\BaseDto;
 use rollun\datastore\DataStore\Formatter\FormatterInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Type\TypeInt;
 use rollun\datastore\DataStore\Type\TypeInterface;
+use rollun\datastore\DataStore\Type\TypeString;
 use rollun\datastore\Rql\RqlQuery;
 
 class AspectTypedTest extends TestCase
@@ -210,48 +212,6 @@ class UserDto extends BaseDto
     public function getName()
     {
         return $this->name->toTypeValue();
-    }
-}
-
-;
-
-class TypeInt implements TypeInterface
-{
-    protected $value;
-
-    public function __construct($value)
-    {
-        $this->value = $value;
-    }
-
-    public function toTypeValue()
-    {
-        return (int)$this->value;
-    }
-
-    public static function getTypeName()
-    {
-        return 'int';
-    }
-}
-
-class TypeString implements TypeInterface
-{
-    protected $value;
-
-    public function __construct($value)
-    {
-        $this->value = $value;
-    }
-
-    public function toTypeValue()
-    {
-        return (string)$this->value;
-    }
-
-    public static function getTypeName()
-    {
-        return 'string';
     }
 }
 
