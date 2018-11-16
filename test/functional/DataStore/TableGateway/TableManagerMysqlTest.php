@@ -42,7 +42,7 @@ class TableManagerMysqlTest extends \PHPUnit_Framework_TestCase
                 TableManagerMysql::FIELD_TYPE => TableManagerMysql::TYPE_INTEGER,
                 TableManagerMysql::FIELD_PARAMS => [
                     TableManagerMysql::PROPERTY_OPTIONS => [
-                        TableManagerMysql::OPTIONS_AUTOINCREMENT => true,
+                        TableManagerMysql::OPTION_AUTOINCREMENT => true,
                     ],
                 ],
             ],
@@ -61,15 +61,15 @@ class TableManagerMysqlTest extends \PHPUnit_Framework_TestCase
                 TableManagerMysql::FIELD_TYPE => TableManagerMysql::TYPE_INTEGER,
                 TableManagerMysql::FIELD_PARAMS => [
                     TableManagerMysql::PROPERTY_OPTIONS => [
-                        TableManagerMysql::OPTIONS_AUTOINCREMENT => true,
+                        TableManagerMysql::OPTION_AUTOINCREMENT => true,
                     ],
                 ],
                 TableManagerMysql::FOREIGN_KEY => [
-                    TableManagerMysql::OPTIONS_REFERENCE_TABLE => 'testTable1',
-                    TableManagerMysql::OPTIONS_REFERENCE_COLUMN => 'id',
-                    TableManagerMysql::OPTIONS_ON_DELETE_RULE => 'cascade',
-                    TableManagerMysql::OPTIONS_ON_UPDATE_RULE => null,
-                    TableManagerMysql::OPTIONS_NAME => null,
+                    TableManagerMysql::OPTION_REFERENCE_TABLE => 'testTable1',
+                    TableManagerMysql::OPTION_REFERENCE_COLUMN => 'id',
+                    TableManagerMysql::OPTION_ON_DELETE_RULE => 'cascade',
+                    TableManagerMysql::OPTION_ON_UPDATE_RULE => null,
+                    TableManagerMysql::OPTION_NAME => null,
                 ],
             ],
             'name' => [

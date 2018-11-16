@@ -12,34 +12,36 @@ http), Memory (для [RAM](https://en.wikipedia.org/wiki/Random-access_memory))
 
 - `getIdentifier()` - возвращает имя поля, которое служит `primary key` для идентификации уникальной записи (по 
 умолчанию это `id`);
-- `count()` - возвращяет количестов записей;
+- `count()` - возвращает количество записей;
 - `create($itemData)` - создает новую запись (если такая запись уже существует или не указан `primary key`,
-будет выброшен exception), возвращает созданую запись;
-- `update($itemData)` - обновляет существующюю запись (если такая запись не существует или не указан `primary key`,
-будет выброшен exception), возвращает обновленую запись;
+будет выброшен exception), возвращает созданную запись;
+- `update($itemData)` - обновляет существующею запись (если такая запись не существует или не указан `primary key`,
+будет выброшен exception), возвращает обновленную запись;
 - `delete($id)` - удаляет запись по `primary key`, возвращает удаленную запись;
 - `has($id)` - проверяет существует ли запись в хранилище, возвращает true/false;
 - `read($id)` - возвращает запись по `primary key`;
 - `query(Query $query)` - возвращает массив записей которые совпадают, указаному в `$query`, rql выражению.
 
-Как уже было подмечено, для точной идентификации записи в хранидище используеться `primary key`. Предполагаеться что
+
+Как уже было подмечено, для точной идентификации записи в хранилище используется `primary key`. Предполагается что
 идентификатор не автоинкрементный, по этому вызов метода `create` без указание идентификатора выбросит exception
-(или в случае старых версии приведет к ошыбке уровня `E_USER_DEPRECATED`).
+(или в случае старых версии приведет к ошибке уровня `E_USER_DEPRECATED`).
 
 **Реализации `DataStoreInterface`, которые предоставляет библиотека:**
 
-- `DbTable` - для таблиц баз данных (по скольку зависимость `TableGateway` предоставляеться
+- `DbTable` - для таблиц баз данных (по скольку зависимость `TableGateway` предоставляется
 [zendframework/zend-db](https://github.com/zendframework/zend-db), то есть возможность использовать MySQL,
 PostgreSQL,Oracle, IBM DB2, Microsoft Sql Server, PDO и тд.);
 - `SerializedDbTable` - тот же `DbTable`, только умеющий сериализоваться;
 - `CsvBase` - для [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) файлов;
-- `HttpClient` - для внешних ресурсов через `http` (разумееться если этот ресурс умеет обрабатывть соответственные обращения);
+- `HttpClient` - для внешних ресурсов через `http` (разумеется если этот ресурс умеет обрабатывать соответственные 
+обращения);
 - `Memory` - хранилище в оперативной памяти
-- `Cacheable` - декоратор вокруг `DataStoresInterface`, который представляет возможность кэширования данных;
+- `Cacheable` - декоратор вокруг `DataStoresInterface`, который представляет возможность кэширования данных.
 
 ##### 1. DbTable и SerializedDbTable
 
-Для того чтобы начать использовтаь DbTable data store нужен
+Для того чтобы начать использовать DbTable data store нужен
 [Zend\Db\TableGateway\TableGateway](https://zendframework.github.io/zend-db/table-gateway/)
 
 Пример:
@@ -120,7 +122,7 @@ var_dump($httpClient->read(1)); // ['id' => '1', 'name' => 'foo']
 
 ##### 4. Memory
 
-Для работы с Memory нужно указать поля (если поля не будут указаны то будет выброшена ошыбка уровня 
+Для работы с Memory нужно указать поля (если поля не будут указаны то будет выброшена ошибка уровня 
 `E_USER_DEPRECATED`).
 
 ```php
@@ -139,9 +141,11 @@ var_dump($memory->read(1)); // ['id' => '1', 'name' => 'foo']
 
 ##### 5. Cacheable
 
-`Cacheable` используеться для того чтобы можна было хранить данные в кеше для более быстрого доступа и обновлять его.
-Для этого `Cacheable` нужно сам источник данных, который реализует интерфейс `DataSourceInterface` и data store
-Так же если источник данных поддержывает методы `DataStoresInterface` для записи данных, можно обновлять обновлять его.
+`Cacheable` используется для того чтобы можно было хранить данные в кеше для более быстрого доступа и обновлять его.
+Для этого `Cacheable` нужно источник данных, который реализует кдинственный метод `getAll()` интерфейса
+`DataSourceInterface` и 
+data store
+Так же если источник данных поддерживает методы `DataStoresInterface` для записи данных, можно обновлять его.
 
 Пример:
 
@@ -186,10 +190,11 @@ var_dump($cacheable->read(1)); // ['id' => 1, 'name' => 'foo1']
 var_dump($cacheable->read(4)); // ['id' => 4, 'name' => 'foo4']
 ```
 
+
 ### Data Type
 
 Data store не имеет никакого представления о типах данных которые он хранит, поэтому типизацией и хранением данных о себе 
-data store занимается аспект data store который поддерживет интерфейс SchemableInterface
+data store занимается аспект data store который поддерживает интерфейс SchemableInterface
 и реализует метод getSchema этого интерфейса. Для описания типа и форматтера для каждого столбца используется схема.
 Схема это массив, ключ которого это название поля а значение - массив, в котором храниться в качестве ключей `type`,
 `formatter`, а в качестве значений соответствующие классы.
@@ -294,3 +299,266 @@ class StringFormatter implements FormatterInterface
     }
 }
 ```
+
+
+### Middleware
+
+Как было указано, для `HttpClient` нужно предоставить url, который будет корректно обрабатывать `GET`, `POST`, '`PUT`,
+`DELETE`, `PATCH` в соответствии с RESTful API и уметь обрабатывать RQL. С этой задачей может справиться `Data Store Middleware`.
+Для этого нужно в качестве middleware обработчика route указать `DataStoreApi`. Нужно чтобы route был типа 
+`/api/datastore/{resourceName}[/{id}]` и иметь в сервис с именем `resourceName` в реализации `PSR ContainerInterface`
+вашего приложения.
+
+Пример конфигураций route для 
+[zendframework/zend-expressive-skeleton](https://github.com/zendframework/zend-expressive-skeleton):
+
+1. Посредством конфигурационного файла для [zendframework/zend-expressive](https://github.com/zendframework/zend-expressive)
+```php
+<?php
+
+use rollun\datastore\Middleware\DataStoreApi;
+
+return [
+    'routes' => [
+        [
+            'name' => DataStoreApi::class,
+            'path' => '/api/datastore/{resourceName}[/{id}]',
+            'middleware' => DataStoreApi::class,
+            'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+        ],
+    ],
+];
+```
+
+2. Через объект `\Zend\Expressive\Application`
+
+```php
+<?php
+
+use rollun\datastore\Middleware\DataStoreApi;
+
+/** @var \Zend\Expressive\Application $app */
+$app->route(
+    '/api/datastore[/{resourceName}[/{id}]]', // route pattern
+    DataStoreApi::class, // middleware
+    ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    DataStoreApi::class // route name
+);
+```
+
+
+### RQL
+
+RQL - простой язык построения запросов для абстрактных хранилищ. В данной библиотеки реализация RQL от 
+[xiag/rql-parser](https://github.com/xiag-ag/rql-parser). Построить запрос можна с помощью строки:
+
+```php
+<?php
+
+use rollun\datastore\DataStore\Memory;
+use rollun\datastore\Rql\RqlQuery;
+
+$dataStore = new Memory(['id', 'name', 'age']);
+
+// You can use string
+$rql = new RqlQuery('and(ge(id,1),or(not(eqn(name)),not(eqn(surname))))&limit(1)&select(email,password)');
+$dataStore->query($rql);
+```
+
+Так и с помощью `node` объектов:
+
+```php
+<?php
+
+use rollun\datastore\DataStore\Memory;
+use rollun\datastore\Rql\RqlQuery;
+use Xiag\Rql\Parser\Node as XiagNode;
+use rollun\datastore\Rql\Node as RollunNode;
+
+$dataStore = new Memory(['id', 'name', 'age']);
+
+$rql = new RqlQuery(
+    new XiagNode\Query\LogicOperator\AndNode([
+        new XiagNode\Query\ScalarOperator\GeNode('eq', 1),
+        new XiagNode\Query\LogicOperator\OrNode([
+            new XiagNode\Query\LogicOperator\NotNode([
+                new RollunNode\BinaryNode\EqnNode('name')    
+            ]),
+            new XiagNode\Query\LogicOperator\NotNode([
+                new RollunNode\BinaryNode\EqnNode('surname')    
+            ])
+        ])
+    ])
+);
+$rql->setLimit(new XiagNode\LimitNode(1));
+$rql->setSelect(new XiagNode\SelectNode(['email', 'password']));
+$dataStore->query($rql);
+```
+
+
+### Table mysql manager
+
+Так же библиотека предоставляет возможность создавать и удалять таблицы бд используя `TableMysqlManager`. Для это нужен
+`Zend\Db\Adapter\Adapter`. Создать таблицы можно и при инициализации объекта и при вызове методы `createTable()` с 
+помощью конфигураций. Структура конфигураций представляет собой массив, где ключ - имя поля, а значение - массив со 
+следующими ключами:
+
+1. `TableManagerMysql::FIELD_TYPE` указывает на тип поля. Доступные значения и их константы разбитые на групы:
+    - `TableManagerMysql::COLUMN_SIMPLE`:
+        - `TableManagerMysql::TYPE_BIG_INTEGER`
+        - `TableManagerMysql::TYPE_BOOLEAN`
+        - `TableManagerMysql::TYPE_DATE`
+        - `TableManagerMysql::TYPE_DATETIME`
+        - `TableManagerMysql::TYPE_INTEGER`
+        - `TableManagerMysql::TYPE_TIME`
+        - `TableManagerMysql::TYPE_TIMESTAMP`
+        - `TableManagerMysql::TYPE_BINARY`
+    - `TableManagerMysql::COLUMN_LENGTH`:
+        - `TableManagerMysql::TYPE_BLOB`
+        - `TableManagerMysql::TYPE_CHAR`
+        - `TableManagerMysql::TYPE_TEXT`
+        - `TableManagerMysql::TYPE_VARBINARY`
+        - `TableManagerMysql::TYPE_VARCHAR`
+    - `TableManagerMysql::COLUMN_PRECISION`:
+        - `TableManagerMysql::TYPE_DECIMAL`
+        - `TableManagerMysql::TYPE_FLOAT`
+        - `TableManagerMysql::TYPE_FLOATING`
+    
+2. `TableManagerMysql::FIELD_PARAMS` указывает на дополнительные свойства полей в виде массива. Доступные свойства - константы:
+    - Для всех групп:
+        - `TableManagerMysql::PROPERTY_NULLABLE`
+        - `TableManagerMysql::PROPERTY_DEFAULT`
+        - `TableManagerMysql::PROPERTY_OPTIONS` ключ, значением которого сформирован с массива доступных опций:
+            -  `TableManagerMysql::OPTION_AUTOINCREMENT`
+            -  `TableManagerMysql::OPTION_UNSIGNED`
+            -  `TableManagerMysql::OPTION_ZEROFILL`
+            -  `TableManagerMysql::OPTION_IDENTITY`
+            -  `TableManagerMysql::OPTION_SERIAL`
+            -  `TableManagerMysql::OPTION_COMMENT`
+            -  `TableManagerMysql::OPTION_COLUMNFORMAT`
+            -  `TableManagerMysql::OPTION_FORMAT`
+            -  `TableManagerMysql::OPTION_STORAGE`
+    - `TableManagerMysql::COLUMN_LENGTH`:
+        - `TableManagerMysql::PROPERTY_LENGTH`
+    - `TableManagerMysql::COLUMN_PRECISION`:
+        - `TableManagerMysql::PROPERTY_DIGITS`
+        - `TableManagerMysql::PROPERTY_DECIMAL`
+        
+3. `TableManagerMysql::FOREIGN_KEY` описывает внешний ключ данного поля в виде массива из доступных констант:
+    - `TableManagerMysql::OPTION_REFERENCE_TABLE`
+    - `TableManagerMysql::OPTION_REFERENCE_COLUMN`
+    - `TableManagerMysql::OPTION_ON_DELETE_RULE`
+    - `TableManagerMysql::OPTION_ON_UPDATE_RULE`
+    - `TableManagerMysql::OPTION_NAME`
+        
+4. `TableManagerMysql::UNIQUE_KEY` описывает уникальный ключ. В качестве значения принимается имя ключа.
+
+
+Пример:
+
+```php
+<?php
+
+use rollun\datastore\TableGateway\TableManagerMysql;
+use Zend\Db\Adapter\Adapter;
+
+$tableConfig = [
+    'id' => [
+        TableManagerMysql::FIELD_TYPE => TableManagerMysql::TYPE_INTEGER,
+        TableManagerMysql::FIELD_PARAMS => [
+            TableManagerMysql::PROPERTY_OPTIONS => [
+                TableManagerMysql::OPTION_AUTOINCREMENT => true,
+            ],
+        ],
+    ],
+    'name' => [
+        TableManagerMysql::FIELD_TYPE => TableManagerMysql::TYPE_VARCHAR,
+        TableManagerMysql::FIELD_PARAMS => [
+            TableManagerMysql::PROPERTY_LENGTH => 10,
+            TableManagerMysql::PROPERTY_NULLABLE => true,
+            TableManagerMysql::PROPERTY_DEFAULT => 'foo',
+        ],
+        TableManagerMysql::UNIQUE_KEY => true,
+    ],
+];
+
+$dbConfig = [
+    'driver'   => 'Mysqli',
+    'database' => 'zend_db_example',
+    'username' => 'developer',
+    'password' => 'developer-password',
+];
+
+$adapter = new Adapter($dbConfig);
+$tableManager = new TableManagerMysql($adapter);
+$tableManager->createTable('tableName1', $tableConfig);
+```
+
+Для того чтобы создать таблицы и/или задать конфигурации для таблиц при инициализации объекта нужно задать 
+конфигурации таблиц под ключами `TableManagerMysql::KEY_AUTOCREATE_TABLES` и `TableManagerMysql::KEY_TABLES_CONFIGS` 
+соответственно вторым параметром конструктора.
+
+Пример:
+
+```php
+<?php
+
+use rollun\datastore\TableGateway\TableManagerMysql;
+use Zend\Db\Adapter\Adapter;
+
+$tablesConfigs = [
+    TableManagerMysql::KEY_AUTOCREATE_TABLES => [
+        'tableName2' => [
+            'id' => [
+                TableManagerMysql::FIELD_TYPE => TableManagerMysql::TYPE_INTEGER,
+                TableManagerMysql::FIELD_PARAMS => [
+                    TableManagerMysql::PROPERTY_OPTIONS => [
+                        TableManagerMysql::OPTION_AUTOINCREMENT => true,
+                    ],
+                ],
+                TableManagerMysql::FOREIGN_KEY => [
+                    TableManagerMysql::OPTION_REFERENCE_TABLE => 'tableName1',
+                    TableManagerMysql::OPTION_REFERENCE_COLUMN => 'id',
+                    TableManagerMysql::OPTION_ON_DELETE_RULE => 'cascade',
+                    TableManagerMysql::OPTION_ON_UPDATE_RULE => null,
+                    TableManagerMysql::OPTION_NAME => null,
+                ],
+            ],
+            'name' => [
+                TableManagerMysql::FIELD_TYPE => TableManagerMysql::TYPE_VARCHAR,
+                TableManagerMysql::FIELD_PARAMS => [
+                    TableManagerMysql::PROPERTY_LENGTH => 10,
+                    TableManagerMysql::PROPERTY_NULLABLE => true,
+                    TableManagerMysql::PROPERTY_DEFAULT => 'foo',
+                ],
+            ],
+        ],
+    ],
+    TableManagerMysql::KEY_TABLES_CONFIGS => [
+        'tableName3' => [
+            'id' => [
+                TableManagerMysql::FIELD_TYPE => TableManagerMysql::TYPE_VARCHAR,
+                TableManagerMysql::FIELD_PARAMS => [
+                    TableManagerMysql::PROPERTY_LENGTH => 10,
+                    TableManagerMysql::PROPERTY_NULLABLE => true,
+                    TableManagerMysql::PROPERTY_DEFAULT => 'foo',
+                ],
+            ],
+        ],
+    ],
+];
+
+$dbConfig = [
+    'driver'   => 'Mysqli',
+    'database' => 'zend_db_example',
+    'username' => 'developer',
+    'password' => 'developer-password',
+];
+
+$adapter = new Adapter($dbConfig);
+$tableManager = new TableManagerMysql($adapter, $tablesConfigs);
+```
+
+
+### Cleaner 
+

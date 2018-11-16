@@ -315,7 +315,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
 
             usleep(10);
 
-            return $this->lockFile(($nbTries + 1));
+            return $this->lockFile($nbTries + 1);
         }
 
         return true;

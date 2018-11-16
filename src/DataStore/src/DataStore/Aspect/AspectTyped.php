@@ -146,7 +146,7 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
             $itemData[$field] = new $typeClassName($value);
         }
 
-        return $this->dtoClassName::createFromArray($itemData);
+        return call_user_func([$this->dtoClassName, 'createFromArray'], $itemData);
     }
 
     /**
@@ -162,7 +162,7 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
             $typeClassName = $fieldInfo['type'];
 
             $scheme[$fieldName] = [
-                'type' => $typeClassName::getTypeName(),
+                'type' => call_user_func([$typeClassName, 'getTypeName']),
             ];
         }
 

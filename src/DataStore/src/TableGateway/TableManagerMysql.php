@@ -122,12 +122,21 @@ class TableManagerMysql
     const PROPERTY_OPTIONS = 'options';
 
     // Option keys
-    const OPTIONS_AUTOINCREMENT = 'autoincrement';
-    const OPTIONS_REFERENCE_TABLE = 'referenceTable';
-    const OPTIONS_REFERENCE_COLUMN = 'referenceColumn';
-    const OPTIONS_ON_DELETE_RULE = 'onDeleteRule';
-    const OPTIONS_ON_UPDATE_RULE = 'onUpdateRule';
-    const OPTIONS_NAME = 'name';
+    const OPTION_REFERENCE_TABLE = 'referenceTable';
+    const OPTION_REFERENCE_COLUMN = 'referenceColumn';
+    const OPTION_ON_DELETE_RULE = 'onDeleteRule';
+    const OPTION_ON_UPDATE_RULE = 'onUpdateRule';
+    const OPTION_NAME = 'name';
+
+    const OPTION_AUTOINCREMENT = 'autoincrement';
+    const OPTION_UNSIGNED = 'unsigned';
+    const OPTION_ZEROFILL = 'zerofill';
+    const OPTION_IDENTITY = 'identity';
+    const OPTION_SERIAL = 'serial';
+    const OPTION_COMMENT = 'comment';
+    const OPTION_COLUMNFORMAT = 'columnformat';
+    const OPTION_FORMAT = 'format';
+    const OPTION_STORAGE = 'storage';
 
     /**
      * Grouped column types by column type group
@@ -494,7 +503,7 @@ class TableManagerMysql
         foreach ($defaultFieldParameters as $key => $value) {
             if ($key === self::PROPERTY_OPTIONS
                 && isset($fieldData[self::FIELD_PARAMS][self::PROPERTY_OPTIONS])
-                && key_exists(self::OPTIONS_AUTOINCREMENT, $fieldData[self::FIELD_PARAMS][self::PROPERTY_OPTIONS])) {
+                && key_exists(self::OPTION_AUTOINCREMENT, $fieldData[self::FIELD_PARAMS][self::PROPERTY_OPTIONS])) {
                 trigger_error("Autoincrement field is deprecated", E_USER_DEPRECATED);
             }
 

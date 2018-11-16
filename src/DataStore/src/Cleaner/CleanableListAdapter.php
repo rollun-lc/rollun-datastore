@@ -27,6 +27,7 @@ class CleanableListAdapter implements \IteratorAggregate, CleanableListInterface
     {
         $primaryKey = $this->datastore->getIdentifier();
         $id = $item[$primaryKey];
+
         try {
             $this->datastore->delete($id);
         } catch (Exception $exc) {
