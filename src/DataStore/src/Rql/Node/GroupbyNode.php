@@ -8,7 +8,7 @@ namespace rollun\datastore\Rql\Node;
 
 use Xiag\Rql\Parser\AbstractNode;
 
-class GroupByNode extends AbstractNode
+class GroupbyNode extends AbstractNode
 {
     private $fields;
 

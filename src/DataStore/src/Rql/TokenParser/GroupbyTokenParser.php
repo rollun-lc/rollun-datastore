@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\Rql\TokenParser;
 
-use rollun\datastore\Rql\Node\GroupByNode;
+use rollun\datastore\Rql\Node\GroupbyNode;
 use Xiag\Rql\Parser\AbstractNode;
 use Xiag\Rql\Parser\AbstractTokenParser;
 use Xiag\Rql\Parser\Exception\SyntaxErrorException;
@@ -36,7 +36,7 @@ class GroupbyTokenParser extends AbstractTokenParser
 
         $tokenStream->expect(Token::T_CLOSE_PARENTHESIS);
 
-        return new GroupByNode($fields);
+        return new GroupbyNode($fields);
     }
 
     /**

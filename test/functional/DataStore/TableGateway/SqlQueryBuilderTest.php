@@ -15,7 +15,7 @@ use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
 use rollun\datastore\Rql\Node\BinaryNode\IeNode;
 use rollun\datastore\Rql\Node\ContainsNode;
-use rollun\datastore\Rql\Node\GroupByNode;
+use rollun\datastore\Rql\Node\GroupbyNode;
 use rollun\datastore\Rql\Node\LikeGlobNode;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
@@ -198,7 +198,7 @@ class SqlQueryBuilderTest extends TestCase
         $object = new SqlQueryBuilder($this->mockAdapter, $tableName);
 
         $rqlQuery = new RqlQuery();
-        $rqlQuery->setGroupBy(new GroupByNode(['a', 'b']));
+        $rqlQuery->setGroupBy(new GroupbyNode(['a', 'b']));
 
         $select = "SELECT `table`.* FROM `table` ";
         $where = "WHERE '1' = '1' ";
@@ -240,7 +240,7 @@ class SqlQueryBuilderTest extends TestCase
 
         $rqlQuery->setLimit(new LimitNode(5));
         $rqlQuery->setSort(new SortNode(['a' => SortNode::SORT_ASC]));
-        $rqlQuery->setGroupBy(new GroupByNode(['a', 'b']));
+        $rqlQuery->setGroupBy(new GroupbyNode(['a', 'b']));
 
         $select = "SELECT `table`.* FROM `table` ";
         $where = "WHERE ((`a` LIKE BINARY 'b') AND ((`a` IS FALSE) OR ( NOT ((`a`>'b')) ))) ";

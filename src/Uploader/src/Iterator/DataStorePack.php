@@ -7,7 +7,7 @@
 namespace rollun\uploader\Iterator;
 
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
-use rollun\uploader\SeekableIterator;
+use SeekableIterator;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\GtNode;
 use Xiag\Rql\Parser\Node\SortNode;

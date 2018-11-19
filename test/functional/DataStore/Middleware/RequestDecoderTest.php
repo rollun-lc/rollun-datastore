@@ -14,7 +14,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\Middleware\RequestDecoder;
 use rollun\datastore\Middleware\RestException;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
-use rollun\datastore\Rql\Node\GroupByNode;
+use rollun\datastore\Rql\Node\GroupbyNode;
 use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
@@ -133,7 +133,7 @@ class RequestDecoderTest extends TestCase
                     $query->setQuery(new EqNode('a', 1));
                     $query->setSort(new SortNode(['a' => 1]));
                     $query->setSelect(new AggregateSelectNode(['a']));
-                    $query->setGroupBy(new GroupByNode(['a']));
+                    $query->setGroupBy(new GroupbyNode(['a']));
                     $query->setLimit(new LimitNode(5, 0));
 
                     return $request->getAttribute('rqlQueryObject') == $query;

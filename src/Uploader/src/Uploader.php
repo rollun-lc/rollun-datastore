@@ -6,8 +6,9 @@
 
 namespace rollun\uploader;
 
-use IteratorAggregate;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use SeekableIterator;
+use Traversable;
 
 /**
  * Class Uploader
@@ -16,7 +17,7 @@ use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 class Uploader
 {
     /**
-     * @var  IteratorAggregate
+     * @var Traversable
      */
     protected $sourceDataIteratorAggregator;
 
@@ -32,11 +33,11 @@ class Uploader
 
     /**
      * Uploader constructor.
-     * @param IteratorAggregate $sourceDataIteratorAggregator
+     * @param Traversable $sourceDataIteratorAggregator
      * @param DataStoresInterface $destinationDataStore
      */
     public function __construct(
-        IteratorAggregate $sourceDataIteratorAggregator,
+        Traversable $sourceDataIteratorAggregator,
         DataStoresInterface $destinationDataStore
     ) {
         $this->sourceDataIteratorAggregator = $sourceDataIteratorAggregator;
@@ -45,13 +46,11 @@ class Uploader
 
     public function upload()
     {
-        $iterator = $this->sourceDataIteratorAggregator->getIterator();
-
-        if (isset($this->key) && $iterator instanceof SeekableIterator) {
-            $iterator->seek($this->key); //set iterator to last position.
+        if ($this->sourceDataIteratorAggregator instanceof SeekableIterator && isset($this->key)) {
+            $this->sourceDataIteratorAggregator->seek($this->key);
         }
 
-        foreach ($iterator as $key => $value) {
+        foreach ($this->sourceDataIteratorAggregator as $key => $value) {
             $this->key = $key;
             $this->destinationDataStore->create($value, true);
         }
@@ -65,23 +64,8 @@ class Uploader
         $this->upload();
     }
 
-    /**
-     * @return array
-     */
-    public function __sleep()
-    {
-        return [
-            "iteratorAggregate",
-            "destinationDataStore",
-            "key",
-        ];
-    }
-
-    /**
-     *
-     */
     public function __wakeup()
     {
-        $this->__construct($this->sourceDataIteratorAggregator, $this->destinationDataStore);
+        $this->key = null;
     }
 }

@@ -350,7 +350,179 @@ $app->route(
 ### RQL
 
 RQL - простой язык построения запросов для абстрактных хранилищ. В данной библиотеки реализация RQL от 
-[xiag/rql-parser](https://github.com/xiag-ag/rql-parser). Построить запрос можна с помощью строки:
+[xiag/rql-parser](https://github.com/xiag-ag/rql-parser). Атомарной единицей запроса является нода. Есть несколько вид 
+нод: операторов (составляют сравнений), групировки, выборки, сортировки и нода лимита. 
+Все эти типы нод в строковом представлении разделяются знаком `&`. Построить запрос можно с помощью строки или с 
+помощю объектов.
+
+**Существующие ноды объекты и их строковые эквиваленты:**
+
+1. Операторы для работы с массивами
+    * `in`. Оператор который позволяет определить, совпадает ли значение поля со значением в списке.
+        - Объект: `Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode`. Пример: 
+             ```php
+             $query = new InNode('name', ['John', 'Jackson', 'Liam']);
+             ```
+        - Строковое представление: `in`. Пример:
+            ```php
+            $query = 'in(name,John,Jackson,Liam)';
+            ```
+    * `out`. Оператор который позволяет определить, НЕ совпадает ли значение поля со значением в списке (обратное к `in`).
+        - Объект: `Xiag\Rql\Parser\Node\Query\ArrayOperator\OutNode`. Пример: 
+             ```php
+             $query = new OutNode('name', ['Grayson', 'Lucas']);
+             ```
+        - Строковое представление: `out`. Пример:
+            ```php
+            $query = 'out(name,Grayson,Lucas)';
+
+2. Логические операторы
+    * `and`. Оператор, который отображает только те записи, когда все условие является правдой (`true`).
+        - Объект: `Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode`.  В качестве параметров принимает ноды. Пример: 
+             ```php
+             $query = new AndNode([
+                 new EqNode('name', 'John'),  
+                 new EqNode('surname', 'Smith')  
+             ]);
+             ```
+        - Строковое представление: `and`. Пример:
+            ```php
+            $query = 'and(eq(name,John),eq(surname,Smith))1;
+            ```
+    * `or`. Оператор, который отображает только те записи, когда хотя бы одно из двух условий является правдой (`true`).
+        - Объект: `Xiag\Rql\Parser\Node\Query\ArrayOperator\OrNode`. В качестве параметров принимает ноды. Пример: 
+             ```php
+             $query = new OrNode([
+                 new EqNode('login', 'congrate'),  
+                 new EqNode('name', 'John')  
+             ]);
+             ```
+        - Строковое представление: `or`. Пример:
+            ```php
+            $query = 'or(eq(login,congrate),eq(name,John))';
+            ```
+    * `not`. Оператор служит для задания противоположно заданного условия.
+        - Объект: `Xiag\Rql\Parser\Node\Query\ArrayOperator\NotNode`. В качестве параметров принимает ноды. Пример: 
+             ```php
+             $query = new NotNode([EqNode('id', '1')]);
+             ```
+        - Строковое представление: `not`. Пример:
+            ```php
+            $query = 'not(eq(id,1))';
+            ```
+
+3. Бинарные операторы:
+    * `eqf`. Оператор служит для сравнение с булевым `false`.
+        - Объект: `rollun\datastore\Rql\Node\BinaryNode\EqfNode`. Пример: 
+             ```php
+             $query = new EqfNode('isActive');
+             ```
+        - Строковое представление: `eqf`. Пример:
+            ```php
+            $query = 'eqf(isActive)';
+            ```
+    * `eqt`. Оператор служит для сравнение с булевым `true`.
+        - Объект: `rollun\datastore\Rql\Node\BinaryNode\EqtNode`. Пример: 
+             ```php
+             $query = new EqtNode('isActive');
+             ```
+        - Строковое представление: `eqt`. Пример:
+            ```php
+            $query = 'eqt(isActive)';
+            ```
+    * `eqn`. Оператор служит для сравнение с `null`.
+        - Объект: `rollun\datastore\Rql\Node\BinaryNode\EqnNode`. Пример: 
+             ```php
+             $query = new EqbNode('name');
+             ```
+        - Строковое представление: `eqn`. Пример:
+            ```php
+            $query = 'eqn(name)';
+            ```
+    * `ie`. Оператор служит для того, чтобы определить является ли значение пустым (равным `false` или `null`).
+        - Объект: `rollun\datastore\Rql\Node\BinaryNode\IeNode`. Пример: 
+             ```php
+             $query = new IeNode('name');
+             ```
+        - Строковое представление: `ie`. Пример:
+            ```php
+            $query = 'ie(name)';
+            ```
+4. Скалярные операторы:
+    * `eq`, `ge`, `gt`, `le`, `lt`, `ne` аналогичны операторам `=`, `>=` ,`>` ,`<=` ,`<`, `!=`. Названия операторов 
+    эквивалентны их строковым представлениям. Соответствие строкового представления к объектам:
+        - `Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode` для `eq`; 
+        - `Xiag\Rql\Parser\Node\Query\ScalarOperator\GeNode` для `ge`; 
+        - `Xiag\Rql\Parser\Node\Query\ScalarOperator\GtNode` для `gt`; 
+        - `Xiag\Rql\Parser\Node\Query\ScalarOperator\LeNode` для `le`; 
+        - `Xiag\Rql\Parser\Node\Query\ScalarOperator\LtNode` для `lt`; 
+        - `Xiag\Rql\Parser\Node\Query\ScalarOperator\NeNode` для `ne`;
+        Пример:
+        ```php
+        $query = 'gt(age,21)';
+        $query = GtNode('age', '21');
+        ```
+
+5. Нода для задания лимита (`limit`) и сдвига (`offset`)
+    - Объект: `Xiag\Rql\Parser\Node\LimitNode`. Первый параметр для задание лимита, в второй (необязательный) 
+    для задания сдвига. Пример: 
+        ```php
+        $query = new LimitNode(5, 10);
+        ```
+    - Строковое представление: `limit`. Пример:
+        ```php
+        $query = 'limit(5,10)';
+        ```
+
+6. Нода для задания агрегирующей функции. Доступные функции: `count`, `max`, `min`, `sum`, `avg`. Используется 
+только в сочетании с `AggregateSelectNode`. Объект: `rollun\datastore\Rql\Node\AggregateFunctionNode`.
+
+7. Нода для задания выборки (поля которые нужно считать). Если нода не задана, по умолчанию будут считаны все поля.
+    * `SelectNode`.
+        - Объект: `Xiag\Rql\Parser\Node\SelectNode`.
+        для задания сдвига. Пример: 
+            ```php
+            $query = new SelectNode(['id', 'name']);
+            ```
+        - Строковое представление: `select`. Пример:
+            ```php
+            $query = 'select(id,name)';
+            ```
+    * `AggregateSelectNode`. Точно такая же нода как и `SelectNode`, за исключением того что в качестве поля может
+    принимать агрегирующую ноду.
+        - Объект: `rollun\datastore\Rql\Node\AggregateSelectNode`. Пример:
+            ```php
+            $query = new AggregateSelectNode(['id', new AggregateFunctionNode('count', 'name)]);
+            ```
+        - Строковое представление аналогично. Пример:
+            ```php
+            $query = 'select(id,count(name))';
+            ```
+
+8. Нода для задания сортировки.
+    - Объект: `Xiag\Rql\Parser\Node\SortNode`. Принимает массив, где ключ - поле, значение - `1`(asc) или `-1`(desc) 
+    Пример: 
+        ```php
+        $query = new SortNode(['id' => 1, 'name' => -1]);
+        ```
+    - Строковое представление: `sort`. Пример:
+        ```php
+        $query = 'sort(+id,-name)'; // or 'sort(id,-name)'
+        ```
+        
+9. Нода для задания группировки.
+    - Объект: `rollun\datastore\Rql\Node\GroupByNode`. Принимает массив полей для группировки.
+        ```php
+        $query = new GroupbyNode(['name']);
+        ```
+    - Строковое представление: `ie`. Пример:
+        ```php
+        $query = 'groupby(name)';
+        ```
+        
+Чтобы задать тип используется структуру типа `{type}:{value}`.
+
+Пример:
 
 ```php
 <?php
@@ -364,8 +536,6 @@ $dataStore = new Memory(['id', 'name', 'age']);
 $rql = new RqlQuery('and(ge(id,1),or(not(eqn(name)),not(eqn(surname))))&limit(1)&select(email,password)');
 $dataStore->query($rql);
 ```
-
-Так и с помощью `node` объектов:
 
 ```php
 <?php
@@ -562,3 +732,79 @@ $tableManager = new TableManagerMysql($adapter, $tablesConfigs);
 
 ### Cleaner 
 
+`Cleaner` предоставляет гибкий способ удаление данных, которые прошли 'валидацию на удаление' с data store. Для этого
+нужно реализовать единственный метод `isValid()` интерфейса `CleaningValidatorInterface`.
+
+Пример:
+
+```php
+<?php
+
+use rollun\datastore\DataStore\Memory;
+use rollun\datastore\Cleaner\Cleaner;
+use rollun\utils\Cleaner\CleaningValidator\CleaningValidatorInterface;
+use rollun\datastore\Rql\RqlQuery;
+
+$dataStore = new Memory(['id', 'name']);
+
+foreach (range(1, 3) as $id) {
+    $dataStore->create([
+        'id' => $id,
+        'name' => "foo{$id}",
+    ]);
+}
+
+$cleaningValidator = new class implements CleaningValidatorInterface
+{
+    public function isValid($value){
+        return $value['id'] > 1 && $value['name'] !== 'foo3';
+    }
+};
+
+$cleaner = new Cleaner($dataStore, $cleaningValidator);
+$cleaner->cleanList();
+
+var_dump($dataStore->count()); // 1
+var_dump($dataStore->query(new RqlQuery())); // [['id' => '2', 'name' => 'foo2']]
+
+```
+
+
+### Uploader
+
+Для загрузки данных в data store с итератора можно использовать `Uploader`. Так же если этот итератор
+поддерживает интерфейс `\SeekableIterator` можно возобновлять загрузку данных с прошлой позиции.
+`DataStorePack` реализует итератор `\SeekableIterator` для data store. Таким способом можно 
+перекачивать данные с одного хранилища в другой, с возможностью возобновить загрузку данных с прошлой считаной позиции.
+
+Пример:
+
+```php
+<?php
+
+use rollun\datastore\DataStore\Memory;
+use rollun\uploader\Uploader;
+use rollun\uploader\Iterator\DataStorePack;
+
+$dataStoreFrom = new Memory(['id', 'name']);
+foreach (range(1, 4) as $id) {
+    $dataStoreFrom->create([
+        'id' => $id,
+        'name' => "foo{$id}"
+    ]);
+}
+
+$dataStoreTo = new Memory(['id', 'name']);
+
+$iterator = new DataStorePack($dataStoreFrom);
+$uploader = new Uploader($iterator, $dataStoreTo);
+
+var_dump($dataStoreTo->has(1)); // false
+
+$uploader->upload(); // or $uploader();
+
+var_dump($dataStoreTo->has(1)); // true
+var_dump($dataStoreTo->read(1)); // ['id' => 1, 'name' => 'foo1']
+var_dump($dataStoreTo->read(3)); // ['id' => 3, 'name' => 'foo3']
+
+```

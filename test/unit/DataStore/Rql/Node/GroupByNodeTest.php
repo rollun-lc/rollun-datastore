@@ -3,13 +3,13 @@
 namespace rollun\test\unit\DataStore\Rql\Node;
 
 use PHPUnit\Framework\TestCase;
-use rollun\datastore\Rql\Node\GroupByNode;
+use rollun\datastore\Rql\Node\GroupbyNode;
 
 class GroupByNodeTest extends TestCase
 {
     protected function createObject(array $fields)
     {
-        return new GroupByNode($fields);
+        return new GroupbyNode($fields);
     }
 
     public function dataProvider()

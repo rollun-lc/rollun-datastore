@@ -13,7 +13,9 @@ namespace rollun\datastore\DataStore\Interfaces;
 interface DataSourceInterface
 {
     /**
-     * @return array Return data of DataSource
+     * Return some data that we can iterate
+     *
+     * @return \Traversable
      */
-    public function getAll();
+    public function getAll(): \Traversable;
 }

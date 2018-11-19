@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\Rql;
 
-use rollun\datastore\Rql\Node\GroupByNode;
+use rollun\datastore\Rql\Node\GroupbyNode;
 use Xiag\Rql\Parser\AbstractNode;
 use Xiag\Rql\Parser\QueryBuilder;
 
@@ -19,7 +19,7 @@ class RqlQueryBuilder extends QueryBuilder
 
     public function addNode(AbstractNode $node)
     {
-        if ($node instanceof GroupByNode) {
+        if ($node instanceof GroupbyNode) {
             return $this->query->setGroupBy($node);
         }
         return parent::addNode($node);

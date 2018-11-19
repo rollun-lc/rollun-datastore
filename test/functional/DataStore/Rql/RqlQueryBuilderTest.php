@@ -30,13 +30,13 @@ class RqlQueryBuilderTest extends TestCase
             new Node\ContainsNode('a', 'b'),
             new Node\LikeGlobNode('a', 'b'),
         ];
-        $groupByNode = new Node\GroupByNode([]);
+        $groupByNode = new Node\GroupbyNode([]);
         $selectNode = new Node\AggregateSelectNode();
         $allNodes = array_merge($queryNodes, [$groupByNode, $selectNode]);
 
         $rqlQuery = new RqlQuery();
         $rqlQuery->setQuery(new AndNode($queryNodes));
-        $rqlQuery->setGroupBy(new Node\GroupByNode([]));
+        $rqlQuery->setGroupBy(new Node\GroupbyNode([]));
         $rqlQuery->setSelect(new Node\AggregateSelectNode([]));
 
         $object = new RqlQueryBuilder();

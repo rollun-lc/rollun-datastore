@@ -6,13 +6,13 @@
 
 namespace rollun\datastore\Rql;
 
-use rollun\datastore\Rql\Node\GroupByNode;
+use rollun\datastore\Rql\Node\GroupbyNode;
 use Xiag\Rql\Parser\Query;
 
 class RqlQuery extends Query
 {
 
-    /** @var  GroupByNode */
+    /** @var  GroupbyNode */
     protected $groupBy;
 
     /**
@@ -40,14 +40,14 @@ class RqlQuery extends Query
      * @param mixed $groupBy
      * @return RqlQuery
      */
-    public function setGroupBy(GroupByNode $groupBy)
+    public function setGroupBy(GroupbyNode $groupBy)
     {
         $this->groupBy = $groupBy;
         return $this;
     }
 
     /**
-     * @return GroupByNode
+     * @return GroupbyNode
      */
     public function getGroupBy()
     {
