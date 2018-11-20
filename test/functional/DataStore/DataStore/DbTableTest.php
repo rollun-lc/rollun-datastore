@@ -11,6 +11,7 @@ use PHPUnit_Framework_Error_Deprecated;
 use Psr\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\DbTable;
+use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\datastore\TableGateway\TableManagerMysql;
 use Zend\Db\TableGateway\TableGateway;
@@ -235,6 +236,56 @@ class DbTableTest extends TestCase
 
         $this->create($itemData3);
         $this->assertEquals(3, $object->count());
+    }
+
+    public function testQueriedDeleteSuccess()
+    {
+        $object = $this->createObject();
+
+        foreach (range(1, 10) as $id) {
+            $object->create([
+                'id' => $id,
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ]);
+        }
+
+        $query = new RqlQuery('gt(id,3)');
+        $object->queriedDelete($query);
+
+        foreach (range(1, 10) as $id) {
+            $this->assertEquals($id > 3, !$object->read($id));
+        }
+    }
+
+    public function testQueriedUpdateSuccess()
+    {
+        $object = $this->createObject();
+
+        foreach (range(1, 10) as $id) {
+            $object->create([
+                'id' => $id,
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ]);
+        }
+
+        $query = new RqlQuery('gt(id,3)');
+        $object->queriedUpdate([
+            'name' => "name0",
+            'surname' => "surname0",
+        ], $query);
+
+        foreach (range(1, 10) as $id) {
+            if ($id > 3) {
+                $item = ['name' => "name0", 'surname' => "surname0"];
+            } else {
+                $item = ['name' => "name{$id}", 'surname' => "surname{$id}"];
+            }
+
+            $this->assertEquals(array_merge($item, ['id' => $id]), $object->read($id));
+
+        }
     }
 
     /**

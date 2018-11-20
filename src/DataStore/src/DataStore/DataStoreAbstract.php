@@ -6,6 +6,7 @@
 
 namespace rollun\datastore\DataStore;
 
+use InvalidArgumentException;
 use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Iterators\DataStoreIterator;
@@ -86,10 +87,14 @@ abstract class DataStoreAbstract implements DataStoresInterface
     public function query(Query $query)
     {
         $limitNode = $query->getLimit();
-        $limit = !$limitNode ? self::LIMIT_INFINITY : $query->getLimit()
-            ->getLimit();
-        $offset = !$limitNode ? 0 : $query->getLimit()
-            ->getOffset();
+        $limit = !$limitNode
+            ? self::LIMIT_INFINITY
+            : $query->getLimit()
+                ->getLimit();
+        $offset = !$limitNode
+            ? 0
+            : $query->getLimit()
+                ->getOffset();
 
         if (isset($limitNode) && $query->getSort() !== null) {
             $data = $this->queryWhere($query, self::LIMIT_INFINITY, 0);
@@ -134,8 +139,8 @@ abstract class DataStoreAbstract implements DataStoresInterface
         $conditionBuilder = $this->conditionBuilder;
         $condition = $conditionBuilder($query->getQuery());
 
-        $whereFunctionBody = PHP_EOL . '$result = ' . PHP_EOL
-            . rtrim($condition, PHP_EOL) . ';' . PHP_EOL . 'return $result;';
+        $whereFunctionBody = PHP_EOL . '$result = ' . PHP_EOL . rtrim($condition, PHP_EOL) . ';' . PHP_EOL
+            . 'return $result;';
 
         $whereFunction = create_function('$item', $whereFunctionBody);
         $suitableItemsNumber = 0;
@@ -353,8 +358,85 @@ abstract class DataStoreAbstract implements DataStoresInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @param array $record
+     * @param array
+     */
+    public function multiCreate($records)
+    {
+        $ids = [];
+
+        foreach ($records as $record) {
+            try {
+                $createdRecord = $this->create($record);
+                $ids[] = $createdRecord[$this->getIdentifier()];
+            } catch (\Throwable $e) {
+                // TODO: need to log record that was not created
+                continue;
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     abstract public function update($itemData, $createIfAbsent = false);
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param array $record
+     * @param array
+     */
+    public function multiUpdate($records)
+    {
+        $ids = [];
+
+        foreach ($records as $record) {
+            try {
+                $updatedRecord = $this->update($record);
+                $ids[] = $updatedRecord[$this->getIdentifier()];
+            } catch (\Throwable $e) {
+                // TODO: need to log record that was not updated
+                continue;
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param $record
+     * @param Query $query
+     * @return array
+     */
+    public function queriedUpdate($record, Query $query)
+    {
+        $identifier = $this->getIdentifier();
+
+        if (isset($record[$identifier])) {
+            throw new InvalidArgumentException('Primary key is not allowed in record for queried update');
+        }
+
+        $forUpdateRecords = $this->query($query);
+        $updatedIds = [];
+
+        foreach ($forUpdateRecords as $forUpdateRecord) {
+            try {
+                $updatedRecord = $this->update(array_merge($record, [$identifier => $forUpdateRecord[$identifier]]));
+                $updatedIds[] = $updatedRecord[$identifier];
+            } catch (\Throwable $e) {
+                // TODO: log failed queried updated record
+                continue;
+            }
+        }
+
+        return $updatedIds;
+    }
 
     /**
      * {@inheritdoc}
@@ -385,6 +467,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
     protected function getKeys()
     {
         $identifier = $this->getIdentifier();
+
         $query = new Query();
         $selectNode = new Node\SelectNode([$identifier]);
         $query->setSelect($selectNode);
@@ -400,8 +483,75 @@ abstract class DataStoreAbstract implements DataStoresInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @param array $record
+     * @param array
+     */
+    public function rewrite($record)
+    {
+        if (isset($record[$this->getIdentifier()])) {
+            throw new InvalidArgumentException('Identifier is required');
+        }
+
+        if ($this->has($record[$this->getIdentifier()])) {
+            $this->delete($record[$this->getIdentifier()]);
+        }
+
+        return $this->create($record);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param array[] $records
+     * @return array
+     */
+    public function multiRewrite($records)
+    {
+        $ids = [];
+
+        foreach ($records as $record) {
+            try {
+                $rewroteRecord = $this->rewrite($record);
+                $ids[] = $rewroteRecord[$this->getIdentifier()];
+            } catch (\Throwable $e) {
+                // TODO: need to log record that was not rewrote
+                continue;
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     abstract public function delete($id);
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param Query $query
+     * @return array
+     */
+    public function queriedDelete(Query $query)
+    {
+        $identifier = $this->getIdentifier();
+        $queryResult = $this->query($query);
+        $deletedIds = [];
+
+        foreach ($queryResult as $record) {
+            try {
+                $deletedRecord = $this->delete($record[$identifier]);
+                $deletedIds[] = $deletedRecord[$identifier];
+            } catch (\Throwable $e) {
+                // TODO: need to log record that was not deleted
+                continue;
+            }
+        }
+
+        return $deletedIds;
+    }
 
     /**
      * Interface 'Countable'

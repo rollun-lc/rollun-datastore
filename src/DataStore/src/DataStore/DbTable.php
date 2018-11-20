@@ -6,12 +6,17 @@
 
 namespace rollun\datastore\DataStore;
 
+use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
+use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
+use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
 use Zend\Db\Adapter\ParameterContainer;
+use Zend\Db\Sql\Delete;
 use Zend\Db\Sql\Select;
+use Zend\Db\Sql\Sql;
 use Zend\Db\TableGateway\TableGateway;
 
 /**
@@ -124,6 +129,98 @@ class DbTable extends DataStoreAbstract
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * @param Query $query
+     * @return array
+     * @throws DataStoreException
+     */
+    public function queriedDelete(Query $query)
+    {
+        $getIdCallable = function ($item) {
+            return $item[$this->getIdentifier()];
+        };
+
+        $deleteQuery = new Query();
+        $deleteQuery->setQuery($query->getQuery());
+
+        $conditionBuilder = new SqlConditionBuilder(
+            $this->getDbTable()->getAdapter(),
+            $this->getDbTable()->getTable()
+        );
+
+        $sql = new Sql($this->getDbTable()->getAdapter());
+        $delete = $sql->delete($this->getDbTable()->getTable());
+        $delete->where($conditionBuilder->__invoke($deleteQuery->getQuery()));
+        $sqlString = $sql->buildSqlString($delete);
+
+        $adapter = $this->dbTable->getAdapter();
+        $shouldDeletedIds = array_map($getIdCallable, $this->query($deleteQuery));
+
+        try {
+            $statement = $adapter->getDriver()->createStatement($sqlString);
+            $statement->execute();
+        } catch (\Throwable $e) {
+            throw new DataStoreException("Can't delete records using query", 0, $e);
+        }
+
+        $result = $this->selectForUpdate($shouldDeletedIds);
+
+        foreach ($result as $record) {
+            if (in_array($record[$this->getIdentifier()], $shouldDeletedIds)) {
+                unset($shouldDeletedIds[$record[$this->getIdentifier()]]);
+            }
+        }
+
+        return $shouldDeletedIds;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param $record
+     * @param Query $query
+     * @return array
+     */
+    public function queriedUpdate($record, Query $query)
+    {
+        $getIdCallable = function ($item) {
+            return $item[$this->getIdentifier()];
+        };
+
+        $updateQuery = new Query();
+        $updateQuery->setQuery($query->getQuery());
+        $shouldUpdatedId = array_map($getIdCallable, $this->query($updateQuery));
+        $result = $this->selectForUpdate($shouldUpdatedId);
+
+        if (!$result) {
+            return [];
+        }
+
+        $conditionBuilder = new SqlConditionBuilder(
+            $this->getDbTable()->getAdapter(),
+            $this->getDbTable()->getTable()
+        );
+
+        $sql = new Sql($this->getDbTable()->getAdapter());
+        $update = $sql->update($this->getDbTable()->getTable());
+        $update->where($conditionBuilder->__invoke($updateQuery->getQuery()));
+        $update->set($record);
+        $sqlString = $sql->buildSqlString($update);
+
+        $adapter = $this->dbTable->getAdapter();
+
+        try {
+            $statement = $adapter->getDriver()->createStatement($sqlString);
+            $statement->execute();
+        } catch (\Throwable $e) {
+            throw new DataStoreException("Can't update records using query", 0, $e);
+        }
+
+        return $shouldUpdatedId;
+    }
+
+    /**
      * @param array $identifiers
      * @return \Zend\Db\Adapter\Driver\ResultInterface
      */
@@ -173,7 +270,7 @@ class DbTable extends DataStoreAbstract
             throw new DataStoreException("Can't update item with id = $id");
         }
 
-        return $result = $this->read($id);
+        return $this->read($id);
     }
 
     /**
@@ -268,20 +365,18 @@ class DbTable extends DataStoreAbstract
      * @return array|array[]
      * @throws DataStoreException
      */
-    public function multiCreate(array $itemsData)
+    public function multiCreate($itemsData)
     {
         $multiInsertTableGw = $this->createMultiInsertTableGw();
         $multiInsertTableGw->getAdapter()->getDriver()->getConnection()->beginTransaction();
+        $getIdCallable = function ($item) {
+            return $item[$this->getIdentifier()];
+        };
 
         try {
-            $identifiers = array_map(
-                function ($item) {
-                    return $item[$this->getIdentifier()];
-                },
-                $itemsData
-            );
-
+            $identifiers = array_map($getIdCallable, $itemsData);
             $multiInsertTableGw->insert($itemsData);
+
             $query = new Query();
             $query->setQuery(new InNode($this->getIdentifier(), $identifiers));
             $insertedItems = $this->query($query);
@@ -295,7 +390,7 @@ class DbTable extends DataStoreAbstract
             );
         }
 
-        return $insertedItems;
+        return array_map($getIdCallable, $insertedItems);
     }
 
     /**
