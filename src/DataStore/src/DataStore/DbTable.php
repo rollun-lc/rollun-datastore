@@ -54,7 +54,7 @@ class DbTable extends DataStoreAbstract
     public function create($itemData, $rewriteIfExist = false)
     {
         if ($rewriteIfExist) {
-            // TODO: 'rewriteIfExist' do not work with multiply insert
+            // 'rewriteIfExist' do not work with multiply insert
             trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
         }
 
@@ -88,7 +88,7 @@ class DbTable extends DataStoreAbstract
         if (isset($itemData[$this->getIdentifier()])) {
             $insertedItem = $this->read($itemData[$this->getIdentifier()]);
         } else {
-            trigger_error("Getting last id using db is deprecate", E_USER_DEPRECATED);
+            trigger_error("Autoincrement 'id' is not allowed", E_USER_DEPRECATED);
             $id = $this->dbTable->getLastInsertValue();
             $insertedItem = $this->read($id);
         }
@@ -102,7 +102,7 @@ class DbTable extends DataStoreAbstract
     public function update($itemData, $createIfAbsent = false)
     {
         if ($createIfAbsent) {
-            trigger_error("createIfAbsent is deprecated.", E_DEPRECATED);
+            trigger_error("Option 'createIfAbsent' is no more use.", E_DEPRECATED);
         }
 
         if (!isset($itemData[$this->getIdentifier()])) {
@@ -137,10 +137,10 @@ class DbTable extends DataStoreAbstract
         }
 
         $valTemplate = trim($valTemplate, ",");
-        $sqlString = "SELECT " . Select::SQL_STAR;
-        $sqlString .= " FROM {$adapter->getPlatform()->quoteIdentifier($this->dbTable->getTable())}";
-        $sqlString .= " WHERE {$adapter->getPlatform()->quoteIdentifier($this->getIdentifier())} IN ($valTemplate)";
-        $sqlString .= " FOR UPDATE";
+        $sqlString = "SELECT " . Select::SQL_STAR
+            . " FROM {$adapter->getPlatform()->quoteIdentifier($this->dbTable->getTable())}"
+            . " WHERE {$adapter->getPlatform()->quoteIdentifier($this->getIdentifier())} IN ($valTemplate)"
+            . " FOR UPDATE";
 
         $statement = $adapter->getDriver()->createStatement($sqlString);
         $statement->setParameterContainer(new ParameterContainer($identifiers));

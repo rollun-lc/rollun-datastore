@@ -26,11 +26,6 @@ abstract class BaseDataStoreTest extends TestCase
 {
     protected $columns = ['id', 'name', 'surname'];
 
-    protected function setUp()
-    {
-        PHPUnit_Framework_Error_Deprecated::$enabled = false;
-    }
-
     abstract protected function createObject(): DataStoresInterface;
 
     protected function identifierToType($id)

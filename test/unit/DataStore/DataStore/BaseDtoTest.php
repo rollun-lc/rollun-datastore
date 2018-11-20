@@ -18,7 +18,7 @@ class BaseDtoTest extends TestCase
     {
         $id = new TypeInt('1');
         $name = new TypeString('name');
-        $object = TestDto::createFromArray([
+        $object = new TestDto([
             'id' => $id,
             'name' => $name
         ]);
@@ -32,7 +32,7 @@ class BaseDtoTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $id = new TypeInt('1');
         $name = new TypeString('name');
-        $object = TestDto::createFromArray([
+        $object = new TestDto([
             'foo' => $id,
             'boo' => $name
         ]);
@@ -48,10 +48,4 @@ class TestDto extends BaseDto {
 
     /** @var TypeString  */
     protected $name;
-
-    public function __construct(TypeInt $id, TypeString $name)
-    {
-        $this->id = $id;
-        $this->name = $name;
-    }
 }

@@ -25,7 +25,6 @@ class UploaderTest extends TestCase
 
     public function setUp()
     {
-        PHPUnit_Framework_Error_Deprecated::$enabled = false;
         $this->inMemDataStore = new Memory();
         $this->outMemDataStore = new Memory();
         $this->object = new Uploader($this->outMemDataStore, $this->inMemDataStore);
@@ -61,18 +60,5 @@ class UploaderTest extends TestCase
 
         $this->object->upload();
         $this->assertEquals($this->outMemDataStore->query(new Query()), $this->inMemDataStore->query(new Query()));
-    }
-
-    public function testDleep()
-    {
-        $result = $this->object->__sleep();
-        $this->assertEquals(
-            [
-                "iteratorAggregate",
-                "destinationDataStore",
-                "key",
-            ],
-            $result
-        );
     }
 }

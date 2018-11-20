@@ -242,7 +242,6 @@ class RequestDecoderTest extends TestCase
             ],
             [
                 function () {
-                    PHPUnit_Framework_Error_Deprecated::$enabled = false;
                     $request = new ServerRequest();
                     $request = $request->withHeader('Range', 'items=22-22');
 
@@ -257,7 +256,6 @@ class RequestDecoderTest extends TestCase
             ],
             [
                 function () {
-                    PHPUnit_Framework_Error_Deprecated::$enabled = false;
                     $request = new ServerRequest();
                     $request = $request->withHeader('Range', 'items!=22\\');
 
@@ -269,7 +267,6 @@ class RequestDecoderTest extends TestCase
             ],
             [
                 function () {
-                    PHPUnit_Framework_Error_Deprecated::$enabled = false;
                     $request = new ServerRequest();
                     $request = $request->withHeader('Range', 'items=2');
 

@@ -132,6 +132,8 @@ class CsvIntId extends CsvBase
      */
     protected function checkIdentifierType($id)
     {
+        trigger_error("This method is deprecated. Use 'AspectTyped' to define any field type.", E_USER_DEPRECATED);
+
         $idType = gettype($id);
 
         if ($idType == 'integer') {

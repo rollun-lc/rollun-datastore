@@ -19,7 +19,6 @@ class DataStorePackTest extends TestCase
 
     public function setUp()
     {
-        PHPUnit_Framework_Error_Deprecated::$enabled = false;
         $this->dataStore = new Memory();
 
         foreach (range(1, 10) as $num) {

@@ -14,26 +14,9 @@ use rollun\datastore\DataStore\Memory;
 
 class MemoryTest extends TestCase
 {
-    protected function createObject($columns = [], $muteDeprecatedError = true)
+    protected function createObject($columns = [])
     {
-        if (!count($columns) && $muteDeprecatedError) {
-            PHPUnit_Framework_Error_Deprecated::$enabled = false;
-        }
-
         return new Memory($columns);
-    }
-
-    public function testCreateSuccess()
-    {
-        $this->expectException(PHPUnit_Framework_Error_Deprecated::class);
-        $this->expectExceptionMessage('Array of required columns is not specified');
-        $item = [
-            'id' => 1,
-            'name' => 'name'
-        ];
-        $object = $this->createObject([], false);
-        $object->create($item);
-        $this->assertAttributeEquals([1 => $item], 'items', $object);
     }
 
     public function testCreateFailWithItemExist()
@@ -217,14 +200,5 @@ class MemoryTest extends TestCase
             ]
         );
         $this->assertEquals(2, $object->count());
-    }
-
-    public function testGetIteratorIsDeprecated()
-    {
-        $this->expectException(PHPUnit_Framework_Error_Deprecated::class);
-        $this->expectExceptionMessage('Datastore is not iterable no more');
-        $object = $this->createObject();
-        PHPUnit_Framework_Error_Deprecated::$enabled = true;
-        $object->getIterator();
     }
 }

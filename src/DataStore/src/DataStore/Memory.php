@@ -180,7 +180,7 @@ class Memory extends DataStoreAbstract
      */
     public function getIterator()
     {
-        trigger_error("Datastore is not iterable no more", E_USER_DEPRECATED);
+        trigger_error("Datastore is no more iterable", E_USER_DEPRECATED);
 
         return new \ArrayIterator($this->items);
     }

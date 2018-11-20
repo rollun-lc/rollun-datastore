@@ -237,15 +237,6 @@ class DbTableTest extends TestCase
         $this->assertEquals(3, $object->count());
     }
 
-    public function testGetIteratorIsDeprecated()
-    {
-        $this->expectException(PHPUnit_Framework_Error_Deprecated::class);
-        $this->expectExceptionMessage('Datastore is not iterable no more');
-        $object = $this->createObject();
-        PHPUnit_Framework_Error_Deprecated::$enabled = true;
-        $object->getIterator();
-    }
-
     /**
      * Read record by id directly through TableGateway
      *

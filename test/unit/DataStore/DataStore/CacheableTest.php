@@ -129,7 +129,6 @@ class CacheableTest extends TestCase
 
     public function testCreateSuccess()
     {
-        PHPUnit_Framework_Error_Deprecated::$enabled = false;
         $items = [];
 
         $dataSource = new Foo();
@@ -146,7 +145,6 @@ class CacheableTest extends TestCase
     {
         $this->expectException(DataStoreException::class);
         $this->expectExceptionMessage("Refreshable don't haw method create");
-        PHPUnit_Framework_Error_Deprecated::$enabled = false;
         $items = [];
 
         /** @var DataSourceInterface|\PHPUnit_Framework_MockObject_MockObject $dataSource */
@@ -162,7 +160,6 @@ class CacheableTest extends TestCase
 
     public function testUpdateSuccess()
     {
-        PHPUnit_Framework_Error_Deprecated::$enabled = false;
         $items = ['id' => 1];
 
         /** @var DataSourceInterface|\PHPUnit_Framework_MockObject_MockObject $dataSource */
@@ -184,7 +181,6 @@ class CacheableTest extends TestCase
     {
         $this->expectException(DataStoreException::class);
         $this->expectExceptionMessage("Refreshable don't haw method update");
-        PHPUnit_Framework_Error_Deprecated::$enabled = false;
         $items = [];
 
         /** @var DataSourceInterface|\PHPUnit_Framework_MockObject_MockObject $dataSource */
@@ -200,7 +196,6 @@ class CacheableTest extends TestCase
 
     public function testDeleteAllSuccess()
     {
-        PHPUnit_Framework_Error_Deprecated::$enabled = false;
 
         /** @var DataSourceInterface|DataStoreException|\PHPUnit_Framework_MockObject_MockObject $dataSource */
         $dataSource = $this->getMockBuilder(Foo::class)
@@ -220,7 +215,6 @@ class CacheableTest extends TestCase
     {
         $this->expectException(DataStoreException::class);
         $this->expectExceptionMessage("Refreshable don't haw method deleteAll");
-        PHPUnit_Framework_Error_Deprecated::$enabled = false;
 
         /** @var DataSourceInterface|DataStoreException|\PHPUnit_Framework_MockObject_MockObject $dataSource */
         $dataSource = new Boo();
@@ -236,7 +230,6 @@ class CacheableTest extends TestCase
     public function testDeleteSuccess()
     {
         $id = 1;
-        PHPUnit_Framework_Error_Deprecated::$enabled = false;
 
         /** @var DataSourceInterface|DataStoreException|\PHPUnit_Framework_MockObject_MockObject $dataSource */
         $dataSource = $this->getMockBuilder(Foo::class)
@@ -258,7 +251,6 @@ class CacheableTest extends TestCase
         $id = 1;
         $this->expectException(DataStoreException::class);
         $this->expectExceptionMessage("Refreshable don't haw method delete");
-        PHPUnit_Framework_Error_Deprecated::$enabled = false;
 
         /** @var DataSourceInterface|DataStoreException|\PHPUnit_Framework_MockObject_MockObject $dataSource */
         $dataSource = new Boo();
@@ -273,7 +265,6 @@ class CacheableTest extends TestCase
 
     public function testRefresh()
     {
-        PHPUnit_Framework_Error_Deprecated::$enabled = false;
 
         $dataSource = new Foo();
         $items = [];
@@ -304,6 +295,7 @@ class Boo implements DataSourceInterface
 {
     public function getAll()
     {
+        return [];
     }
 }
 

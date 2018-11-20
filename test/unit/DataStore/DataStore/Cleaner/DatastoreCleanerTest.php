@@ -44,7 +44,6 @@ class DatastoreCleanerTest extends TestCase
      */
     protected function setUp()
     {
-        \PHPUnit_Framework_Error_Deprecated::$enabled = false;
         $this->memoryDataStore = new MemoryDataStore();
 
         foreach ($this->dataStoreRecords as $val) {

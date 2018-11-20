@@ -111,7 +111,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      */
     public function getIterator()
     {
-        trigger_error("Datastore is not iterable no more", E_USER_DEPRECATED);
+        trigger_error("Datastore is no more iterable", E_USER_DEPRECATED);
 
         return new CsvIterator($this);
     }
@@ -121,6 +121,10 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      */
     public function create($itemData, $rewriteIfExist = false)
     {
+        if ($rewriteIfExist) {
+            trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
+        }
+
         $identifier = $this->getIdentifier();
 
         switch (true) {
@@ -150,6 +154,10 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      */
     public function update($itemData, $createIfAbsent = false)
     {
+        if ($createIfAbsent) {
+            trigger_error("Option 'createIfAbsent' is no more use.", E_DEPRECATED);
+        }
+
         $identifier = $this->getIdentifier();
 
         if (!isset($itemData[$identifier])) {
@@ -169,7 +177,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
                 break;
         }
 
-        foreach ($item as $key => &$value) {
+        foreach ($item as $key => $value) {
             if (isset($itemData[$key])) {
                 $item[$key] = $itemData[$key];
             }

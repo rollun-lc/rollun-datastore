@@ -6,20 +6,20 @@
 
 namespace rollun\datastore\DataStore\Type;
 
-class TypeFloat implements TypeInterface
+class TypeFloat extends TypeAbstract
 {
-    protected $value;
-
-    public function __construct($value)
-    {
-        $this->value = $value;
-    }
-
+    /**
+     * @return string
+     */
     public static function getTypeName()
     {
         return 'float';
     }
 
+    /**
+     * @return float
+     * @throws TypeException
+     */
     public function toTypeValue()
     {
         try {

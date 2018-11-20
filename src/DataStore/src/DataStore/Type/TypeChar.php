@@ -6,20 +6,20 @@
 
 namespace rollun\datastore\DataStore\Type;
 
-class TypeChar implements TypeInterface
+class TypeChar extends TypeAbstract
 {
-    protected $value;
-
-    public function __construct($value)
-    {
-        $this->value = $value;
-    }
-
+    /**
+     * @return string
+     */
     public static function getTypeName()
     {
         return 'char';
     }
 
+    /**
+     * @return string
+     * @throws TypeException
+     */
     public function toTypeValue()
     {
         if (is_resource($this->value)) {

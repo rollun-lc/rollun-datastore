@@ -69,7 +69,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
      */
     protected function checkIdentifierType($id)
     {
-        // TODO: trigger deprecated error
+        trigger_error("This method is deprecated. Use 'AspectTyped' to define any field type.", E_USER_DEPRECATED);
 
         $idType = gettype($id);
 
@@ -424,7 +424,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
      */
     public function getIterator()
     {
-        trigger_error("Datastore is not iterable no more", E_USER_DEPRECATED);
+        trigger_error("Datastore is no more iterable", E_USER_DEPRECATED);
 
         return new DataStoreIterator($this);
     }

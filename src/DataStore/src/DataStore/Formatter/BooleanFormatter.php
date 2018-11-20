@@ -6,14 +6,14 @@
 
 namespace rollun\datastore\DataStore\Formatter;
 
-class StringFormatter extends AbstractFormatter
+class BooleanFormatter extends AbstractFormatter
 {
     /**
      * @param $value
-     * @return string
+     * @return boolean
      */
     public function format($value)
     {
-        return $this->getTypeCaster('string', $value)->toTypeValue();
+        return $this->getTypeCaster('bool', $value)->toTypeValue();
     }
 }

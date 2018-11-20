@@ -6,20 +6,20 @@
 
 namespace rollun\datastore\DataStore\Type;
 
-class TypeBoolean implements TypeInterface
+class TypeBoolean extends TypeAbstract
 {
-    protected $value;
-
-    public function __construct($value)
-    {
-        $this->value = $value;
-    }
-
+    /**
+     * @return string
+     */
     public static function getTypeName()
     {
         return 'boolean';
     }
 
+    /**
+     * @return bool
+     * @throws TypeException
+     */
     public function toTypeValue()
     {
         try {

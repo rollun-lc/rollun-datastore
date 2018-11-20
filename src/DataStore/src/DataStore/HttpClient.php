@@ -184,13 +184,17 @@ class HttpClient extends DataStoreAbstract
      */
     public function create($itemData, $rewriteIfExist = false)
     {
+        if ($rewriteIfExist) {
+            trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
+        }
+
         $identifier = $this->getIdentifier();
 
         if (isset($itemData[$identifier])) {
             $id = $itemData[$identifier];
             $this->checkIdentifierType($itemData[$identifier]);
         } else {
-            trigger_error("Getting last id using db is deprecate", E_USER_DEPRECATED);
+            trigger_error("Autoincrement 'id' is not allowed", E_USER_DEPRECATED);
             $id = null;
         }
 
@@ -218,6 +222,10 @@ class HttpClient extends DataStoreAbstract
      */
     public function update($itemData, $createIfAbsent = false)
     {
+        if ($createIfAbsent) {
+            trigger_error("Option 'createIfAbsent' is no more use.", E_DEPRECATED);
+        }
+
         $identifier = $this->getIdentifier();
 
         if (!isset($itemData[$identifier])) {

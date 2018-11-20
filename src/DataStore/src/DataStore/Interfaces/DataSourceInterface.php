@@ -15,7 +15,7 @@ interface DataSourceInterface
     /**
      * Return some data that we can iterate
      *
-     * @return \Traversable
+     * @return \Traversable|array
      */
-    public function getAll(): \Traversable;
+    public function getAll();
 }

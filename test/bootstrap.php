@@ -1,8 +1,7 @@
 <?php
 global $argv;
 
-error_reporting(E_ALL | E_STRICT ^ E_DEPRECATED);
-
+error_reporting(E_ALL);
 PHPUnit_Framework_Error_Deprecated::$enabled = false;
 
 // Change to the project root, to simplify resolving paths

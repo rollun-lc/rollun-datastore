@@ -17,7 +17,6 @@ use Xiag\Rql\Parser\Query;
  */
 interface ReadInterface extends \Countable, \IteratorAggregate
 {
-
     /**
      * Default identifier
      *
@@ -27,19 +26,16 @@ interface ReadInterface extends \Countable, \IteratorAggregate
 
     /**
      * Use it in limit section in query if need
-     *
-     * @todo resolve compatible with dojo 'infinity'
-     * @see https://github.com/SitePen/dgrid/blob/930c6343918441664abe60a4b74912b655f48940/_StoreMixin.js
      */
     const LIMIT_INFINITY = 2147483647;
 
     /**
      * Return primary key identifier
      *
-     * Return "id" by default
+     * Return 'id' by default
      *
      * @see DEF_ID
-     * @return string "id" by default
+     * @return string 'id' by default
      */
     public function getIdentifier();
 
@@ -47,7 +43,12 @@ interface ReadInterface extends \Countable, \IteratorAggregate
      * Return Item by 'id'
      *
      * Method return null if item with that id is absent.
-     * Format of Item - Array("id"=>123, "field1"=value1, ...)
+     * Format of item:
+     * [
+     *      'id' => 123,
+     *      field1' => 'value1',
+     *      // ...
+     * ]
      *
      * @param int|string $id PrimaryKey
      * @return array|null

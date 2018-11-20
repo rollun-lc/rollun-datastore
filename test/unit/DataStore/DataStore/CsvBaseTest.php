@@ -24,7 +24,6 @@ class CsvBaseTest extends TestCase
 
     public function setUp()
     {
-        PHPUnit_Framework_Error_Deprecated::$enabled = false;
         $this->filename = tempnam(sys_get_temp_dir(), 'csv');
         $resource = fopen($this->filename, 'w+');
         fputcsv($resource, $this->columns);
@@ -257,15 +256,6 @@ class CsvBaseTest extends TestCase
     public function testGetIteratorSuccess()
     {
         $this->assertTrue($this->createObject()->getIterator() instanceof CsvIterator);
-    }
-
-    public function testGetIteratorDeprecated()
-    {
-        $this->expectException(PHPUnit_Framework_Error_Deprecated::class);
-        $this->expectExceptionMessage('Datastore is not iterable no more');
-        $object = $this->createObject();
-        PHPUnit_Framework_Error_Deprecated::$enabled = true;
-        $object->getIterator();
     }
 
     public function testTypesSuccess()

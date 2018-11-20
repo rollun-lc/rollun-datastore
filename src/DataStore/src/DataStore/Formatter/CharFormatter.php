@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\DataStore\Formatter;
 
-class StringFormatter extends AbstractFormatter
+class CharFormatter extends AbstractFormatter
 {
     /**
      * @param $value
@@ -14,6 +14,6 @@ class StringFormatter extends AbstractFormatter
      */
     public function format($value)
     {
-        return $this->getTypeCaster('string', $value)->toTypeValue();
+        return $this->getTypeCaster('char', $value)->toTypeValue();
     }
 }

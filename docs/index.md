@@ -282,6 +282,10 @@ echo $user->getName(); // 'name' (string)
 Для этого удобно использовать форматеры. Форматеры (formatter) реализуют интерфейс `FormatterInterface`.
 
 **Существующие форматтеры:**
+- `BooleanFormatter`
+- `CharFormatter`
+- `FloatFormatter`
+- `IntFormatter`
 - `StringFormatter`
 
 Пример:

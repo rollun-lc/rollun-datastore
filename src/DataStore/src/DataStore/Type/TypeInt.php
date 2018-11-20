@@ -6,20 +6,20 @@
 
 namespace rollun\datastore\DataStore\Type;
 
-class TypeInt implements TypeInterface
+class TypeInt extends TypeAbstract
 {
-    protected $value;
-
-    public function __construct($value)
-    {
-        $this->value = $value;
-    }
-
+    /**
+     * @return string
+     */
     public static function getTypeName()
     {
         return 'integer';
     }
 
+    /**
+     * @return int
+     * @throws TypeException
+     */
     public function toTypeValue()
     {
         try {

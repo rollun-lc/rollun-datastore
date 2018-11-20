@@ -133,6 +133,10 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
      */
     public function create($itemData, $rewriteIfExist = false)
     {
+        if ($rewriteIfExist) {
+            trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
+        }
+
         if (method_exists($this->dataSource, "create")) {
             return $this->dataSource->create($itemData, $rewriteIfExist);
         } else {
@@ -160,6 +164,10 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
      */
     public function update($itemData, $createIfAbsent = false)
     {
+        if ($createIfAbsent) {
+            trigger_error("Option 'createIfAbsent' is no more use.", E_DEPRECATED);
+        }
+
         if (method_exists($this->dataSource, "update")) {
             return $this->dataSource->update($itemData, $createIfAbsent);
         } else {

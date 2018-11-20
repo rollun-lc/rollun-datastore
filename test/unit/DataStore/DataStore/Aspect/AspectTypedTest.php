@@ -107,7 +107,7 @@ class AspectTypedTest extends TestCase
         $dataStore = $this->getMockBuilder(DataStoresInterface::class)
             ->getMock();
 
-        $dto = new UserDto(new TypeInt(1), new TypeString('name'));
+        $dto = new UserDto(['id' => new TypeInt(1), 'name' => new TypeString('name')]);
         $dataStore
             ->method('create')
             ->with([
@@ -159,8 +159,8 @@ class AspectTypedTest extends TestCase
 
         $object = new AspectTyped($dataStore, $scheme, UserDto::class);
         $this->assertEquals([
-            new UserDto(new TypeInt(1), new TypeString('name1')),
-            new UserDto(new TypeInt(2), new TypeString('name2')),
+            new UserDto(['id' => new TypeInt(1), 'name' => new TypeString('name1')]),
+            new UserDto(['id' => new TypeInt(2), 'name' => new TypeString('name2')]),
         ], $object->query(new RqlQuery()));
     }
 
@@ -197,12 +197,6 @@ class UserDto extends BaseDto
     protected $id;
 
     protected $name;
-
-    public function __construct(TypeInt $id, TypeString $name)
-    {
-        $this->id = $id;
-        $this->name = $name;
-    }
 
     public function getId()
     {

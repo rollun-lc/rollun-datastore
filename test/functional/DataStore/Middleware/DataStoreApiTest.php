@@ -107,8 +107,6 @@ class DataStoreApiTest extends BaseMiddlewareTest
      */
     public function testProcess($object, $resourceName, $dataStore)
     {
-        PHPUnit_Framework_Error_Deprecated::$enabled = false;
-
         $this->object = $object;
         $this->resourceName = $resourceName;
         $this->dataStore = $dataStore;

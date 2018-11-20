@@ -23,11 +23,6 @@ use rollun\datastore\Rql\RqlQuery;
 
 class NoSupportTraitTest extends TestCase
 {
-    public function setUp()
-    {
-        \PHPUnit_Framework_Error_Deprecated::$enabled = false;
-    }
-
     protected function createObject()
     {
         return new class implements DataStoresInterface {

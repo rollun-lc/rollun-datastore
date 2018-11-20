@@ -9,11 +9,13 @@ namespace rollun\datastore\DataStore\Aspect;
 use InvalidArgumentException;
 use rollun\datastore\DataStore\BaseDto;
 use rollun\datastore\DataStore\Formatter\FormatterInterface;
+use rollun\datastore\DataStore\Formatter\FormatterPluginManager;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Interfaces\SchemableInterface;
-use rollun\datastore\DataStore\Type\TypeInterface;
+use rollun\datastore\DataStore\Type\TypePluginManager;
 use RuntimeException;
 use Xiag\Rql\Parser\Query;
+use Zend\ServiceManager\ServiceManager;
 
 class AspectTyped extends AspectAbstract implements SchemableInterface
 {
@@ -28,27 +30,56 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
     protected $dtoClassName;
 
     /**
+     * @var TypePluginManager
+     */
+    protected $typePluginManager;
+
+    /**
+     * @var FormatterPluginManager
+     */
+    protected $formatterPluginManager;
+
+    /**
      * AspectTyped constructor.
      * @param DataStoresInterface $dataStore
      * @param array $scheme
      * @param string $dtoClassName
+     * @param TypePluginManager|null $typePluginManager
+     * @param FormatterPluginManager|null $formatterPluginManager
      */
-    public function __construct(DataStoresInterface $dataStore, array $scheme, string $dtoClassName)
-    {
+    public function __construct(
+        DataStoresInterface $dataStore,
+        array $scheme,
+        string $dtoClassName,
+        TypePluginManager $typePluginManager = null,
+        FormatterPluginManager $formatterPluginManager = null
+    ) {
         parent::__construct($dataStore);
 
-        foreach ($scheme as $fieldInfo) {
-            if (!isset($fieldInfo['type']) || !is_a($fieldInfo['type'], TypeInterface::class, true)) {
-                throw new InvalidArgumentException("Invalid option 'type' in scheme");
+        foreach ($scheme as $field => $fieldInfo) {
+            if (!isset($fieldInfo['type'])) {
+                throw new InvalidArgumentException("Invalid option 'type' in scheme for field '{$field}'");
             }
 
-            if (!isset($fieldInfo['formatter']) || !is_a($fieldInfo['formatter'], FormatterInterface::class, true)) {
-                throw new InvalidArgumentException("Invalid option 'formatter' in scheme");
+            if (!isset($fieldInfo['formatter'])) {
+                throw new InvalidArgumentException("Invalid option 'formatter' in scheme for field '{$field}'");
             }
         }
 
         if (!is_a($dtoClassName, BaseDto::class, true)) {
             throw new InvalidArgumentException("Invalid value for 'dtoClassName' property");
+        }
+
+        if (is_null($typePluginManager)) {
+            $this->typePluginManager = new TypePluginManager(new ServiceManager());
+        } else {
+            $this->typePluginManager = $typePluginManager;
+        }
+
+        if (is_null($formatterPluginManager)) {
+            $this->formatterPluginManager = new FormatterPluginManager(new ServiceManager());
+        } else {
+            $this->formatterPluginManager = $formatterPluginManager;
         }
 
         $this->dtoClassName = $dtoClassName;
@@ -118,10 +149,8 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
                 throw new RuntimeException("Undefined method '$getter' in " . get_class($dto));
             }
 
-            $formatterClassName = $fieldInfo['formatter'];
-
             /** @var FormatterInterface $formatter */
-            $formatter = new $formatterClassName();
+            $formatter = $this->formatterPluginManager->get($fieldInfo['formatter']);
 
             $itemData[$fieldName] = $formatter->format($dto->$getter());
         }
@@ -142,11 +171,11 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
                 throw new InvalidArgumentException("Undefined field '$field' in scheme");
             }
 
-            $typeClassName = $this->scheme[$field]['type'];
-            $itemData[$field] = new $typeClassName($value);
+            $typeService = $this->scheme[$field]['type'];
+            $itemData[$field] = $this->typePluginManager->get($typeService, ['value' => $value]);
         }
 
-        return call_user_func([$this->dtoClassName, 'createFromArray'], $itemData);
+        return new $this->dtoClassName($itemData);
     }
 
     /**

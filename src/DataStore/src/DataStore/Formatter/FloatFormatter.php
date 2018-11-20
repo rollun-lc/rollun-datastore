@@ -6,14 +6,14 @@
 
 namespace rollun\datastore\DataStore\Formatter;
 
-class StringFormatter extends AbstractFormatter
+class FloatFormatter extends AbstractFormatter
 {
     /**
      * @param $value
-     * @return string
+     * @return float
      */
     public function format($value)
     {
-        return $this->getTypeCaster('string', $value)->toTypeValue();
+        return $this->getTypeCaster('float', $value)->toTypeValue();
     }
 }
