@@ -6,15 +6,15 @@
 
 namespace rollun\datastore\DataStore;
 
+use InvalidArgumentException;
 use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
-use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
+use Zend\Db\Adapter\Driver\ResultInterface;
 use Zend\Db\Adapter\ParameterContainer;
-use Zend\Db\Sql\Delete;
 use Zend\Db\Sql\Select;
 use Zend\Db\Sql\Sql;
 use Zend\Db\TableGateway\TableGateway;
@@ -137,12 +137,12 @@ class DbTable extends DataStoreAbstract
      */
     public function queriedDelete(Query $query)
     {
-        $getIdCallable = function ($item) {
-            return $item[$this->getIdentifier()];
-        };
-
-        $deleteQuery = new Query();
-        $deleteQuery->setQuery($query->getQuery());
+        if ($query->getLimit()
+            || $query->getSort()
+            || ($query instanceof RqlQuery && $query->getGroupBy())
+            || $query->getSelect()) {
+            throw new InvalidArgumentException('Only where clause allowed for delete');
+        }
 
         $conditionBuilder = new SqlConditionBuilder(
             $this->getDbTable()->getAdapter(),
@@ -151,24 +151,30 @@ class DbTable extends DataStoreAbstract
 
         $sql = new Sql($this->getDbTable()->getAdapter());
         $delete = $sql->delete($this->getDbTable()->getTable());
-        $delete->where($conditionBuilder->__invoke($deleteQuery->getQuery()));
+        $delete->where($conditionBuilder->__invoke($query->getQuery()));
         $sqlString = $sql->buildSqlString($delete);
 
         $adapter = $this->dbTable->getAdapter();
-        $shouldDeletedIds = array_map($getIdCallable, $this->query($deleteQuery));
+        $shouldDeletedIds = array_map(function ($item) {
+            return $item[$this->getIdentifier()];
+        }, $this->query($query));
 
         try {
             $statement = $adapter->getDriver()->createStatement($sqlString);
-            $statement->execute();
+            $result = $statement->execute();
         } catch (\Throwable $e) {
             throw new DataStoreException("Can't delete records using query", 0, $e);
         }
 
-        $result = $this->selectForUpdate($shouldDeletedIds);
+        if (count($shouldDeletedIds) === $result->getAffectedRows()) {
+            return $shouldDeletedIds;
+        } else {
+            $result = $this->query($query);
 
-        foreach ($result as $record) {
-            if (in_array($record[$this->getIdentifier()], $shouldDeletedIds)) {
-                unset($shouldDeletedIds[$record[$this->getIdentifier()]]);
+            foreach ($result as $record) {
+                if (in_array($record[$this->getIdentifier()], $shouldDeletedIds)) {
+                    unset($shouldDeletedIds[$record[$this->getIdentifier()]]);
+                }
             }
         }
 
@@ -184,16 +190,16 @@ class DbTable extends DataStoreAbstract
      */
     public function queriedUpdate($record, Query $query)
     {
-        $getIdCallable = function ($item) {
-            return $item[$this->getIdentifier()];
-        };
+        if ($query->getLimit()
+            || $query->getSort()
+            || ($query instanceof RqlQuery && $query->getGroupBy())
+            || $query->getSelect()) {
+            throw new InvalidArgumentException('Only where clause allowed for update');
+        }
 
-        $updateQuery = new Query();
-        $updateQuery->setQuery($query->getQuery());
-        $shouldUpdatedId = array_map($getIdCallable, $this->query($updateQuery));
-        $result = $this->selectForUpdate($shouldUpdatedId);
+        $selectResult = $this->selectForUpdateWithQuery($query);
 
-        if (!$result) {
+        if (!$selectResult) {
             return [];
         }
 
@@ -204,7 +210,7 @@ class DbTable extends DataStoreAbstract
 
         $sql = new Sql($this->getDbTable()->getAdapter());
         $update = $sql->update($this->getDbTable()->getTable());
-        $update->where($conditionBuilder->__invoke($updateQuery->getQuery()));
+        $update->where($conditionBuilder->__invoke($query->getQuery()));
         $update->set($record);
         $sqlString = $sql->buildSqlString($update);
 
@@ -212,19 +218,34 @@ class DbTable extends DataStoreAbstract
 
         try {
             $statement = $adapter->getDriver()->createStatement($sqlString);
-            $statement->execute();
+            $updateResult = $statement->execute();
+            $updatedIds = [];
+
+            if ($selectResult->getAffectedRows() === $updateResult->getAffectedRows()) {
+                foreach ($selectResult as $record) {
+                    $updatedIds[] = $record[$this->getIdentifier()];
+                }
+            } else {
+                $effectedRecords = $this->query($query);
+
+                foreach ($selectResult as $record) {
+                    if ($record !== $effectedRecords[$this->getIdentifier()]) {
+                        $updatedIds[] = $effectedRecords[$this->getIdentifier()];
+                    }
+                }
+            }
         } catch (\Throwable $e) {
             throw new DataStoreException("Can't update records using query", 0, $e);
         }
 
-        return $shouldUpdatedId;
+        return $updatedIds;
     }
 
     /**
      * @param array $identifiers
      * @return \Zend\Db\Adapter\Driver\ResultInterface
      */
-    private function selectForUpdate(array $identifiers)
+    private function selectForUpdateWithIds(array $identifiers)
     {
         $adapter = $this->dbTable->getAdapter();
         $valTemplate = '';
@@ -246,6 +267,22 @@ class DbTable extends DataStoreAbstract
     }
 
     /**
+     * @param Query $query
+     * @return \Zend\Db\Adapter\Driver\ResultInterface
+     */
+    private function selectForUpdateWithQuery(Query $query)
+    {
+        $adapter = $this->dbTable->getAdapter();
+
+        $sqlString = $this->sqlQueryBuilder->buildSql($query);
+        $sqlString .= " FOR UPDATE";
+
+        $statement = $adapter->getDriver()->createStatement($sqlString);
+
+        return $statement->execute();
+    }
+
+    /**
      * @param $itemData
      * @param bool $createIfAbsent
      * @return array|mixed|null
@@ -258,7 +295,7 @@ class DbTable extends DataStoreAbstract
         $this->checkIdentifierType($id);
 
         // Is row with this index exist ?
-        $result = $this->selectForUpdate([$id]);
+        $result = $this->selectForUpdateWithIds([$id]);
         $isExist = $result->count();
 
         if (!$isExist && $createIfAbsent) {
