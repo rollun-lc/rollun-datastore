@@ -8,7 +8,6 @@ namespace rollun\test\functional\DataStore\Middleware;
 
 use Interop\Http\ServerMiddleware\DelegateInterface;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_Error_Deprecated;
 use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\Middleware\RequestDecoder;

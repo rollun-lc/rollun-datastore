@@ -2,7 +2,6 @@
 
 namespace rollun\test\uploader\Uploader;
 
-use PHPUnit_Framework_Error_Deprecated;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Memory;
 use rollun\uploader\Iterator\DataStorePack as DataStorePackIterator;

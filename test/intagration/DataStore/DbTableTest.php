@@ -7,8 +7,8 @@
 namespace rollun\test\intagration\DataStore;
 
 use Interop\Container\ContainerInterface;
+use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\DbTable;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\datastore\TableGateway\TableManagerMysql;
 use Zend\Db\TableGateway\TableGateway;
@@ -36,7 +36,7 @@ class DbTableTest extends BaseDataStoreTest
     protected $tableName = 'testTable';
 
     protected $tableConfig = [
-        'id' => [
+        DataStoreAbstract::DEF_ID => [
             'field_type' => 'Integer',
         ],
         'name' => [
@@ -84,7 +84,7 @@ class DbTableTest extends BaseDataStoreTest
         $this->mysqlManager->deleteTable($this->tableName);
     }
 
-    public function createObject(): DataStoresInterface
+    public function createObject(): DataStoreAbstract
     {
         $adapter = $this->getContainer()->get('db');
         $sqlQueryBuilder = new SqlQueryBuilder($adapter, $this->tableName);

@@ -6,13 +6,13 @@
 
 namespace rollun\test\intagration\DataStore;
 
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\Memory;
 
 class MemoryTest extends BaseDataStoreTest
 {
-    protected function createObject(): DataStoresInterface
+    protected function createObject(): DataStoreAbstract
     {
-        return new Memory($this->columns);
+        return new Memory($this->getColumns());
     }
 }

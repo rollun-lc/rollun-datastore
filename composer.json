@@ -53,6 +53,14 @@
             "rollun\\test\\": "test"
         }
     },
+    "extra": {
+        "zf": {
+            "config-provider": [
+                "rollun\\datastore\\ConfigProvider",
+                "rollun\\uploader\\ConfigProvider"
+            ]
+        }
+    },
     "scripts": {
         "test": "phpunit --colors=always",
         "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",

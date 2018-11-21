@@ -6,7 +6,6 @@
 
 namespace rollun\datastore\DataStore;
 
-use InvalidArgumentException;
 use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Iterators\DataStoreIterator;
@@ -419,7 +418,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
         $identifier = $this->getIdentifier();
 
         if (isset($record[$identifier])) {
-            throw new InvalidArgumentException('Primary key is not allowed in record for queried update');
+            throw new DataStoreException('Primary key is not allowed in record for queried update');
         }
 
         $forUpdateRecords = $this->query($query);
@@ -489,8 +488,8 @@ abstract class DataStoreAbstract implements DataStoresInterface
      */
     public function rewrite($record)
     {
-        if (isset($record[$this->getIdentifier()])) {
-            throw new InvalidArgumentException('Identifier is required');
+        if (!isset($record[$this->getIdentifier()])) {
+            throw new DataStoreException("Identifier is required for 'rewrite' action");
         }
 
         if ($this->has($record[$this->getIdentifier()])) {
@@ -511,6 +510,10 @@ abstract class DataStoreAbstract implements DataStoresInterface
         $ids = [];
 
         foreach ($records as $record) {
+            if (!isset($record[$this->getIdentifier()])) {
+                throw new DataStoreException("Identifier is required in 'multiRewrite' action for each record");
+            }
+
             try {
                 $rewroteRecord = $this->rewrite($record);
                 $ids[] = $rewroteRecord[$this->getIdentifier()];

@@ -7,8 +7,8 @@
 namespace rollun\test\intagration\DataStore;
 
 use Interop\Container\ContainerInterface;
+use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\HttpClient;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\TableGateway\TableManagerMysql;
 use Zend\Http\Client;
 
@@ -30,7 +30,7 @@ class HttpClientTest extends BaseDataStoreTest
     protected $tableName = 'testTable';
 
     protected $tableConfig = [
-        'id' => [
+        DataStoreAbstract::DEF_ID => [
             'field_type' => 'Integer',
         ],
         'name' => [
@@ -48,9 +48,8 @@ class HttpClientTest extends BaseDataStoreTest
     ];
 
     /**
-     * Run "php -S localhost:9000 -t test/assets" in project root directory
+     * Run "php -S localhost:9000 -t test/public" in project root directory
      *
-     * @throws \ReflectionException
      * @throws \rollun\datastore\DataStore\DataStoreException
      */
     public function setUp()
@@ -79,11 +78,10 @@ class HttpClientTest extends BaseDataStoreTest
      */
     protected $filename;
 
-    protected function createObject(): DataStoresInterface
+    protected function createObject(): DataStoreAbstract
     {
         $dataStoreService = 'dbDataStore';
-        $url = getenv('HOST');
-        $url .= "api/datastore/{$dataStoreService}";
+        $url = getenv('TEST_HOST') . "api/datastore/{$dataStoreService}";
         $client = new Client();
 
         return new HttpClient($client, $url);

@@ -3,7 +3,6 @@
 namespace rollun\test\functional\DataStore\Middleware\Handler;
 
 use Interop\Container\ContainerInterface;
-use PHPUnit_Framework_Error_Deprecated;
 use rollun\datastore\TableGateway\TableManagerMysql;
 
 /**

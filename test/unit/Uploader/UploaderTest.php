@@ -6,7 +6,6 @@
 
 namespace rollun\test\unit\Uploader;
 
-use PHPUnit_Framework_Error_Deprecated;
 use rollun\datastore\DataStore\Memory;
 use rollun\uploader\Uploader;
 use PHPUnit\Framework\TestCase;

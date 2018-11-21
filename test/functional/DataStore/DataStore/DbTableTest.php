@@ -7,7 +7,6 @@
 namespace rollun\test\functional\DataStore\DataStore;
 
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_Error_Deprecated;
 use Psr\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\DbTable;

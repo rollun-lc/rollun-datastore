@@ -7,10 +7,10 @@
 namespace rollun\test\unit\DataStore\DataStore;
 
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_Error_Deprecated;
 use rollun\datastore\DataStore\CsvBase;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Iterators\CsvIterator;
+use rollun\datastore\Rql\RqlQuery;
 use Symfony\Component\Filesystem\LockHandler;
 
 class CsvBaseTest extends TestCase
@@ -118,6 +118,84 @@ class CsvBaseTest extends TestCase
         $this->assertEquals($item, $this->read($item['id']));
     }
 
+    public function testMultiCreateSuccess()
+    {
+        $object = $this->createObject();
+        $items = [];
+
+        foreach (range(1, 5) as $id) {
+            $items[] = [
+                $object->getIdentifier() => $id,
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ];
+        }
+
+        $object->multiCreate($items);
+
+        foreach ($items as $item) {
+            $this->assertEquals($item, $this->read($item[$object->getIdentifier()]));
+        }
+    }
+
+    public function testRewriteSuccess()
+    {
+        $object = $this->createObject();
+        $item = [
+            $object->getIdentifier() => 1,
+            'name' => "name1",
+            'surname' => "surname1",
+        ];
+
+        $object->rewrite($item);
+        $this->assertEquals($item, $this->read(1));
+
+        $item = [
+            $object->getIdentifier() => 1,
+            'name' => "name2",
+            'surname' => "surname2",
+        ];
+        $object->rewrite($item);
+        $this->assertEquals($item, $this->read(1));
+    }
+
+    public function testMultiRewriteSuccess()
+    {
+        $object = $this->createObject();
+        $items = [];
+        $range = range(1, 5);
+
+        foreach ($range as $id) {
+            $items[$id] = [
+                $object->getIdentifier() => $id,
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ];
+        }
+
+        $object->multiRewrite($items);
+
+        foreach ($items as $item) {
+            $this->assertEquals($item, $this->read($item[$object->getIdentifier()]));
+        }
+
+        $items = [];
+
+        foreach ($range as $id) {
+            $items[$id] = [
+                $object->getIdentifier() => $id,
+                'name' => "foo{$id}",
+                'surname' => "bar{$id}",
+            ];
+        }
+
+        $object->multiRewrite($items);
+
+        foreach ($items as $item) {
+            $this->assertEquals($item, $this->read($item[$object->getIdentifier()]));
+        }
+    }
+
     public function testUpdateSuccess()
     {
         $item = [
@@ -188,6 +266,60 @@ class CsvBaseTest extends TestCase
         $this->assertEquals($item, $this->read($item['id']));
     }
 
+    public function testQueriedUpdateSuccess()
+    {
+        $object = $this->createObject();
+        $items = [];
+
+        foreach (range(1, 5) as $id) {
+            $item = [
+                $object->getIdentifier() => $id,
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ];
+
+            $object->create($item);
+            $items[$id] = $item;
+        }
+
+        $query = new RqlQuery('or(eq(id,1),eq(id,3))');
+        $object->queriedUpdate([
+            'surname' => "foo",
+        ], $query);
+
+        foreach ([1, 3] as $id) {
+            $this->assertEquals($object->read($items[$id][$object->getIdentifier()]), [
+                $object->getIdentifier() => $id,
+                'name' => "name{$id}",
+                'surname' => "foo",
+            ]);
+        }
+    }
+
+    public function testQueriedDeleteSuccess()
+    {
+        $object = $this->createObject();
+        $items = [];
+
+        foreach (range(1, 5) as $id) {
+            $item = [
+                $object->getIdentifier() => $id,
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ];
+
+            $object->create($item);
+            $items[$id] = $item;
+        }
+
+        $query = new RqlQuery('or(eq(id,1),eq(id,3))');
+        $object->queriedDelete($query);
+        $this->assertEquals(3, count($this->getAll()));
+
+        $object->queriedDelete(new RqlQuery());
+        $this->assertEquals(0, count($this->getAll()));
+    }
+
     public function testReadSuccess()
     {
         $items = [
@@ -248,6 +380,21 @@ class CsvBaseTest extends TestCase
         }
     }
 
+    public function testCount()
+    {
+        $range = range(1, 10);
+
+        foreach (range(1, 10) as $id) {
+            $this->create([
+                'id' => $id,
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ]);
+        }
+
+        $this->assertEquals($this->createObject()->count(), count($range));
+    }
+
     public function testGetIdentifier()
     {
         $this->assertEquals('id', $this->createObject()->getIdentifier());
@@ -292,6 +439,30 @@ class CsvBaseTest extends TestCase
                     for ($i = 0; $i < count($columns); $i++) {
                         $result[$columns[$i]] = $data[$i];
                     }
+                }
+            }
+
+            fclose($handle);
+        }
+
+        return $result;
+    }
+
+    protected function getAll($delimiter = ',')
+    {
+        $result = [];
+
+        if (($handle = fopen($this->filename, 'r')) !== false) {
+            $columns = fgetcsv($handle, 1000, $delimiter);
+            flock($handle, LOCK_SH | LOCK_EX);
+
+            while (($data = fgetcsv($handle, 1000, $delimiter)) !== false) {
+                for ($i = 0; $i < count($columns); $i++) {
+                    $item[$columns[$i]] = $data[$i];
+                }
+
+                if (!empty($item)) {
+                    $result[] = $item;
                 }
             }
 

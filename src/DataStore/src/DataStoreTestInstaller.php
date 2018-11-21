@@ -94,7 +94,7 @@ class DataStoreTestInstaller extends InstallerAbstract
             'testHttpClient' => [
                 'class' => HttpClient::class,
                 'tableName' => 'test_res_http',
-                'url' => getenv('HOST') . 'api/datastore/testDataSourceDb',
+                'url' => getenv('TEST_HOST') . 'api/datastore/testDataSourceDb',
                 'options' => ['timeout' => 30],
             ],
             'testMemory' => [

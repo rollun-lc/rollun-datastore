@@ -6,13 +6,13 @@
 
 namespace rollun\test\intagration\DataStore;
 
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\SerializedDbTable;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 
 class SerializedDbTableTest extends DbTableTest
 {
-    public function createObject(): DataStoresInterface
+    public function createObject(): DataStoreAbstract
     {
         $adapter = $this->container->get('db');
         $sqlQueryBuilder = new SqlQueryBuilder($adapter, $this->tableName);

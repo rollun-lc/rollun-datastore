@@ -7,9 +7,8 @@
 namespace rollun\test\intagration\DataStore;
 
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_Error_Deprecated;
 use rollun\datastore\DataStore\DataStoreException;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\Node\LikeGlobNode;
 use rollun\datastore\Rql\RqlQuery;
@@ -24,22 +23,25 @@ use Xiag\Rql\Parser\Node\SelectNode;
 
 abstract class BaseDataStoreTest extends TestCase
 {
-    protected $columns = ['id', 'name', 'surname'];
+    abstract protected function createObject(): DataStoreAbstract;
 
-    abstract protected function createObject(): DataStoresInterface;
+    protected function getColumns()
+    {
+        return [DataStoreAbstract::DEF_ID, 'name', 'surname'];
+    }
 
     protected function identifierToType($id)
     {
         return (string)$id;
     }
 
-    public function testMajorCRUD()
+    public function testMajorCrud()
     {
         $object = $this->createObject();
         $id = $this->identifierToType(1);
 
         $item = [
-            'id' => $id,
+            $object->getIdentifier() => $id,
             'name' => 'name',
             'surname' => 'surname',
         ];
@@ -52,7 +54,7 @@ abstract class BaseDataStoreTest extends TestCase
         $object->create($item);
 
         $item = [
-            'id' => $id,
+            $object->getIdentifier() => $id,
             'name' => 'name1',
             'surname' => 'surname1',
         ];
@@ -63,6 +65,64 @@ abstract class BaseDataStoreTest extends TestCase
         $this->assertEquals($item, $object->delete($id));
     }
 
+    public function testDataIntegritySuccess()
+    {
+        $object = $this->createObject();
+        $object->queriedDelete(new RqlQuery());
+        $range13 = range(1, 3);
+
+        foreach ($range13 as $id) {
+            $object->create([
+                $object->getIdentifier() => $id,
+                'name' => 'name',
+                'surname' => 'surname',
+            ]);
+        }
+
+        $this->assertEquals($object->count(), count($range13));
+        $range49 = range(4, 9);
+
+        foreach ($range49 as $id) {
+            $object->create([
+                $object->getIdentifier() => $id,
+                'name' => 'name',
+                'surname' => 'surname',
+            ]);
+        }
+
+        $this->assertEquals($object->count(), count($range13) + count($range49));
+
+        $object->delete(2);
+        $object->delete(6);
+        $this->assertEquals($object->count(), (count($range13) + count($range49)) - 2);
+
+        $object->queriedUpdate(['name' => 'foo', 'surname' => 'bar'], new RqlQuery());
+        $this->assertEquals($object->count(), (count($range13) + count($range49)) - 2);
+
+        $object->create([
+            $object->getIdentifier() => 10,
+            'name' => 'name',
+            'surname' => 'surname',
+        ]);
+        $this->assertEquals($object->count(), (count($range13) + count($range49)) - 1);
+
+        $object->create([
+            $object->getIdentifier() => 2,
+            'name' => 'name',
+            'surname' => 'surname',
+        ]);
+
+        $object->create([
+            $object->getIdentifier() => 6,
+            'name' => 'name',
+            'surname' => 'surname',
+        ]);
+        $this->assertEquals($object->count(), (count($range13) + count($range49)) + 1);
+
+        $object->queriedDelete(new RqlQuery());
+        $this->assertEquals(0, $object->count());
+    }
+
     public function testCreateItemAlreadyExistException()
     {
         $this->expectException(DataStoreException::class);
@@ -70,7 +130,7 @@ abstract class BaseDataStoreTest extends TestCase
         $id = $this->identifierToType(1);
 
         $item = [
-            'id' => $id,
+            $object->getIdentifier() => $id,
             'name' => 'name',
             'surname' => 'surname',
         ];
@@ -84,13 +144,13 @@ abstract class BaseDataStoreTest extends TestCase
         $object = $this->createObject();
 
         $item1 = [
-            'id' => $this->identifierToType(1),
+            $object->getIdentifier() => $this->identifierToType(1),
             'name' => 'name1',
             'surname' => 'surname1',
         ];
 
         $item2 = [
-            'id' => $this->identifierToType(1),
+            $object->getIdentifier() => $this->identifierToType(1),
             'name' => 'name2',
             'surname' => 'surname2',
         ];
@@ -106,7 +166,7 @@ abstract class BaseDataStoreTest extends TestCase
         $object = $this->createObject();
 
         $item = [
-            'id' => $this->identifierToType(1),
+            $object->getIdentifier() => $this->identifierToType(1),
             'name' => 'name',
             'surname' => 'surname',
         ];
@@ -119,7 +179,7 @@ abstract class BaseDataStoreTest extends TestCase
         $object = $this->createObject();
 
         $item = [
-            'id' => $this->identifierToType(1),
+            $object->getIdentifier() => $this->identifierToType(1),
             'name' => 'name',
             'surname' => 'surname',
         ];
@@ -134,7 +194,7 @@ abstract class BaseDataStoreTest extends TestCase
         foreach (range(1, 6) as $id) {
             $object->create(
                 [
-                    'id' => $this->identifierToType($id),
+                    $object->getIdentifier() => $this->identifierToType($id),
                     'name' => "name{$id}",
                     'surname' => "surname{$id}",
                 ]
@@ -147,12 +207,12 @@ abstract class BaseDataStoreTest extends TestCase
                 [
                     new OrNode(
                         [
-                            new GeNode('id', 3),
-                            new LeNode('id', 7),
+                            new GeNode($object->getIdentifier(), 3),
+                            new LeNode($object->getIdentifier(), 7),
                         ]
                     ),
-                    new NotNode([new EqNode('id', 4)]),
-                    new GeNode('id', 3),
+                    new NotNode([new EqNode($object->getIdentifier(), 4)]),
+                    new GeNode($object->getIdentifier(), 3),
                 ]
             )
         );
@@ -160,7 +220,7 @@ abstract class BaseDataStoreTest extends TestCase
         $rqlQuery->setSelect(
             new SelectNode(
                 [
-                    'id',
+                    $object->getIdentifier(),
                     'name',
                     'surname',
                 ]
@@ -169,17 +229,17 @@ abstract class BaseDataStoreTest extends TestCase
 
         $expectedItems = [
             [
-                'id' => 3,
+                $object->getIdentifier() => 3,
                 'name' => "name3",
                 'surname' => "surname3",
             ],
             [
-                'id' => 5,
+                $object->getIdentifier() => 5,
                 'name' => "name5",
                 'surname' => "surname5",
             ],
             [
-                'id' => 6,
+                $object->getIdentifier() => 6,
                 'name' => "name6",
                 'surname' => "surname6",
             ],
@@ -191,24 +251,24 @@ abstract class BaseDataStoreTest extends TestCase
 
     public function testQueryWithAggregationFunctionsSuccess()
     {
+        $object = $this->createObject();
         $rqlQuery = new RqlQuery();
         $rqlQuery->setSelect(
             new SelectNode(
                 [
-                    new AggregateFunctionNode('count', 'id'),
-                    new AggregateFunctionNode('max', 'id'),
-                    new AggregateFunctionNode('min', 'id'),
-                    new AggregateFunctionNode('sum', 'id'),
-                    new AggregateFunctionNode('avg', 'id'),
+                    new AggregateFunctionNode('count', $object->getIdentifier()),
+                    new AggregateFunctionNode('max', $object->getIdentifier()),
+                    new AggregateFunctionNode('min', $object->getIdentifier()),
+                    new AggregateFunctionNode('sum', $object->getIdentifier()),
+                    new AggregateFunctionNode('avg', $object->getIdentifier()),
                 ]
             )
         );
 
-        $object = $this->createObject();
         foreach (range(1, 3) as $id) {
             $object->create(
                 [
-                    'id' => $this->identifierToType($id),
+                    $object->getIdentifier() => $this->identifierToType($id),
                     'name' => "name{$id}",
                     'surname' => "surname{$id}",
                 ]
@@ -239,7 +299,7 @@ abstract class BaseDataStoreTest extends TestCase
         foreach (range(1, 5) as $id) {
             $object->create(
                 [
-                    'id' => $this->identifierToType($id),
+                    $object->getIdentifier() => $this->identifierToType($id),
                     'name' => "name{$id}",
                     'surname' => "surname{$id}",
                 ]
@@ -251,12 +311,12 @@ abstract class BaseDataStoreTest extends TestCase
             $items,
             [
                 [
-                    'id' => 3,
+                    $object->getIdentifier() => 3,
                     'name' => "name3",
                     'surname' => "surname3",
                 ],
                 [
-                    'id' => 4,
+                    $object->getIdentifier() => 4,
                     'name' => "name4",
                     'surname' => "surname4",
                 ],
@@ -281,7 +341,7 @@ abstract class BaseDataStoreTest extends TestCase
 
         foreach (range(1, 5) as $id) {
             $item = [
-                'id' => $this->identifierToType($id),
+                $object->getIdentifier() => $this->identifierToType($id),
                 'name' => "name{$id}{$id}{$id}",
                 'surname' => "{$id}surname{$id}",
             ];
@@ -293,6 +353,175 @@ abstract class BaseDataStoreTest extends TestCase
         $this->assertEquals($object->query($rqlQuery), $items);
     }
 
+    public function testMultiCreateSuccess()
+    {
+        $object = $this->createObject();
+        $items = [];
+
+        foreach (range(1, 5) as $id) {
+            $items[] = [
+                $object->getIdentifier() => $this->identifierToType($id),
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ];
+        }
+
+        $object->multiCreate($items);
+        
+        foreach ($items as $item) {
+            $this->assertEquals($item, $object->read($item[$object->getIdentifier()]));
+        }
+    }
+
+    public function testMultiUpdateSuccess()
+    {
+        $object = $this->createObject();
+        $items = [];
+
+        foreach (range(1, 5) as $id) {
+            $item = [
+                $object->getIdentifier() => $this->identifierToType($id),
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ];
+
+            $object->create($item);
+            $items[] = $item;
+        }
+
+        foreach ($items as &$item) {
+            if ($item[$object->getIdentifier()] == 1) {
+                continue;
+            }
+
+            $item['name'] = 'name' . ($item[$object->getIdentifier()] + 100);
+        }
+
+        $object->multiUpdate($items);
+
+        foreach ($items as $item) {
+            if ($item[$object->getIdentifier()] == 1) {
+                $item['name'] = 'name' . $item[$object->getIdentifier()];
+            } else {
+                $item['name'] = 'name' . ($item[$object->getIdentifier()] + 100);
+            }
+
+            $this->assertEquals($item, $object->read($item[$object->getIdentifier()]));
+        }
+    }
+
+    public function testQueriedUpdateSuccess()
+    {
+        $object = $this->createObject();
+        $items = [];
+
+        foreach (range(1, 5) as $id) {
+            $item = [
+                $object->getIdentifier() => $this->identifierToType($id),
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ];
+
+            $object->create($item);
+            $items[$id] = $item;
+        }
+
+        $query = new RqlQuery('or(eq(id,1),eq(id,3))');
+        $object->queriedUpdate([
+            'surname' => "foo",
+        ], $query);
+
+        foreach ([1, 3] as $id) {
+            $this->assertEquals($object->read($items[$id][$object->getIdentifier()]), [
+                $object->getIdentifier() => $this->identifierToType($id),
+                'name' => "name{$id}",
+                'surname' => "foo",
+            ]);
+        }
+    }
+
+    public function testQueriedDeleteSuccess()
+    {
+        $object = $this->createObject();
+        $items = [];
+
+        foreach (range(1, 5) as $id) {
+            $item = [
+                $object->getIdentifier() => $this->identifierToType($id),
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ];
+
+            $object->create($item);
+            $items[$id] = $item;
+        }
+
+        $query = new RqlQuery('or(eq(id,1),eq(id,3))');
+        $object->queriedDelete($query);
+        $this->assertEquals(3, $object->count());
+
+        $object->queriedDelete(new RqlQuery());
+        $this->assertEquals(0, $object->count());
+    }
+
+    public function testRewriteSuccess()
+    {
+        $object = $this->createObject();
+        $item = [
+            $object->getIdentifier() => $this->identifierToType(1),
+            'name' => "name1",
+            'surname' => "surname1",
+        ];
+
+        $object->rewrite($item);
+        $this->assertEquals($item, $object->read(1));
+
+        $item = [
+            $object->getIdentifier() => $this->identifierToType(1),
+            'name' => "name2",
+            'surname' => "surname2",
+        ];
+        $object->rewrite($item);
+        $this->assertEquals($item, $object->read(1));
+    }
+
+    public function testMultiRewriteSuccess()
+    {
+        $object = $this->createObject();
+        $items = [];
+        $range = range(1, 5);
+
+        foreach ($range as $id) {
+            $items[$id] = [
+                $object->getIdentifier() => $this->identifierToType($id),
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ];
+        }
+
+        $object->multiRewrite($items);
+
+        foreach ($items as $item) {
+            $this->assertEquals($item, $object->read($item[$object->getIdentifier()]));
+        }
+
+        $items = [];
+
+        foreach ($range as $id) {
+            $items[$id] = [
+                $object->getIdentifier() => $this->identifierToType($id),
+                'name' => "foo{$id}",
+                'surname' => "bar{$id}",
+            ];
+        }
+
+        $object->multiRewrite($items);
+
+        foreach ($items as $item) {
+            $this->assertEquals($item, $object->read($item[$object->getIdentifier()]));
+        }
+    }
+
     public function testQueryWithEmptySuccess()
     {
         $this->assertEquals(
@@ -302,13 +531,9 @@ abstract class BaseDataStoreTest extends TestCase
         );
     }
 
-    public function testGetIdentifierSuccess()
+    public function testGetDefaultIdentifierSuccess()
     {
-        $this->assertEquals(
-            'id',
-            $this->createObject()
-                ->getIdentifier()
-        );
+        $this->assertEquals(DataStoreAbstract::DEF_ID, $this->createObject()->getIdentifier());
     }
 
     public function testHasSuccess()
@@ -316,7 +541,7 @@ abstract class BaseDataStoreTest extends TestCase
         $object = $this->createObject();
         $object->create(
             [
-                'id' => 1,
+                $object->getIdentifier() => 1,
                 'name' => "name1",
                 'surname' => "surname1",
             ]
@@ -342,7 +567,7 @@ abstract class BaseDataStoreTest extends TestCase
         foreach (range(1, 5) as $id) {
             $object->create(
                 [
-                    'id' => $this->identifierToType($id),
+                    $object->getIdentifier() => $this->identifierToType($id),
                     'name' => "name{$id}{$id}{$id}",
                     'surname' => "{$id}surname{$id}",
                 ]
@@ -362,7 +587,7 @@ abstract class BaseDataStoreTest extends TestCase
 
         foreach (range(1, 5) as $id) {
             $item = [
-                'id' => $this->identifierToType($id),
+                $object->getIdentifier() => $this->identifierToType($id),
                 'name' => "name{$id}",
                 'surname' => "surname{$id}",
             ];

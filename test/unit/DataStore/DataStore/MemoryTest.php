@@ -7,10 +7,10 @@
 namespace rollun\test\unit\DataStore\DataStore;
 
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_Error_Deprecated;
 use ReflectionClass;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Memory;
+use rollun\datastore\Rql\RqlQuery;
 
 class MemoryTest extends TestCase
 {
@@ -98,6 +98,99 @@ class MemoryTest extends TestCase
         $this->assertAttributeEquals([1 => $itemData2], 'items', $object);
     }
 
+    public function testMultiUpdateSuccess()
+    {
+        $object = $this->createObject(['id', 'name', 'surname']);
+        $items = [];
+
+        foreach (range(1, 5) as $id) {
+            $items[$id] = [
+                'id' => $id,
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ];
+        }
+
+        $reflection = new ReflectionClass($object);
+        $property = $reflection->getProperty('items');
+        $property->setAccessible(true);
+        $property->setValue($object, $items);
+
+        foreach ($items as $item) {
+            $id = $item['id'];
+            $items[$id] = [
+                'id' => $id,
+                'name' => "foo{$id}",
+                'surname' => "bar{$id}",
+            ];
+        }
+
+        $object->multiUpdate($items);
+        $this->assertAttributeEquals($items, 'items', $object);
+    }
+
+    public function testQueriedUpdate()
+    {
+        $object = $this->createObject(['id', 'name', 'surname']);
+        $items = [];
+
+        foreach (range(1, 5) as $id) {
+            $items[$id] = [
+                'id' => $id,
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ];
+        }
+
+        $reflection = new ReflectionClass($object);
+        $property = $reflection->getProperty('items');
+        $property->setAccessible(true);
+        $property->setValue($object, $items);
+
+        $query = new RqlQuery('or(eq(id,1),eq(id,5))');
+        $object->queriedUpdate([
+            'name' => "foo",
+            'surname' => "bar",
+        ], $query);
+
+        $actualItems = $property->getValue($object);
+
+        foreach ([1, 5] as $id) {
+            $this->assertEquals([
+                'id' => $id,
+                'name' => "foo",
+                'surname' => "bar",
+            ], $actualItems[$id]);
+        }
+    }
+
+    public function testQueriedDelete()
+    {
+        $object = $this->createObject(['id', 'name', 'surname']);
+        $items = [];
+
+        foreach (range(1, 5) as $id) {
+            $items[$id] = [
+                'id' => $id,
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ];
+        }
+
+        $reflection = new ReflectionClass($object);
+        $property = $reflection->getProperty('items');
+        $property->setAccessible(true);
+        $property->setValue($object, $items);
+
+        $query = new RqlQuery('or(eq(id,1),eq(id,5))');
+        $object->queriedDelete($query);
+
+        $this->assertEquals(3, count($property->getValue($object)));
+
+        $object->queriedDelete(new RqlQuery());
+        $this->assertEquals(0, count($property->getValue($object)));
+    }
+
     public function testCreateUpdateFailWithNotExistingField()
     {
         $this->expectException(DataStoreException::class);
@@ -116,6 +209,70 @@ class MemoryTest extends TestCase
             'name' => 'name',
             'notExistingField' => 'anyValue',
         ]);
+    }
+
+    public function testMultiCreateSuccess()
+    {
+        $object = $this->createObject(['id', 'name']);
+        $items = [];
+
+        foreach (range(1, 5) as $id) {
+            $items[$id] = [
+                'id' => $id,
+                'name' => "name{$id}",
+            ];
+        }
+
+        $object->multiCreate($items);
+        $this->assertAttributeEquals($items, 'items', $object);
+    }
+
+    public function testMultiRewriteSuccess()
+    {
+        $object = $this->createObject(['id', 'name']);
+        $items = [];
+        $range = range(1, 5);
+
+        foreach ($range as $id) {
+            $items[$id] = [
+                $object->getIdentifier() => $id,
+                'name' => "name{$id}",
+            ];
+        }
+
+        $object->multiRewrite($items);
+        $this->assertAttributeEquals($items, 'items', $object);
+
+        $items = [];
+
+        foreach ($range as $id) {
+            $items[$id] = [
+                $object->getIdentifier() => $id,
+                'name' => "foo{$id}",
+            ];
+        }
+
+        $object->multiRewrite($items);
+        $this->assertAttributeEquals($items, 'items', $object);
+    }
+
+    public function testRewriteSuccess()
+    {
+        $object = $this->createObject();
+        $item = [
+            $object->getIdentifier() => 1,
+            'name' => "name1",
+        ];
+
+        $object->rewrite($item);
+        $this->assertEquals($item, $object->read(1));
+
+        $item = [
+            $object->getIdentifier() => 1,
+            'name' => "name2",
+        ];
+        $object->rewrite($item);
+        $this->assertEquals($item, $object->read(1));
     }
 
     public function testReadNotExistingItem()

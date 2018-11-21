@@ -44,19 +44,19 @@ class Memory extends DataStoreAbstract
      *
      * @var array
      */
-    protected $fields;
+    protected $columns;
 
     /**
      * Memory constructor.
-     * @param array $fields
+     * @param array $columns
      */
-    public function __construct(array $fields = [])
+    public function __construct(array $columns = [])
     {
-        if (!count($fields)) {
+        if (!count($columns)) {
             trigger_error("Array of required columns is not specified", E_USER_DEPRECATED);
         }
 
-        $this->fields = $fields;
+        $this->columns = $columns;
         $this->conditionBuilder = new PhpConditionBuilder();
     }
 
@@ -200,12 +200,12 @@ class Memory extends DataStoreAbstract
      */
     protected function checkOnExistingColumns($itemData)
     {
-        if (!count($this->fields)) {
+        if (!count($this->columns)) {
             return $itemData;
         }
 
         foreach ($itemData as $field => $value) {
-            if (!in_array($field, $this->fields)) {
+            if (!in_array($field, $this->columns)) {
                 throw new DataStoreException("Undefined field '$field' in data store");
             }
         }

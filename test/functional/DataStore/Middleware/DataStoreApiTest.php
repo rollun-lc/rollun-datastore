@@ -12,7 +12,6 @@ use SplQueue;
 use TypeError;
 use Interop\Http\ServerMiddleware\DelegateInterface;
 use Interop\Http\ServerMiddleware\MiddlewareInterface;
-use PHPUnit_Framework_Error_Deprecated;
 use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Http\Message\ResponseInterface;
 use rollun\datastore\DataStore\DataStoreException;

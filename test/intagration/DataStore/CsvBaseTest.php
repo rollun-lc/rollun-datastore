@@ -7,7 +7,7 @@
 namespace rollun\test\intagration\DataStore;
 
 use rollun\datastore\DataStore\CsvBase;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\DataStoreAbstract;
 use Symfony\Component\Filesystem\LockHandler;
 
 class CsvBaseTest extends BaseDataStoreTest
@@ -24,7 +24,7 @@ class CsvBaseTest extends BaseDataStoreTest
         parent::setUp();
         $this->filename = tempnam(sys_get_temp_dir(), 'csv');
         $resource = fopen($this->filename, 'w+');
-        fputcsv($resource, $this->columns);
+        fputcsv($resource, $this->getColumns());
         fclose($resource);
     }
 
@@ -33,7 +33,7 @@ class CsvBaseTest extends BaseDataStoreTest
         unlink($this->filename);
     }
 
-    protected function createObject(): DataStoresInterface
+    protected function createObject(): DataStoreAbstract
     {
         $lockHandler = new LockHandler($this->filename);
 
