@@ -55,6 +55,33 @@ abstract class DataStoreAbstract implements DataStoresInterface
         }
     }
 
+    protected function getNext($id)
+    {
+        $isNext = false;
+        $iterator = $this->getIterator();
+
+        if (is_null($id)) {
+            $iterator->rewind();
+            return $iterator->current();
+        }
+
+        foreach ($iterator as $record) {
+            if ($isNext) {
+                return $record;
+            }
+
+            if ($id == $record[$this->getIdentifier()]) {
+                $isNext = true;
+            }
+        }
+
+        if ($isNext) {
+            return $iterator->current();
+        }
+
+        throw new DataStoreException("Can't find record with id = {$id}");
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -492,11 +519,13 @@ abstract class DataStoreAbstract implements DataStoresInterface
             throw new DataStoreException("Identifier is required for 'rewrite' action");
         }
 
+        $rewriteIfExist = false;
+
         if ($this->has($record[$this->getIdentifier()])) {
-            $this->delete($record[$this->getIdentifier()]);
+            $rewriteIfExist = true;
         }
 
-        return $this->create($record);
+        return $this->create($record, $rewriteIfExist);
     }
 
     /**

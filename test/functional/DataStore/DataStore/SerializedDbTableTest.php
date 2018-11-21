@@ -7,6 +7,7 @@
 namespace rollun\test\functional\DataStore\DataStore;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use rollun\datastore\DataStore\SerializedDbTable;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\datastore\TableGateway\TableManagerMysql;
@@ -53,12 +54,22 @@ class SerializedDbTableTest extends TestCase
             ]
         ],
     ];
+
+    /**
+     * @return ContainerInterface
+     */
+    protected function getContainer()
+    {
+        if ($this->container === null) {
+            $this->container = include './config/container.php';
+        }
+
+        return $this->container;
+    }
+
     public function setUp()
     {
-        /** @var ServiceManager $container */
-        $this->container = include './config/container.php';
-
-        $adapter = $container->get('db');
+        $adapter = clone $this->getContainer()->get('db');
         $this->mysqlManager = new TableManagerMysql($adapter);
 
         if ($this->mysqlManager->hasTable($this->tableName)) {
@@ -66,16 +77,6 @@ class SerializedDbTableTest extends TestCase
         }
 
         $this->mysqlManager->createTable($this->tableName, $this->tableConfig);
-
-        $tableGateway = new TableGateway($this->tableName, $adapter);
-        $sqlQueryBuilder = new SqlQueryBuilder($container->get('db'), $this->tableName);
-
-        $container = clone $this->container;
-        $container->setService($this->tableName, $tableGateway);
-        $container->setService(SqlQueryBuilder::class, $sqlQueryBuilder);
-        InsideConstruct::setContainer($container);
-
-        $this->object = new SerializedDbTable($tableGateway, $sqlQueryBuilder);
     }
 
     public function tearDown()
@@ -84,8 +85,24 @@ class SerializedDbTableTest extends TestCase
         InsideConstruct::setContainer($this->container);
     }
 
-    public function testSerializable()
+    public function testSerializableWithoutConfigs()
     {
+        $adapter = clone $this->getContainer()->get('db');
+        $tableGateway = new TableGateway($this->tableName, $adapter);
+        $sqlQueryBuilder = new SqlQueryBuilder($adapter, $this->tableName);
+
+        $container = clone $this->container;
+        $container->setService($this->tableName, $tableGateway);
+        $container->setService(SqlQueryBuilder::class, $sqlQueryBuilder);
+        InsideConstruct::setContainer($container);
+
+        $this->object = new SerializedDbTable($tableGateway, $sqlQueryBuilder);
+        $this->assertEquals($this->object, unserialize(serialize($this->object)));
+    }
+
+    public function testSerializableWithConfigs()
+    {
+        $this->object = $this->getContainer()->get('dbDataStoreSerialized');
         $this->assertEquals($this->object, unserialize(serialize($this->object)));
     }
 }

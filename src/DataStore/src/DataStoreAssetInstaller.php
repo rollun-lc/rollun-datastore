@@ -17,6 +17,7 @@ use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilderAbstractFacto
 use rollun\datastore\DataStore\CsvBase;
 use rollun\datastore\DataStore\CsvIntId;
 use rollun\datastore\DataStore\DbTable;
+use rollun\datastore\DataStore\Factory\DataStoreAbstractFactory;
 use rollun\datastore\DataStore\HttpClient;
 use rollun\datastore\DataStore\Installers\CacheableInstaller;
 use rollun\datastore\DataStore\Installers\CsvInstaller;
@@ -28,10 +29,11 @@ use rollun\datastore\DataStore\SerializedDbTable;
 use rollun\datastore\Middleware\DataStoreMiddlewareInstaller;
 use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use rollun\datastore\TableGateway\Factory\SqlQueryBuilderAbstractFactory;
+use rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\installer\Install\InstallerAbstract;
 
-class DataStoreTestInstaller extends InstallerAbstract
+class DataStoreAssetInstaller extends InstallerAbstract
 {
     protected $dataStore;
 
@@ -43,9 +45,14 @@ class DataStoreTestInstaller extends InstallerAbstract
 
     protected $sqlConditionBuilder;
 
+    protected $db;
+
+    protected $dependencies;
+
     public function __construct(ContainerInterface $container, IOInterface $ioComposer)
     {
         parent::__construct($container, $ioComposer);
+
         $this->tableGateway = [
             'test_res_tablle' => [
                 'sql' => MultiInsertSql::class,
@@ -53,7 +60,11 @@ class DataStoreTestInstaller extends InstallerAbstract
             'table_with_name_same_as_resource_name' => [],
             'tbl_name_which_exist' => [],
             'test_res_http' => [],
+
+            // new tests
+            'testTable' => [],
         ];
+
         $this->tableManagerMysql = [
             'tablesConfigs' => [
                 'test_table_config' => [],
@@ -62,6 +73,7 @@ class DataStoreTestInstaller extends InstallerAbstract
                 'test_autocreate_table' => 'test_table_config',
             ],
         ];
+
         $this->dataStore = [
             'exploited1DbTable' => [
                 'class' => DbTable::class,
@@ -123,18 +135,58 @@ class DataStoreTestInstaller extends InstallerAbstract
                 'dataSource' => 'testDataSourceDb',
                 'cacheable' => 'testDbTable',
             ],
+
+            // new tests
+            'memoryDataStore' => [
+                'class' => Memory::class,
+            ],
+            'dbDataStore' => [
+                'class' => DbTable::class,
+                'tableGateway' => 'testTable',
+            ],
+            'dbDataStoreSerialized' => [
+                'class' => SerializedDbTable::class,
+                'tableName' => 'testTable',
+                'sqlQueryBuilder' => 'sqlQueryBuilder1',
+            ],
         ];
 
         $this->sqlQueryBuilder = [
-            SqlQueryBuilder::class => [
+            'sqlQueryBuilder1' => [
                 'tableName' => 'test_res_tablle',
+                'sqlConditionBuilder' => 'sqlConditionBuilder1',
+            ],
+
+            // new tests
+            SqlQueryBuilder::class => [
+                'tableName' => 'testTable',
                 'sqlConditionBuilder' => SqlConditionBuilder::class,
             ],
         ];
 
         $this->sqlConditionBuilder = [
-            SqlConditionBuilder::class => [
+            'sqlConditionBuilder1' => [
                 'tableName' => 'test_res_tablle',
+            ],
+
+            // new tests
+            SqlConditionBuilder::class => [
+                'tableName' => 'testTable',
+            ],
+        ];
+
+        $this->db = [
+            'driver' => getenv('DB_DRIVER'),
+            'hostname' => getenv('DB_HOST'),
+            'port' => getenv('DB_PORT'),
+            'database' => getenv('DB_NAME'),
+            'username' => getenv('DB_USER'),
+            'password' => getenv('DB_PASS'),
+        ];
+
+        $this->dependencies = [
+            'aliases' => [
+                'db' => 'Zend\Db\Adapter\AdapterInterface',
             ],
         ];
     }
@@ -146,11 +198,13 @@ class DataStoreTestInstaller extends InstallerAbstract
     public function install()
     {
         return [
-            'tableManagerMysql' => $this->tableManagerMysql,
-            'tableGateway' => $this->tableGateway,
-            'dataStore' => $this->dataStore,
+            TableGatewayAbstractFactory::KEY_TABLE_GATEWAY => $this->tableGateway,
+            DataStoreAbstractFactory::KEY_DATASTORE => $this->dataStore,
             SqlQueryBuilderAbstractFactory::class => $this->sqlQueryBuilder,
             SqlConditionBuilderAbstractFactory::class => $this->sqlConditionBuilder,
+            'tableManagerMysql' => $this->tableManagerMysql,
+            'dependencies' => $this->dependencies,
+            'db' => $this->db,
         ];
     }
 

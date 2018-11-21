@@ -14,8 +14,8 @@ use Xiag\Rql\Parser\Node;
 /**
  * Outer iterator for rollun\datastore\DataStore\Read\ReadInterface objects
  *
- * @category   rest
- * @package    zaboy
+ * Class DataStoreIterator
+ * @package rollun\datastore\DataStore\Iterators
  */
 class DataStoreIterator implements \Iterator
 {

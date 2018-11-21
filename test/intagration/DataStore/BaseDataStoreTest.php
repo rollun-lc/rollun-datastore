@@ -601,4 +601,41 @@ abstract class BaseDataStoreTest extends TestCase
             $this->assertEquals($object->read($id), $item);
         }
     }
+
+    public function testGetNextSuccess()
+    {
+        $object = $this->createObject();
+        $reflectionMethod = new \ReflectionMethod($object, 'getNext');
+        $reflectionMethod->setAccessible(true);
+        $items = [];
+
+        foreach (range(1, 10) as $id) {
+            $items[] = [
+                $object->getIdentifier() => $this->identifierToType($id),
+                'name' => "name{$id}",
+                'surname' => "surname{$id}",
+            ];
+        }
+
+        $object->multiCreate($items);
+
+        $record = current($items);
+        $assertItems[] = $record;
+
+        while (!is_null($record = $reflectionMethod->invoke($object, $record[$object->getIdentifier()]))) {
+            $assertItems[] = $record;
+        }
+
+        $this->assertEquals($items, $assertItems);
+
+        $record[$object->getIdentifier()] = null;
+        $assertItems = [];
+
+        while (!is_null($record = $reflectionMethod->invoke($object, $record[$object->getIdentifier()]))) {
+            $assertItems[] = $record;
+        }
+
+        $this->assertEquals($items, $assertItems);
+        $this->assertEquals(null, $reflectionMethod->invoke($object, 10));
+    }
 }

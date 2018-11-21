@@ -28,18 +28,11 @@ use rollun\datastore\TableGateway\TableManagerMysql;
 class TableManagerMysqlFactory extends FactoryAbstract
 {
     /**
-     * Create and return an instance of the TableGateway.
-     *
-     * 'use Zend\ServiceManager\AbstractFactoryInterface;' for V2 to
-     * 'use Zend\ServiceManager\Factory\AbstractFactoryInterface;' for V3
-     *
-     * @param  ContainerInterface $container
-     * @param  string $requestedName
-     * @param  array $options
-     * @return mixed|TableManagerMysql
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     * @throws \ReflectionException
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     * @param array|null $options
+     * @return object|TableManagerMysql
+     * @throws \Exception
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
