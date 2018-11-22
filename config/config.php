@@ -17,34 +17,32 @@ $cacheConfig = [
 // Determine application environment ('dev' or 'prod').
 $appEnv = getenv('APP_ENV');
 
-$aggregator = new ConfigAggregator(
-    [
-        \Zend\Db\ConfigProvider::class,
-        \Zend\Validator\ConfigProvider::class,
-        \Zend\Expressive\Router\ConfigProvider::class,
+$aggregator = new ConfigAggregator([
+    \Zend\Db\ConfigProvider::class,
+    \Zend\Validator\ConfigProvider::class,
+    \Zend\Expressive\Router\ConfigProvider::class,
 
-        // Include cache configuration
-        new ArrayProvider($cacheConfig),
+    // Include cache configuration
+    new ArrayProvider($cacheConfig),
 
-        // Default App module config
-        // Load application config in a pre-defined order in such a way that local settings
-        // overwrite global settings. (Loaded as first to last):
-        //   - `global.php`
-        //   - `*.global.php`
-        //   - `local.php`
-        //   - `*.local.php`
-        new PhpFileProvider('config/autoload/{{,*.}global,{,*.}local}.php'),
+    // Default App module config
+    // Load application config in a pre-defined order in such a way that local settings
+    // overwrite global settings. (Loaded as first to last):
+    //   - `global.php`
+    //   - `*.global.php`
+    //   - `local.php`
+    //   - `*.local.php`
+    new PhpFileProvider('config/autoload/{{,*.}global,{,*.}local}.php'),
 
-        // Load application config according to environment:
-        //   - `dev.global.php`,   `test.global.php`,   `prod.global.php`
-        //   - `*.dev.global.php`, `*.test.global.php`, `*.prod.global.php`
-        //   - `dev.local.php`,    `test.local.php`,     `prod.local.php`
-        //   - `*.dev.local.php`,  `*.test.local.php`,  `*.prod.local.php`
-        new PhpFileProvider(realpath(__DIR__) . "/autoload/{{,*.}{$appEnv}.global,{,*.}{$appEnv}.local}.php"),
+    // Load application config according to environment:
+    //   - `dev.global.php`,   `test.global.php`,   `prod.global.php`
+    //   - `*.dev.global.php`, `*.test.global.php`, `*.prod.global.php`
+    //   - `dev.local.php`,    `test.local.php`,     `prod.local.php`
+    //   - `*.dev.local.php`,  `*.test.local.php`,  `*.prod.local.php`
+    new PhpFileProvider(realpath(__DIR__) . "/autoload/{{,*.}{$appEnv}.global,{,*.}{$appEnv}.local}.php"),
 
-        // Load development config if it exists
-        new PhpFileProvider('config/development.config.php'),
-    ], $cacheConfig['config_cache_path']
-);
+    // Load development config if it exists
+    new PhpFileProvider('config/development.config.php'),
+], $cacheConfig['config_cache_path']);
 
 return $aggregator->getMergedConfig();
