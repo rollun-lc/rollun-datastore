@@ -8,16 +8,24 @@
 composer require rollun-com/rollun-datastore
 ```
 
-Существует два `ConfigProvider` которые подключить в ваше приложение, для подключение фабрик:
+Чтобы начать пользовать библиотекой, нужно подключить следующие `ConfigProvider` в файл конфигурации для
+[ServiceManager](https://github.com/zendframework/zend-servicemanager):
 - `rollun\datastore\ConfigProvider`
 - `rollun\uploader\ConfigProvider`
 
-Чтобы запустить тесты нужно указать обязательные переменные в `.env` в корне проекта и установить файлы конфигурации 
+
+##### Тестирование
+Чтобы запустить тесты нужно указать обязательные переменные в `.env`, установить файлы конфигурации 
 (`rollun\datastore\DataStoreAssetInstaller`) для тестового окружения (при этом конфигурации для фабрик подтянуться 
-тоже).
+тоже)
 
 ```bash
 composer lib install
+```
+
+и запустить встроенный `php` сервер
+```bash
+php -S localhost:9000 -t public public/test.php
 ```
 
 ### Getting Started
