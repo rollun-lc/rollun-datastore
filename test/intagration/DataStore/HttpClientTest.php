@@ -8,6 +8,7 @@ namespace rollun\test\intagration\DataStore;
 
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStoreAbstract;
+use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\HttpClient;
 use rollun\datastore\TableGateway\TableManagerMysql;
 use Zend\Http\Client;
@@ -50,7 +51,7 @@ class HttpClientTest extends BaseDataStoreTest
     /**
      * Run "php -S localhost:9000 -t test/public" in project root directory
      *
-     * @throws \rollun\datastore\DataStore\DataStoreException
+     * @throws DataStoreException
      */
     public function setUp()
     {

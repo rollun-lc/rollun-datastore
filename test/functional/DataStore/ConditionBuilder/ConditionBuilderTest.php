@@ -52,7 +52,8 @@ abstract class ConditionBuilderTest extends TestCase
      */
     public function testInvoke($rootQueryNode, $out)
     {
-        $condition = $this->createObject()->__invoke($rootQueryNode);
+        $condition = $this->createObject()
+            ->__invoke($rootQueryNode);
         $this->assertEquals($out, $condition);
     }
 }

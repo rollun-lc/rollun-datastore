@@ -82,69 +82,45 @@ class RqlConditionBuilderTest extends ConditionBuilderTest
                 'and(eq(a,1),ne(b,2),lt(c,3),gt(d,4),le(e,5),ge(f,6),like(g,string:*abc?))',
             ],
             [
-                (new QueryBuilder())->addQuery(
-                    new AndNode(
-                        [
-                            new EqNode('a', 'b'),
-                            new LtNode('c', 'd'),
-                            new OrNode(
-                                [
-                                    new LtNode('g', 5),
-                                    new GtNode('g', 2),
-                                ]
-                            ),
-                        ]
-                    )
-                )
-                    ->addQuery(
-                        new NotNode(
-                            [
-                                new NeNode('h', 3),
-                            ]
-                        )
-                    )
+                (new QueryBuilder())->addQuery(new AndNode([
+                    new EqNode('a', 'b'),
+                    new LtNode('c', 'd'),
+                    new OrNode([
+                        new LtNode('g', 5),
+                        new GtNode('g', 2),
+                    ]),
+                ]))
+                    ->addQuery(new NotNode([
+                        new NeNode('h', 3),
+                    ]))
                     ->getQuery()
                     ->getQuery(),
                 'and(eq(a,string:b),lt(c,string:d),or(lt(g,5),gt(g,2)),not(ne(h,3)))',
             ],
             [
-                (new QueryBuilder())->addQuery(
-                    new AndNode(
-                        [
-                            new EqNode('a', null),
-                            new LtNode('c', 'd'),
-                            new OrNode(
-                                [
-                                    new LtNode('g', 5),
-                                    new GtNode('g', 2),
-                                ]
-                            ),
-                        ]
-                    )
-                )
-                    ->addQuery(
-                        new NotNode(
-                            [
-                                new NeNode('h', 3),
-                            ]
-                        )
-                    )
+                (new QueryBuilder())->addQuery(new AndNode([
+                    new EqNode('a', null),
+                    new LtNode('c', 'd'),
+                    new OrNode([
+                        new LtNode('g', 5),
+                        new GtNode('g', 2),
+                    ]),
+                ]))
+                    ->addQuery(new NotNode([
+                        new NeNode('h', 3),
+                    ]))
                     ->getQuery()
                     ->getQuery(),
                 'and(eq(a,null()),lt(c,string:d),or(lt(g,5),gt(g,2)),not(ne(h,3)))',
             ],
             [
-                (new QueryBuilder())->addQuery(
-                    new AndNode(
-                        [
-                            new EqnNode('a'),
-                            new EqtNode('b'),
-                            new EqfNode('c'),
-                            new IeNode('d'),
-                            new AlikeGlobNode('a', '*abc?'),
-                        ]
-                    )
-                )
+                (new QueryBuilder())->addQuery(new AndNode([
+                    new EqnNode('a'),
+                    new EqtNode('b'),
+                    new EqfNode('c'),
+                    new IeNode('d'),
+                    new AlikeGlobNode('a', '*abc?'),
+                ]))
                     ->getQuery()
                     ->getQuery(),
                 'and(eqn(a),eqt(b),eqf(c),ie(d),alike(a,string:*abc?))',

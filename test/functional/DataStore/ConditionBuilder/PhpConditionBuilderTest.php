@@ -81,68 +81,44 @@ class PhpConditionBuilderTest extends ConditionBuilderTest
                 . ' && ( ($_field = $item[\'k\']) !==\'\' && preg_match(\'/dc.$/\'. \'i\', $_field) ))',
             ],
             [
-                (new QueryBuilder())->addQuery(
-                    new AndNode(
-                        [
-                                new EqNode('a', 'b'),
-                                new LtNode('c', 'd'),
-                                new OrNode(
-                                    [
-                                        new LtNode('g', 5),
-                                        new GtNode('g', 2),
-                                    ]
-                                ),
-                            ]
-                    )
-                )
-                    ->addQuery(
-                        new NotNode(
-                            [
-                                new NeNode('h', 3),
-                            ]
-                        )
-                    )
+                (new QueryBuilder())->addQuery(new AndNode([
+                    new EqNode('a', 'b'),
+                    new LtNode('c', 'd'),
+                    new OrNode([
+                        new LtNode('g', 5),
+                        new GtNode('g', 2),
+                    ]),
+                ]))
+                    ->addQuery(new NotNode([
+                        new NeNode('h', 3),
+                    ]))
                     ->getQuery()
                     ->getQuery(),
                 '(($item[\'a\']==\'b\') && ($item[\'c\']<\'d\') && (($item[\'g\']<5) || ($item[\'g\']>2)) && ( !(($item[\'h\']!=3)) ))',
             ],
             [
-                (new QueryBuilder())->addQuery(
-                    new AndNode(
-                        [
-                                new EqNode('a', null),
-                                new LtNode('c', 'd'),
-                                new OrNode(
-                                    [
-                                        new LtNode('g', 5),
-                                        new GtNode('g', 2),
-                                    ]
-                                ),
-                            ]
-                    )
-                )
-                    ->addQuery(
-                        new NotNode(
-                            [
-                                new NeNode('h', 3),
-                            ]
-                        )
-                    )
+                (new QueryBuilder())->addQuery(new AndNode([
+                    new EqNode('a', null),
+                    new LtNode('c', 'd'),
+                    new OrNode([
+                        new LtNode('g', 5),
+                        new GtNode('g', 2),
+                    ]),
+                ]))
+                    ->addQuery(new NotNode([
+                        new NeNode('h', 3),
+                    ]))
                     ->getQuery()
                     ->getQuery(),
                 '(($item[\'a\']==null) && ($item[\'c\']<\'d\') && (($item[\'g\']<5) || ($item[\'g\']>2)) && ( !(($item[\'h\']!=3)) ))',
             ],
             [
-                (new QueryBuilder())->addQuery(
-                    new AndNode(
-                        [
-                                new EqnNode('a'),
-                                new EqtNode('b'),
-                                new EqfNode('c'),
-                                new IeNode('d'),
-                            ]
-                    )
-                )
+                (new QueryBuilder())->addQuery(new AndNode([
+                    new EqnNode('a'),
+                    new EqtNode('b'),
+                    new EqfNode('c'),
+                    new IeNode('d'),
+                ]))
                     ->getQuery()
                     ->getQuery(),
                 '(is_null($item[\'a\']) && ($item[\'b\']==true) && ($item[\'c\']==false) && empty($item[\'d\']))',

@@ -50,13 +50,23 @@ class SqlQueryBuilderTest extends TestCase
 
     public function setUp()
     {
-        $mockResult = $this->getMockBuilder(ResultInterface::class)->getMock();
-        $mockStatement = $this->getMockBuilder(StatementInterface::class)->getMock();
-        $mockStatement->expects($this->any())->method('execute')->will($this->returnValue($mockResult));
-        $mockConnection = $this->getMockBuilder(ConnectionInterface::class)->getMock();
-        $mockDriver = $this->getMockBuilder(DriverInterface::class)->getMock();
-        $mockDriver->expects($this->any())->method('createStatement')->will($this->returnValue($mockStatement));
-        $mockDriver->expects($this->any())->method('getConnection')->will($this->returnValue($mockConnection));
+        $mockResult = $this->getMockBuilder(ResultInterface::class)
+            ->getMock();
+        $mockStatement = $this->getMockBuilder(StatementInterface::class)
+            ->getMock();
+        $mockStatement->expects($this->any())
+            ->method('execute')
+            ->will($this->returnValue($mockResult));
+        $mockConnection = $this->getMockBuilder(ConnectionInterface::class)
+            ->getMock();
+        $mockDriver = $this->getMockBuilder(DriverInterface::class)
+            ->getMock();
+        $mockDriver->expects($this->any())
+            ->method('createStatement')
+            ->will($this->returnValue($mockStatement));
+        $mockDriver->expects($this->any())
+            ->method('getConnection')
+            ->will($this->returnValue($mockConnection));
         $mockPlatform = $this->getPlatformMockObject();
 
         // Setup mock adapter
@@ -90,7 +100,7 @@ class SqlQueryBuilderTest extends TestCase
         $select = "SELECT `table`.* FROM `table` ";
         $where = "WHERE ((`a`IS NULL OR `a` IS FALSE) AND (`a` IS TRUE) AND (`a` IS FALSE) AND (`a` IS NULL))";
 
-        $this->assertEquals($select . $where, $object->buildSql($rqlQuery));
+        $this->assertEquals($select.$where, $object->buildSql($rqlQuery));
     }
 
     public function testBuildSqlWithScalarNodes()
@@ -111,7 +121,7 @@ class SqlQueryBuilderTest extends TestCase
         $select = "SELECT `table`.* FROM `table` ";
         $where = "WHERE ((`a`='b') AND (`a`>='b') AND (`a`>'b') AND (`a`<='b') AND (`a`<'b') AND (`a`<>'b'))";
 
-        $this->assertEquals($select . $where, $object->buildSql($rqlQuery));
+        $this->assertEquals($select.$where, $object->buildSql($rqlQuery));
     }
 
     public function testBuildSqlWithLikeNodes()
@@ -130,9 +140,9 @@ class SqlQueryBuilderTest extends TestCase
 
         $select = "SELECT `table`.* FROM `table` ";
         $where = "WHERE ((`a` LIKE BINARY 'b') AND (`a` LIKE BINARY 'b') "
-            . "AND (`a` LIKE 'b') AND (`a` LIKE 'b') AND (`a` LIKE '%b%'))";
+            ."AND (`a` LIKE 'b') AND (`a` LIKE 'b') AND (`a` LIKE '%b%'))";
 
-        $this->assertEquals($select . $where, $object->buildSql($rqlQuery));
+        $this->assertEquals($select.$where, $object->buildSql($rqlQuery));
     }
 
     public function testBuildSqlWithNotNode()
@@ -150,7 +160,7 @@ class SqlQueryBuilderTest extends TestCase
         // TODO: it is misbehavior
         $where = "WHERE ( NOT ((`a` IN ('b','c')) error (`a` NOT IN ('b','c'))) )";
 
-        $this->assertEquals($select . $where, $object->buildSql($rqlQuery));
+        $this->assertEquals($select.$where, $object->buildSql($rqlQuery));
     }
 
     public function testBuildSqlWithLimitNode()
@@ -165,7 +175,7 @@ class SqlQueryBuilderTest extends TestCase
         $where = "WHERE '1' = '1' ";
         $limit = "LIMIT 5";
 
-        $this->assertEquals($select . $where . $limit, $object->buildSql($rqlQuery));
+        $this->assertEquals($select.$where.$limit, $object->buildSql($rqlQuery));
     }
 
     public function testBuildSqlWithSortNode()
@@ -180,16 +190,14 @@ class SqlQueryBuilderTest extends TestCase
         $where = "WHERE '1' = '1' ";
         $sort = "ORDER BY `a` ASC";
 
-        $this->assertEquals($select . $where . $sort, $object->buildSql($rqlQuery));
+        $this->assertEquals($select.$where.$sort, $object->buildSql($rqlQuery));
 
-        $rqlQuery->setSort(new SortNode(
-            [
-                'a' => SortNode::SORT_ASC,
-                'b' => SortNode::SORT_DESC,
-            ]
-        ));
+        $rqlQuery->setSort(new SortNode([
+            'a' => SortNode::SORT_ASC,
+            'b' => SortNode::SORT_DESC,
+        ]));
         $sort = "ORDER BY `a` ASC, `b` DESC";
-        $this->assertEquals($select . $where . $sort, $object->buildSql($rqlQuery));
+        $this->assertEquals($select.$where.$sort, $object->buildSql($rqlQuery));
     }
 
     public function testBuildSqlWithGroupByNode()
@@ -204,7 +212,7 @@ class SqlQueryBuilderTest extends TestCase
         $where = "WHERE '1' = '1' ";
         $groupBy = "GROUP BY `a`, `b`";
 
-        $this->assertEquals($select . $where . $groupBy, $object->buildSql($rqlQuery));
+        $this->assertEquals($select.$where.$groupBy, $object->buildSql($rqlQuery));
     }
 
     public function testBuildSqlWithSelectNode()
@@ -213,11 +221,9 @@ class SqlQueryBuilderTest extends TestCase
         $object = new SqlQueryBuilder($this->mockAdapter, $tableName);
 
         $rqlQuery = new RqlQuery();
-        $rqlQuery->setSelect(
-            new SelectNode([
-                new AggregateFunctionNode('count', 'a')
-            ])
-        );
+        $rqlQuery->setSelect(new SelectNode([
+            new AggregateFunctionNode('count', 'a'),
+        ]));
 
         $sql = "SELECT count(a) AS `count(a)` FROM `table` WHERE '1' = '1'";
         $this->assertEquals($sql, $object->buildSql($rqlQuery));
@@ -234,7 +240,7 @@ class SqlQueryBuilderTest extends TestCase
             new LikeNode('a', 'b'),
             new OrNode([
                 new EqfNode('a'),
-                new NotNode([new GtNode('a', 'b')])
+                new NotNode([new GtNode('a', 'b')]),
             ]),
         ]));
 
@@ -248,15 +254,15 @@ class SqlQueryBuilderTest extends TestCase
         $sort = "ORDER BY `a` ASC ";
         $limit = "LIMIT 5";
 
-        $this->assertEquals($select . $where . $groupBy . $sort . $limit, $object->buildSql($rqlQuery));
+        $this->assertEquals($select.$where.$groupBy.$sort.$limit, $object->buildSql($rqlQuery));
     }
 
     protected function getPlatformMockObject()
     {
-        $platform = $this->getMockBuilder(PlatformInterface::class)->getMock();
+        $platform = $this->getMockBuilder(PlatformInterface::class)
+            ->getMock();
 
-        $platform
-            ->expects($this->any())
+        $platform->expects($this->any())
             ->method('quoteValue')
             ->will($this->returnCallback(function ($argument) {
                 return "'{$argument}'";
@@ -279,8 +285,7 @@ class SqlQueryBuilderTest extends TestCase
             ->will($this->returnValue('.'));
 
 
-        $platform
-            ->expects($this->any())
+        $platform->expects($this->any())
             ->method('getName')
             ->will($this->returnValue('MySQL'));
 

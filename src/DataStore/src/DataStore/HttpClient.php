@@ -92,9 +92,8 @@ class HttpClient extends DataStoreAbstract
         if ($response->isOk()) {
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
-            throw new DataStoreException(
-                $this->getClientExceptionMessage($response, "Can't read item with id = $id.")
-            );
+            $responseMessage = $this->createResponseMessage($uri, Request::METHOD_GET, $response);
+            throw new DataStoreException("Can't read item {$responseMessage}");
         }
 
         return $result;
@@ -137,12 +136,12 @@ class HttpClient extends DataStoreAbstract
         $uri = $this->url;
 
         if (isset($id)) {
-            $uri = $this->url . '/' . $this->encodeString($id);
+            $uri = $this->url.'/'.$this->encodeString($id);
         }
 
         if (isset($query)) {
             $rqlString = RqlParser::rqlEncode($query);
-            $uri = $uri . '?' . $rqlString;
+            $uri = $uri.'?'.$rqlString;
         }
 
         return $uri;
@@ -162,18 +161,15 @@ class HttpClient extends DataStoreAbstract
      */
     public function query(Query $query)
     {
-        $client = $this->initHttpClient(Request::METHOD_GET, $this->createUri($query));
+        $uri = $this->createUri($query);
+        $client = $this->initHttpClient(Request::METHOD_GET, $uri);
         $response = $client->send();
 
         if ($response->isOk()) {
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
-            throw new DataStoreException(
-                $this->getClientExceptionMessage(
-                    $response,
-                    "Can't execute query = '" . RqlParser::rqlEncode($query) . "'."
-                )
-            );
+            $responseMessage = $this->createResponseMessage($uri, Request::METHOD_GET, $response);
+            throw new DataStoreException("Can't fetch items by query {$responseMessage}");
         }
 
         return empty($result) ? [] : $result;
@@ -188,16 +184,6 @@ class HttpClient extends DataStoreAbstract
             trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
         }
 
-        $identifier = $this->getIdentifier();
-
-        if (isset($itemData[$identifier])) {
-            $id = $itemData[$identifier];
-            $this->checkIdentifierType($itemData[$identifier]);
-        } else {
-            trigger_error("Autoincrement 'id' is not allowed", E_USER_DEPRECATED);
-            $id = null;
-        }
-
         $client = $this->initHttpClient(Request::METHOD_POST, $this->url, $rewriteIfExist);
         $json = Serializer::jsonSerialize($itemData);
         $client->setRawBody($json);
@@ -206,12 +192,8 @@ class HttpClient extends DataStoreAbstract
         if ($response->isSuccess()) {
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
-            throw new DataStoreException(
-                $this->getClientExceptionMessage(
-                    $response,
-                    "Can't create item with id = " . (is_null($id) ? 'null' : $id) . "."
-                )
-            );
+            $responseMessage = $this->createResponseMessage($this->url, Request::METHOD_POST, $response);
+            throw new DataStoreException("Can't create item {$responseMessage}");
         }
 
         return $result;
@@ -244,12 +226,8 @@ class HttpClient extends DataStoreAbstract
         if ($response->isSuccess()) {
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
-            throw new DataStoreException(
-                $this->getClientExceptionMessage(
-                    $response,
-                    "Can't update item with id = $id."
-                )
-            );
+            $responseMessage = $this->createResponseMessage($uri, Request::METHOD_PUT, $response);
+            throw new DataStoreException("Can't update item {$responseMessage}");
         }
 
         return $result;
@@ -261,45 +239,41 @@ class HttpClient extends DataStoreAbstract
     public function delete($id)
     {
         $this->checkIdentifierType($id);
-        $client = $this->initHttpClient(Request::METHOD_DELETE, $this->createUri(null, $id));
+        $uri = $this->createUri(null, $id);
+        $client = $this->initHttpClient(Request::METHOD_DELETE, $uri);
         $response = $client->send();
 
         if ($response->isSuccess()) {
             $result = !empty($response->getBody()) ? Serializer::jsonUnserialize($response->getBody()) : null;
         } else {
-            throw new DataStoreException(
-                $this->getClientExceptionMessage(
-                    $response,
-                    "Can't delete item with id = $id."
-                )
-            );
+            $responseMessage = $this->createResponseMessage($uri, Request::METHOD_DELETE, $response);
+            throw new DataStoreException("Can't delete item {$responseMessage}");
         }
 
         return $result;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function count()
+    protected function createResponseMessage($uri, $method, Response $response)
     {
-        return parent::count();
-    }
+        $messages = [
+            $method,
+            $uri,
+            $response->getStatusCode(),
+            $response->getReasonPhrase(),
+        ];
 
-    /**
-     * @param Response $response
-     * @param $message
-     * @return string
-     */
-    protected function getClientExceptionMessage(Response $response, $message)
-    {
-        $body = '';
-
-        if (strlen($response->getBody()) < 255) {
-            $body = " Body: '{$response->getBody()}'.";
+        switch ($response->getStatusCode()) {
+            case 301:
+            case 302:
+            case 307:
+            case 308:
+                $location = $response->getHeaders()
+                    ->get('Location')
+                    ->getFieldValue();
+                $messages[] = "New location is '{$location}'";
+                break;
         }
 
-        return $message . " Status: '{$response->getStatusCode()}'."
-            . " ReasonPhrase: '{$response->getReasonPhrase()}'." . $body;
+        return trim(implode(' ', $messages));
     }
 }

@@ -81,69 +81,45 @@ class SqlConditionBuilderTest extends ConditionBuilderTest
                 "((`a`='1') AND (`b`<>'2') AND (`c`<'3') AND (`d`>'4') AND (`e`<='5') AND (`f`>='6') AND (`g` LIKE BINARY '%abc_'))",
             ],
             [
-                (new QueryBuilder())->addQuery(
-                    new AndNode(
-                        [
-                            new EqNode('a', 'b'),
-                            new LtNode('c', 'd'),
-                            new OrNode(
-                                [
-                                    new LtNode('g', 5),
-                                    new GtNode('g', 2),
-                                ]
-                            ),
-                        ]
-                    )
-                )
-                    ->addQuery(
-                        new NotNode(
-                            [
-                                new NeNode('h', 3),
-                            ]
-                        )
-                    )
+                (new QueryBuilder())->addQuery(new AndNode([
+                    new EqNode('a', 'b'),
+                    new LtNode('c', 'd'),
+                    new OrNode([
+                        new LtNode('g', 5),
+                        new GtNode('g', 2),
+                    ]),
+                ]))
+                    ->addQuery(new NotNode([
+                        new NeNode('h', 3),
+                    ]))
                     ->getQuery()
                     ->getQuery(),
                 "((`a`='b') AND (`c`<'d') AND ((`g`<'5') OR (`g`>'2')) AND ( NOT ((`h`<>'3')) ))",
             ],
             [
-                (new QueryBuilder())->addQuery(
-                    new AndNode(
-                        [
-                            new EqNode('a', null),
-                            new LtNode('c', 'd'),
-                            new OrNode(
-                                [
-                                    new LtNode('g', 5),
-                                    new GtNode('g', 2),
-                                ]
-                            ),
-                        ]
-                    )
-                )
-                    ->addQuery(
-                        new NotNode(
-                            [
-                                new NeNode('h', 3),
-                            ]
-                        )
-                    )
+                (new QueryBuilder())->addQuery(new AndNode([
+                    new EqNode('a', null),
+                    new LtNode('c', 'd'),
+                    new OrNode([
+                        new LtNode('g', 5),
+                        new GtNode('g', 2),
+                    ]),
+                ]))
+                    ->addQuery(new NotNode([
+                        new NeNode('h', 3),
+                    ]))
                     ->getQuery()
                     ->getQuery(),
                 "((`a`='') AND (`c`<'d') AND ((`g`<'5') OR (`g`>'2')) AND ( NOT ((`h`<>'3')) ))",
             ],
             [
-                (new QueryBuilder())->addQuery(
-                    new AndNode(
-                        [
-                            new EqnNode('a'),
-                            new EqtNode('b'),
-                            new EqfNode('c'),
-                            new IeNode('d'),
-                            new AlikeGlobNode('a', '*abc?'),
-                        ]
-                    )
-                )
+                (new QueryBuilder())->addQuery(new AndNode([
+                    new EqnNode('a'),
+                    new EqtNode('b'),
+                    new EqfNode('c'),
+                    new IeNode('d'),
+                    new AlikeGlobNode('a', '*abc?'),
+                ]))
                     ->getQuery()
                     ->getQuery(),
                 "((`a` IS NULL) AND (`b` IS TRUE) AND (`c` IS FALSE) AND (`d`IS NULL OR `d` IS FALSE) AND (`a` LIKE '%abc_'))",

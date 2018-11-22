@@ -16,7 +16,7 @@ if (php_sapi_name() === 'cli-server'
     return false;
 }
 
-chdir(dirname(getcwd() . '/../../../'));
+chdir(dirname(__DIR__));
 
 require 'vendor/autoload.php';
 

@@ -14,6 +14,8 @@ use rollun\datastore\DataStore\HttpClient;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\utils\Json\Serializer;
 use Zend\Http\Client;
+use Zend\Http\Header\HeaderInterface;
+use Zend\Http\Headers;
 use Zend\Http\Response;
 
 class HttpClientTest extends TestCase
@@ -394,5 +396,101 @@ class HttpClientTest extends TestCase
             ->with($options);
 
         return $clientMockMock;
+    }
+
+    public function testException()
+    {
+        $body = 'body';
+        $items = ['id' => 1, 'name' => 'name',];
+        $url = 'www.example.com';
+        $method = 'POST';
+        $status = 500;
+        $reasonPhrase = 'Internal Server Error';
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage("Can't create item {$method} {$url} ${status} {$reasonPhrase}");
+
+        $clientMock = $this->createClientMock($method, $url, [], 1);
+        $clientMock->expects($this->once())
+            ->method('setRawBody')
+            ->with(Serializer::jsonSerialize($items));
+
+        $response = $this->createResponse($body);
+        $response->expects($this->any())
+            ->method('isSuccess')
+            ->willReturn(false);
+
+        $response->expects($this->any())
+            ->method('getStatusCode')
+            ->willReturn($status);
+
+        $response->expects($this->any())
+            ->method('getReasonPhrase')
+            ->willReturn($reasonPhrase);
+
+        $clientMock->expects($this->once())
+            ->method('send')
+            ->willReturn($response);
+
+        $object = $this->createObject($clientMock, $url);
+
+        $object->create($items, 1);
+    }
+
+    public function testExceptionWithRedirect()
+    {
+        $body = 'body';
+        $items = ['id' => 1, 'name' => 'name',];
+        $url = 'www.example.com';
+        $method = 'POST';
+        $status = 301;
+        $reasonPhrase = 'Moved Permanently';
+        $location = 'www.example.com/index.php';
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage(
+            "Can't create item {$method} {$url} ${status} {$reasonPhrase} New location is '{$location}'"
+        );
+
+        $clientMock = $this->createClientMock($method, $url, [], 1);
+        $clientMock->expects($this->once())
+            ->method('setRawBody')
+            ->with(Serializer::jsonSerialize($items));
+
+        $response = $this->createResponse($body);
+        $response->expects($this->any())
+            ->method('isSuccess')
+            ->willReturn(false);
+
+        $response->expects($this->any())
+            ->method('getStatusCode')
+            ->willReturn($status);
+
+        $response->expects($this->any())
+            ->method('getReasonPhrase')
+            ->willReturn($reasonPhrase);
+
+        $header = $this->getMockBuilder(HeaderInterface::class)->disableOriginalConstructor()->getMock();
+        $header->expects($this->once())
+            ->method('getFieldValue')
+            ->willReturn($location);
+
+        $headers = $this->getMockBuilder(Headers::class)->disableOriginalConstructor()->getMock();
+        $headers->expects($this->once())
+            ->method('get')
+            ->with('Location')
+            ->willReturn($header);
+
+        $response->expects($this->any())
+            ->method('getHeaders')
+            ->willReturn($headers);
+
+        $clientMock->expects($this->once())
+            ->method('send')
+            ->willReturn($response);
+
+        $object = $this->createObject($clientMock, $url);
+
+        $object->create($items, 1);
     }
 }

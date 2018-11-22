@@ -364,10 +364,6 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
         $this->openFile(0);
         $this->columns = fgetcsv($this->fileHandler, null, $this->csvDelimiter);
         $this->closeFile();
-
-        if (!in_array($this->getIdentifier(), $this->columns)) {
-            throw new DataStoreException("Can't find identifier column '{$this->getIdentifier()}' in heading line");
-        }
     }
 
     /**

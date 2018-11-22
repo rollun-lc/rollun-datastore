@@ -31,7 +31,8 @@ class AspectTypedTest extends TestCase
         $dtoClassName = BaseDto::class;
 
         /** @var PHPUnit_Framework_MockObject_MockObject|DataStoresInterface $dataStore */
-        $dataStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        $dataStore = $this->getMockBuilder(DataStoresInterface::class)
+            ->getMock();
 
         $object = new AspectTyped($dataStore, $scheme, $dtoClassName);
         $this->assertAttributeEquals($scheme, 'scheme', $object);
@@ -51,7 +52,8 @@ class AspectTypedTest extends TestCase
         $dtoClassName = BaseDto::class;
 
         /** @var PHPUnit_Framework_MockObject_MockObject|DataStoresInterface $dataStore */
-        $dataStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        $dataStore = $this->getMockBuilder(DataStoresInterface::class)
+            ->getMock();
         new AspectTyped($dataStore, $scheme, $dtoClassName);
     }
 
@@ -67,7 +69,8 @@ class AspectTypedTest extends TestCase
         $dtoClassName = BaseDto::class;
 
         /** @var PHPUnit_Framework_MockObject_MockObject|DataStoresInterface $dataStore */
-        $dataStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        $dataStore = $this->getMockBuilder(DataStoresInterface::class)
+            ->getMock();
         new AspectTyped($dataStore, $scheme, $dtoClassName);
     }
 
@@ -86,7 +89,8 @@ class AspectTypedTest extends TestCase
         });
 
         /** @var PHPUnit_Framework_MockObject_MockObject|DataStoresInterface $dataStore */
-        $dataStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        $dataStore = $this->getMockBuilder(DataStoresInterface::class)
+            ->getMock();
         new AspectTyped($dataStore, $scheme, $dtoClassName);
     }
 
@@ -108,15 +112,13 @@ class AspectTypedTest extends TestCase
             ->getMock();
 
         $dto = new UserDto(['id' => new TypeInt(1), 'name' => new TypeString('name')]);
-        $dataStore
-            ->method('create')
+        $dataStore->method('create')
             ->with([
                 'id' => '1',
                 'name' => 'name',
             ]);
 
-        $dataStore
-            ->method('update')
+        $dataStore->method('update')
             ->with([
                 'id' => '1',
                 'name' => 'name',
@@ -144,8 +146,7 @@ class AspectTypedTest extends TestCase
         $dataStore = $this->getMockBuilder(DataStoresInterface::class)
             ->getMock();
 
-        $dataStore
-            ->method('query')
+        $dataStore->method('query')
             ->will($this->returnValue([
                 [
                     'id' => '1',

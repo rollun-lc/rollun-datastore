@@ -46,43 +46,31 @@ class RqlParserTest extends TestCase
     {
         $this->queryObject = new RqlQuery();
 
-        $this->queryObject->setQuery(
-            new AndNode(
-                [
-                    new AndNode(
-                        [
-                            new EqNode('q', null),
-                            new NeNode('q', null),
-                            new LeNode('q', 'r'),
-                            new GeNode('q', 'u'),
-                            new EqnNode('a'),
-                            new EqfNode('b'),
-                            new EqtNode('c'),
-                            new AlikeGlobNode('d', '*abc?'),
-                            new IeNode('f'),
-                        ]
-                    ),
-                    new OrNode(
-                        [
-                            new LtNode('q', 't'),
-                            new GtNode('q', 'y'),
-                            new InNode('q', ['a', 's', 'd', 'f', 'g']),
-                        ]
-                    ),
-                ]
-            )
-        );
+        $this->queryObject->setQuery(new AndNode([
+            new AndNode([
+                new EqNode('q', null),
+                new NeNode('q', null),
+                new LeNode('q', 'r'),
+                new GeNode('q', 'u'),
+                new EqnNode('a'),
+                new EqfNode('b'),
+                new EqtNode('c'),
+                new AlikeGlobNode('d', '*abc?'),
+                new IeNode('f'),
+            ]),
+            new OrNode([
+                new LtNode('q', 't'),
+                new GtNode('q', 'y'),
+                new InNode('q', ['a', 's', 'd', 'f', 'g']),
+            ]),
+        ]));
 
-        $this->queryObject->setSelect(
-            new AggregateSelectNode(
-                [
-                    'q',
-                    (new AggregateFunctionNode('max', 'q')),
-                    (new AggregateFunctionNode('min', 'q')),
-                    (new AggregateFunctionNode('count', 'q')),
-                ]
-            )
-        );
+        $this->queryObject->setSelect(new AggregateSelectNode([
+            'q',
+            (new AggregateFunctionNode('max', 'q')),
+            (new AggregateFunctionNode('min', 'q')),
+            (new AggregateFunctionNode('count', 'q')),
+        ]));
 
         $this->queryObject->setSort(new SortNode(['q' => -1, 'w' => 1, 'e' => 1]));
         $this->queryObject->setLimit(new LimitNode(20, 30));
@@ -146,20 +134,14 @@ class RqlParserTest extends TestCase
     {
         $rqlString = RqlParser::rqlDecode('and(eq(email,aaa@gmail.com),or(le(age,1\,4),ge(age,1\.8)),ne(name,q1$3))');
         $query = new RqlQuery();
-        $query->setQuery(
-            new AndNode(
-                [
-                    new EqNode('email', 'aaa@gmail.com'),
-                    new OrNode(
-                        [
-                            new LeNode('age', '1,4'),
-                            new GeNode('age', '1.8'),
-                        ]
-                    ),
-                    new NeNode('name', 'q1$3'),
-                ]
-            )
-        );
+        $query->setQuery(new AndNode([
+            new EqNode('email', 'aaa@gmail.com'),
+            new OrNode([
+                new LeNode('age', '1,4'),
+                new GeNode('age', '1.8'),
+            ]),
+            new NeNode('name', 'q1$3'),
+        ]));
 
         $this->assertEquals($query, $rqlString);
     }
@@ -196,24 +178,16 @@ class RqlParserTest extends TestCase
 
     public function testGroupbyWithQuery()
     {
-        $queryByString = RqlParser::rqlDecode(
-            'and(eq(email,aaa@gmail.com),or(le(age,1\,4),ge(age,1\.8)),ne(name,q1$3))&groupby(id)'
-        );
+        $queryByString = RqlParser::rqlDecode('and(eq(email,aaa@gmail.com),or(le(age,1\,4),ge(age,1\.8)),ne(name,q1$3))&groupby(id)');
         $query = new RqlQuery();
-        $query->setQuery(
-            new AndNode(
-                [
-                    new EqNode('email', 'aaa@gmail.com'),
-                    new OrNode(
-                        [
-                            new LeNode('age', '1,4'),
-                            new GeNode('age', '1.8'),
-                        ]
-                    ),
-                    new NeNode('name', 'q1$3'),
-                ]
-            )
-        );
+        $query->setQuery(new AndNode([
+            new EqNode('email', 'aaa@gmail.com'),
+            new OrNode([
+                new LeNode('age', '1,4'),
+                new GeNode('age', '1.8'),
+            ]),
+            new NeNode('name', 'q1$3'),
+        ]));
         $query->setGroupBy(new GroupbyNode(['id']));
         $this->assertEquals($query, $queryByString);
     }
