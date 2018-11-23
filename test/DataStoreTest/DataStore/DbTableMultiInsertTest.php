@@ -1,13 +1,13 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 21.07.16
- * Time: 13:56
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\test\DataStoreTest\DataStore;
 
+use rollun\datastore\DataStore\DbTable;
+use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use Zend\Db\TableGateway\TableGateway;
 
 class DbTableMultiInsertTest extends DbTableTest
@@ -19,15 +19,12 @@ class DbTableMultiInsertTest extends DbTableTest
     {
         $this->container = include './config/container.php';
         $this->config = $this->container->get('config')['dataStore'];
-
-        $tableGateway = $this->config[$dataStoreName]['tableGateway'];
-
-        $this->dbTable = $this->container->get($tableGateway);
-
-        $this->dbTableName = $this->dbTable->getTable();
-
+        $this->dbTableName = $dataStoreName;
         $this->adapter = $this->container->get('db');
-        $this->object = $this->container->get($dataStoreName);
+
+        $sql = new MultiInsertSql($this->adapter, $this->dbTableName);
+        $this->dbTable = new TableGateway($this->dbTableName, $this->adapter, null, null, $sql);
+        $this->object = new DbTable($this->dbTable);
     }
 
     public function testCreate_multiRow_withoutId()
@@ -42,7 +39,7 @@ class DbTableMultiInsertTest extends DbTableTest
         }
 
         $newItems = $this->object->create($data);
-        $this->assertEquals('Create_withoutId' . 1 ,$newItems['fString']);
+        $this->assertEquals('Create_withoutId' . 1, $newItems['fString']);
     }
 
     public function testCreate_multiRow_withId()
@@ -58,7 +55,7 @@ class DbTableMultiInsertTest extends DbTableTest
         }
 
         $newItems = $this->object->create($data);
-        $this->assertEquals(20000 ,$newItems[$this->object->getIdentifier()]);
+        $this->assertEquals(20000, $newItems[$this->object->getIdentifier()]);
     }
 
     public function testCreate_multiRow_withRewrite()
@@ -74,7 +71,7 @@ class DbTableMultiInsertTest extends DbTableTest
         }
 
         $newItems = $this->object->create($data, true);
-        $this->assertEquals(20000 ,$newItems[$this->object->getIdentifier()]);
+        $this->assertEquals(20000, $newItems[$this->object->getIdentifier()]);
     }
 
     /**

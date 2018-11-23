@@ -1,17 +1,12 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\test\DataStoreTest\DataStore;
 
-use Xiag\Rql\Parser\Query;
 use rollun\datastore\DataStore\DbTable;
-use rollun\datastore\Rql\RqlQuery;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -20,7 +15,6 @@ use Zend\Db\TableGateway\TableGateway;
  */
 class SerializedDbTableTest extends AbstractTest
 {
-
     /**
      * @var DbTable
      */
@@ -30,13 +24,15 @@ class SerializedDbTableTest extends AbstractTest
      * @var Adapter
      */
     protected $adapter;
+
     protected $dbTableName;
-    protected $configTableDefault = array(
+
+    protected $configTableDefault = [
         'id' => 'INT NOT NULL AUTO_INCREMENT PRIMARY KEY',
         'anotherId' => 'INT NOT NULL',
         'fString' => 'CHAR(20)',
-        'fInt' => 'INT'
-    );
+        'fInt' => 'INT',
+    ];
 
     /**
      * Sets up the fixture, for example, opens a network connection.
@@ -59,7 +55,7 @@ class SerializedDbTableTest extends AbstractTest
         $quoteTableName = $this->adapter->platform->quoteIdentifier($this->dbTableName);
         $deleteStatementStr = "DROP TABLE IF EXISTS " . $quoteTableName;
         $deleteStatement = $this->adapter->query($deleteStatementStr);
-        //$deleteStatement->execute();
+        $deleteStatement->execute();
     }
 
     /**
@@ -97,6 +93,7 @@ class SerializedDbTableTest extends AbstractTest
             }
             $dbTableFields = $dbTableFields . $fieldType;
         }
+
         return $dbTableFields;
     }
 
@@ -112,7 +109,8 @@ class SerializedDbTableTest extends AbstractTest
         $deleteStatement->execute();
         $createStr = "CREATE TABLE  " . $quoteTableName;
         $fields = $this->_getDbTableFields($data);
-        $createStatementStr = $createStr . '(' . $fields . ') ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;';
+        $createStatementStr = $createStr . '(' . $fields
+            . ') ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;';
         $createStatement = $this->adapter->query($createStatementStr);
         $createStatement->execute();
     }
@@ -130,14 +128,5 @@ class SerializedDbTableTest extends AbstractTest
         foreach ($data as $record) {
             $dbTable->insert($record);
         }
-    }
-
-    /* * ************************** Identifier *********************** */
-
-    public function testSerialization()
-    {
-        $this->_initObject();
-        $data = serialize($this->object);
-        $this->object = unserialize($data);
     }
 }

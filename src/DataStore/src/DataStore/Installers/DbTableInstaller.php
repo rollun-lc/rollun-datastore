@@ -6,7 +6,9 @@
 
 namespace rollun\datastore\DataStore\Installers;
 
+use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilderAbstractFactory;
 use rollun\datastore\DataStore\Factory\DbTableAbstractFactory;
+use rollun\datastore\TableGateway\Factory\SqlQueryBuilderAbstractFactory;
 use rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory;
 use rollun\datastore\TableGateway\Factory\TableManagerMysqlFactory;
 use rollun\installer\Install\InstallerAbstract;
@@ -28,6 +30,8 @@ class DbTableInstaller extends InstallerAbstract
                 'abstract_factories' => [
                     DbTableAbstractFactory::class,
                     TableGatewayAbstractFactory::class,
+                    SqlConditionBuilderAbstractFactory::class,
+                    SqlQueryBuilderAbstractFactory::class,
                 ],
             ]
         ];

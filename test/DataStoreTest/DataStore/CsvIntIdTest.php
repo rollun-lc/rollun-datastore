@@ -1,8 +1,10 @@
 <?php
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
 namespace rollun\test\DataStoreTest\DataStore;
-
-use rollun\test\DataStoreTest\DataStore\CsvBaseTest;
 
 class CsvIntIdTest extends CsvBaseTest
 {
@@ -11,78 +13,72 @@ class CsvIntIdTest extends CsvBaseTest
     public function testCheckItegrity()
     {
         $this->_initObject();
-        $this->assertTrue(
-            $this->object->checkIntegrityData()
-        );
+        $this->assertTrue($this->object->checkIntegrityData());
     }
 
     public function testInsertLastRowAndCheckIntegrity()
     {
         $this->_initObject();
-        $itemData = array(
+        $itemData = [
             'id' => 1000,
             'anotherId' => null,
             'fFloat' => 1000.01,
-            'fString' => ''
-        );
+            'fString' => '',
+        ];
         $this->object->create($itemData);
-        $this->assertTrue(
-            $this->object->checkIntegrityData()
-        );
+        $this->assertTrue($this->object->checkIntegrityData());
     }
 
     public function testInsertRowIntoMiddleListAndCheckIntegrity()
     {
         $this->_initObject();
-        $itemData = array(
+        $itemData = [
             'id' => 1000,
             'anotherId' => null,
             'fFloat' => 1000.01,
-            'fString' => ''
-        );
+            'fString' => '',
+        ];
         $this->object->create($itemData);
-        $itemData = array(
+        $itemData = [
             'id' => 100,
             'anotherId' => null,
             'fFloat' => 100.01,
-            'fString' => ''
-        );
+            'fString' => '',
+        ];
         $this->object->create($itemData);
-        $this->assertTrue(
-            $this->object->checkIntegrityData()
-        );
+        $this->assertTrue($this->object->checkIntegrityData());
     }
 
     public function testIntegrityNotSortedData()
     {
         $itemData = $this->_itemsArrayDelault;
-        $itemData[] = array(
+        $itemData[] = [
             'id' => 1000,
             'anotherId' => null,
             'fFloat' => 1000.01,
-            'fString' => ''
-        );
-        $itemData[] = array(
+            'fString' => '',
+        ];
+        $itemData[] = [
             'id' => 100,
             'anotherId' => null,
             'fFloat' => 100.01,
-            'fString' => ''
-        );
+            'fString' => '',
+        ];
         $this->_initObject($itemData);
-        $this->setExpectedException('\rollun\datastore\DataStore\DataStoreException');
+        $this->expectException('\rollun\datastore\DataStore\DataStoreException');
         $this->object->checkIntegrityData();
     }
 
     public function testIntegrity_TryingToWriteNotIntegerPrimaryKey()
     {
         $this->_initObject();
-        $itemData = array(
+        $itemData = [
             'id' => uniqid(),
             'anotherId' => null,
             'fFloat' => 1000.01,
-            'fString' => ''
-        );
-        $this->setExpectedException('\rollun\datastore\DataStore\DataStoreException');
+            'fString' => '',
+        ];
+        $this->expectException('\rollun\datastore\DataStore\DataStoreException');
         $this->object->create($itemData);
     }
 }

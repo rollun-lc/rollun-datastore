@@ -1,37 +1,23 @@
 <?php
-
 /**
- * Created by PhpStorm.
- * User: victorsecuring
- * Date: 14.12.16
- * Time: 10:51 AM
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\test\DataStoreTest\RqlParser;
 
+use PHPUnit\Framework\TestCase;
 use Xiag\Rql\Parser\Node\LimitNode;
-use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;
-use Xiag\Rql\Parser\Node\Query\LogicOperator\OrNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\GtNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\LtNode;
-use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
 use rollun\datastore\Rql\RqlQuery;
-use Zend\Db\Adapter\Platform\Oracle;
 
-class RqlQueryTest extends \PHPUnit_Framework_TestCase
+class RqlQueryTest extends TestCase
 {
-
     /** @var  RqlQuery */
     private $object;
-
-    public function setUp()
-    {
-
-    }
 
     public function testQueryNode()
     {
@@ -79,20 +65,4 @@ class RqlQueryTest extends \PHPUnit_Framework_TestCase
         $query->setLimit(new LimitNode(10, 0));
         $this->assertEquals($query->getLimit(), $this->object->getLimit());
     }
-
-    /* public function testLSSQNodes()
-      {
-      $this->object = new RqlQuery("and(eq(b,1),or(gt(z,2),lt(z,-1)))&select(b,z,a)&limit(12,14)&sort(+z)");
-
-      $query = new Query();
-      $query->setQuery(
-      new AndNode([
-      new EqNode('b', 1),
-      new OrNode([
-      new GtNode('z',2),
-      new LtNode('z',-1),
-      ])
-      ])
-      );
-      } */
 }

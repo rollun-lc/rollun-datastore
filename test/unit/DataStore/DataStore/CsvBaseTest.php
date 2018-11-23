@@ -78,13 +78,11 @@ class CsvBaseTest extends TestCase
             'name' => 'name',
             'surname' => 'surname',
         ];
-        $this->create(
-            [
-                'id' => 1,
-                'name' => 'name1',
-                'surname' => 'surname1',
-            ]
-        );
+        $this->create([
+            'id' => 1,
+            'name' => 'name1',
+            'surname' => 'surname1',
+        ]);
 
         $object = $this->createObject();
         $object->create($item, 1);
@@ -203,13 +201,11 @@ class CsvBaseTest extends TestCase
             'name' => 'name',
             'surname' => 'surname',
         ];
-        $this->create(
-            [
-                'id' => 1,
-                'name' => 'name1',
-                'surname' => 'surname1',
-            ]
-        );
+        $this->create([
+            'id' => 1,
+            'name' => 'name1',
+            'surname' => 'surname1',
+        ]);
 
         $object = $this->createObject();
         $object->update($item);
@@ -239,13 +235,11 @@ class CsvBaseTest extends TestCase
             'surname' => 'surname2',
         ];
 
-        $this->create(
-            [
-                'id' => 1,
-                'name' => 'name1',
-                'surname' => 'surname1',
-            ]
-        );
+        $this->create([
+            'id' => 1,
+            'name' => 'name1',
+            'surname' => 'surname1',
+        ]);
 
         $item['name'] = 'name1';
         $object = $this->createObject();
@@ -373,7 +367,8 @@ class CsvBaseTest extends TestCase
             ]);
         }
 
-        $this->createObject()->deleteAll();
+        $this->createObject()
+            ->deleteAll();
 
         foreach ($range as $id) {
             $this->assertEquals($this->read($id), []);
@@ -392,17 +387,20 @@ class CsvBaseTest extends TestCase
             ]);
         }
 
-        $this->assertEquals($this->createObject()->count(), count($range));
+        $this->assertEquals($this->createObject()
+            ->count(), count($range));
     }
 
     public function testGetIdentifier()
     {
-        $this->assertEquals('id', $this->createObject()->getIdentifier());
+        $this->assertEquals('id', $this->createObject()
+            ->getIdentifier());
     }
 
     public function testGetIteratorSuccess()
     {
-        $this->assertTrue($this->createObject()->getIterator() instanceof CsvIterator);
+        $this->assertTrue($this->createObject()
+                ->getIterator() instanceof CsvIterator);
     }
 
     public function testTypesSuccess()

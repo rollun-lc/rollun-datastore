@@ -37,7 +37,7 @@
         "zendframework/zend-expressive-helpers": "^4.0",
         "zendframework/zend-expressive-fastroute": "^2.0",
         "zendframework/zend-expressive-zendviewrenderer": "^1.4",
-        "phpunit/phpunit": "^5.7.15",
+        "phpunit/phpunit": "^7",
         "zfcampus/zf-development-mode": "^3.1",
         "filp/whoops": "^2.1.7",
         "symfony/dotenv": "^4.1"

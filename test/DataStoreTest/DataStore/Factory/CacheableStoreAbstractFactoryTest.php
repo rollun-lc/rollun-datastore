@@ -1,37 +1,20 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 04.07.16
- * Time: 14:08
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\test\DataStoreTest\DataStore\Factory;
 
-class CacheableStoreAbstractFactoryTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+use rollun\datastore\DataStore\Factory\CacheableAbstractFactory;
+
+class CacheableStoreAbstractFactoryTest extends TestCase
 {
     /**
-     * @var Returner
+     * @var CacheableAbstractFactory
      */
     protected $object;
-
-    /**
-     * Sets up the fixture, for example, opens a network connection.
-     * This method is called before a test is executed.
-     */
-    protected function setUp()
-    {
-
-    }
-
-    /**
-     * Tears down the fixture, for example, closes a network connection.
-     * This method is called after a test is executed.
-     */
-    protected function tearDown()
-    {
-
-    }
 
     public function testDataStoreMemory__invoke()
     {

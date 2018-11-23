@@ -128,16 +128,17 @@ class CacheableTest extends TestCase
 
     public function testCreateSuccess()
     {
-        $items = [];
-
+        $item = [
+            'id' => 1,
+            'name' => 'foo'
+        ];
         $dataSource = new Foo();
 
-        /** @var DataStoresInterface|\PHPUnit_Framework_MockObject_MockObject $dataSource */
+        /** @var DataStoresInterface|\PHPUnit_Framework_MockObject_MockObject $cashStore */
         $cashStore = $this->getMockBuilder(DataStoresInterface::class)
             ->getMock();
 
-        $this->createObject($dataSource, $cashStore)
-            ->create($items);
+        $this->assertEquals($item, $this->createObject($dataSource, $cashStore)->create($item));
     }
 
     public function testCreateFail()

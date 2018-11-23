@@ -1,16 +1,17 @@
 <?php
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
 namespace rollun\test\DataStoreTest\DataStore;
 
-use Symfony\Component\Filesystem\LockHandler;
-use rollun\datastore\DataStore\CsvBase;
-use rollun\test\DataStoreTest\DataStore\AbstractTest;
-
 class CsvBaseTest extends AbstractTest
 {
-
     protected $filename;
+
     protected $delimiter;
+
     protected $entity = 'testCsvBase';
 
     protected function setUp()
@@ -55,74 +56,60 @@ class CsvBaseTest extends AbstractTest
     public function testWriteAndReadNullValueAndEmptyString()
     {
         $this->_initObject();
-        $itemData = array(
+        $itemData = [
             'id' => 1000,
             'anotherId' => null,
             'fFloat' => 1000.01,
-            'fString' => ''
-        );
-        $this->object->create(
-                $itemData, true
-        );
+            'fString' => '',
+        ];
+        $this->object->create($itemData, true);
         $row = $this->object->read(1000);
-        $this->assertEquals(
-                $itemData, $row
-        );
+        $this->assertEquals($itemData, $row);
     }
 
     public function testWriteAndRead_FalseValue()
     {
         $this->_initObject();
-        $itemData = array(
+        $itemData = [
             'id' => 1000,
             'anotherId' => false,
             'fFloat' => 1000.01,
-            'fString' => 'FalseValue'
-        );
-        $this->object->create(
-                $itemData, true
-        );
+            'fString' => 'FalseValue',
+        ];
+        $this->object->create($itemData, true);
         $row = $this->object->read(1000);
-        $this->assertEquals(
-                $row['anotherId'], false
-        );
+        $this->assertEquals($row['anotherId'], false);
     }
 
     public function testReadNotExistedRow()
     {
         $this->_initObject();
         $row = $this->object->read(10000);
-        $this->assertEquals(
-                $row, null
-        );
+        $this->assertEquals($row, null);
     }
 
     public function testWriteAndRead_TrueValue()
     {
         $this->_initObject();
-        $itemData = array(
+        $itemData = [
             'id' => 1000,
             'anotherId' => true,
             'fFloat' => 1000.01,
-            'fString' => 'TrueValue'
-        );
-        $this->object->create(
-                $itemData, true
-        );
+            'fString' => 'TrueValue',
+        ];
+        $this->object->create($itemData, true);
         $row = $this->object->read(1000);
-        $this->assertEquals(
-                $row['anotherId'], true
-        );
+        $this->assertEquals($row['anotherId'], true);
     }
 
     public function testWriteToEmptyFile()
     {
-        $itemData[] = array(
+        $itemData[] = [
             'id' => 1000,
             'anotherId' => true,
             'fFloat' => 1000.01,
-            'fString' => 'TrueValue'
-        );
+            'fString' => 'TrueValue',
+        ];
         $this->_initObject($itemData);
         $this->object->delete(1000);
         $itemData = array_shift($itemData);
@@ -136,32 +123,13 @@ class CsvBaseTest extends AbstractTest
         $this->_initObject();
         clearstatcache();
         $content = $this->object->getAll();
-        $this->assertTrue(
-                isset($content[0]['id'])
-        );
+        $this->assertTrue(isset($content[0]['id']));
     }
 
     public function testIterator()
     {
         $this->_initObject();
         $iterator = $this->object->getIterator();
-        //$iterator->rewind();
-//        $key = $iterator->key();
-//        $item = $iterator->current();
-//        $iterator->next();
-//
-//        $key = $iterator->key();
-//        $item = $iterator->current();
-//        $iterator->next();
-//
-//        $key = $iterator->key();
-//        $item = $iterator->current();
-//        $iterator->next();
-//
-//
-//
-//
-//        $iterator->rewind();
         $item = $iterator->current();
         $this->assertEquals(1, $item['id']);
 
@@ -185,24 +153,4 @@ class CsvBaseTest extends AbstractTest
         $item = $iterator->current();
         $this->assertNull($item);
     }
-    
-//    public function test_getAllExpectIterator()
-//    {
-//        $this->_initObject();
-//        clearstatcache();
-//        $count = $this->object->count();
-//        $fp = fopen($this->filename, 'a+');
-//        $itemData = $this->_itemsArrayDelault[$count - 1];
-//        while (filesize($this->filename) <= CsvBase::MAX_FILE_SIZE_FOR_CACHE + 100) {
-//            $count++;
-//            $itemData['id'] = $count;
-//            fputcsv($fp, $itemData, $this->delimiter);
-//            clearstatcache();
-//        }
-//        fclose($fp);
-//        $content = $this->object->getAll();
-//        $this->assertTrue(
-//            $content instanceof \Traversable
-//        );
-//    }
 }

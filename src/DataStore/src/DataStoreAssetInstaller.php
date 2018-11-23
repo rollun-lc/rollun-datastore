@@ -27,7 +27,6 @@ use rollun\datastore\DataStore\Installers\MemoryInstaller;
 use rollun\datastore\DataStore\Memory;
 use rollun\datastore\DataStore\SerializedDbTable;
 use rollun\datastore\Middleware\DataStoreMiddlewareInstaller;
-use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use rollun\datastore\TableGateway\Factory\SqlQueryBuilderAbstractFactory;
 use rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
@@ -45,18 +44,11 @@ class DataStoreAssetInstaller extends InstallerAbstract
 
     protected $sqlConditionBuilder;
 
-    protected $db;
-
-    protected $dependencies;
-
     public function __construct(ContainerInterface $container, IOInterface $ioComposer)
     {
         parent::__construct($container, $ioComposer);
 
         $this->tableGateway = [
-            'test_res_tablle' => [
-                'sql' => MultiInsertSql::class,
-            ],
             'table_with_name_same_as_resource_name' => [],
             'tbl_name_which_exist' => [],
             'test_res_http' => [],
@@ -98,10 +90,6 @@ class DataStoreAssetInstaller extends InstallerAbstract
                 'class' => SerializedDbTable::class,
                 'tableName' => 'test_res_tablle',
                 'sqlQueryBuilder' => SqlQueryBuilder::class,
-            ],
-            'testDbTableMultiInsert' => [
-                'class' => DbTable::class,
-                'tableGateway' => 'test_res_tablle',
             ],
             'testHttpClient' => [
                 'class' => HttpClient::class,
@@ -174,21 +162,6 @@ class DataStoreAssetInstaller extends InstallerAbstract
                 'tableName' => 'testTable',
             ],
         ];
-
-        $this->db = [
-            'driver' => getenv('DB_DRIVER'),
-            'hostname' => getenv('DB_HOST'),
-            'port' => getenv('DB_PORT'),
-            'database' => getenv('DB_NAME'),
-            'username' => getenv('DB_USER'),
-            'password' => getenv('DB_PASS'),
-        ];
-
-        $this->dependencies = [
-            'aliases' => [
-                'db' => 'Zend\Db\Adapter\AdapterInterface',
-            ],
-        ];
     }
 
     /**
@@ -203,8 +176,6 @@ class DataStoreAssetInstaller extends InstallerAbstract
             SqlQueryBuilderAbstractFactory::class => $this->sqlQueryBuilder,
             SqlConditionBuilderAbstractFactory::class => $this->sqlConditionBuilder,
             'tableManagerMysql' => $this->tableManagerMysql,
-            'dependencies' => $this->dependencies,
-            'db' => $this->db,
         ];
     }
 

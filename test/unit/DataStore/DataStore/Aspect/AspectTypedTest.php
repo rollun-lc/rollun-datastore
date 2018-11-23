@@ -94,7 +94,7 @@ class AspectTypedTest extends TestCase
         new AspectTyped($dataStore, $scheme, $dtoClassName);
     }
 
-    public function testCreateAndCreate()
+    public function testCreateAndUpdate()
     {
         $scheme = [
             'id' => [
@@ -111,22 +111,27 @@ class AspectTypedTest extends TestCase
         $dataStore = $this->getMockBuilder(DataStoresInterface::class)
             ->getMock();
 
-        $dto = new UserDto(['id' => new TypeInt(1), 'name' => new TypeString('name')]);
+        $dtoCreate = new UserDto(['id' => new TypeInt(1), 'name' => new TypeString('foo')]);
+        $dtoUpdate = new UserDto(['id' => new TypeInt(1), 'name' => new TypeString('bar')]);
+        $createItem = [
+            'id' => '1',
+            'name' => 'foo',
+        ];
+        $updateItem = [
+            'id' => '1',
+            'name' => 'bar',
+        ];
         $dataStore->method('create')
-            ->with([
-                'id' => '1',
-                'name' => 'name',
-            ]);
+            ->with($createItem, false)
+            ->willReturn($createItem);
 
         $dataStore->method('update')
-            ->with([
-                'id' => '1',
-                'name' => 'name',
-            ]);
+            ->with($updateItem, false)
+            ->willReturn($updateItem);
 
         $object = new AspectTyped($dataStore, $scheme, UserDto::class);
-        $object->create($dto);
-        $object->update($dto);
+        $this->assertEquals($dtoCreate, $object->create($dtoCreate));
+        $this->assertEquals($dtoUpdate, $object->update($dtoUpdate));
     }
 
     public function testQuery()

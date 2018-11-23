@@ -1,16 +1,12 @@
 <?php
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\test\DataStoreTest\DataStore;
 
-use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Memory;
-use rollun\datastore\Rql\RqlQuery;
 use rollun\installer\Command;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Node\SortNode;
@@ -18,7 +14,6 @@ use Xiag\Rql\Parser\Query;
 
 class MemoryTest extends AbstractTest
 {
-
     /**
      * @var Memory
      */
@@ -41,15 +36,6 @@ class MemoryTest extends AbstractTest
     {
         parent::setUp();
         $this->object = $this->container->get('testMemory');
-    }
-
-    /**
-     * Tears down the fixture, for example, closes a network connection.
-     * This method is called after a test is executed.
-     */
-    protected function tearDown()
-    {
-
     }
 
     /**

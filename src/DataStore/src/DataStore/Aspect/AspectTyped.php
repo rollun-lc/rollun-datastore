@@ -101,6 +101,18 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
     /**
      * {@inheritdoc}
      */
+    protected function postUpdate($result, $itemData, $rewriteIfExist)
+    {
+        if (is_array($result)) {
+            return $this->arrayToDto($result);
+        }
+
+        return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function preCreate($itemData, $rewriteIfExist = false)
     {
         if ($itemData instanceof BaseDto) {
@@ -113,9 +125,37 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
     /**
      * {@inheritdoc}
      */
+    protected function postCreate($result, $itemData, $rewriteIfExist)
+    {
+        if (is_array($result)) {
+            return $this->arrayToDto($result);
+        }
+
+        return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function postRead($result, $id)
     {
-        return $this->arrayToDto($result);
+        if (is_array($result)) {
+            return $this->arrayToDto($result);
+        }
+
+        return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function postDelete($result, $id)
+    {
+        if (is_array($result)) {
+            return $this->arrayToDto($result);
+        }
+
+        return $result;
     }
 
     /**
@@ -126,7 +166,9 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
         $dtoResult = [];
 
         foreach ($result as $dataItem) {
-            $dtoResult[] = $this->arrayToDto($dataItem);
+            if (is_array($result)) {
+                $dtoResult[] = $this->arrayToDto($dataItem);
+            }
         }
 
         return $dtoResult;
