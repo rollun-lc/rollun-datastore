@@ -1,7 +1,7 @@
 
 # rollun-datastore
 
-### Installation
+### Установка
 
 Установить с помощью [composer](https://getcomposer.org/).
 ```bash

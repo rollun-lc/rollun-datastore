@@ -185,7 +185,6 @@ class DataStoreAssetInstaller extends InstallerAbstract
      */
     public function uninstall()
     {
-
     }
 
     /**

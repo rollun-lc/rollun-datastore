@@ -136,12 +136,12 @@ class HttpClient extends DataStoreAbstract
         $uri = $this->url;
 
         if (isset($id)) {
-            $uri = $this->url.'/'.$this->encodeString($id);
+            $uri = $this->url . '/' . $this->encodeString($id);
         }
 
         if (isset($query)) {
             $rqlString = RqlParser::rqlEncode($query);
-            $uri = $uri.'?'.$rqlString;
+            $uri = $uri . '?' . $rqlString;
         }
 
         return $uri;
