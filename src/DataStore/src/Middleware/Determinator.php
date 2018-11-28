@@ -40,7 +40,7 @@ class Determinator implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, DelegateInterface $delegate)
     {
-        $requestedName = $request->getAttribute("resourceName");
+        $requestedName = $request->getAttribute(ResourceResolver::RESOURCE_NAME);
         $dataStore = $this->dataStorePluginManager->get($requestedName);
 
         $dataStoreRest = new DataStoreRest($dataStore);

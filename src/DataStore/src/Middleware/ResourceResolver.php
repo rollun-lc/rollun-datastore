@@ -35,6 +35,10 @@ class ResourceResolver implements MiddlewareInterface
 {
     const BASE_PATH = '/api/datastore';
 
+    const RESOURCE_NAME = 'resourceName';
+
+    const PRIMARY_KEY_VALUE = 'primaryKeyValue';
+
     /**
      * @var string
      */
@@ -56,10 +60,10 @@ class ResourceResolver implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, DelegateInterface $delegate)
     {
-        if ($request->getAttribute("resourceName") !== null) {
+        if ($request->getAttribute(self::RESOURCE_NAME) !== null) {
             // Router have set "resourceName". It work in expressive.
             $id = empty($request->getAttribute("id")) ? null : $this->decodeString($request->getAttribute("id"));
-            $request = $request->withAttribute('primaryKeyValue', $id);
+            $request = $request->withAttribute(self::PRIMARY_KEY_VALUE, $id);
         } else {
             // "resourceName" isn't set. It work in stratigility.
             $path = $request->getUri()->getPath();
@@ -68,10 +72,10 @@ class ResourceResolver implements MiddlewareInterface
             preg_match($pattern, $path, $matches);
 
             $resourceName = isset($matches[1]) ? $matches[1] : null;
-            $request = $request->withAttribute('resourceName', $resourceName);
+            $request = $request->withAttribute(self::RESOURCE_NAME, $resourceName);
 
             $id = isset($matches[3]) ? $this->decodeString($matches[3]) : null;
-            $request = $request->withAttribute('primaryKeyValue', $id);
+            $request = $request->withAttribute(self::PRIMARY_KEY_VALUE, $id);
         }
 
         $response = $delegate->process($request);
