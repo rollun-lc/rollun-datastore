@@ -1,6 +1,7 @@
 {
     "name": "rollun-com/rollun-datastore",
     "description": "Datastore",
+    "minimum-stability": "stable",
     "license": "proprietary",
     "type": "library",
     "authors": [
