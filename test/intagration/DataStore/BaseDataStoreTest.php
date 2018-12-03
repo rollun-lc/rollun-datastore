@@ -184,7 +184,7 @@ abstract class BaseDataStoreTest extends TestCase
             'surname' => 'surname',
         ];
 
-        $object->update($item, 1);
+        $this->assertEquals($item, $object->update($item, 1));
     }
 
     public function testQueryCombineWhereClauseSuccess()

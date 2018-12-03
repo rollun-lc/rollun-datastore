@@ -6,12 +6,12 @@
 
 namespace rollun\test\functional\DataStore\Middleware;
 
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Interop\Http\ServerMiddleware\DelegateInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
@@ -51,15 +51,15 @@ abstract class BaseMiddlewareTest extends TestCase
         ServerRequestInterface $request,
         MiddlewareInterface $object
     ) {
-        /** @var PHPUnit_Framework_MockObject_MockObject|DelegateInterface $mockDelegate */
-        $mockDelegate = $this->getMockBuilder(DelegateInterface::class)
+        /** @var PHPUnit_Framework_MockObject_MockObject|RequestHandlerInterface $mockHandler */
+        $mockHandler = $this->getMockBuilder(RequestHandlerInterface::class)
             ->getMock();
-        $mockDelegate->expects($this->once())
-            ->method('process')
+        $mockHandler->expects($this->once())
+            ->method('handle')
             ->with($request)
             ->willReturn($expectedResponse);
 
-        $object->process($request, $mockDelegate);
+        $object->process($request, $mockHandler);
     }
 
     /**
@@ -88,13 +88,13 @@ abstract class BaseMiddlewareTest extends TestCase
         ServerRequestInterface $request,
         MiddlewareInterface $object
     ) {
-        /** @var PHPUnit_Framework_MockObject_MockObject|DelegateInterface $mockDelegate */
-        $mockDelegate = $this->getMockBuilder(DelegateInterface::class)
+        /** @var PHPUnit_Framework_MockObject_MockObject|RequestHandlerInterface $mockHandler */
+        $mockHandler = $this->getMockBuilder(RequestHandlerInterface::class)
             ->getMock();
-        $mockDelegate->expects($this->once())
-            ->method('process')
+        $mockHandler->expects($this->once())
+            ->method('handle')
             ->with($this->callback($assertion));
 
-        $object->process($request, $mockDelegate);
+        $object->process($request, $mockHandler);
     }
 }

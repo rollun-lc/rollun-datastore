@@ -6,9 +6,9 @@
 
 namespace rollun\test\functional\DataStore\Middleware;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
+use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\DataStore\DataStorePluginManager;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\Middleware\Determinator;
@@ -41,8 +41,8 @@ class DeterminatorTest extends TestCase
         $request = new ServerRequest();
         $request = $request->withAttribute('resourceName', $serviceName);
 
-        /** @var DelegateInterface|PHPUnit_Framework_MockObject_MockObject $delegate */
-        $delegate = $this->getMockBuilder(DelegateInterface::class)->getMock();
+        /** @var RequestHandlerInterface|PHPUnit_Framework_MockObject_MockObject $delegate */
+        $delegate = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
 
         $dataStorePluginManagerMock->expects($this->once())
             ->method('get')
@@ -69,8 +69,8 @@ class DeterminatorTest extends TestCase
         $request = new ServerRequest();
         $request = $request->withAttribute('resourceName', $serviceName);
 
-        /** @var DelegateInterface|PHPUnit_Framework_MockObject_MockObject $delegate */
-        $delegate = $this->getMockBuilder(DelegateInterface::class)->getMock();
+        /** @var RequestHandlerInterface|PHPUnit_Framework_MockObject_MockObject $delegate */
+        $delegate = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
 
         $dataStorePluginManagerMock->expects($this->once())
             ->method('get')

@@ -1,8 +1,10 @@
 <?php
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
-namespace rollun\test\DataStoreTest\DataStore;
-
-use rollun\test\DataStoreTest\DataStore\CsvBaseTest;
+namespace rollun\test\old\DataStore;
 
 class CsvIntIdTest extends CsvBaseTest
 {
@@ -69,7 +71,7 @@ class CsvIntIdTest extends CsvBaseTest
             'fString' => ''
         );
         $this->_initObject($itemData);
-        $this->setExpectedException('\rollun\datastore\DataStore\DataStoreException');
+        $this->expectException('\rollun\datastore\DataStore\DataStoreException');
         $this->object->checkIntegrityData();
     }
 

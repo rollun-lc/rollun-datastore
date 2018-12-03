@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\Middleware;
 
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
+use Psr\Http\Server\MiddlewareInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 
 /**

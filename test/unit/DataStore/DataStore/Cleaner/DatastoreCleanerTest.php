@@ -4,7 +4,7 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\test\DataStoreTest\Cleaner;
+namespace rollun\test\old\Cleaner;
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\Memory as MemoryDataStore;

@@ -1,25 +1,12 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
-namespace rollun\test\DataStoreTest\DataStore;
+namespace rollun\test\old\DataStore;
 
-use PDOException;
-use rollun\datastore\DataStore\DataStoreException;
-use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
-use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
-use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
-use Xiag\Rql\Parser\Node\SelectNode;
-use Xiag\Rql\Parser\Node\SortNode;
-use Xiag\Rql\Parser\Query;
 use rollun\datastore\DataStore\DbTable;
-use rollun\datastore\Rql\RqlQuery;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -28,7 +15,6 @@ use Zend\Db\TableGateway\TableGateway;
  */
 class DbTableTest extends AbstractTest
 {
-
     const TABLE_EXPLOIT_1_NAME = "test_exploit1_tablle";
     const TABLE_EXPLOIT_2_NAME = "test_exploit2_tablle";
 
@@ -41,13 +27,15 @@ class DbTableTest extends AbstractTest
      * @var Adapter
      */
     protected $adapter;
+
     protected $dbTableName;
-    protected $configTableDefault = array(
+
+    protected $configTableDefault = [
         'id' => 'INT NOT NULL AUTO_INCREMENT PRIMARY KEY',
         'anotherId' => 'INT NOT NULL',
         'fString' => 'CHAR(20)',
-        'fInt' => 'INT'
-    );
+        'fInt' => 'INT',
+    ];
 
     /**
      * Sets up the fixture, for example, opens a network connection.
@@ -73,7 +61,6 @@ class DbTableTest extends AbstractTest
         $quoteTableName = $this->adapter->platform->quoteIdentifier($this->dbTableName);
         $deleteStatementStr = "DROP TABLE IF EXISTS " . $quoteTableName;
         $deleteStatement = $this->adapter->query($deleteStatementStr);
-        //$deleteStatement->execute();
     }
 
     /**
@@ -111,6 +98,7 @@ class DbTableTest extends AbstractTest
             }
             $dbTableFields = $dbTableFields . $fieldType;
         }
+
         return $dbTableFields;
     }
 
@@ -126,7 +114,8 @@ class DbTableTest extends AbstractTest
         $deleteStatement->execute();
         $createStr = "CREATE TABLE  " . $quoteTableName;
         $fields = $this->_getDbTableFields($data);
-        $createStatementStr = $createStr . '(' . $fields . ') ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;';
+        $createStatementStr = $createStr . '(' . $fields
+            . ') ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;';
         $createStatement = $this->adapter->query($createStatementStr);
         $createStatement->execute();
     }

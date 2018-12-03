@@ -7,11 +7,10 @@
 namespace rollun\test\functional\DataStore\Middleware;
 
 use Exception;
-use Interop\Container\ContainerInterface;
-use SplQueue;
 use TypeError;
-use Interop\Http\ServerMiddleware\DelegateInterface;
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
+use Interop\Container\ContainerInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Http\Message\ResponseInterface;
 use rollun\datastore\DataStore\DataStoreException;
@@ -25,7 +24,7 @@ use Zend\Diactoros\Response\JsonResponse;
 use Zend\Diactoros\ServerRequest;
 use Zend\Diactoros\Stream;
 use Zend\Diactoros\Uri;
-use Zend\Stratigility\Route;
+use Zend\Stratigility\MiddlewarePipe;
 
 class DataStoreApiTest extends BaseMiddlewareTest
 {
@@ -176,8 +175,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
         /** @var MiddlewareInterface $object */
         $object = new DataStoreApi($determinator);
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
 
         $this->assertJsonResponseEquals($response, $object->process($request, $delegateMock));
     }
@@ -197,14 +196,14 @@ class DataStoreApiTest extends BaseMiddlewareTest
             ->setConstructorArgs([$dataStorePluginManagerMock])
             ->getMock();
 
-        $splObject = new SplQueue();
-        $splObject->enqueue(new Route('/', new Middleware\ResourceResolver()));
-        $splObject->enqueue(new Route('/', new Middleware\RequestDecoder()));
-        $splObject->enqueue(new Route('/', new Middleware\DataStoreRest($dataStoreMock)));
-        $splObject->enqueue(new Route('/', new Middleware\JsonRenderer()));
+        $middlewarePipe = new MiddlewarePipe();
+        $middlewarePipe->pipe(new Middleware\ResourceResolver());
+        $middlewarePipe->pipe(new Middleware\RequestDecoder());
+        $middlewarePipe->pipe(new Middleware\DataStoreRest($dataStoreMock));
+        $middlewarePipe->pipe(new Middleware\JsonRenderer());
 
         $objects = new DataStoreApi($dataStoreDeterminator);
-        $this->assertAttributeEquals($splObject, 'pipeline', $objects);
+        $this->assertAttributeEquals($middlewarePipe, 'middlewarePipe', $objects);
     }
 
     protected function processSuccessCreateAndItemDoesNotExist()
@@ -227,8 +226,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
                 ->getPath()
         );
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
 
         $this->assertJsonResponseEquals($response, $this->object->process($request, $delegateMock));
     }
@@ -250,8 +249,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
         $resource = "data://text/plain;base64," . base64_encode(json_encode($data));
         $request = $request->withBody(new Stream(fopen($resource, 'r')));
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
         $this->object->process($request, $delegateMock);
     }
 
@@ -277,8 +276,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
                 ->getPath()
         );
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
 
         $this->assertJsonResponseEquals(
             $response,
@@ -306,8 +305,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
                 ->getPath()
         );
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
 
         $this->assertJsonResponseEquals(
             $response,
@@ -332,8 +331,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
 
         $response = new JsonResponse($data, 200);
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
 
         $this->assertJsonResponseEquals(
             $response,
@@ -357,8 +356,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
 
         $response = new JsonResponse($data, 200);
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
 
         $this->assertJsonResponseEquals(
             $response,
@@ -395,8 +394,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
 
         $response = new JsonResponse($data, $status);
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
 
         $this->assertJsonResponseEquals(
             $response,
@@ -436,8 +435,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
 
         $response = new JsonResponse($data, $status);
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
 
         $this->assertJsonResponseEquals(
             $response,
@@ -475,8 +474,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
             ]
         );
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
 
         $this->assertJsonResponseEquals(
             $response,
@@ -514,8 +513,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
             ]
         );
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
 
         $this->assertJsonResponseEquals(
             $response,
@@ -540,8 +539,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
 
         $response = new JsonResponse($data, 200);
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
 
         $this->assertJsonResponseEquals(
             $response,
@@ -565,8 +564,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
 
         $response = new JsonResponse('', 200);
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
 
         $this->assertJsonResponseEquals(
             $response,
@@ -585,8 +584,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
 
         $response = new JsonResponse(null, 200);
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
 
         $this->assertJsonResponseEquals(
             $response,
@@ -594,7 +593,7 @@ class DataStoreApiTest extends BaseMiddlewareTest
         );
     }
 
-    protected function processWithoutHandlerHandle(MiddlewareInterface $object, $method, Exception $exception)
+    protected function processWithoutHandlerHandle($method, Exception $exception)
     {
         $this->expectException(get_class($exception));
         $this->expectExceptionMessage($exception->getMessage());
@@ -606,8 +605,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
 
         $response = new JsonResponse('', 200);
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
 
         $this->assertJsonResponseEquals(
             $response,

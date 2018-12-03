@@ -6,9 +6,9 @@
 
 namespace rollun\datastore\Middleware\Handler;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\Middleware\DataStoreAbstract;
 use rollun\datastore\Middleware\JsonRenderer;
 use Xiag\Rql\Parser\Query;
@@ -32,16 +32,7 @@ abstract class AbstractHandler extends DataStoreAbstract
      */
     abstract protected function handle(ServerRequestInterface $request): ResponseInterface;
 
-    /**
-     * Process an incoming server request and return a response.
-     * Optionally delegating to the next middleware component to create the response.
-     *
-     * @param ServerRequestInterface $request
-     * @param DelegateInterface $delegate
-     *
-     * @return ResponseInterface
-     */
-    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($this->canHandle($request)) {
             $response = $this->handle($request);
@@ -55,7 +46,7 @@ abstract class AbstractHandler extends DataStoreAbstract
             $request = $request->withAttribute(ResponseInterface::class, $response);
         }
 
-        $response = $delegate->process($request);
+        $response = $handler->handle($request);
 
         return $response;
     }

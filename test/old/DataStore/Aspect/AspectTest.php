@@ -1,8 +1,12 @@
 <?php
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
-namespace rollun\test\DataStoreTest\DataStore\Aspect;
+namespace rollun\test\old\DataStore\Aspect;
 
-use rollun\test\DataStoreTest\DataStore\AbstractTest;
+use rollun\test\old\DataStore\AbstractTest;
 
 class AspectTest extends AbstractTest
 {

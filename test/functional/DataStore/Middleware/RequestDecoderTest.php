@@ -6,10 +6,10 @@
 
 namespace rollun\test\functional\DataStore\Middleware;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\Middleware\RequestDecoder;
 use rollun\datastore\Middleware\RestException;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
@@ -37,11 +37,11 @@ class RequestDecoderTest extends TestCase
     {
         $request = $getRequest();
 
-        /** @var PHPUnit_Framework_MockObject_MockObject|DelegateInterface $mockDelegate */
-        $mockDelegate = $this->getMockBuilder(DelegateInterface::class)
+        /** @var PHPUnit_Framework_MockObject_MockObject|RequestHandlerInterface $mockDelegate */
+        $mockDelegate = $this->getMockBuilder(RequestHandlerInterface::class)
             ->getMock();
         $mockDelegate->expects($this->once())
-            ->method('process')
+            ->method('handle')
             ->with($this->callback($assertion));
 
         $object = new RequestDecoder();
@@ -56,8 +56,8 @@ class RequestDecoderTest extends TestCase
         $request = $request->withHeader('Content-Type', 'foo');
         $object = new RequestDecoder();
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->getMockBuilder(DelegateInterface::class)
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->getMockBuilder(RequestHandlerInterface::class)
             ->getMock();
 
         $object->process($request, $delegateMock);

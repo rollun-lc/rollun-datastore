@@ -1,15 +1,18 @@
 <?php
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
-namespace rollun\test\DataStoreTest\DataStore;
+namespace rollun\test\old\DataStore;
 
-use rollun\datastore\DataStore\DataStoreException;
+use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Memory;
 use rollun\datastore\DataStore\Traits\AutoIdGeneratorTrait;
 use rollun\utils\IdGenerator;
-use Xiag\Rql\Parser\Query;
 
-class AutoIdGeneratorTraitTest extends \PHPUnit_Framework_TestCase
+class AutoIdGeneratorTraitTest extends TestCase
 {
     /**
      * @var DataStoresInterface with AutoIdGeneratorTrait
@@ -24,7 +27,8 @@ class AutoIdGeneratorTraitTest extends \PHPUnit_Framework_TestCase
     {
         $idLength = $this->idLength;
         $idCharSet = $this->idCharSet;
-        $this->object = new class($idLength, $idCharSet) extends Memory {
+        $this->object = new class($idLength, $idCharSet) extends Memory
+        {
             use AutoIdGeneratorTrait;
 
             /**
@@ -47,24 +51,31 @@ class AutoIdGeneratorTraitTest extends \PHPUnit_Framework_TestCase
             public function create($itemData, $rewriteIfExist = false)
             {
                 $itemData = $this->prepareItem($itemData);
+
                 return parent::create($itemData, $rewriteIfExist);
             }
         };
     }
 
-    public function testCreateWithoutId(){
-        $item = $this->object->create([
-            "name" => "test",
-        ]);
+    public function testCreateWithoutId()
+    {
+        $item = $this->object->create(
+            [
+                "name" => "test",
+            ]
+        );
         $this->assertNotEmpty($item[$this->object->getIdentifier()]);
     }
 
-    public function testCreateWithId(){
+    public function testCreateWithId()
+    {
         $id = "MY_ID";
-        $item = $this->object->create([
-            $this->object->getIdentifier() => $id,
-            "name" => "test",
-        ]);
+        $item = $this->object->create(
+            [
+                $this->object->getIdentifier() => $id,
+                "name" => "test",
+            ]
+        );
         $this->assertEquals($id, $item[$this->object->getIdentifier()]);
     }
 
@@ -76,9 +87,11 @@ class AutoIdGeneratorTraitTest extends \PHPUnit_Framework_TestCase
     {
         $len = pow(strlen($this->idCharSet), $this->idLength) + 10;
         for ($i = 0; $i < $len; $i++) {
-            $this->object->create([
-                "num" => $i
-            ]);
+            $this->object->create(
+                [
+                    "num" => $i,
+                ]
+            );
         }
     }
 }

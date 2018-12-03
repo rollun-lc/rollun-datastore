@@ -1,17 +1,12 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
-namespace rollun\test\DataStoreTest\DataStore;
+namespace rollun\test\old\DataStore;
 
-use Xiag\Rql\Parser\Query;
 use rollun\datastore\DataStore\DbTable;
-use rollun\datastore\Rql\RqlQuery;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -20,7 +15,6 @@ use Zend\Db\TableGateway\TableGateway;
  */
 class SerializedDbTableTest extends AbstractTest
 {
-
     /**
      * @var DbTable
      */
@@ -59,7 +53,6 @@ class SerializedDbTableTest extends AbstractTest
         $quoteTableName = $this->adapter->platform->quoteIdentifier($this->dbTableName);
         $deleteStatementStr = "DROP TABLE IF EXISTS " . $quoteTableName;
         $deleteStatement = $this->adapter->query($deleteStatementStr);
-        //$deleteStatement->execute();
     }
 
     /**

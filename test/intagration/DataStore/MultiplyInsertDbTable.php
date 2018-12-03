@@ -7,6 +7,7 @@
 namespace rollun\test\intagration\DataStore;
 
 use rollun\datastore\DataStore\DataStoreAbstract;
+use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\datastore\TableGateway\TableManagerMysql;

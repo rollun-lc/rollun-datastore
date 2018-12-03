@@ -6,31 +6,35 @@
 
 namespace rollun\datastore\Middleware;
 
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Webimpress\HttpMiddlewareCompatibility\HandlerInterface as DelegateInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Diactoros\Response\JsonResponse;
 use Zend\Stratigility\MiddlewarePipe;
 
-class DataStoreApi extends MiddlewarePipe
+class DataStoreApi implements MiddlewareInterface
 {
+    protected $middlewarePipe;
+
     /**
      * DataStoreApi constructor.
      * @param Determinator $dataStoreDeterminator
      */
     public function __construct(Determinator $dataStoreDeterminator)
     {
-        parent::__construct();
+        $this->middlewarePipe = new MiddlewarePipe();
 
-        $this->pipe(new ResourceResolver());
-        $this->pipe(new RequestDecoder());
-        $this->pipe($dataStoreDeterminator);
-        $this->pipe(new JsonRenderer());
+        $this->middlewarePipe->pipe(new ResourceResolver());
+        $this->middlewarePipe->pipe(new RequestDecoder());
+        $this->middlewarePipe->pipe($dataStoreDeterminator);
+        $this->middlewarePipe->pipe(new JsonRenderer());
     }
 
-    public function process(Request $request, DelegateInterface $delegate)
+    public function process(Request $request, RequestHandlerInterface $handler): ResponseInterface
     {
         try {
-            return parent::process($request, $delegate);
+            return $this->middlewarePipe->process($request, $handler);
         } catch (\Exception $e) {
             return new JsonResponse($e->getMessage(), 500);
         }

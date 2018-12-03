@@ -1,16 +1,11 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
-namespace rollun\test\DataStoreTest\DataStore;
+namespace rollun\test\old\DataStore;
 
-use rollun\datastore\Rql\RqlQuery;
-use rollun\test\DataStoreTest\DataStore\AbstractTest;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Http\Client;
@@ -20,7 +15,6 @@ use Zend\Http\Client;
  */
 class HttpClientTest extends AbstractTest
 {
-
     /**
      * @var TableGateway
      */
@@ -30,30 +24,32 @@ class HttpClientTest extends AbstractTest
      * @var Adapter
      */
     protected $adapter;
+
     protected $dbTableName;
-    protected $configTableDefault = array(
+
+    protected $configTableDefault = [
         'id' => 'INT NOT NULL AUTO_INCREMENT PRIMARY KEY',
         'anotherId' => 'INT NOT NULL',
         'fString' => 'CHAR(20)',
-        'fInt' => 'INT'
+        'fInt' => 'INT',
 
-    );
+    ];
 
     public function providerHeader()
     {
         return [
             [
                 "limit(1)",
-                ["Content-Range" => "items 1-1/4"]
+                ["Content-Range" => "items 1-1/4"],
             ],
             [
                 "limit(3,1)",
-                ["Content-Range" => "items 2-4/4"]
+                ["Content-Range" => "items 2-4/4"],
             ],
             [
                 "",
-                ["Content-Range" => "items 1-4/4"]
-            ]
+                ["Content-Range" => "items 1-4/4"],
+            ],
         ];
     }
 
@@ -112,14 +108,15 @@ class HttpClientTest extends AbstractTest
 
         $createStr = "CREATE TABLE IF NOT EXISTS  " . $quoteTableName;
         $fields = $this->_getDbTableFields($data);
-        $createStatementStr = $createStr . '(' . $fields . ') ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;';
+        $createStatementStr = $createStr . '(' . $fields
+            . ') ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;';
         $createStatement = $this->adapter->query($createStatementStr);
         $createStatement->execute();
     }
 
     /**
-     *
-     * @param array $data
+     * @param $data
+     * @return string
      */
     protected function _getDbTableFields($data)
     {
@@ -151,6 +148,7 @@ class HttpClientTest extends AbstractTest
             }
             $dbTableFields = $dbTableFields . $fieldType;
         }
+
         return $dbTableFields;
     }
 
@@ -175,8 +173,5 @@ class HttpClientTest extends AbstractTest
         $quoteTableName = $this->adapter->platform->quoteIdentifier($this->dbTableName);
         $deleteStatementStr = "DROP TABLE IF EXISTS " . $quoteTableName;
         $deleteStatement = $this->adapter->query($deleteStatementStr);
-        //$deleteStatement->execute();
     }
-
-    /*     * ************************** Identifier *********************** */
 }

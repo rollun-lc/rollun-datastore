@@ -6,8 +6,8 @@
 
 namespace rollun\test\functional\DataStore\Middleware\Handler;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
 use Psr\Http\Message\UriInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\Middleware\Handler\CreateHandler;
@@ -147,8 +147,8 @@ class CreateHandlerTest extends BaseHandlerTest
 
         $object = $this->createObject($dataStore);
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->getMockBuilder(DelegateInterface::class)->getMock();
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
         $object->process($request, $delegateMock);
     }
 

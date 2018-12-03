@@ -1,12 +1,10 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 21.07.16
- * Time: 13:56
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
-namespace rollun\test\DataStoreTest\DataStore;
+namespace rollun\test\old\DataStore;
 
 use Zend\Db\TableGateway\TableGateway;
 
@@ -42,7 +40,7 @@ class DbTableMultiInsertTest extends DbTableTest
         }
 
         $newItems = $this->object->create($data);
-        $this->assertEquals('Create_withoutId' . 1 ,$newItems['fString']);
+        $this->assertEquals('Create_withoutId' . 1, $newItems['fString']);
     }
 
     public function testCreate_multiRow_withId()
@@ -58,7 +56,7 @@ class DbTableMultiInsertTest extends DbTableTest
         }
 
         $newItems = $this->object->create($data);
-        $this->assertEquals(20000 ,$newItems[$this->object->getIdentifier()]);
+        $this->assertEquals(20000, $newItems[$this->object->getIdentifier()]);
     }
 
     public function testCreate_multiRow_withRewrite()
@@ -74,7 +72,7 @@ class DbTableMultiInsertTest extends DbTableTest
         }
 
         $newItems = $this->object->create($data, true);
-        $this->assertEquals(20000 ,$newItems[$this->object->getIdentifier()]);
+        $this->assertEquals(20000, $newItems[$this->object->getIdentifier()]);
     }
 
     /**

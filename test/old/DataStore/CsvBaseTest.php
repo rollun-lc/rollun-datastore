@@ -1,14 +1,13 @@
 <?php
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
-namespace rollun\test\DataStoreTest\DataStore;
-
-use Symfony\Component\Filesystem\LockHandler;
-use rollun\datastore\DataStore\CsvBase;
-use rollun\test\DataStoreTest\DataStore\AbstractTest;
+namespace rollun\test\old\DataStore;
 
 class CsvBaseTest extends AbstractTest
 {
-
     protected $filename;
     protected $delimiter;
     protected $entity = 'testCsvBase';
@@ -17,6 +16,7 @@ class CsvBaseTest extends AbstractTest
     {
         parent::setUp();
         $this->filename = $this->config[$this->entity]['filename'];
+
         // If file does not exist creates it
         if (!is_file($this->filename)) {
             $fp = fopen($this->filename, 'w');
@@ -145,23 +145,6 @@ class CsvBaseTest extends AbstractTest
     {
         $this->_initObject();
         $iterator = $this->object->getIterator();
-        //$iterator->rewind();
-//        $key = $iterator->key();
-//        $item = $iterator->current();
-//        $iterator->next();
-//
-//        $key = $iterator->key();
-//        $item = $iterator->current();
-//        $iterator->next();
-//
-//        $key = $iterator->key();
-//        $item = $iterator->current();
-//        $iterator->next();
-//
-//
-//
-//
-//        $iterator->rewind();
         $item = $iterator->current();
         $this->assertEquals(1, $item['id']);
 
@@ -185,24 +168,4 @@ class CsvBaseTest extends AbstractTest
         $item = $iterator->current();
         $this->assertNull($item);
     }
-    
-//    public function test_getAllExpectIterator()
-//    {
-//        $this->_initObject();
-//        clearstatcache();
-//        $count = $this->object->count();
-//        $fp = fopen($this->filename, 'a+');
-//        $itemData = $this->_itemsArrayDelault[$count - 1];
-//        while (filesize($this->filename) <= CsvBase::MAX_FILE_SIZE_FOR_CACHE + 100) {
-//            $count++;
-//            $itemData['id'] = $count;
-//            fputcsv($fp, $itemData, $this->delimiter);
-//            clearstatcache();
-//        }
-//        fclose($fp);
-//        $content = $this->object->getAll();
-//        $this->assertTrue(
-//            $content instanceof \Traversable
-//        );
-//    }
 }
