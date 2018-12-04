@@ -31,7 +31,6 @@ $aggregator = new ConfigAggregator([
     //   - `*.global.php`
     //   - `local.php`
     //   - `*.local.php`
-
     new PhpFileProvider('config/autoload/{{,*.}global,{,*.}local}.php'),
     // Load application config according to environment:
     //   - `global.dev.php`,   `global.test.php`,   `prod.global.prod.php`
@@ -39,9 +38,6 @@ $aggregator = new ConfigAggregator([
     //   - `local.dev.php`,    `local.test.php`,     `prod.local.prod.php`
     //   - `*.local.dev.php`,  `*.local.test.php`,  `*.prod.local.prod.php`
     new PhpFileProvider(realpath(__DIR__) . "/autoload/{{,*.}global.{$appEnv},{,*.}local.{$appEnv}}.php"),
-
-    // Load development config if it exists
-    new PhpFileProvider('config/development.config.php'),
 ], $cacheConfig['config_cache_path']);
 
 
