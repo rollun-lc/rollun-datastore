@@ -7,8 +7,8 @@
 namespace rollun\datastore\TableGateway;
 
 use InvalidArgumentException;
-use rollun\datastore\DataStore\DataStoreException;
 use Exception;
+use RuntimeException;
 use Zend\Db\Adapter;
 use Zend\Db\Adapter\Driver\Mysqli\Mysqli;
 use Zend\Db\Adapter\Driver\Pdo\Pdo;
@@ -238,13 +238,13 @@ class TableManagerMysql
      * @param string $tableName
      * @param string $tableConfig
      * @return mixed
-     * @throws DataStoreException
+     * @throws RuntimeException
      * @throws Exception
      */
     public function createTable($tableName, $tableConfig = null)
     {
         if ($this->hasTable($tableName)) {
-            throw new DataStoreException("Table with name {$tableName} is exist. Use rewriteTable()");
+            throw new RuntimeException("Table with name {$tableName} is exist. Use rewriteTable()");
         }
 
         return $this->create($tableName, $tableConfig);
