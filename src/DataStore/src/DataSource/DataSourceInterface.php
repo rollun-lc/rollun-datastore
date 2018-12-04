@@ -4,7 +4,7 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\datastore\DataStore\Interfaces;
+namespace rollun\datastore\DataSource;
 
 /**
  * Interface DataSourceInterface

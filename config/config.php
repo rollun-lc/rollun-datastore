@@ -1,7 +1,6 @@
 <?php
 
 use Symfony\Component\Dotenv\Dotenv;
-use Zend\ConfigAggregator\ArrayProvider;
 use Zend\ConfigAggregator\ConfigAggregator;
 use Zend\ConfigAggregator\PhpFileProvider;
 
@@ -14,9 +13,6 @@ $appEnv = getenv('APP_ENV');
 $aggregator = new ConfigAggregator([
     \Zend\Db\ConfigProvider::class,
     \Zend\Validator\ConfigProvider::class,
-
-    // Include cache configuration
-    new ArrayProvider($cacheConfig),
 
     // Default App module config
     // Load application config in a pre-defined order in such a way that local settings

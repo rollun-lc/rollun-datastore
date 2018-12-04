@@ -201,7 +201,7 @@ var_dump($memory->read(1)); // ['id' => '1', 'name' => 'foo']
 <?php 
 
 use rollun\datastore\DataStore\Memory;
-use rollun\datastore\DataStore\Interfaces\DataSourceInterface;
+use rollun\datastore\DataSource\DataSourceInterface;
 use rollun\datastore\DataStore\Cacheable;
 
 $data = [

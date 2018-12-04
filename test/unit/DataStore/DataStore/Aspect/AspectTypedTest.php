@@ -127,6 +127,7 @@ class AspectTypedTest extends TestCase
         $object = new AspectTyped($dataStore, $scheme, UserDto::class);
         $object->create($dto);
         $object->update($dto);
+        $this->assertTrue(true);
     }
 
     public function testQuery()

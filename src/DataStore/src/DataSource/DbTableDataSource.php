@@ -8,7 +8,6 @@ namespace rollun\datastore\DataSource;
 
 use Xiag\Rql\Parser\Query;
 use rollun\datastore\DataStore\DbTable;
-use rollun\datastore\DataStore\Interfaces\DataSourceInterface;
 
 /**
  * Class DbTableDataSource

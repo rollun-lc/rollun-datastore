@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\DataStore;
 
-use rollun\datastore\DataStore\Interfaces\DataSourceInterface;
+use rollun\datastore\DataSource\DataSourceInterface;
 use rollun\datastore\DataStore\Iterators\CsvIterator;
 use rollun\datastore\DataStore\ConditionBuilder\PhpConditionBuilder;
 use Symfony\Component\Filesystem\LockHandler;
