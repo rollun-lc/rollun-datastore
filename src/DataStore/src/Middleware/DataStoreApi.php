@@ -7,10 +7,11 @@
 namespace rollun\datastore\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Diactoros\Response\JsonResponse;
+use Zend\Stratigility\Middleware\RequestHandlerMiddleware;
 use Zend\Stratigility\MiddlewarePipe;
 
 class DataStoreApi implements MiddlewareInterface
@@ -19,19 +20,27 @@ class DataStoreApi implements MiddlewareInterface
 
     /**
      * DataStoreApi constructor.
-     * @param Determinator $dataStoreDeterminator
+     * @param Determinator $determinator
+     * @param RequestHandlerInterface|null $renderer
      */
-    public function __construct(Determinator $dataStoreDeterminator)
+    public function __construct(Determinator $determinator, RequestHandlerInterface $renderer = null)
     {
         $this->middlewarePipe = new MiddlewarePipe();
 
         $this->middlewarePipe->pipe(new ResourceResolver());
         $this->middlewarePipe->pipe(new RequestDecoder());
-        $this->middlewarePipe->pipe($dataStoreDeterminator);
-        $this->middlewarePipe->pipe(new JsonRenderer());
+        $this->middlewarePipe->pipe($determinator);
+
+        if ($renderer) {
+            $renderer = new RequestHandlerMiddleware($renderer);
+        } else {
+            $renderer = new JsonRenderer();
+        }
+
+        $this->middlewarePipe->pipe($renderer);
     }
 
-    public function process(Request $request, RequestHandlerInterface $handler): ResponseInterface
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         try {
             return $this->middlewarePipe->process($request, $handler);
