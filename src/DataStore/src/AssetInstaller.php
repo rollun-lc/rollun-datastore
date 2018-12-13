@@ -33,7 +33,7 @@ use rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\installer\Install\InstallerAbstract;
 
-class DataStoreAssetInstaller extends InstallerAbstract
+class AssetInstaller extends InstallerAbstract
 {
     protected $dataStore;
 
