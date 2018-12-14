@@ -1,0 +1,17 @@
+<?php
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
+
+namespace rollun\datastore\Rql\Node\BinaryNode;
+
+use Xiag\Rql\Parser\Node\Query\AbstractComparisonOperatorNode;
+
+abstract class BinaryOperatorNodeAbstract extends AbstractComparisonOperatorNode
+{
+    public function __construct(string $field)
+    {
+        $this->field = $field;
+    }
+}

@@ -1,10 +1,7 @@
 <?php
-
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 21.07.16
- * Time: 13:36
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\TableGateway\DbSql;
@@ -31,7 +28,9 @@ class MultiInsert extends Insert
                     'A Zend\Db\Sql\Select instance cannot be provided with the merge flag'
                 );
             }
+
             $this->select = $values;
+
             return $this;
         }
 
@@ -50,9 +49,10 @@ class MultiInsert extends Insert
         if ($flag == self::VALUES_SET) {
             if ($this->isArrayOfArray($values)) {
                 foreach ($values as $key => $value) {
-                    if (!$this->isAssocativeArray($value)) {
+                    if (!$this->isAssociativeArray($value)) {
                         $value = array_combine(array_keys($this->columns), array_values($value));
                     }
+
                     foreach ($value as $column => $item) {
                         $this->columns[$column][$key] = $item;
                     }
@@ -64,7 +64,6 @@ class MultiInsert extends Insert
             }
         } else {
             if ($this->isArrayOfArray($values)) {
-                //rework, get $key in $item
                 foreach ($values as $key => $item) {
                     foreach ($item as $column => $value) {
                         $this->columns[$column][$key] = $value;
@@ -98,16 +97,20 @@ class MultiInsert extends Insert
      * @param array $array
      * @return bool
      */
-    private function isAssocativeArray(array $array)
+    private function isAssociativeArray(array $array)
     {
         return array_keys($array) !== range(0, count($array) - 1);
     }
 
-    protected function processInsert(PlatformInterface $platform, DriverInterface $driver = null, ParameterContainer $parameterContainer = null)
-    {
+    protected function processInsert(
+        PlatformInterface $platform,
+        DriverInterface $driver = null,
+        ParameterContainer $parameterContainer = null
+    ) {
         if ($this->select) {
             return;
         }
+
         if (!$this->columns) {
             throw new InvalidArgumentException('values or select should be present');
         }
@@ -116,30 +119,26 @@ class MultiInsert extends Insert
         $values = [];
 
         foreach ($this->columns as $column => $value) {
-
             $columns[] = $platform->quoteIdentifier($column);
             foreach ($value as $key => $item) {
-                /* if (is_scalar($item) && $parameterContainer) {
-                     $values[$key][] = $driver->formatParameterName($column);
-                     $parameterContainer->offsetSet($column, $item);
-                 } else {*/
                 $values[$key][] = $this->resolveColumnValue(
                     $item,
                     $platform,
                     $driver,
                     $parameterContainer
                 );
-                /* }*/
             }
         }
 
         $strValues = '';
+
         foreach ($values as $value) {
             $strValues .= '(' . implode(', ', $value) . '),';
         }
+
         $strValues = rtrim($strValues, ',');
 
-        $sql =  sprintf(
+        $sql = sprintf(
             $this->specifications[static::SPECIFICATION_INSERT],
             $this->resolveTable($this->table, $platform, $driver, $parameterContainer),
             implode(', ', $columns),
@@ -148,5 +147,4 @@ class MultiInsert extends Insert
 
         return $sql;
     }
-
 }

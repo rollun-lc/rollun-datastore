@@ -1,27 +1,23 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\ConditionBuilder;
 
+use rollun\datastore\Rql\Node\BinaryNode\BinaryOperatorNodeAbstract;
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
 use rollun\datastore\DataStore\DataStoreException;
 use Zend\Db\Adapter\AdapterInterface;
 
 /**
- * {@inheritdoc}
- *
- * {@inheritdoc}
+ * Class SqlConditionBuilder
+ * @package rollun\datastore\DataStore\ConditionBuilder
  */
 class SqlConditionBuilder extends ConditionBuilderAbstract
 {
-
     protected $literals = [
         'LogicOperator' => [
             'and' => ['before' => '(', 'between' => ' AND ', 'after' => ')'],
@@ -30,7 +26,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         ],
         'ArrayOperator' => [
             'in' => ['before' => '(', 'between' => ' IN (', 'delimiter' => ',', 'after' => '))'],
-            'out' => ['before' => '(', 'between' => ' NOT IN (', 'delimiter' => ',', 'after' => '))']
+            'out' => ['before' => '(', 'between' => ' NOT IN (', 'delimiter' => ',', 'after' => '))'],
         ],
         'ScalarOperator' => [
             'eq' => ['before' => '(', 'between' => '=', 'after' => ')'],
@@ -39,9 +35,16 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
             'gt' => ['before' => '(', 'between' => '>', 'after' => ')'],
             'le' => ['before' => '(', 'between' => '<=', 'after' => ')'],
             'lt' => ['before' => '(', 'between' => '<', 'after' => ')'],
-            'like' => ['before' => '(', 'between' => ' LIKE ', 'after' => ')'],
+            'like' => ['before' => '(', 'between' => ' LIKE BINARY ', 'after' => ')'],
+            'alike' => ['before' => '(', 'between' => ' LIKE ', 'after' => ')'],
             'contains' => ['before' => '(', 'between' => ' LIKE \'%', 'after' => '%\')'],
-        ]
+        ],
+        'BinaryOperator' => [
+            'eqn' => ['before' => '(', 'after' => ' IS NULL)'],
+            'eqt' => ['before' => '(', 'after' => ' IS TRUE)'],
+            'eqf' => ['before' => '(', 'after' => ' IS FALSE)'],
+            'ie' => ['before' => '(', 'after' => ')'],
+        ],
     ];
 
     /**
@@ -50,6 +53,9 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
      */
     protected $db;
 
+    /**
+     * @var string
+     */
     protected $tableName;
 
     /**
@@ -60,26 +66,21 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
     public function __construct(AdapterInterface $dbAdapter, $tableName)
     {
         $this->db = $dbAdapter;
-        $this->emptyCondition = $this->prepareFieldValue(1)
-            . ' = '
-            . $this->prepareFieldValue(1);
+        $this->emptyCondition = $this->prepareFieldValue(1) . ' = ' . $this->prepareFieldValue(1);
         $this->tableName = $tableName;
     }
 
     /**
      * {@inheritdoc}
-     *
-     * {@inheritdoc}
      */
     public function prepareFieldValue($fieldValue)
     {
         $fieldValue = parent::prepareFieldValue($fieldValue);
+
         return $this->db->platform->quoteValue($fieldValue);
     }
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function getValueFromGlob(Glob $globNode)
@@ -90,45 +91,36 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         $glob = parent::getValueFromGlob($globNode);
 
         $regexSQL = strtr(
-            preg_quote(rawurldecode(strtr($glob, ['*' => $constStar, '?' => $constQuestion])), '/'), [$constStar => '%', $constQuestion => '_']
+            rawurldecode(strtr($glob, ['*' => $constStar, '?' => $constQuestion])),
+            [$constStar => '%', $constQuestion => '_']
         );
 
         return $regexSQL;
     }
 
     /**
-     * Make string with conditions for ScalarOperatorNode
-     *
-     * @param AbstractScalarOperatorNode $node
-     * @return string
-     * @throws DataStoreException
+     * {@inheritdoc}
      */
     public function makeScalarOperator(AbstractScalarOperatorNode $node)
     {
         $nodeName = $node->getNodeName();
+
         if (!isset($this->literals['ScalarOperator'][$nodeName])) {
             throw new DataStoreException(
                 'The Scalar Operator not suppoted: ' . $nodeName
             );
         }
-        $value = $node->getValue() instanceof \DateTime ? $node->getValue()->format("Y-m-d") : $node->getValue();
-        $strQuery = $this->literals['ScalarOperator'][$nodeName]['before']
-            . $this->prepareFieldName($node->getField());
 
-        if (is_null($value)) {
-            if ($nodeName === 'eq') {
-                $strQuery .= "IS NULL";
-            } else if ($nodeName === 'ne') {
-                $strQuery .= "IS NOT NULL";
-            } else {
-                throw new DataStoreException("Can't use `null` for " . $nodeName . ". Only for `eq` or `ne`");
-            }
-        } else if ($nodeName === 'contains') {
-            $strQuery .= $this->literals['ScalarOperator'][$nodeName]['between'] .
-                trim($this->prepareFieldValue($value), '\'');
-        } else {
+        $value = $node->getValue() instanceof \DateTime ? $node->getValue()
+            ->format("Y-m-d") : $node->getValue();
+
+        $strQuery = $this->literals['ScalarOperator'][$nodeName]['before'] . $this->prepareFieldName($node->getField());
+
+        if ($nodeName === 'contains') {
             $strQuery .= $this->literals['ScalarOperator'][$nodeName]['between']
-                . $this->prepareFieldValue($value);
+                . trim($this->prepareFieldValue($value), '\'');
+        } else {
+            $strQuery .= $this->literals['ScalarOperator'][$nodeName]['between'] . $this->prepareFieldValue($value);
         }
 
         $strQuery .= $this->literals['ScalarOperator'][$nodeName]['after'];
@@ -138,25 +130,48 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
 
     /**
      * {@inheritdoc}
-     *
+     */
+    public function makeBinaryOperator(BinaryOperatorNodeAbstract $node)
+    {
+        $nodeName = $node->getNodeName();
+
+        if (!isset($this->literals['BinaryOperator'][$nodeName])) {
+            throw new DataStoreException(
+                'The Binary Operator not suppoted: ' . $nodeName
+            );
+        }
+
+        $strQuery = $this->literals['BinaryOperator'][$nodeName]['before'];
+        $field = $this->prepareFieldName($node->getField());
+
+        if ($nodeName === 'ie') {
+            $strQuery .= $field . 'IS NULL OR ' . $field . ' IS FALSE';
+        } else {
+            $strQuery .= $field;
+        }
+
+        $strQuery .= $this->literals['BinaryOperator'][$nodeName]['after'];
+
+        return $strQuery;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function prepareFieldName($fieldName)
     {
         if (!strpos($fieldName, '.')) {
             if ($fieldName == 'id') {
-                $fieldName = $this->db->platform->quoteIdentifierInFragment("{$this->tableName}.{$fieldName}");
-                /*$fieldName = $this->db->platform->quoteIdentifier($this->tableName) .  '.' .$this->db->platform->quoteIdentifier($fieldName);*/
+                $fieldName = $this->db->getPlatform()->quoteIdentifierInFragment("{$this->tableName}.{$fieldName}");
             } else {
-                $fieldName = $this->db->platform->quoteIdentifierInFragment("{$fieldName}");
+                $fieldName = $this->db->getPlatform()->quoteIdentifierInFragment("{$fieldName}");
             }
         } else {
-            //TODO: force set tableName!!!!!
+            // TODO: force set table
             $name = explode('.', $fieldName);
-            $fieldName = $this->db->platform->quoteIdentifierInFragment("{$name[0]}.{$name[1]}");
-            //$fieldName = $this->db->platform->quoteIdentifier($name[0]) . '.' . $this->db->platform->quoteIdentifier($name[1]);
+            $fieldName = $this->db->getPlatform()->quoteIdentifierInFragment("{$name[0]}.{$name[1]}");
         }
-        return $fieldName;
 
+        return $fieldName;
     }
 }

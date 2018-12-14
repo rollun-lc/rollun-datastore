@@ -1,28 +1,30 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 15.05.17
- * Time: 17:47
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\Traits;
 
-
 use rollun\datastore\DataStore\DataStoreException;
 use Xiag\Rql\Parser\Query;
 
+/**
+ * Use this trait to disable 'query' method in datastore
+ *
+ * Trait NoSupportQueryTrait
+ * @package rollun\datastore\DataStore\Traits
+ */
 trait NoSupportQueryTrait
 {
     /**
-     * {@inheritdoc}
-     * http://www.simplecoding.org/sortirovka-v-mysql-neskolko-redko-ispolzuemyx-vozmozhnostej.html
-     * http://ru.php.net/manual/ru/function.usort.php
      * @param Query $query
-     * @return array[] fo items or [] if not any
+     * @throws DataStoreException
      */
     public function query(Query $query)
     {
+        trigger_error(NoSupportQueryTrait::class . ' trait is deprecated', E_USER_DEPRECATED);
+
         throw new DataStoreException("Method don't support.");
     }
 }

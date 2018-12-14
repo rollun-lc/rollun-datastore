@@ -1,23 +1,16 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore;
 
-use rollun\datastore\RestException;
-
 /**
- * Exception class
- *
- * @category   rest
- * @package    zaboy
+ * Class DataStoreException
+ * @package rollun\datastore\DataStore
  */
-class DataStoreException extends RestException
+class DataStoreException extends \Exception
 {
 
 }

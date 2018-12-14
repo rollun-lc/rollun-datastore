@@ -1,15 +1,17 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 04.07.16
- * Time: 11:42
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\Interfaces;
 
 use rollun\datastore\DataStore\DataStoreException;
 
+/**
+ * Interface RefreshableInterface
+ * @package rollun\datastore\DataStore\Interfaces
+ */
 interface RefreshableInterface
 {
     /**

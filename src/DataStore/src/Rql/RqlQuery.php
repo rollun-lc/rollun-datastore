@@ -1,9 +1,7 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: victorsecuring
- * Date: 26.11.16
- * Time: 11:43 AM
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\Rql;
@@ -15,7 +13,7 @@ class RqlQuery extends Query
 {
 
     /** @var  GroupbyNode */
-    protected $groupby;
+    protected $groupBy;
 
     /**
      * Query constructor. Init query with rql string or another query obj.
@@ -34,27 +32,25 @@ class RqlQuery extends Query
             $this->select = $query->select;
         }
         if ($query instanceof RqlQuery) {
-            $this->groupby = $query->groupby;
+            $this->groupBy = $query->groupBy;
         }
     }
 
     /**
-     * @param mixed $groupby
+     * @param mixed $groupBy
      * @return RqlQuery
      */
-    public function setGroupby(GroupbyNode $groupby)
+    public function setGroupBy(GroupbyNode $groupBy)
     {
-        $this->groupby = $groupby;
+        $this->groupBy = $groupBy;
         return $this;
     }
 
     /**
      * @return GroupbyNode
      */
-    public function getGroupby()
+    public function getGroupBy()
     {
-        return $this->groupby;
+        return $this->groupBy;
     }
-
-
 }

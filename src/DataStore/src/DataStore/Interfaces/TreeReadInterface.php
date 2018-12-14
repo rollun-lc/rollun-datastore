@@ -1,25 +1,17 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\Interfaces;
 
-use rollun\datastore\DataStore\Interfaces\ReadInterface;
-
 /**
- * TreeRead Interface for DataStores
- *
- * @category   rest
- * @package    zaboy
+ * Interface TreeReadInterface
+ * @package rollun\datastore\DataStore\Interfaces
  */
 interface TreeReadInterface extends ReadInterface
 {
-
     /**
      * @return array|object|null
      */
@@ -39,7 +31,7 @@ interface TreeReadInterface extends ReadInterface
 
     /**
      * @param mixed
-     * @return boool
+     * @return bool
      */
     public function mayHaveChildren($id);
 

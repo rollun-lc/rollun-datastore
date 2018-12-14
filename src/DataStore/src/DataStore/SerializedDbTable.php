@@ -1,27 +1,22 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 02.10.17
- * Time: 17:27
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore;
 
-use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
-use rollun\datastore\DataStore\DbTable;
+use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\dic\InsideConstruct;
-use Zend\Db\Adapter\Adapter;
 use Zend\Db\TableGateway\TableGateway;
 
 class SerializedDbTable extends DbTable
 {
-
     protected $tableName;
 
-    public function __construct(TableGateway $dbTable)
+    public function __construct(TableGateway $dbTable, SqlQueryBuilder $sqlQueryBuilder = null)
     {
-        parent::__construct($dbTable);
+        parent::__construct($dbTable, $sqlQueryBuilder);
         $this->tableName = $this->dbTable->getTable();
     }
 
@@ -34,11 +29,17 @@ class SerializedDbTable extends DbTable
     }
 
     /**
-     *
-     * @throws \ReflectionException
+     * @throws DataStoreException
      */
     public function __wakeup()
     {
-        InsideConstruct::initWakeup(["dbTable" => $this->tableName]);
+        try {
+            InsideConstruct::initWakeup([
+                "dbTable" => $this->tableName,
+                "sqlQueryBuilder" => SqlQueryBuilder::class,
+            ]);
+        } catch (\Throwable $e) {
+            throw new DataStoreException("Can't deserialize itself. Reason: {$e->getMessage()}", 0, $e);
+        }
     }
 }

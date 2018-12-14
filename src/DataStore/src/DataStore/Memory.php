@@ -1,44 +1,66 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore;
 
-use rollun\datastore\DataStore\DataStoreAbstract;
-use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\ConditionBuilder\PhpConditionBuilder;
 
 /**
- * DataStores as array
+ * Represent php array as datastore
+ * All items store in protected property $item (actually it is a RAM)
+ * To easy search item id matches $item key
  *
- * @todo delete string 74
- * @see http://en.wikipedia.org/wiki/Create,_read,_update_and_delete
- * @category   rest
- * @package    zaboy
+ * Example:
+ * [
+ *      1 => [
+ *          // identifier can be another
+ *          'id' => 1,
+ *          'name' => 'name1',
+ *      ],
+ *      37 => [
+ *          // identifier can be another
+ *          'id' => 37,
+ *          'name' => 'name2',
+ *      ],
+ * ]
+ *
+ * Class Memory
+ * @package rollun\datastore\DataStore
  */
 class Memory extends DataStoreAbstract
 {
+    /**
+     * Collected items
+     *
+     * @var array
+     */
+    protected $items = [];
 
     /**
-     * @var array Collected items
+     * Required fields
+     *
+     * @var array
      */
-    protected $items = array();
+    protected $columns;
 
-    public function __construct()
+    /**
+     * Memory constructor.
+     * @param array $columns
+     */
+    public function __construct(array $columns = [])
     {
-        $this->conditionBuilder = new PhpConditionBuilder;
+        if (!count($columns)) {
+            trigger_error("Array of required columns is not specified", E_USER_DEPRECATED);
+        }
+
+        $this->columns = $columns;
+        $this->conditionBuilder = new PhpConditionBuilder();
     }
 
-//** Interface "rollun\datastore\DataStore\Interfaces\ReadInterface" **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function read($id)
@@ -51,94 +73,101 @@ class Memory extends DataStoreAbstract
         }
     }
 
-// ** Interface "rollun\datastore\DataStore\Interfaces\DataStoresInterface"  **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function create($itemData, $rewriteIfExist = false)
     {
+        if ($rewriteIfExist) {
+            trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
+        }
+
+        $this->checkOnExistingColumns($itemData);
         $identifier = $this->getIdentifier();
-        if (!isset($itemData[$identifier])) {
+        $id = isset($itemData[$identifier]) ? $itemData[$identifier] : null;
+
+        if ($id) {
+            if (isset($this->items[$id]) && !$rewriteIfExist) {
+                throw new DataStoreException("Item with id '{$itemData[$identifier]}' already exist");
+            }
+
+            $this->checkIdentifierType($id);
+        } else {
             $this->items[] = $itemData;
             $itemsKeys = array_keys($this->items);
             $id = array_pop($itemsKeys);
-        } elseif (!$rewriteIfExist && isset($this->items[$itemData[$identifier]])) {
-            throw new DataStoreException('Item is already exist with "id" =  ' . $itemData[$identifier]);
-        } else {
-            $id = $itemData[$identifier];
-            $this->checkIdentifierType($id);
-            $this->items[$id] = array_merge(array($identifier => $id), $itemData);
         }
-        $this->items[$id] = array_merge(array($identifier => $id), $itemData);
+
+        $this->items[$id] = array_merge([$identifier => $id], $itemData);
+
         return $this->items[$id];
     }
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function update($itemData, $createIfAbsent = false)
     {
+        if ($createIfAbsent) {
+            trigger_error("Option 'createIfAbsent' is no more use", E_USER_DEPRECATED);
+        }
+
+        $this->checkOnExistingColumns($itemData);
         $identifier = $this->getIdentifier();
+
         if (!isset($itemData[$identifier])) {
             throw new DataStoreException('Item must has primary key');
         }
-        $id = $itemData[$identifier];
-        $this->checkIdentifierType($id);
 
-        switch (true) {
-            case!isset($this->items[$id]) && !$createIfAbsent:
-                $errorMsg = 'Can\'t update item with "id" = ' . $id;
-                throw new DataStoreException($errorMsg);
-            case!isset($this->items[$id]) && $createIfAbsent:
-                $this->items[$id] = array_merge(array($identifier => $id), $itemData);
-                break;
-            case isset($this->items[$id]):
-                unset($itemData[$id]);
-                $this->items[$id] = array_merge($this->items[$id], $itemData);
-                break;
+        $this->checkIdentifierType($itemData[$identifier]);
+        $id = $itemData[$identifier];
+
+        if (isset($this->items[$id])) {
+            foreach ($itemData as $field => $value) {
+                $this->items[$id][$field] = $value;
+            }
+
+            unset($itemData[$id]);
+        } else {
+            if ($createIfAbsent) {
+                $this->items[$id] = $itemData;
+            } else {
+                throw new DataStoreException("Item doesn't exist with id = $id");
+            }
         }
+
         return $this->items[$id];
     }
 
     /**
      * {@inheritdoc}
-     *
-     * {@inheritdoc}
      */
     public function delete($id)
     {
-
         $this->checkIdentifierType($id);
+
         if (isset($this->items[$id])) {
             $item = $this->items[$id];
             unset($this->items[$id]);
 
+            return $item;
         }
-        return isset($item) ? $item : null;
+
+        return null;
     }
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function deleteAll()
     {
         $deletedItemsCount = count($this->items);
-        $this->items = array();
+        $this->items = [];
+
         return $deletedItemsCount;
     }
 
-// ** Interface "/Coutable"  **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function count()
@@ -146,23 +175,17 @@ class Memory extends DataStoreAbstract
         return count($this->items);
     }
 
-// ** Interface "/IteratorAggregate"  **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function getIterator()
     {
+        trigger_error("Datastore is no more iterable", E_USER_DEPRECATED);
+
         return new \ArrayIterator($this->items);
     }
 
-// ** protected  **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     protected function getKeys()
@@ -170,4 +193,23 @@ class Memory extends DataStoreAbstract
         return array_keys($this->items);
     }
 
+    /**
+     * @param $itemData
+     * @return mixed
+     * @throws DataStoreException
+     */
+    protected function checkOnExistingColumns($itemData)
+    {
+        if (!count($this->columns)) {
+            return $itemData;
+        }
+
+        foreach ($itemData as $field => $value) {
+            if (!in_array($field, $this->columns)) {
+                throw new DataStoreException("Undefined field '$field' in data store");
+            }
+        }
+
+        return $itemData;
+    }
 }

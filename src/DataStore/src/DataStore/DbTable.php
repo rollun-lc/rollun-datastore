@@ -1,73 +1,80 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore;
 
+use InvalidArgumentException;
 use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
-use rollun\datastore\DataStore\Interfaces\SqlQueryGetterInterface;
-use rollun\datastore\Rql\Node\AggregateFunctionNode;
-use rollun\datastore\Rql\Node\AggregateSelectNode;
 use rollun\datastore\Rql\RqlQuery;
-use Xiag\Rql\Parser\Node\SortNode;
+use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
+use rollun\datastore\TableGateway\SqlQueryBuilder;
+use Xiag\Rql\Parser\Node\LimitNode;
+use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
 use Xiag\Rql\Parser\Query;
-use Zend\Db\Adapter\Adapter;
-use Zend\Db\ResultSet\ResultSet;
-use Zend\Db\Sql\Predicate\Expression;
+use Zend\Db\Adapter\Driver\ResultInterface;
+use Zend\Db\Adapter\ParameterContainer;
 use Zend\Db\Sql\Select;
+use Zend\Db\Sql\Sql;
 use Zend\Db\TableGateway\TableGateway;
 
 /**
- * DataStores as Db Table
+ * Datastore as db table
  *
- * @todo rearrangement query. Use TableGateway method instead string manipulation for compatible
- * @uses zend-db
- * @see https://github.com/zendframework/zend-db
- * @see http://en.wikipedia.org/wiki/Create,_read,_update_and_delete
- * @category   rest
- * @package    zaboy
+ * Class DbTable
+ * @package rollun\datastore\DataStore
  */
-class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
+class DbTable extends DataStoreAbstract
 {
-
     /**
-     *
      * @var TableGateway
      */
     protected $dbTable;
 
     /**
-     *
-     * @param TableGateway $dbTable
+     * @var SqlQueryBuilder
      */
-    public function __construct(TableGateway $dbTable)
+    protected $sqlQueryBuilder;
+
+    /**
+     * DbTable constructor.
+     * @param TableGateway $dbTable
+     * @param SqlQueryBuilder $sqlQueryBuilder
+     */
+    public function __construct(TableGateway $dbTable, SqlQueryBuilder $sqlQueryBuilder = null)
     {
         $this->dbTable = $dbTable;
+
+        if ($this->sqlQueryBuilder === null) {
+            $this->sqlQueryBuilder = new SqlQueryBuilder($this->dbTable->getAdapter(), $this->dbTable->table);
+        } else {
+            $this->sqlQueryBuilder = $sqlQueryBuilder;
+        }
     }
 
     /**
      * {@inheritdoc}
-     *
-     * {@inheritdoc}
      */
     public function create($itemData, $rewriteIfExist = false)
     {
+        if ($rewriteIfExist) {
+            // 'rewriteIfExist' do not work with multiply insert
+            trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
+        }
 
         $adapter = $this->dbTable->getAdapter();
-
         $adapter->getDriver()->getConnection()->beginTransaction();
+
         try {
-            $insertedItem = $this->_create($itemData, $rewriteIfExist);
+            $insertedItem = $this->insertItem($itemData, $rewriteIfExist);
             $adapter->getDriver()->getConnection()->commit();
         } catch (\Throwable $e) {
             $adapter->getDriver()->getConnection()->rollback();
-            throw new DataStoreException('Can\'t insert item ' . $e->getMessage(), 0, $e);
+            throw new DataStoreException("Can't insert item. {$e->getMessage()}", 0, $e);
         }
+
         return $insertedItem;
     }
 
@@ -76,308 +83,288 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
      * @param bool $rewriteIfExist
      * @return array|mixed|null
      */
-    protected function _create($itemData, $rewriteIfExist = false)
+    protected function insertItem($itemData, $rewriteIfExist = false)
     {
-
-        $identifier = $this->getIdentifier();
-        if ($rewriteIfExist) {
-            if (isset($itemData[$identifier])) {
-                $this->deleteIfExist($itemData, $identifier);
-            } else if (isset($itemData[0]) && isset($itemData[0][$identifier])) {
-                foreach ($itemData as $item) {
-                    $this->deleteIfExist($item, $identifier);
-                }
-            }
+        if ($rewriteIfExist && isset($itemData[$this->getIdentifier()])) {
+            $this->delete($itemData[$this->getIdentifier()]);
         }
+
         $this->dbTable->insert($itemData);
-        if (!isset($itemData[$identifier])) {
+
+        if (isset($itemData[$this->getIdentifier()])) {
+            $insertedItem = $this->read($itemData[$this->getIdentifier()]);
+        } else {
+            trigger_error("Autoincrement 'id' is not allowed", E_USER_DEPRECATED);
             $id = $this->dbTable->getLastInsertValue();
-            $newItem = $this->read($id);
-        } else {
-            $newItem = $itemData;
+            $insertedItem = $this->read($id);
         }
 
-        return $newItem;
+        return $insertedItem;
     }
 
     /**
-     * @param array $item
-     * @param $identifier
-     * @throws DataStoreException
-     */
-    protected function deleteIfExist(array $item, $identifier)
-    {
-        if ($this->read($item[$identifier])) {
-            try {
-                $this->dbTable->delete(array($identifier => $item[$identifier]));
-            } catch (\Throwable $e) {
-                throw new DataStoreException("Can't delete item with '$identifier' = " . $item[$identifier], 0, $e);
-            }
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * {@inheritdoc}
-     */
-    public function query(Query $query)
-    {
-        $sql = $this->getSqlQuery($query);
-        /** @var Adapter $adapter */
-        $adapter = $this->dbTable->getAdapter();
-        $rowset = $adapter->query($sql, $adapter::QUERY_MODE_EXECUTE);
-
-        return $rowset->toArray();
-    }
-
-    /**
-     * @param Select $selectSQL
-     * @param Query $query
-     * @return Select
-     */
-    protected function setSelectLimitOffset(Select $selectSQL, Query $query)
-    {
-        $limits = $query->getLimit();
-        $limit = !$limits ? self::LIMIT_INFINITY : $limits->getLimit();
-        $offset = !$limits ? 0 : $limits->getOffset();
-        if ($limit <> self::LIMIT_INFINITY) {
-            $selectSQL->limit($limit);
-        }
-        if ($offset <> 0) {
-            $selectSQL->offset($offset);
-        }
-        return $selectSQL;
-    }
-
-    /**
-     * @param Select $selectSQL
-     * @param Query $query
-     * @return Select
-     */
-    protected function setSelectOrder(Select $selectSQL, Query $query)
-    {
-        $sort = $query->getSort();
-        $sortFields = !$sort ? [$this->dbTable->table . '.' . $this->getIdentifier() => SortNode::SORT_ASC] : $sort->getFields();
-        foreach ($sortFields as $ordKey => $ordVal) {
-            if (!preg_match('/[\w]+\.[\w]+/', $ordKey)) {
-                $ordKey = $this->dbTable->table . '.' . $ordKey;
-            }
-            if ((int)$ordVal === SortNode::SORT_DESC) {
-                $selectSQL->order($ordKey . ' ' . Select::ORDER_DESCENDING);
-            } else {
-                $selectSQL->order($ordKey . ' ' . Select::ORDER_ASCENDING);
-            }
-        }
-        return $selectSQL;
-    }
-
-    /**
-     * @param Select $selectSQL
-     * @param Query $query
-     * @return Select
-     */
-    protected function setSelectColumns(Select $selectSQL, Query $query)
-    {
-        $select = $query->getSelect();  //What fields will return
-        $selectFields = !$select ? [] : $select->getFields();
-        if (!empty($selectFields)) {
-            $fields = [];
-
-            foreach ($selectFields as $field) {
-                if ($field instanceof AggregateFunctionNode) {
-                    $fields[$field->getField() . "->" . $field->getFunction()] = new Expression($field->__toString());
-                } else {
-                    $fields[] = $field;
-                }
-            }
-            $selectSQL->columns($fields);
-        }
-        return $selectSQL;
-    }
-
-    /**
-     * @param Select $selectSQL
-     * @param Query $query
-     * @return Select
-     */
-    protected function setSelectJoin(Select $selectSQL, Query $query)
-    {
-        return $selectSQL;
-    }
-
-    /**
-     * @param Select $selectSQL
-     * @param RqlQuery $query
-     * @return Select
-     */
-    protected function setGroupby(Select $selectSQL, RqlQuery $query)
-    {
-        $groupByFields = $query->getGroupby()->getFields();
-        $selectionFields = $query->getSelect()->getFields();
-        foreach ($selectionFields as &$field) {
-            if (!in_array($field, $groupByFields) && !($field instanceof AggregateFunctionNode)) {
-                $field = new AggregateFunctionNode('count', $field);
-            }
-        }
-        $query->setSelect(new AggregateSelectNode($selectionFields));
-        $selectSQL->group($query->getGroupby()->getFields());
-        return $selectSQL;
-    }
-
-    /**
-     * @param Select $selectSQL
-     * @return Select
-     */
-    protected function makeExternalSql(Select $selectSQL)
-    {
-        //create new Select - for aggregate func query
-        $fields = $selectSQL->getRawState(Select::COLUMNS);
-
-        $hasAggregateFilds = array_keys($fields) != range(0, count($fields) - 1) && !empty($fields);
-        if ($hasAggregateFilds) {
-            $externalSql = new Select();
-            $externalSql->columns($selectSQL->getRawState(Select::COLUMNS));
-            $externalSql->group($selectSQL->getRawState(Select::GROUP));
-            $selectSQL->reset(Select::GROUP);
-            //change select column to all
-            $selectSQL->columns(['*']);
-            //create sub query without aggreagate func and with all fields
-            $from = "(" . $this->dbTable->getSql()->buildSqlString($selectSQL) . ")";
-            $externalSql->from(array('Q' => $from));
-            return $externalSql;
-        } else {
-            return $selectSQL;
-        }
-    }
-
-
-    /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function update($itemData, $createIfAbsent = false)
     {
+        if ($createIfAbsent) {
+            trigger_error("Option 'createIfAbsent' is no more use.", E_DEPRECATED);
+        }
 
-        /*$adapter = $this->dbTable->getAdapter();
-        $adapter->getDriver()->getConnection()->beginTransaction();
-
-        $identifier = $this->getIdentifier();
-        if (!isset($itemData[$identifier])) {
+        if (!isset($itemData[$this->getIdentifier()])) {
             throw new DataStoreException('Item must has primary key');
         }
-        $id = $itemData[$identifier];
-        $this->checkIdentifierType($id);
-
-        $errorMsg = 'Can\'t update item with "id" = ' . $id;
-
-        $queryStr = 'SELECT ' . Select::SQL_STAR
-            . ' FROM ' . $adapter->platform->quoteIdentifier($this->dbTable->getTable())
-            . ' WHERE ' . $adapter->platform->quoteIdentifier($identifier) . ' = ?'
-            . ' FOR UPDATE';
-
-        try {
-            //is row with this index exist?
-            $rowset = $adapter->query($queryStr, array($id));
-            $isExist = !is_null($rowset->current());
-            switch (true) {
-                case!$isExist && !$createIfAbsent:
-                    throw new DataStoreException($errorMsg);
-                case!$isExist && $createIfAbsent:
-                    $this->dbTable->insert($itemData);
-                    $result = $itemData;
-                    break;
-                case $isExist:
-                    unset($itemData[$identifier]);
-                    $this->dbTable->update($itemData, array($identifier => $id));
-                    $rowset = $adapter->query($queryStr, array($id));
-                    $result = $rowset->current()->getArrayCopy();
-                    break;
-            }
-            $adapter->getDriver()->getConnection()->commit();
-        } catch (\Exception $e) {
-            $adapter->getDriver()->getConnection()->rollback();
-            throw new DataStoreException($errorMsg, 0, $e);
-        }
-        return $result;*/
 
         $adapter = $this->dbTable->getAdapter();
         $adapter->getDriver()->getConnection()->beginTransaction();
+
         try {
-            $result = $this->_update($itemData, $createIfAbsent);
+            $result = $this->updateItem($itemData, $createIfAbsent);
             $adapter->getDriver()->getConnection()->commit();
         } catch (\Throwable $e) {
             $adapter->getDriver()->getConnection()->rollback();
-            throw new DataStoreException('Can\'t update item', 0, $e);
+            throw new DataStoreException("Can't update item. {$e->getMessage()}", 0, $e);
         }
-        return $result;
-    }
 
-    protected function _update($itemData, $createIfAbsent = false)
-    {
-        $adapter = $this->dbTable->getAdapter();
-
-        $identifier = $this->getIdentifier();
-        if (!isset($itemData[$identifier])) {
-            throw new DataStoreException('Item must has primary key');
-        }
-        $id = $itemData[$identifier];
-        $this->checkIdentifierType($id);
-
-        $queryStr = 'SELECT ' . Select::SQL_STAR
-            . ' FROM ' . $adapter->platform->quoteIdentifier($this->dbTable->getTable())
-            . ' WHERE ' . $adapter->platform->quoteIdentifier($identifier) . ' = ?'
-            . ' FOR UPDATE';
-
-        //is row with this index exist?
-        $rowset = $adapter->query($queryStr, array($id));
-        $isExist = !is_null($rowset->current());
-        $result = [];
-        switch (true) {
-            case!$isExist && !$createIfAbsent:
-                throw new DataStoreException('Can\'t update item with "id" = ' . $id);
-            case!$isExist && $createIfAbsent:
-                $this->dbTable->insert($itemData);
-                $result = $itemData;
-                break;
-            case $isExist:
-                unset($itemData[$identifier]);
-                $this->dbTable->update($itemData, array($identifier => $id));
-                $rowset = $adapter->query($queryStr, array($id));
-                $result = $rowset->current()->getArrayCopy();
-                break;
-        }
         return $result;
     }
 
     /**
      * {@inheritdoc}
      *
+     * @param Query $query
+     * @return array
+     * @throws DataStoreException
+     */
+    public function queriedDelete(Query $query)
+    {
+        if ($query->getLimit()
+            || $query->getSort()
+            || ($query instanceof RqlQuery && $query->getGroupBy())
+            || $query->getSelect()) {
+            throw new InvalidArgumentException('Only where clause allowed for delete');
+        }
+
+        $conditionBuilder = new SqlConditionBuilder(
+            $this->getDbTable()->getAdapter(),
+            $this->getDbTable()->getTable()
+        );
+
+        $sql = new Sql($this->getDbTable()->getAdapter());
+        $delete = $sql->delete($this->getDbTable()->getTable());
+        $delete->where($conditionBuilder->__invoke($query->getQuery()));
+        $sqlString = $sql->buildSqlString($delete);
+
+        $adapter = $this->dbTable->getAdapter();
+        $shouldDeletedIds = array_map(function ($item) {
+            return $item[$this->getIdentifier()];
+        }, $this->query($query));
+
+        try {
+            $statement = $adapter->getDriver()->createStatement($sqlString);
+            $result = $statement->execute();
+        } catch (\Throwable $e) {
+            throw new DataStoreException("Can't delete records using query", 0, $e);
+        }
+
+        if (count($shouldDeletedIds) === $result->getAffectedRows()) {
+            return $shouldDeletedIds;
+        } else {
+            $result = $this->query($query);
+
+            foreach ($result as $record) {
+                if (in_array($record[$this->getIdentifier()], $shouldDeletedIds)) {
+                    unset($shouldDeletedIds[$record[$this->getIdentifier()]]);
+                }
+            }
+        }
+
+        return $shouldDeletedIds;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param $record
+     * @param Query $query
+     * @return array
+     */
+    public function queriedUpdate($record, Query $query)
+    {
+        if ($query->getLimit()
+            || $query->getSort()
+            || ($query instanceof RqlQuery && $query->getGroupBy())
+            || $query->getSelect()) {
+            throw new InvalidArgumentException('Only where clause allowed for update');
+        }
+
+        $selectResult = $this->selectForUpdateWithQuery($query);
+
+        if (!$selectResult) {
+            return [];
+        }
+
+        $conditionBuilder = new SqlConditionBuilder(
+            $this->getDbTable()->getAdapter(),
+            $this->getDbTable()->getTable()
+        );
+
+        $sql = new Sql($this->getDbTable()->getAdapter());
+        $update = $sql->update($this->getDbTable()->getTable());
+        $update->where($conditionBuilder->__invoke($query->getQuery()));
+        $update->set($record);
+        $sqlString = $sql->buildSqlString($update);
+
+        $adapter = $this->dbTable->getAdapter();
+
+        try {
+            $statement = $adapter->getDriver()->createStatement($sqlString);
+            $updateResult = $statement->execute();
+            $updatedIds = [];
+
+            if ($selectResult->getAffectedRows() === $updateResult->getAffectedRows()) {
+                foreach ($selectResult as $record) {
+                    $updatedIds[] = $record[$this->getIdentifier()];
+                }
+            } else {
+                $effectedRecords = $this->query($query);
+
+                foreach ($selectResult as $record) {
+                    if ($record !== $effectedRecords[$this->getIdentifier()]) {
+                        $updatedIds[] = $effectedRecords[$this->getIdentifier()];
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            throw new DataStoreException("Can't update records using query", 0, $e);
+        }
+
+        return $updatedIds;
+    }
+
+    /**
+     * @param array $identifiers
+     * @return \Zend\Db\Adapter\Driver\ResultInterface
+     */
+    private function selectForUpdateWithIds(array $identifiers)
+    {
+        $adapter = $this->dbTable->getAdapter();
+        $valTemplate = '';
+
+        foreach ($identifiers as $identifier) {
+            $valTemplate .= '?,';
+        }
+
+        $valTemplate = trim($valTemplate, ",");
+        $sqlString = "SELECT " . Select::SQL_STAR
+            . " FROM {$adapter->getPlatform()->quoteIdentifier($this->dbTable->getTable())}"
+            . " WHERE {$adapter->getPlatform()->quoteIdentifier($this->getIdentifier())} IN ($valTemplate)"
+            . " FOR UPDATE";
+
+        $statement = $adapter->getDriver()->createStatement($sqlString);
+        $statement->setParameterContainer(new ParameterContainer($identifiers));
+
+        return $statement->execute();
+    }
+
+    /**
+     * @param Query $query
+     * @return \Zend\Db\Adapter\Driver\ResultInterface
+     */
+    private function selectForUpdateWithQuery(Query $query)
+    {
+        $adapter = $this->dbTable->getAdapter();
+
+        $sqlString = $this->sqlQueryBuilder->buildSql($query);
+        $sqlString .= " FOR UPDATE";
+
+        $statement = $adapter->getDriver()->createStatement($sqlString);
+
+        return $statement->execute();
+    }
+
+    /**
+     * @param $itemData
+     * @param bool $createIfAbsent
+     * @return array|mixed|null
+     * @throws DataStoreException
+     */
+    protected function updateItem($itemData, $createIfAbsent = false)
+    {
+        $identifier = $this->getIdentifier();
+        $id = $itemData[$identifier];
+        $this->checkIdentifierType($id);
+
+        // Is row with this index exist ?
+        $result = $this->selectForUpdateWithIds([$id]);
+        $isExist = $result->count();
+
+        if (!$isExist && $createIfAbsent) {
+            $this->dbTable->insert($itemData);
+        } elseif ($isExist) {
+            unset($itemData[$identifier]);
+            $this->dbTable->update($itemData, [$identifier => $id]);
+        } else {
+            throw new DataStoreException("Can't update item with id = $id");
+        }
+
+        return $this->read($id);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function query(Query $query)
+    {
+        $adapter = $this->dbTable->getAdapter();
+        $sqlString = $this->sqlQueryBuilder->buildSql($query);
+
+        try {
+            $statement = $adapter->getDriver()->createStatement($sqlString);
+            $resultSet = $statement->execute();
+        } catch (\PDOException $exception) {
+            throw new DataStoreException(
+                "Error by execute '$sqlString' query to {$this->getDbTable()->getTable()}.",
+                500,
+                $exception
+            );
+        }
+
+        $result = [];
+
+        foreach ($resultSet as $itemData) {
+            $result[] = $itemData;
+        }
+
+        return $result;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function delete($id)
     {
         $identifier = $this->getIdentifier();
         $this->checkIdentifierType($id);
-
         $element = $this->read($id);
 
-        $deletedItemsCount = $this->dbTable->delete(array($identifier => $id));
+        if ($element) {
+            $this->dbTable->delete([$identifier => $id]);
+        }
+
         return $element;
     }
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function read($id)
     {
         $this->checkIdentifierType($id);
         $identifier = $this->getIdentifier();
-        $rowset = $this->dbTable->select(array($identifier => $id));
-        $row = $rowset->current();
+        $rowSet = $this->dbTable->select([$identifier => $id]);
+        $row = $rowSet->current();
+
         if (isset($row)) {
             return $row->getArrayCopy();
         } else {
@@ -387,31 +374,61 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
 
     /**
      * {@inheritdoc}
-     *
-     * {@inheritdoc}
      */
     public function deleteAll()
     {
         $where = '1=1';
         $deletedItemsCount = $this->dbTable->delete($where);
+
         return $deletedItemsCount;
     }
 
     /**
      * {@inheritdoc}
-     *
-     * {@inheritdoc}
      */
     public function count()
     {
-        /** @var Adapter $adapter */
         $adapter = $this->dbTable->getAdapter();
-        /* @var $rowset ResultSet */
-        $rowset = $adapter->query(
-            'SELECT COUNT(*) AS count FROM '
-            . $adapter->platform->quoteIdentifier($this->dbTable->getTable())
-            , $adapter::QUERY_MODE_EXECUTE);
-        return $rowset->current()['count'];
+
+        $sql = "SELECT COUNT(*) AS count FROM " . $adapter->getPlatform()->quoteIdentifier($this->dbTable->getTable());
+
+        $statement = $adapter->getDriver()->createStatement($sql);
+        $result = $statement->execute();
+
+        return $result->current()['count'];
+    }
+
+    /**
+     * @param array $itemsData
+     * @return array|array[]
+     * @throws DataStoreException
+     */
+    public function multiCreate($itemsData)
+    {
+        $multiInsertTableGw = $this->createMultiInsertTableGw();
+        $multiInsertTableGw->getAdapter()->getDriver()->getConnection()->beginTransaction();
+        $getIdCallable = function ($item) {
+            return $item[$this->getIdentifier()];
+        };
+
+        try {
+            $identifiers = array_map($getIdCallable, $itemsData);
+            $multiInsertTableGw->insert($itemsData);
+
+            $query = new Query();
+            $query->setQuery(new InNode($this->getIdentifier(), $identifiers));
+            $insertedItems = $this->query($query);
+        } catch (\Throwable $throwable) {
+            $multiInsertTableGw->getAdapter()->getDriver()->getConnection()->rollback();
+
+            throw new DataStoreException(
+                "Exception by multi create to table {$this->dbTable->table}.",
+                500,
+                $throwable
+            );
+        }
+
+        return array_map($getIdCallable, $insertedItems);
     }
 
     /**
@@ -424,49 +441,36 @@ class DbTable extends DataStoreAbstract implements SqlQueryGetterInterface
 
     /**
      * {@inheritdoc}
-     *
-     * {@inheritdoc}
      */
     protected function getKeys()
     {
         $identifier = $this->getIdentifier();
         $select = $this->dbTable->getSql()->select();
-        $select->columns(array($identifier));
-        $rowset = $this->dbTable->selectWith($select);
-        $keysArrays = $rowset->toArray();
-        if (PHP_VERSION_ID >= 50500) {
-            $keys = array_column($keysArrays, $identifier);
-        } else {
-            $keys = array();
-            foreach ($keysArrays as $value) {
-                $keys[] = $value[$identifier];
-            }
+        $select->columns([$identifier]);
+
+        $resultSet = $this->dbTable->selectWith($select);
+        $keys = [];
+
+        foreach ($resultSet as $key => $result) {
+            $keys[] = $key;
         }
+
         return $keys;
     }
 
     /**
-     * @param Query $query
-     * @return mixed|string
+     * @return TableGateway
      */
-    public function getSqlQuery(Query $query)
+    private function createMultiInsertTableGw()
     {
-        $conditionBuilder = new SqlConditionBuilder($this->dbTable->getAdapter(), $this->dbTable->getTable());
+        $multiInsertTableGw = new TableGateway(
+            $this->dbTable->getTable(),
+            $this->dbTable->getAdapter(),
+            $this->dbTable->getFeatureSet(),
+            $this->dbTable->getResultSetPrototype(),
+            new MultiInsertSql($this->dbTable->getAdapter(), $this->dbTable->getTable())
+        );
 
-        $selectSQL = $this->dbTable->getSql()->select();
-        $selectSQL->where($conditionBuilder($query->getQuery()));
-        $selectSQL = $this->setSelectOrder($selectSQL, $query);
-        $selectSQL = $this->setSelectLimitOffset($selectSQL, $query);
-        $selectSQL = ($query instanceof RqlQuery && $query->getGroupby() != null) ?
-            $this->setGroupby($selectSQL, $query) : $selectSQL;
-        $selectSQL = $this->setSelectColumns($selectSQL, $query);
-        $selectSQL = $this->setSelectJoin($selectSQL, $query);
-        $selectSQL = $this->makeExternalSql($selectSQL);
-
-        //build sql string
-        $sql = $this->dbTable->getSql()->buildSqlString($selectSQL);
-        //replace double ` char to single.
-        $sql = str_replace(["`(", ")`", "``"], ['(', ')', "`"], $sql);
-        return $sql;
+        return $multiInsertTableGw;
     }
 }

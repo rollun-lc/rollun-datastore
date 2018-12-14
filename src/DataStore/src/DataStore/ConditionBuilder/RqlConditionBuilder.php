@@ -1,25 +1,19 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\ConditionBuilder;
 
-use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
 use Xiag\Rql\Parser\DataType\Glob;
 
 /**
- * {@inheritdoc}
- *
- * {@inheritdoc}
+ * Class RqlConditionBuilder
+ * @package rollun\datastore\DataStore\ConditionBuilder
  */
 class RqlConditionBuilder extends ConditionBuilderAbstract
 {
-
     const TEXT_NULL = 'null()';
 
     protected $literals = [
@@ -30,7 +24,7 @@ class RqlConditionBuilder extends ConditionBuilderAbstract
         ],
         'ArrayOperator' => [
             'in' => ['before' => 'in(', 'between' => ',(', 'delimiter' => ',', 'after' => '))'],
-            'out' => ['before' => 'out(', 'between' => ',(', 'delimiter' => ',', 'after' => '))']
+            'out' => ['before' => 'out(', 'between' => ',(', 'delimiter' => ',', 'after' => '))'],
         ],
         'ScalarOperator' => [
             'eq' => ['before' => 'eq(', 'between' => ',', 'after' => ')'],
@@ -40,33 +34,37 @@ class RqlConditionBuilder extends ConditionBuilderAbstract
             'le' => ['before' => 'le(', 'between' => ',', 'after' => ')'],
             'lt' => ['before' => 'lt(', 'between' => ',', 'after' => ')'],
             'like' => ['before' => 'like(', 'between' => ',', 'after' => ')'],
+            'alike' => ['before' => 'alike(', 'between' => ',', 'after' => ')'],
             'contains' => ['before' => 'contains(', 'between' => ',', 'after' => ')'],
-        ]
+        ],
+        'BinaryOperator' => [
+            'eqn' => ['before' => 'eqn(', 'after' => ')'],
+            'eqt' => ['before' => 'eqt(', 'after' => ')'],
+            'eqf' => ['before' => 'eqf(', 'after' => ')'],
+            'ie' => ['before' => 'ie(', 'after' => ')'],
+        ],
     ];
+
     protected $emptyCondition = '';
 
     /**
      * {@inheritdoc}
-     *
-     * {@inheritdoc}
      */
     public static function encodeString($value)
     {
-        //
-        return strtr(rawurlencode($value), [
-            '-' => '%2D',
-            '_' => '%5F',
-            '.' => '%2E',
-            '~' => '%7E',
-            '`' => '%60',
-            "(" => "%28",
-            ")" => "%29",
-        ]);
+        return strtr(
+            rawurlencode($value),
+            [
+                '-' => '%2D',
+                '_' => '%5F',
+                '.' => '%2E',
+                '~' => '%7E',
+                '`' => '%60',
+            ]
+        );
     }
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function prepareFieldValue($fieldValue)
@@ -76,20 +74,21 @@ class RqlConditionBuilder extends ConditionBuilderAbstract
         if (is_null($regexRqlDecoded)) {
             return 'null()';
         }
+
         if (is_string($regexRqlDecoded)) {
             $constStar = 'starhjc7vjHg6jd8mv8hcy75GFt0c67cnbv74FegxtEDJkcucG64frblmkb';
             $constQuestion = 'questionhjc7vjHg6jd8mv8hcy75GFt0c67cnbv74FegxtEDJkcucG64frblmkb';
-            $regexRqlEnecoded = self::encodeString($regexRqlDecoded);
-            $regexRqlPrepared = strtr($regexRqlEnecoded, [$constStar => '*', $constQuestion => '?']);
+            $regexRelEncoded = self::encodeString($regexRqlDecoded);
+            $regexRqlPrepared = strtr($regexRelEncoded, [$constStar => '*', $constQuestion => '?']);
             $value = empty($regexRqlPrepared) ? "empty" : 'string:' . $regexRqlPrepared;
+
             return $value;
         }
+
         return $regexRqlDecoded;
     }
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function getValueFromGlob(Glob $globNode)
@@ -101,7 +100,7 @@ class RqlConditionBuilder extends ConditionBuilderAbstract
 
         $regexRqlPrepared = strtr($glob, ['*' => $constStar, '?' => $constQuestion]);
         $regexRqlDecoded = rawurldecode($regexRqlPrepared);
+
         return $regexRqlDecoded;
     }
-
 }

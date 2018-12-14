@@ -1,26 +1,22 @@
 <?php
-
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 14.07.16
- * Time: 14:53
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
+
 namespace rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator;
 
-use rollun\datastore\Rql\Node\ContainsNode;
 use rollun\datastore\Rql\Node\LikeGlobNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\LikeNode;
-use Xiag\Rql\Parser\TokenParser\Query\Basic\AbstractScalarOperatorTokenParser;
+use Xiag\Rql\Parser\TokenParser\Query\Fiql\AbstractScalarOperatorTokenParser;
 
 class LikeGlobTokenParser extends AbstractScalarOperatorTokenParser
 {
     /**
      * @inheritdoc
      */
-    protected function getOperatorName()
+    protected function getOperatorNames()
     {
-        return 'like';
+        return ['like'];
     }
 
     /**
