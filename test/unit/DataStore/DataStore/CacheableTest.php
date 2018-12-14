@@ -111,10 +111,7 @@ class CacheableTest extends TestCase
         /** @var DataStoresInterface|MockObject $cashStore */
         $cashStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
 
-        $this->assertEquals(
-            ['id' => 0],
-            $this->createObject($dataSource, $cashStore)->create($items)
-        );
+        $this->assertEquals($item, $this->createObject($dataSource, $cashStore)->create($item));
     }
 
     public function testCreateFail()
