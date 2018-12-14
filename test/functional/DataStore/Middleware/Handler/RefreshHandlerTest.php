@@ -7,6 +7,7 @@
 namespace rollun\test\functional\DataStore\Middleware\Handler;
 
 use Interop\Http\ServerMiddleware\DelegateInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Interfaces\RefreshableInterface;
 use rollun\datastore\DataStore\Memory;
@@ -89,8 +90,8 @@ class RefreshHandlerTest extends BaseHandlerTest
         $request = new ServerRequest();
         $request = $request->withMethod('PATCH');
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->getMockBuilder(DelegateInterface::class)->getMock();
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
         $dataStore = new Memory(['id']);
         $object = $this->createObject($dataStore);
         $object->process($request, $delegateMock);

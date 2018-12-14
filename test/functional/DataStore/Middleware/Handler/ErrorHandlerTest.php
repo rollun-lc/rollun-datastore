@@ -8,11 +8,12 @@
 
 namespace rollun\test\functional\DataStore\Middleware\Handler;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
 use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\Middleware\Handler\ErrorHandler;
 use rollun\datastore\Middleware\RestException;
+use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
 use Zend\Diactoros\Uri;
 
@@ -24,17 +25,17 @@ class ErrorHandlerTest extends BaseHandlerTest
         $response = $this->createResponse();
         $request = $request->withAttribute(ResponseInterface::class, $response);
 
-        $resultResponse = null;
+        $resultResponse = new Response();
 
-        /** @var DelegateInterface|PHPUnit_Framework_MockObject_MockObject $delegate */
-        $delegate = $this->getMockBuilder(DelegateInterface::class)->getMock();
-        $delegate->expects($this->once())
-            ->method('process')
+        /** @var RequestHandlerInterface|PHPUnit_Framework_MockObject_MockObject $handler */
+        $handler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
+        $handler->expects($this->once())
+            ->method('handle')
             ->with($request)
             ->willReturn($resultResponse);
 
         $object = new ErrorHandler();
-        $this->assertEquals($object->process($request, $delegate), $resultResponse);
+        $this->assertEquals($object->process($request, $handler), $resultResponse);
     }
 
     public function testProcessFail()
@@ -56,8 +57,8 @@ class ErrorHandlerTest extends BaseHandlerTest
         $uri = $uri->withPath('/some/path');
         $request = $request->withUri($uri);
 
-        /** @var DelegateInterface $delegate */
-        $delegate = $this->getMockBuilder(DelegateInterface::class)->getMock();
+        /** @var RequestHandlerInterface $delegate */
+        $delegate = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
 
         $object = new ErrorHandler();
         $object->process($request, $delegate);

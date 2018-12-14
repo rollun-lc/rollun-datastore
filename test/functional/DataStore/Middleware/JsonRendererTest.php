@@ -6,8 +6,8 @@
 
 namespace rollun\test\functional\DataStore\Middleware;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\Middleware\JsonRenderer;
 use Zend\Diactoros\Response\JsonResponse;
 use Zend\Diactoros\ServerRequest;
@@ -21,8 +21,8 @@ class JsonRendererTest extends BaseMiddlewareTest
 
         $object = new JsonRenderer();
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
 
         $this->assertJsonResponseEquals(
             $response,
@@ -45,8 +45,8 @@ class JsonRendererTest extends BaseMiddlewareTest
 
         $object = new JsonRenderer();
 
-        /** @var DelegateInterface $delegateMock */
-        $delegateMock = $this->createMock(DelegateInterface::class);
+        /** @var RequestHandlerInterface $delegateMock */
+        $delegateMock = $this->createMock(RequestHandlerInterface::class);
 
         $this->assertJsonResponseEquals(
             $response,

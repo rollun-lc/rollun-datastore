@@ -6,7 +6,7 @@
 
 namespace rollun\uploader;
 
-use rollun\uploader\Callback\Factory\UploaderAbstractFactory;
+use rollun\uploader\Factory\UploaderAbstractFactory;
 
 /**
  * The configuration provider for the App module

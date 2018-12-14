@@ -7,7 +7,7 @@
 namespace rollun\datastore\DataStore;
 
 use Xiag\Rql\Parser\Query;
-use rollun\datastore\DataStore\Interfaces\DataSourceInterface;
+use rollun\datastore\DataSource\DataSourceInterface;
 use rollun\datastore\DataStore\Interfaces\RefreshableInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 

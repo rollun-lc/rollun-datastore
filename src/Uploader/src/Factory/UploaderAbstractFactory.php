@@ -4,7 +4,7 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\uploader\Callback\Factory;
+namespace rollun\uploader\Factory;
 
 use Interop\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;

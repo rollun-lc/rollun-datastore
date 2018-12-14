@@ -6,10 +6,10 @@
 
 namespace rollun\datastore\Middleware;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use rollun\utils\Json\Serializer;
 use rollun\datastore\Rql\RqlParser;
 
@@ -27,22 +27,14 @@ use rollun\datastore\Rql\RqlParser;
  */
 class RequestDecoder implements MiddlewareInterface
 {
-    /**
-     * Process an incoming server request and return a response.
-     * Optionally delegating to the next middleware component to create the response.
-     *
-     * @param ServerRequestInterface $request
-     * @param DelegateInterface $delegate
-     * @return ResponseInterface
-     */
-    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $request = $this->parseOverwriteMode($request);
         $request = $this->parseRqlQuery($request);
         $request = $this->parseHeaderLimit($request);
         $request = $this->parseRequestBody($request);
 
-        $response = $delegate->process($request);
+        $response = $handler->handle($request);
 
         return $response;
     }

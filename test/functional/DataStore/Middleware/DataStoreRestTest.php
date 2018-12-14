@@ -11,6 +11,7 @@ use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\Middleware\DataStoreRest;
 use rollun\datastore\Middleware\Handler;
 use SplQueue;
+use Zend\Stratigility\MiddlewarePipe;
 use Zend\Stratigility\Route;
 
 class DataStoreRestTest extends TestCase
@@ -20,15 +21,15 @@ class DataStoreRestTest extends TestCase
         /** @var DataStoresInterface| $dataStoreMock */
         $dataStoreMock = $this->getMockBuilder(DataStoresInterface::class)->getMock();
 
-        $splObject = new SplQueue();
-        $splObject->enqueue(new Route('/', new Handler\QueryHandler($dataStoreMock)));
-        $splObject->enqueue(new Route('/', new Handler\ReadHandler($dataStoreMock)));
-        $splObject->enqueue(new Route('/', new Handler\CreateHandler($dataStoreMock)));
-        $splObject->enqueue(new Route('/', new Handler\UpdateHandler($dataStoreMock)));
-        $splObject->enqueue(new Route('/', new Handler\RefreshHandler($dataStoreMock)));
-        $splObject->enqueue(new Route('/', new Handler\DeleteHandler($dataStoreMock)));
-        $splObject->enqueue(new Route('/', new Handler\ErrorHandler($dataStoreMock)));
+        $middlewarePipe = new MiddlewarePipe();
+        $middlewarePipe->pipe(new Handler\QueryHandler($dataStoreMock));
+        $middlewarePipe->pipe(new Handler\ReadHandler($dataStoreMock));
+        $middlewarePipe->pipe(new Handler\CreateHandler($dataStoreMock));
+        $middlewarePipe->pipe(new Handler\UpdateHandler($dataStoreMock));
+        $middlewarePipe->pipe(new Handler\RefreshHandler($dataStoreMock));
+        $middlewarePipe->pipe(new Handler\DeleteHandler($dataStoreMock));
+        $middlewarePipe->pipe(new Handler\ErrorHandler());
 
-        $this->assertAttributeEquals($splObject, 'pipeline', new DataStoreRest($dataStoreMock));
+        $this->assertAttributeEquals($middlewarePipe, 'middlewarePipe', new DataStoreRest($dataStoreMock));
     }
 }

@@ -6,10 +6,10 @@
 
 namespace rollun\datastore\Middleware\Handler;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\Middleware\RestException;
 
 /**
@@ -20,16 +20,7 @@ use rollun\datastore\Middleware\RestException;
  */
 class ErrorHandler implements MiddlewareInterface
 {
-    /**
-     * Process an incoming server request and return a response.
-     * Optionally delegating to the next middleware component to create the response.
-     *
-     * @param ServerRequestInterface $request
-     * @param DelegateInterface $delegate
-     *
-     * @return ResponseInterface
-     */
-    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $request->getAttribute(ResponseInterface::class);
 
@@ -43,7 +34,7 @@ class ErrorHandler implements MiddlewareInterface
             );
         }
 
-        $response = $delegate->process($request);
+        $response = $handler->handle($request);
 
         return $response;
     }

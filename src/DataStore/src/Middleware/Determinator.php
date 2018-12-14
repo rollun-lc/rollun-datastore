@@ -6,9 +6,10 @@
 
 namespace rollun\datastore\Middleware;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\DataStore\DataStorePluginManager;
 
 /**
@@ -32,19 +33,20 @@ class Determinator implements MiddlewareInterface
     }
 
     /**
-     * Simple hack to simplify determination data store and executing middleware with it
+     * Process an incoming server request and return a response, optionally delegating
+     * response creation to a handler.
      *
      * @param ServerRequestInterface $request
-     * @param DelegateInterface $delegate
-     * @return \Psr\Http\Message\ResponseInterface
+     * @param RequestHandlerInterface $handler
+     * @return ResponseInterface
      */
-    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $requestedName = $request->getAttribute(ResourceResolver::RESOURCE_NAME);
         $dataStore = $this->dataStorePluginManager->get($requestedName);
 
         $dataStoreRest = new DataStoreRest($dataStore);
-        $response = $dataStoreRest->process($request, $delegate);
+        $response = $dataStoreRest->process($request, $handler);
 
         return $response;
     }

@@ -15,9 +15,9 @@ composer require rollun-com/rollun-datastore
 
 
 ##### Тестирование
-Чтобы запустить тесты нужно указать обязательные переменные в `.env`, установить файлы конфигурации 
-(`rollun\datastore\DataStoreAssetInstaller`) для тестового окружения (при этом конфигурации для фабрик подтянуться 
-тоже)
+Чтобы запустить тесты нужно установить обязательные переменные указанные в `.env`, установить файлы конфигурации 
+(`rollun\datastore\AssetInstaller`) для тестового окружения и подключить `ConfigProvider` в 
+конфигурационный файл.
 
 ```bash
 composer lib install
@@ -201,7 +201,7 @@ var_dump($memory->read(1)); // ['id' => '1', 'name' => 'foo']
 <?php 
 
 use rollun\datastore\DataStore\Memory;
-use rollun\datastore\DataStore\Interfaces\DataSourceInterface;
+use rollun\datastore\DataSource\DataSourceInterface;
 use rollun\datastore\DataStore\Cacheable;
 
 $data = [

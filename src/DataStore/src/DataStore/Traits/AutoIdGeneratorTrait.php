@@ -83,6 +83,7 @@ trait AutoIdGeneratorTrait
         if (!isset($itemData[$this->getIdentifier()])) {
             $itemData[$this->getIdentifier()] = $this->generateId();
         }
+
         return $itemData;
     }
 }

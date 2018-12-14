@@ -6,10 +6,10 @@
 
 namespace rollun\datastore\Middleware;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 /**
  * Extracts resource name and row id from URL or from request attributes
@@ -49,16 +49,7 @@ class ResourceResolver implements MiddlewareInterface
         $this->basePath = $basePath ?? self::BASE_PATH;
     }
 
-    /**
-     * Process an incoming server request and return a response.
-     * Optionally delegating to the next middleware component to create the response.
-     *
-     * @param ServerRequestInterface $request
-     * @param DelegateInterface $delegate
-     *
-     * @return ResponseInterface
-     */
-    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($request->getAttribute(self::RESOURCE_NAME) !== null) {
             // Router have set "resourceName". It work in expressive.
@@ -78,7 +69,7 @@ class ResourceResolver implements MiddlewareInterface
             $request = $request->withAttribute(self::PRIMARY_KEY_VALUE, $id);
         }
 
-        $response = $delegate->process($request);
+        $response = $handler->handle($request);
 
         return $response;
     }
