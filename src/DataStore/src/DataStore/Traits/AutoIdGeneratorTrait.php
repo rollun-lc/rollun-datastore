@@ -1,8 +1,10 @@
 <?php
-
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
 namespace rollun\datastore\DataStore\Traits;
-
 
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\utils\IdGenerator;
@@ -26,14 +28,19 @@ trait AutoIdGeneratorTrait
      */
     protected function generateId()
     {
+        trigger_error(AutoIdGeneratorTrait::class . ' trait is deprecated', E_USER_DEPRECATED);
+
         $tryCount = 0;
+
         do {
             $id = $this->idGenerator->generate();
             $tryCount++;
+
             if ($tryCount >= $this->getIdGenerateMaxTry()) {
                 throw new DataStoreException("Can't generate id.");
             }
         } while ($this->has($id));
+
         return $id;
     }
 
@@ -76,6 +83,7 @@ trait AutoIdGeneratorTrait
         if (!isset($itemData[$this->getIdentifier()])) {
             $itemData[$this->getIdentifier()] = $this->generateId();
         }
+
         return $itemData;
     }
 }

@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
 namespace rollun\datastore\DataStore\Aspect;
 
@@ -23,7 +26,7 @@ abstract class AbstractMapperAspect extends AspectAbstract
     use NoSupportDeleteTrait;
 
     /**
-     * interface_field => datastore_field
+     * Get fields map array, where keys - field`s aliases, values - real field`s names
      * @return string[]
      */
     abstract protected function getFieldsMap();
@@ -45,12 +48,15 @@ abstract class AbstractMapperAspect extends AspectAbstract
         if (!is_null($query->getSelect())) {
             $query->setSelect($this->selectRepack($query->getSelect()));
         }
+
         if (!is_null($query->getSort())) {
             $query->setSort($this->sortRepack($query->getSort()));
         }
+
         if (!is_null($query->getQuery())) {
             $query->setQuery($this->queryNodeRepack($query->getQuery()));
         }
+
         return $query;
     }
 
@@ -64,25 +70,34 @@ abstract class AbstractMapperAspect extends AspectAbstract
         if (isset($node)) {
             if ($node instanceof AbstractLogicOperatorNode) {
                 $repackNode = [];
+
                 foreach ($node->getQueries() as $queryNode) {
                     $repackChildNode = $this->queryNodeRepack($queryNode);
+
                     if (isset($repackChildNode)) {
                         $repackNode[] = $repackChildNode;
                     }
                 }
+
                 $nodeClass = get_class($node);
+
                 return new $nodeClass($repackNode);
             } else {
                 /** @var AbstractComparisonOperatorNode $node */
                 if (isset($this->getNotSupportFields()[$node->getField()])) {
                     return null;
-                } else if (!isset($this->getFieldsMap()[$node->getField()])) {
-                    throw new DataStoreException("Filed with name {$node->getField()} not found.");
+                } else {
+                    if (!isset($this->getFieldsMap()[$node->getField()])) {
+                        throw new DataStoreException("Filed with name {$node->getField()} not found.");
+                    }
                 }
+
                 $node->setField($this->getFieldsMap()[$node->getField()]);
+
                 return $node;
             }
         }
+
         return null;
     }
 
@@ -94,11 +109,14 @@ abstract class AbstractMapperAspect extends AspectAbstract
     {
         if (isset($node)) {
             $repackSort = new SortNode();
+
             foreach ($node->getFields() as $field => $direction) {
                 $repackSort->addField($this->getFieldsMap()[$field], $direction);
             }
+
             return $repackSort;
         }
+
         return null;
     }
 
@@ -110,11 +128,14 @@ abstract class AbstractMapperAspect extends AspectAbstract
     {
         if (isset($node)) {
             $fields = [];
+
             foreach ($node->getFields() as $field) {
                 $fields[] = $this->getFieldsMap()[$field];
             }
+
             return new SelectNode($fields);
         }
+
         return null;
     }
 
@@ -127,6 +148,7 @@ abstract class AbstractMapperAspect extends AspectAbstract
     {
         $newQuery = $this->preQuery((clone $query));
         $result = $this->dataStore->query($newQuery);
+
         return $this->postQuery($result, $newQuery);
     }
 
@@ -139,9 +161,11 @@ abstract class AbstractMapperAspect extends AspectAbstract
     protected function postQuery($result, Query $query)
     {
         $repackResult = [];
+
         foreach ($result as $item) {
             $repackResult[] = $this->postRead($item, $item[$this->dataStore->getIdentifier()]);
         }
+
         return $repackResult;
     }
 
@@ -152,14 +176,20 @@ abstract class AbstractMapperAspect extends AspectAbstract
      */
     protected function postRead($item, $id)
     {
-        if(is_null($item)) return null;
+        if (is_null($item)) {
+            return null;
+        }
+
         $repackItem = [];
+
         foreach ($this->getFieldsMap() as $interfaceName => $priceName) {
             $repackItem[$interfaceName] = isset($item[$priceName]) ? trim($item[$priceName]) : null;
         }
+
         foreach ($this->getNotSupportFields() as $filed => $value) {
             $repackItem[$filed] = $value;
         }
+
         return $repackItem;
     }
 }

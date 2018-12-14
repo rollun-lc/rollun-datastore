@@ -1,16 +1,14 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 06.06.16
- * Time: 10:40
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\Rql\Node;
 
-use Xiag\Rql\Parser\AbstractNode;
+use Xiag\Rql\Parser\Node\AbstractQueryNode;
 
-class AggregateFunctionNode extends AbstractNode
+class AggregateFunctionNode extends AbstractQueryNode
 {
     private $function;
 
@@ -51,10 +49,8 @@ class AggregateFunctionNode extends AbstractNode
         return $this->field;
     }
 
-    function __toString()
+    public function __toString()
     {
         return sprintf("%s(%s)", $this->function, $this->field);
     }
-
-
 }

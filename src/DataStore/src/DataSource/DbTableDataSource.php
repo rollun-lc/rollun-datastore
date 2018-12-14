@@ -1,20 +1,20 @@
 <?php
-
 /**
- * Created by PhpStorm.
- * User: root
- * Date: 04.07.16
- * Time: 12:51
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
+
 namespace rollun\datastore\DataSource;
 
 use Xiag\Rql\Parser\Query;
 use rollun\datastore\DataStore\DbTable;
-use rollun\datastore\DataStore\Interfaces\DataSourceInterface;
 
+/**
+ * Class DbTableDataSource
+ * @package rollun\datastore\DataSource
+ */
 class DbTableDataSource extends DbTable implements DataSourceInterface
 {
-
     /**
      * @return array Return data of DataSource
      */

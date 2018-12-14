@@ -1,38 +1,25 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore;
 
-use rollun\datastore\DataStore\DataStoreAbstract;
-use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\ConditionBuilder\RqlConditionBuilder;
 use rollun\utils\Json\Serializer;
 use Xiag\Rql\Parser\Query;
-use Xiag\Rql\Parser\Node\SortNode;
 use rollun\datastore\Rql\RqlParser;
 use Zend\Http\Client;
 use Zend\Http\Request;
-use Zend\Json\Json;
+use Zend\Http\Response;
 
 /**
- * DataStores as http Client
- *
- * @uses Client
- * @see https://github.com/zendframework/zend-db
- * @see http://en.wikipedia.org/wiki/Create,_read,_update_and_delete
- * @category   rest
- * @package    zaboy
- * @todo Json::decode - try cathe
+ * Class HttpClient
+ * @package rollun\datastore\DataStore
  */
 class HttpClient extends DataStoreAbstract
 {
-
     /**
      * @var string 'http://example.org'
      */
@@ -56,210 +43,237 @@ class HttpClient extends DataStoreAbstract
     protected $client;
 
     /**
+     * Supported keys:
+     * - maxredirects
+     * - useragent
+     * - adapter
+     * - timeout
+     * - curloptions
+     *
      * @var array
      */
     protected $options = [];
 
     /**
-     *
-     * @param string $url 'http://example.org'
+     * HttpClient constructor.
      * @param Client $client
-     * @param array $options
+     * @param $url
+     * @param null $options
      */
     public function __construct(Client $client, $url, $options = null)
     {
         $this->client = $client;
         $this->url = rtrim(trim($url), '/');
+
         if (is_array($options)) {
             if (isset($options['login']) && isset($options['password'])) {
                 $this->login = $options['login'];
                 $this->password = $options['password'];
             }
-            $supportedKeys = [
-                'maxredirects',
-                'useragent',
-                'adapter',
-                'timeout',
-                'curloptions'
-            ];
+
+            $supportedKeys = ['maxredirects', 'useragent', 'adapter', 'timeout', 'curloptions'];
+
             $this->options = array_intersect_key($options, array_flip($supportedKeys));
         }
-        $this->conditionBuilder = new RqlConditionBuilder;
+
+        $this->conditionBuilder = new RqlConditionBuilder();
     }
 
-//** Interface "rollun\datastore\DataStore\Interfaces\ReadInterface" **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function read($id)
     {
         $this->checkIdentifierType($id);
-        $client = $this->initHttpClient(Request::METHOD_GET, null, $id);
+        $uri = $this->createUri(null, $id);
+        $client = $this->initHttpClient(Request::METHOD_GET, $uri);
         $response = $client->send();
+
         if ($response->isOk()) {
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
-            throw new DataStoreException(
-            'Status: ' . $response->getStatusCode()
-            . ' - ' . $response->getReasonPhrase()
-            );
+            $responseMessage = $this->createResponseMessage($uri, Request::METHOD_GET, $response);
+            throw new DataStoreException("Can't read item {$responseMessage}");
         }
+
         return $result;
     }
 
     /**
+     * Create http client
      *
-     * @param string 'GET' 'HEAD' 'POST' 'PUT' 'DELETE';
-     * @param Query $query
-     * @param int|string $id
-     * @param bool see $ifMatch $rewriteIfExist and $createIfAbsent in {@see DataStoreAbstract}
+     * @param string $method ('GET', 'HEAD', 'POST', 'PUT', 'DELETE')
+     * @param string $uri
+     * @param bool $ifMatch
      * @return Client
      */
-    protected function initHttpClient($method, Query $query = null, $id = null, $ifMatch = false)
+    protected function initHttpClient(string $method, string $uri, $ifMatch = false)
     {
-        $url = !$id ? $this->url : $this->url . '/' . $this->encodeString($id);
-        if (isset($query)) {
-            $rqlString = RqlParser::rqlEncode($query);
-            $url = $url . '?' . $rqlString;
-        }
         $httpClient = clone $this->client;
-        $httpClient->setUri($url);
+        $httpClient->setUri($uri);
         $httpClient->setOptions($this->options);
+
         $headers['Content-Type'] = 'application/json';
         $headers['Accept'] = 'application/json';
-        $headers['APP_ENV'] = constant('APP_ENV');
+
         if ($ifMatch) {
             $headers['If-Match'] = '*';
         }
+
         $httpClient->setHeaders($headers);
+
         if (isset($this->login) && isset($this->password)) {
             $httpClient->setAuth($this->login, $this->password);
         }
+
         $httpClient->setMethod($method);
+
         return $httpClient;
     }
 
-// ** Interface "rollun\datastore\DataStore\Interfaces\DataStoresInterface"  **/
-
-    protected function encodeString($value)
+    protected function createUri(Query $query = null, $id = null)
     {
-        return strtr(rawurlencode($value), [
-            '-' => '%2D',
-            '_' => '%5F',
-            '.' => '%2E',
-            '~' => '%7E',
-        ]);
+        $uri = $this->url;
+
+        if (isset($id)) {
+            $uri = $this->url . '/' . $this->encodeString($id);
+        }
+
+        if (isset($query)) {
+            $rqlString = RqlParser::rqlEncode($query);
+            $uri = $uri . '?' . $rqlString;
+        }
+
+        return $uri;
     }
 
     /**
-     * {@inheritdoc}
-     *
+     * @param $value
+     * @return string
+     */
+    protected function encodeString($value)
+    {
+        return strtr(rawurlencode($value), ['-' => '%2D', '_' => '%5F', '.' => '%2E', '~' => '%7E',]);
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function query(Query $query)
     {
-        $client = $this->initHttpClient(Request::METHOD_GET, $query);
+        $uri = $this->createUri($query);
+        $client = $this->initHttpClient(Request::METHOD_GET, $uri);
         $response = $client->send();
+
         if ($response->isOk()) {
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
-            throw new DataStoreException(
-            'Status: ' . $response->getStatusCode()
-            . ' - ' . $response->getReasonPhrase()
-            );
+            $responseMessage = $this->createResponseMessage($uri, Request::METHOD_GET, $response);
+            throw new DataStoreException("Can't fetch items by query {$responseMessage}");
         }
-        return $result;
+
+        return empty($result) ? [] : $result;
     }
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function create($itemData, $rewriteIfExist = false)
     {
-        $identifier = $this->getIdentifier();
-        if (isset($itemData[$identifier])) {
-            $id = $itemData[$identifier];
-            $this->checkIdentifierType($id);
-        } else {
-            $id = null;
+        if ($rewriteIfExist) {
+            trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
         }
-        $client = $this->initHttpClient(Request::METHOD_POST, null, $id, $rewriteIfExist);
+
+        $client = $this->initHttpClient(Request::METHOD_POST, $this->url, $rewriteIfExist);
         $json = Serializer::jsonSerialize($itemData);
         $client->setRawBody($json);
         $response = $client->send();
+
         if ($response->isSuccess()) {
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
-            throw new DataStoreException(
-            'Status: ' . $response->getStatusCode()
-            . ' - ' . $response->getReasonPhrase()
-            );
+            $responseMessage = $this->createResponseMessage($this->url, Request::METHOD_POST, $response);
+            throw new DataStoreException("Can't create item {$responseMessage}");
         }
+
         return $result;
     }
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function update($itemData, $createIfAbsent = false)
     {
+        if ($createIfAbsent) {
+            trigger_error("Option 'createIfAbsent' is no more use.", E_USER_DEPRECATED);
+        }
+
         $identifier = $this->getIdentifier();
+
         if (!isset($itemData[$identifier])) {
             throw new DataStoreException('Item must has primary key');
         }
+
         $id = $itemData[$identifier];
         $this->checkIdentifierType($id);
+        $uri = $this->createUri(null, $itemData[$identifier]);
+        unset($itemData[$identifier]);
 
-        $client = $this->initHttpClient(Request::METHOD_PUT, null, $id, $createIfAbsent);
+        $client = $this->initHttpClient(Request::METHOD_PUT, $uri, $createIfAbsent);
         $client->setRawBody(Serializer::jsonSerialize($itemData));
         $response = $client->send();
+
         if ($response->isSuccess()) {
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
-            throw new DataStoreException(
-            'Status: ' . $response->getStatusCode()
-            . ' - ' . $response->getReasonPhrase()
-            );
+            $responseMessage = $this->createResponseMessage($uri, Request::METHOD_PUT, $response);
+            throw new DataStoreException("Can't update item {$responseMessage}");
         }
+
         return $result;
     }
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function delete($id)
     {
         $this->checkIdentifierType($id);
-        $client = $this->initHttpClient(Request::METHOD_DELETE, null, $id);
+        $uri = $this->createUri(null, $id);
+        $client = $this->initHttpClient(Request::METHOD_DELETE, $uri);
         $response = $client->send();
+
         if ($response->isSuccess()) {
             $result = !empty($response->getBody()) ? Serializer::jsonUnserialize($response->getBody()) : null;
         } else {
-            throw new DataStoreException(
-            'Status: ' . $response->getStatusCode()
-            . ' - ' . $response->getReasonPhrase()
-            );
+            $responseMessage = $this->createResponseMessage($uri, Request::METHOD_DELETE, $response);
+            throw new DataStoreException("Can't delete item {$responseMessage}");
         }
+
         return $result;
     }
 
-    /**
-     * {@inheritdoc}
-     *
-     * {@inheritdoc}
-     */
-    public function count()
+    protected function createResponseMessage($uri, $method, Response $response)
     {
-        return parent::count();
-    }
+        $messages = [
+            $method,
+            $uri,
+            $response->getStatusCode(),
+            $response->getReasonPhrase(),
+        ];
 
+        switch ($response->getStatusCode()) {
+            case 301:
+            case 302:
+            case 307:
+            case 308:
+                $location = $response->getHeaders()
+                    ->get('Location')
+                    ->getFieldValue();
+                $messages[] = "New location is '{$location}'";
+                break;
+        }
+
+        return trim(implode(' ', $messages));
+    }
 }

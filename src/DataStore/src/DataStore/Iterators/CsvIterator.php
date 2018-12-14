@@ -1,15 +1,16 @@
 <?php
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
 namespace rollun\datastore\DataStore\Iterators;
 
-use Symfony\Component\Filesystem\LockHandler;
 use rollun\datastore\DataStore\CsvBase;
 use rollun\datastore\DataStore\DataStoreException;
-use rollun\datastore\DataStore\Interfaces\ReadInterface;
 
-class CsvIterator implements \Iterator// extends \SplFileObject
+class CsvIterator implements \Iterator
 {
-
     /**
      * File handler.
      * @var resource
@@ -17,13 +18,11 @@ class CsvIterator implements \Iterator// extends \SplFileObject
     protected $fileHandler;
 
     /**
-     *
      * @var CsvBase
      */
     protected $dataStore;
 
     /**
-     *
      * @var \SplFileObject
      */
     protected $splFileObject;
@@ -31,9 +30,11 @@ class CsvIterator implements \Iterator// extends \SplFileObject
     public function __construct(CsvBase $dataStore)
     {
         $filename = $dataStore->getFilename();
+
         if (!is_file($filename)) {
             throw new DataStoreException(sprintf('The specified file path "%s" does not exist', $filename));
         }
+
         $this->splFileObject = new \SplFileObject($filename);
         $this->splFileObject->setFlags(\SplFileObject::READ_CSV);
         $this->splFileObject->setCsvControl($dataStore->getCsvDelimiter());
@@ -46,11 +47,16 @@ class CsvIterator implements \Iterator// extends \SplFileObject
     /**
      * During destruction an object it unlocks the file and then closes one.
      */
-    function __destruct()
+    public function __destruct()
     {
         $this->unlock();
     }
 
+    /**
+     * @param int $maxTries
+     * @param int $timeout
+     * @throws DataStoreException
+     */
     public function lock($maxTries = 40, $timeout = 50)
     {
         $count = 0;
@@ -59,18 +65,26 @@ class CsvIterator implements \Iterator// extends \SplFileObject
             if (!$wouldblock) {
                 throw new DataStoreException('There is a problem with file: ' . $this->splFileObject->getFilename());
             }
+
             if ($count++ > $maxTries) {
                 throw new DataStoreException('Can not lock the file: ' . $this->splFileObject->getFilename());
             }
+
             usleep($timeout);
         }
     }
 
+    /**
+     * @return bool
+     */
     public function unlock()
     {
         return $this->splFileObject->flock(LOCK_UN);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function rewind()
     {
         $this->splFileObject->rewind();
@@ -78,6 +92,9 @@ class CsvIterator implements \Iterator// extends \SplFileObject
         $this->splFileObject->next();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function key()
     {
         return $this->splFileObject->key();
@@ -91,13 +108,13 @@ class CsvIterator implements \Iterator// extends \SplFileObject
         if ($this->splFileObject->key() === 0) {
             $this->rewind();
         }
+
         $this->splFileObject->next();
         $this->splFileObject->current();
     }
 
     /**
-     * It reads current row from the self file handler but uses a method from dataStore object for data conversion.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function current()
     {
@@ -106,11 +123,13 @@ class CsvIterator implements \Iterator// extends \SplFileObject
         }
 
         $row = $this->splFileObject->current();
+
         if ([null] === $row) {
             return null;
         }
 
         $item = $this->dataStore->getTrueRow($row);
+
         return $item;
     }
 
@@ -126,11 +145,13 @@ class CsvIterator implements \Iterator// extends \SplFileObject
         if (!$this->splFileObject->valid()) {
             return false;
         }
+
         if ($this->splFileObject->key() === 0) {
             $this->splFileObject->next();
         }
+
         $current = $this->splFileObject->current();
+
         return $current <> [null];
     }
-
 }

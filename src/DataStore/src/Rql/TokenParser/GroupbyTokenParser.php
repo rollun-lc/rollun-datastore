@@ -1,13 +1,10 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: victorsecuring
- * Date: 14.01.17
- * Time: 10:20 AM
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\Rql\TokenParser;
-
 
 use rollun\datastore\Rql\Node\GroupbyNode;
 use Xiag\Rql\Parser\AbstractNode;
@@ -18,7 +15,6 @@ use Xiag\Rql\Parser\TokenStream;
 
 class GroupbyTokenParser extends AbstractTokenParser
 {
-
     /**
      * @param TokenStream $tokenStream
      * @return AbstractNode

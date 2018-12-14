@@ -1,10 +1,7 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\Iterators;
@@ -17,14 +14,13 @@ use Xiag\Rql\Parser\Node;
 /**
  * Outer iterator for rollun\datastore\DataStore\Read\ReadInterface objects
  *
- * @category   rest
- * @package    zaboy
+ * Class DataStoreIterator
+ * @package rollun\datastore\DataStore\Iterators
  */
 class DataStoreIterator implements \Iterator
 {
-
     /**
-     * pointer for current item in iteration
+     * Pointer for current item in iteration
      *
      * @see Iterator
      * @var mixed $index
@@ -32,14 +28,12 @@ class DataStoreIterator implements \Iterator
     protected $index = null;
 
     /**
-     *
      * @see Iterator
      * @var ReadInterface $dataStores
      */
     protected $dataStore;
 
     /**
-     *
      * @see Iterator
      * @param ReadInterface $dataStore
      */
@@ -49,9 +43,7 @@ class DataStoreIterator implements \Iterator
     }
 
     /**
-     *
-     * @see Iterator
-     * @return void
+     * {@inheritdoc}
      */
     public function rewind()
     {
@@ -68,20 +60,17 @@ class DataStoreIterator implements \Iterator
     }
 
     /**
-     *
-     * @see Iterator
-     * @return array
+     * {@inheritdoc}
      */
     public function current()
     {
         $result = isset($this->index) ? $this->dataStore->read($this->index) : null;
+
         return $result;
     }
 
     /**
-     *
-     * @see Iterator
-     * @return int|string
+     * {@inheritdoc}
      */
     public function key()
     {
@@ -89,9 +78,7 @@ class DataStoreIterator implements \Iterator
     }
 
     /**
-     *
-     * @see Iterator
-     * @return array
+     * {@inheritdoc}
      */
     public function next()
     {
@@ -110,13 +97,10 @@ class DataStoreIterator implements \Iterator
     }
 
     /**
-     *
-     * @see Iterator
-     * @return bool
+     * {@inheritdoc}
      */
     public function valid()
     {
         return isset($this->index) && ($this->dataStore->read($this->index) !== null);
     }
-
 }

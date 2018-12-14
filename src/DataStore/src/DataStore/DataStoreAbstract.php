@@ -1,15 +1,11 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore;
 
-use phpDocumentor\Reflection\Types\Integer;
 use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Iterators\DataStoreIterator;
@@ -22,31 +18,17 @@ use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
 
 /**
- * Abstract class for DataStores
- *
- * @todo make support null in eq(fieldname, null) and ne(fieldname, null)
- * @todo JsonSerializable https://github.com/zendframework/zend-diactoros/blob/master/doc/book/custom-responses.md#json-responses
- * @todo Adapter paras to config for tests
- * @todo Excel client
- * @todo CSV Store
- * @see http://en.wikipedia.org/wiki/Create,_read,_update_and_delete
- * @category   rest
- * @package    zaboy
+ * Class DataStoreAbstract
+ * @package rollun\datastore\DataStore
  */
 abstract class DataStoreAbstract implements DataStoresInterface
 {
-
     /**
-     *
      * @var ConditionBuilderAbstract
      */
     protected $conditionBuilder;
 
-//** Interface "rollun\datastore\DataStore\Interfaces\ReadInterface" **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function has($id)
@@ -55,8 +37,6 @@ abstract class DataStoreAbstract implements DataStoresInterface
     }
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function read($id)
@@ -67,6 +47,7 @@ abstract class DataStoreAbstract implements DataStoresInterface
         $eqNode = new EqNode($identifier, $id);
         $query->setQuery($eqNode);
         $queryResult = $this->query($query);
+
         if (empty($queryResult)) {
             return null;
         } else {
@@ -74,9 +55,34 @@ abstract class DataStoreAbstract implements DataStoresInterface
         }
     }
 
+    protected function getNext($id)
+    {
+        $isNext = false;
+        $iterator = $this->getIterator();
+
+        if (is_null($id)) {
+            $iterator->rewind();
+            return $iterator->current();
+        }
+
+        foreach ($iterator as $record) {
+            if ($isNext) {
+                return $record;
+            }
+
+            if ($id == $record[$this->getIdentifier()]) {
+                $isNext = true;
+            }
+        }
+
+        if ($isNext) {
+            return $iterator->current();
+        }
+
+        throw new DataStoreException("Can't find record with id = {$id}");
+    }
+
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function getIdentifier()
@@ -85,13 +91,15 @@ abstract class DataStoreAbstract implements DataStoresInterface
     }
 
     /**
-     * Throw Exception if type of Identifier is wrong
-     *
-     * @param mix $id
+     * @param $id
+     * @throws DataStoreException
      */
     protected function checkIdentifierType($id)
     {
+        trigger_error("This method is deprecated. Use 'AspectTyped' to define any field type.", E_USER_DEPRECATED);
+
         $idType = gettype($id);
+
         if ($idType == 'integer' || $idType == 'double' || $idType == 'string') {
             return;
         } else {
@@ -99,18 +107,21 @@ abstract class DataStoreAbstract implements DataStoresInterface
         }
     }
 
-// ** Interface "rollun\datastore\DataStore\Interfaces\DataStoresInterface"  **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function query(Query $query)
     {
         $limitNode = $query->getLimit();
-        $limit = !$limitNode ? self::LIMIT_INFINITY : $query->getLimit()->getLimit();
-        $offset = !$limitNode ? 0 : $query->getLimit()->getOffset();
+        $limit = !$limitNode
+            ? self::LIMIT_INFINITY
+            : $query->getLimit()
+                ->getLimit();
+        $offset = !$limitNode
+            ? 0
+            : $query->getLimit()
+                ->getOffset();
+
         if (isset($limitNode) && $query->getSort() !== null) {
             $data = $this->queryWhere($query, self::LIMIT_INFINITY, 0);
             $sortedData = $this->querySort($data, $query);
@@ -119,56 +130,63 @@ abstract class DataStoreAbstract implements DataStoresInterface
             $data = $this->queryWhere($query, $limit, $offset);
             $result = $this->querySort($data, $query);
         }
-        if ($query instanceof RqlQuery && $query->getGroupby() != null) {
+
+        if ($query instanceof RqlQuery && $query->getGroupBy() != null) {
             $result = $this->queryGroupBy($result, $query);
         } else {
             $result = $this->querySelect($result, $query);
         }
-        //filled item unset field
+
+        // Filled item unset field
         $itemFiled = [];
+
         foreach ($result as &$item) {
             $keys = array_keys($item);
             $diff = array_diff($keys, $itemFiled);
             $itemFiled = array_merge($itemFiled, $diff);
             $diff = array_diff($itemFiled, $keys);
+
             foreach ($diff as $field) {
                 $item[$field] = null;
             }
         }
+
         return $result;
     }
 
     /**
-     * @param $result
-     * @param RqlQuery $query
+     * @param Query $query
+     * @param $limit
+     * @param $offset
+     * @return array
      */
     protected function queryWhere(Query $query, $limit, $offset)
     {
         $conditionBuilder = $this->conditionBuilder;
-        $conditioon = $conditionBuilder($query->getQuery());
+        $condition = $conditionBuilder($query->getQuery());
 
-        $whereFunctionBody = PHP_EOL .
-                '$result = ' . PHP_EOL
-                . rtrim($conditioon, PHP_EOL) . ';' . PHP_EOL
-                . 'return $result;';
-//print_r($whereFunctionBody);
+        $whereFunctionBody = PHP_EOL . '$result = ' . PHP_EOL . rtrim($condition, PHP_EOL) . ';' . PHP_EOL
+            . 'return $result;';
+
         $whereFunction = create_function('$item', $whereFunctionBody);
         $suitableItemsNumber = 0;
         $result = [];
+
         foreach ($this as $value) {
             switch (true) {
                 case (!($whereFunction($value))):
-                    break; // skip!
+                    break;
                 case $suitableItemsNumber < $offset:
                     $suitableItemsNumber = $suitableItemsNumber + 1;
-                    break; // increment!
+                    break;
                 case $limit <> self::LIMIT_INFINITY && $suitableItemsNumber >= ($limit + $offset):
-                    return $result; //enough!
+                    return $result;
                 default:
-                    $result[] = $value; // write!
+                    $result[] = $value;
                     $suitableItemsNumber = $suitableItemsNumber + 1;
             }
         }
+
         return $result;
     }
 
@@ -177,137 +195,166 @@ abstract class DataStoreAbstract implements DataStoresInterface
         if (empty($query->getSort())) {
             return $data;
         }
+
         $nextCompareLevel = '';
-        $sortFields = $query->getSort()->getFields();
+        $sortFields = $query->getSort()
+            ->getFields();
+
         foreach ($sortFields as $ordKey => $ordVal) {
-            if ((int) $ordVal <> SortNode::SORT_ASC && (int) $ordVal <> SortNode::SORT_DESC) {
+            if ((int)$ordVal <> SortNode::SORT_ASC && (int)$ordVal <> SortNode::SORT_DESC) {
                 throw new DataStoreException('Invalid condition: ' . $ordVal);
             }
+
             $cond = $ordVal == SortNode::SORT_DESC ? '<' : '>';
             $notCond = $ordVal == SortNode::SORT_ASC ? '<' : '>';
-            $ordKeySafe = "'". addslashes($ordKey) ."'";
+            $ordKeySafe = "'" . addslashes($ordKey) . "'";
+
             $prevCompareLevel = "if (!isset(\$a[$ordKeySafe])) {return 0;};" . PHP_EOL
-                    . "if (\$a[$ordKeySafe] $cond \$b[$ordKeySafe]) {return 1;};" . PHP_EOL
-                    . "if (\$a[$ordKeySafe] $notCond  \$b[$ordKeySafe]) {return -1;};" . PHP_EOL;
+                . "if (\$a[$ordKeySafe] $cond \$b[$ordKeySafe]) {return 1;};" . PHP_EOL
+                . "if (\$a[$ordKeySafe] $notCond  \$b[$ordKeySafe]) {return -1;};" . PHP_EOL;
+
             $nextCompareLevel = $nextCompareLevel . $prevCompareLevel;
         }
+
         $sortFunctionBody = $nextCompareLevel . 'return 0;';
         $sortFunction = create_function('$a,$b', $sortFunctionBody);
         usort($data, $sortFunction);
+
         return $data;
     }
 
     protected function queryGroupBy($result, RqlQuery $query)
     {
-        $groupFields = $query->getGroupby()->getFields();
-        $selectionFields = $query->getSelect()->getFields();
+        $groupFields = $query->getGroupBy()
+            ->getFields();
+        $selectionFields = $query->getSelect()
+            ->getFields();
+
         foreach ($selectionFields as &$field) {
             if (!in_array($field, $groupFields) && !($field instanceof AggregateFunctionNode)) {
                 $field = new AggregateFunctionNode('count', $field);
             }
         }
+
         $query->setSelect(new AggregateSelectNode($selectionFields));
 
         $groups = [$result];
         $groups = $this->groupBy($groups, $groupFields);
 
         $result = [];
+
         foreach ($groups as $group) {
             $data = $this->querySelect($group, $query);
             $union = [];
+
             foreach ($data as $item) {
                 $union = array_merge($union, $item);
             }
+
             $result = array_merge($result, [$union]);
         }
+
         return $result;
     }
 
     protected function groupBy(array $groups, $groupFields)
     {
         $newGroup = [];
+
         foreach ($groups as $group) {
             foreach ($group as $item) {
                 $key = '';
+
                 foreach ($groupFields as $groupField) {
                     $key .= $item[$groupField];
                 }
+
                 $newGroup[$key][] = $item;
             }
         }
+
         return $newGroup;
     }
 
     protected function querySelect($data, Query $query)
     {
         $selectNode = $query->getSelect();
+
         if (empty($selectNode)) {
             return $data;
         } else {
-            $resultArray = array();
-            $compareArray = array();
+            $resultArray = [];
+            $compareArray = [];
 
-            foreach ($selectNode->getFields() as $field) {
-                if ($field instanceof AggregateFunctionNode) {
-                    switch ($field->getFunction()) {
-                        case 'count': {
-                                $arr = [];
-                                foreach ($data as $item) {
-                                    if (isset($item[$field->getField()])) {
-                                        $arr[] = $item[$field->getField()];
-                                    }
+            foreach ($selectNode->getFields() as $fieldNode) {
+                if ($fieldNode instanceof AggregateFunctionNode) {
+                    switch ($fieldNode->getFunction()) {
+                        case 'count':
+                            $arr = [];
+
+                            foreach ($data as $item) {
+                                if (isset($item[$fieldNode->getField()])) {
+                                    $arr[] = $item[$fieldNode->getField()];
                                 }
-                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [count($arr)];
-                                break;
                             }
-                        case 'max': {
-                                $firstItem = array_pop($data);
-                                $max = $firstItem[$field->getField()];
-                                foreach ($data as $item) {
-                                    $max = $max < $item[$field->getField()] ? $item[$field->getField()] : $max;
-                                }
-                                array_push($data, $firstItem);
-                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [$max];
-                                break;
+
+                            $compareArray[$fieldNode->__toString()] = [count($arr)];
+                            break;
+                        case 'max':
+                            $firstItem = array_pop($data);
+                            $max = $firstItem[$fieldNode->getField()];
+
+                            foreach ($data as $item) {
+                                $max = $max < $item[$fieldNode->getField()] ? $item[$fieldNode->getField()] : $max;
                             }
-                        case 'min': {
-                                $firstItem = array_pop($data);
-                                $min = $firstItem[$field->getField()];
-                                foreach ($data as $item) {
-                                    $min = $min > $item[$field->getField()] ? $item[$field->getField()] : $min;
-                                }
-                                array_push($data, $firstItem);
-                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [$min];
-                                break;
+
+                            array_push($data, $firstItem);
+                            $compareArray[$fieldNode->__toString()] = [$max];
+                            break;
+                        case 'min':
+                            $firstItem = array_pop($data);
+                            $min = $firstItem[$fieldNode->getField()];
+
+                            foreach ($data as $item) {
+                                $min = $min > $item[$fieldNode->getField()] ? $item[$fieldNode->getField()] : $min;
                             }
-                        case 'sum': {
-                                $sum = 0;
-                                foreach ($data as $item) {
-                                    $sum += isset($item[$field->getField()]) ? $item[$field->getField()] : 0;
-                                }
-                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [$sum];
-                                break;
+
+                            array_push($data, $firstItem);
+                            $compareArray[$fieldNode->__toString()] = [$min];
+                            break;
+                        case 'sum':
+                            $sum = 0;
+
+                            foreach ($data as $item) {
+                                $sum += isset($item[$fieldNode->getField()]) ? $item[$fieldNode->getField()] : 0;
                             }
-                        case 'avg': {
-                                $sum = 0;
-                                $count = 0;
-                                foreach ($data as $item) {
-                                    $sum += isset($item[$field->getField()]) ? $item[$field->getField()] : 0;
-                                    $count += isset($item[$field->getField()]) ? 1 : 0;
-                                }
-                                $compareArray[$field->getField() . '->' . $field->getFunction()] = [$sum / $count];
-                                break;
+
+                            $compareArray[$fieldNode->__toString()] = [$sum];
+                            break;
+                        case 'avg':
+                            $sum = 0;
+                            $count = 0;
+
+                            foreach ($data as $item) {
+                                $sum += isset($item[$fieldNode->getField()]) ? $item[$fieldNode->getField()] : 0;
+                                $count += isset($item[$fieldNode->getField()]) ? 1 : 0;
                             }
+
+                            $compareArray[$fieldNode->__toString()] = [$sum / $count];
+                            break;
                     }
                 } else {
                     $dataLine = [];
+
                     foreach ($data as $item) {
-                        $dataLine[] = $item[$field];
+                        $dataLine[] = $item[$fieldNode];
                     }
-                    $compareArray[$field] = $dataLine;
+
+                    $compareArray[$fieldNode] = $dataLine;
                 }
             }
             $min = null;
+
             foreach ($compareArray as $column) {
                 if (!isset($min)) {
                     $min = count($column);
@@ -315,102 +362,239 @@ abstract class DataStoreAbstract implements DataStoresInterface
                     $min = count($column);
                 }
             }
+
             for ($i = 0; $i < $min; ++$i) {
                 $item = [];
+
                 foreach ($compareArray as $fieldName => $column) {
                     $item[$fieldName] = $column[$i];
                 }
+
                 $resultArray[] = $item;
             }
+
             return $resultArray;
         }
     }
 
-// ** Interface "/Coutable"  **/
-
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     abstract public function create($itemData, $rewriteIfExist = false);
 
-// ** Interface "/IteratorAggregate"  **/
-
     /**
      * {@inheritdoc}
      *
+     * @param array $record
+     * @param array
+     */
+    public function multiCreate($records)
+    {
+        $ids = [];
+
+        foreach ($records as $record) {
+            try {
+                $createdRecord = $this->create($record);
+                $ids[] = $createdRecord[$this->getIdentifier()];
+            } catch (\Throwable $e) {
+                // TODO: need to log record that was not created
+                continue;
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
      * {@inheritdoc}
      */
     abstract public function update($itemData, $createIfAbsent = false);
 
-// ** protected  **/
+    /**
+     * {@inheritdoc}
+     *
+     * @param array $record
+     * @param array
+     */
+    public function multiUpdate($records)
+    {
+        $ids = [];
+
+        foreach ($records as $record) {
+            try {
+                $updatedRecord = $this->update($record);
+                $ids[] = $updatedRecord[$this->getIdentifier()];
+            } catch (\Throwable $e) {
+                // TODO: need to log record that was not updated
+                continue;
+            }
+        }
+
+        return $ids;
+    }
 
     /**
      * {@inheritdoc}
      *
+     * @param $record
+     * @param Query $query
+     * @return array
+     */
+    public function queriedUpdate($record, Query $query)
+    {
+        $identifier = $this->getIdentifier();
+
+        if (isset($record[$identifier])) {
+            throw new DataStoreException('Primary key is not allowed in record for queried update');
+        }
+
+        $forUpdateRecords = $this->query($query);
+        $updatedIds = [];
+
+        foreach ($forUpdateRecords as $forUpdateRecord) {
+            try {
+                $updatedRecord = $this->update(array_merge($record, [$identifier => $forUpdateRecord[$identifier]]));
+                $updatedIds[] = $updatedRecord[$identifier];
+            } catch (\Throwable $e) {
+                // TODO: log failed queried updated record
+                continue;
+            }
+        }
+
+        return $updatedIds;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function deleteAll()
     {
-        /* $keys = $this->getKeys();
-          $deletedItemsNumber = 0;
-          foreach ($keys as $id) {
-          $deletedNumber = $this->delete($id);
-          if (is_null($deletedNumber)) {
-          return null;
-          }
-          $deletedItemsNumber = $deletedItemsNumber + $deletedNumber;
-          }
-          return $deletedItemsNumber; */
-
         $keys = $this->getKeys();
         $deletedItemsNumber = 0;
+
         foreach ($keys as $id) {
             $deletedItems = $this->delete($id);
+
             if (is_null($deletedItems)) {
                 return null;
             }
+
             $deletedItemsNumber++;
         }
+
         return $deletedItemsNumber;
     }
 
     /**
      * Return array of keys or empty array
      *
-     * @return array array of keys or empty array
+     * @return array
      */
     protected function getKeys()
     {
         $identifier = $this->getIdentifier();
+
         $query = new Query();
         $selectNode = new Node\SelectNode([$identifier]);
         $query->setSelect($selectNode);
         $queryResult = $this->query($query);
         $keysArray = [];
+
         foreach ($queryResult as $row) {
             $keysArray[] = $row[$identifier];
         }
+
         return $keysArray;
     }
 
     /**
      * {@inheritdoc}
      *
-     * {@inheritdoc}
+     * @param array $record
+     * @param array
      */
-    abstract function delete($id);
+    public function rewrite($record)
+    {
+        if (!isset($record[$this->getIdentifier()])) {
+            throw new DataStoreException("Identifier is required for 'rewrite' action");
+        }
+
+        $rewriteIfExist = false;
+
+        if ($this->has($record[$this->getIdentifier()])) {
+            $rewriteIfExist = true;
+        }
+
+        return $this->create($record, $rewriteIfExist);
+    }
 
     /**
-     * Interface "/Coutable"
+     * {@inheritdoc}
      *
-     * @see /coutable
+     * @param array[] $records
+     * @return array
+     */
+    public function multiRewrite($records)
+    {
+        $ids = [];
+
+        foreach ($records as $record) {
+            if (!isset($record[$this->getIdentifier()])) {
+                throw new DataStoreException("Identifier is required in 'multiRewrite' action for each record");
+            }
+
+            try {
+                $rewroteRecord = $this->rewrite($record);
+                $ids[] = $rewroteRecord[$this->getIdentifier()];
+            } catch (\Throwable $e) {
+                // TODO: need to log record that was not rewrote
+                continue;
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    abstract public function delete($id);
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param Query $query
+     * @return array
+     */
+    public function queriedDelete(Query $query)
+    {
+        $identifier = $this->getIdentifier();
+        $queryResult = $this->query($query);
+        $deletedIds = [];
+
+        foreach ($queryResult as $record) {
+            try {
+                $deletedRecord = $this->delete($record[$identifier]);
+                $deletedIds[] = $deletedRecord[$identifier];
+            } catch (\Throwable $e) {
+                // TODO: need to log record that was not deleted
+                continue;
+            }
+        }
+
+        return $deletedIds;
+    }
+
+    /**
+     * Interface 'Countable'
+     *
+     * @see Countable
      * @return int
      */
     public function count()
     {
         $keys = $this->getKeys();
+
         return count($keys);
     }
 
@@ -422,7 +606,8 @@ abstract class DataStoreAbstract implements DataStoresInterface
      */
     public function getIterator()
     {
+        trigger_error("Datastore is no more iterable", E_USER_DEPRECATED);
+
         return new DataStoreIterator($this);
     }
-
 }

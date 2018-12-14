@@ -1,26 +1,20 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\ConditionBuilder;
 
-use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
 use Xiag\Rql\Parser\DataType\Glob;
 use rollun\datastore\DataStore\DataStoreException;
 
 /**
- * {@inheritdoc}
- *
- * {@inheritdoc}
+ * Class PhpConditionBuilder
+ * @package rollun\datastore\DataStore\ConditionBuilder
  */
 class PhpConditionBuilder extends ConditionBuilderAbstract
 {
-
     protected $literals = [
         'LogicOperator' => [
             'and' => ['before' => '(', 'between' => ' && ', 'after' => ')'],
@@ -29,7 +23,7 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
         ],
         'ArrayOperator' => [
             'in' => ['before' => '(in_array(', 'between' => ',[', 'delimiter' => ',', 'after' => ']))'],
-            'out' => ['before' => '(!in_array(', 'between' => ',[', 'delimiter' => ',', 'after' => ']))']
+            'out' => ['before' => '(!in_array(', 'between' => ',[', 'delimiter' => ',', 'after' => ']))'],
         ],
         'ScalarOperator' => [
             'eq' => ['before' => '(', 'between' => '==', 'after' => ')'],
@@ -41,17 +35,17 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
             'like' => [
                 'before' => '( ($_field = ',
                 'between' => ") !=='' && preg_match(",
-                'after' => ', $_field) )'
+                'after' => ', $_field) )',
             ],
             'alike' => [
                 'before' => '( ($_field = ',
                 'between' => ") !=='' && preg_match(",
-                'after' => '. \'i\', $_field) )'
+                'after' => '. \'i\', $_field) )',
             ],
             'contains' => [
                 'before' => '( ($_field = ',
                 'between' => ") !=='' && preg_match('/' . trim(",
-                'after' => ',"\'"). \'/i\', $_field) )'
+                'after' => ',"\'"). \'/i\', $_field) )',
             ],
         ],
         'BinaryOperator' => [
@@ -60,12 +54,10 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
             'eqt' => ['before' => '(', 'after' => '==true)'],
             'eqf' => ['before' => '(', 'after' => '==false)'],
             'ie' => ['before' => 'empty(', 'after' => ')'],
-        ]
+        ],
     ];
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function prepareFieldName($fieldName)
@@ -75,15 +67,15 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
 
     /**
      * {@inheritdoc}
-     *
-     * {@inheritdoc}
      */
     public function prepareFieldValue($fieldValue)
     {
         $fieldValue = parent::prepareFieldValue($fieldValue);
+
         switch (true) {
             case is_bool($fieldValue):
-                $fieldValue = (bool)$fieldValue ? TRUE : FALSE;
+                $fieldValue = (bool)$fieldValue ? true : false;
+
                 return $fieldValue;
             case is_numeric($fieldValue):
                 return $fieldValue;
@@ -92,15 +84,11 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
             case is_string($fieldValue):
                 return "'" . addslashes($fieldValue) . "'";
             default:
-                throw new DataStoreException(
-                    'Type ' . gettype($fieldValue) . ' is not supported'
-                );
+                throw new DataStoreException('Type ' . gettype($fieldValue) . ' is not supported');
         }
     }
 
     /**
-     * {@inheritdoc}
-     *
      * {@inheritdoc}
      */
     public function getValueFromGlob(Glob $globNode)
@@ -110,25 +98,32 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
 
         $glob = parent::getValueFromGlob($globNode);
         $anchorStart = true;
+
         if (substr($glob, 0, 1) === '*') {
             $anchorStart = false;
             $glob = ltrim($glob, '*');
         }
+
         $anchorEnd = true;
+
         if (substr($glob, -1) === '*') {
             $anchorEnd = false;
             $glob = rtrim($glob, '*');
         }
+
         $regex = strtr(
-            preg_quote(rawurldecode(strtr($glob, ['*' => $constStar, '?' => $constQuestion])), '/'), [$constStar => '.*', $constQuestion => '.']
+            preg_quote(rawurldecode(strtr($glob, ['*' => $constStar, '?' => $constQuestion])), '/'),
+            [$constStar => '.*', $constQuestion => '.']
         );
+
         if ($anchorStart) {
             $regex = '^' . $regex;
         }
+
         if ($anchorEnd) {
             $regex = $regex . '$';
         }
+
         return '/' . $regex . '/';
     }
-
 }

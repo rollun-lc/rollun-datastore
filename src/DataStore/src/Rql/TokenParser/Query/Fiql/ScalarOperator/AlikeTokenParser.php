@@ -1,4 +1,8 @@
 <?php
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
 namespace rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator;
 
@@ -12,7 +16,7 @@ class AlikeTokenParser extends AbstractScalarOperatorTokenParser
      */
     protected function getOperatorNames()
     {
-        return 'alike';
+        return ['alike'];
     }
 
     /**

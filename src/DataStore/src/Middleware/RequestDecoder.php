@@ -1,112 +1,137 @@
 <?php
-
 /**
- * Zaboy lib (http://zaboy.org/lib/)
- *
- * @copyright  Zaboychenko Andrey
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\Middleware;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use rollun\utils\Json\Serializer;
-use Xiag\Rql\Parser\TokenParser;
-use Xiag\Rql\Parser\TokenParser\Query;
-use Xiag\Rql\Parser\TypeCaster;
-use rollun\datastore\RestException;
 use rollun\datastore\Rql\RqlParser;
 
 /**
- * Parse body fron JSON and add result array to $request->withParsedBody()
+ * Parse body from JSON and add result array to $request->withParsedBody()
+ * Also parse attributes:
+ * - overwriteMode
+ * - putDefaultPosition
+ * - putBefore
+ * - rqlQueryObject ($request->getAttribute('rqlQueryObject') returns Query object)
+ * - Limit
  *
- * <b>Used request attributes: </b>
- * <ul>
- * <li>overwriteMode</li>
- * <li>Put-Default-Position</li>
- * <li>Put-Before</li>
- * <li>rqlQueryObject</li>*
- * </ul>
- *
- * @category   rest
- * @package    zaboy
+ * Class RequestDecoder
+ * @package rollun\datastore\Middleware
  */
 class RequestDecoder implements MiddlewareInterface
 {
-    /**
-     * Process an incoming server request and return a response, optionally delegating
-     * to the next middleware component to create the response.
-     *
-     * @param ServerRequestInterface $request
-     * @param DelegateInterface $delegate
-     * @return ResponseInterface
-     * @throws RestException
-     */
-    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $request = $this->parseOverwriteMode($request);
+        $request = $this->parseRqlQuery($request);
+        $request = $this->parseHeaderLimit($request);
+        $request = $this->parseRequestBody($request);
 
-        // @see https://github.com/SitePen/dstore/blob/21129125823a29c6c18533e7b5a31432cf6e5c56/src/Rest.js
+        $response = $handler->handle($request);
+
+        return $response;
+    }
+
+    /**
+     * @see https://github.com/SitePen/dstore/blob/21129125823a29c6c18533e7b5a31432cf6e5c56/src/Rest.js
+     * @param ServerRequestInterface $request
+     * @return ServerRequestInterface
+     */
+    protected function parseOverwriteMode(ServerRequestInterface $request)
+    {
         $overwriteModeHeader = $request->getHeader('If-Match');
-        $overwriteMode = isset($overwriteModeHeader[0]) && $overwriteModeHeader[0] === '*' ? true : false;
+        $overwriteMode = (isset($overwriteModeHeader[0]) && $overwriteModeHeader[0] === '*')
+            ? true
+            : false;
+
         $request = $request->withAttribute('overwriteMode', $overwriteMode);
 
-        $putDefaultPosition = $request->getHeader('Put-Default-Position'); //'start' : 'end'
-        if (isset($putDefaultPosition)) {
-            $request = $request->withAttribute('putDefaultPosition', $putDefaultPosition);
-        }
-        // @see https://github.com/SitePen/dstore/issues/42
-        $putBeforeHeader = $request->getHeader('Put-Before');
-        $putBefore = !empty($putBeforeHeader);
-        $request = $request->withAttribute('putBefore', $putBefore);
+        return $request;
+    }
 
-        $rqlQueryStringWithXdebug = $request->getUri()->getQuery();
-        //$rqlQueryString = rtrim($rqlQueryStringWithXdebug, '&XDEBUG_SESSION_START=netbeans-xdebug');
-        //trim XDEBUG query params
-        $rqlQueryString = preg_replace('/\&XDEBUG_SESSION_START\=[\w\d_-]+/', "", $rqlQueryStringWithXdebug);
+    /**
+     * @param ServerRequestInterface $request
+     * @return ServerRequestInterface
+     */
+    protected function parseRqlQuery(ServerRequestInterface $request)
+    {
+        $rqlQueryStringWithXdebug = $request->getUri()
+            ->getQuery();
+
+        // Trim XDEBUG query params for PHPStorm or NetBeans
+        // $rqlQueryString = rtrim($rqlQueryStringWithXdebug, '&XDEBUG_SESSION_START=netbeans-xdebug');
+        $rqlQueryString = preg_replace(
+            '/\&XDEBUG_SESSION_START\=[\w\d_-]+/',
+            "",
+            $rqlQueryStringWithXdebug
+        );
+
         $rqlQueryObject = RqlParser::rqlDecode($rqlQueryString);
-        $request = $request->withAttribute('rqlQueryObject', $rqlQueryObject);
+        return $request->withAttribute('rqlQueryObject', $rqlQueryObject);
+    }
 
+    /**
+     * @param ServerRequestInterface $request
+     * @return ServerRequestInterface
+     */
+    protected function parseHeaderLimit(ServerRequestInterface $request)
+    {
         $headerLimit = $request->getHeader('Range');
+
         if (isset($headerLimit) && is_array($headerLimit) && count($headerLimit) > 0) {
+            trigger_error("Header 'Range' is deprecated", E_USER_DEPRECATED);
+
             $match = [];
             preg_match('/^items=([0-9]+)\-?([0-9]+)?/', $headerLimit[0], $match);
+
             if (count($match) > 0) {
                 $limit = [];
+
                 if (isset($match[2])) {
                     $limit['offset'] = $match[1];
                     $limit['limit'] = $match[2];
                 } else {
                     $limit['limit'] = $match[1];
                 }
-                $request = $request->withAttribute("Limit", $limit);
+
+                $request = $request->withAttribute('Limit', $limit);
             }
         }
 
-        $contenttypeArray = $request->getHeader('Content-Type');
-        $contenttype = isset($contenttypeArray[0]) ? $contenttypeArray[0] : 'text/html';
-        if (false !== strpos($contenttype, 'json')) {
-            $body = !empty($request->getBody()->__toString()) ?
-                Serializer::jsonUnserialize($request->getBody()->__toString()) : null;
+        return $request;
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return ServerRequestInterface
+     */
+    protected function parseRequestBody(ServerRequestInterface $request)
+    {
+        $contentTypeArray = $request->getHeader('Content-Type');
+        $contentType = isset($contentTypeArray[0]) ? $contentTypeArray[0] : 'text/html';
+
+        if (false !== strpos($contentType, 'json')) {
+            $body = !empty($request->getBody()->__toString())
+                ? Serializer::jsonUnserialize($request->getBody()->__toString())
+                : null;
+
             $request = $request->withParsedBody($body);
-        } elseif ($contenttype === 'text/plain'
-            or $contenttype === 'text/html'
-            or $contenttype === 'application/x-www-form-urlencoded'
+        } elseif ($contentType === 'text/plain'
+            or $contentType === 'text/html'
+            or $contentType === 'application/x-www-form-urlencoded'
         ) {
-            $body = !empty($request->getBody()->__toString()) ? $request->getBody()->__toString() : null;
-            $request = $request->withParsedBody($body);
+            $request = $request->withParsedBody(null);
         } else {
-            //todo XML?
-            throw new RestException(
-                'Unknown Content-Type header - ' .
-                $contenttype
-            );
+            throw new RestException("Unknown Content-Type header - $contentType");
         }
 
-        $response = $delegate->process($request);
-
-        return $response;
+        return $request;
     }
 }

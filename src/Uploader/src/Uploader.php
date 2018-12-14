@@ -1,18 +1,23 @@
 <?php
-
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
 namespace rollun\uploader;
 
-use IteratorAggregate;
-use rollun\callback\Callback\CallbackInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
-use rollun\dic\InsideConstruct;
-use rollun\uploader\SeekableIterator;
+use SeekableIterator;
+use Traversable;
 
+/**
+ * Class Uploader
+ * @package rollun\uploader
+ */
 class Uploader
 {
     /**
-     * @var  IteratorAggregate
+     * @var Traversable
      */
     protected $sourceDataIteratorAggregator;
 
@@ -28,11 +33,11 @@ class Uploader
 
     /**
      * Uploader constructor.
-     * @param IteratorAggregate $sourceDataIteratorAggregator
+     * @param Traversable $sourceDataIteratorAggregator
      * @param DataStoresInterface $destinationDataStore
      */
     public function __construct(
-        IteratorAggregate $sourceDataIteratorAggregator,
+        Traversable $sourceDataIteratorAggregator,
         DataStoresInterface $destinationDataStore
     ) {
         $this->sourceDataIteratorAggregator = $sourceDataIteratorAggregator;
@@ -41,41 +46,26 @@ class Uploader
 
     public function upload()
     {
-        $iterator = $this->sourceDataIteratorAggregator->getIterator();
-        if(isset($this->key) && $iterator instanceof SeekableIterator) {
-            $iterator->seek($this->key); //set iterator to last position.
+        if ($this->sourceDataIteratorAggregator instanceof SeekableIterator && isset($this->key)) {
+            $this->sourceDataIteratorAggregator->seek($this->key);
         }
-        foreach ($iterator as $key => $value) {
+
+        foreach ($this->sourceDataIteratorAggregator as $key => $value) {
             $this->key = $key;
             $this->destinationDataStore->create($value, true);
         }
     }
 
     /**
-     * @param $v
+     * @param null $v
      */
     public function __invoke($v = null)
     {
         $this->upload();
     }
 
-    /**
-     * @return array
-     */
-    public function __sleep()
-    {
-        return [
-            "iteratorAggregate",
-            "destinationDataStore",
-            "key",
-        ];
-    }
-
-    /**
-     *
-     */
     public function __wakeup()
     {
-        $this->__construct($this->sourceDataIteratorAggregator, $this->destinationDataStore);
+        $this->key = null;
     }
 }

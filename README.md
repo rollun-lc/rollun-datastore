@@ -1,33 +1,8 @@
-# datastore
+# rollun-datastore
 
----
-## [Оглавление](https://github.com/rollun-com/rollun-skeleton/blob/master/docs/Contents.md)
+`rollun-datastore` - это библиотека, которая предоставляет единый интерфейс взаимодействие с любым хранилищем данных
+на основе [Resource Query Language (RQL)](https://www.sitepen.com/blog/2010/11/02/resource-query-language-a-query-language-for-the-web-nosql/).
+Существующие реализации: DbTable (для таблицы бд), CsvBase (для csv файлов), HttpClient (для внешнего ресурса через 
+http), Memory (для [RAM](https://en.wikipedia.org/wiki/Random-access_memory)).
 
----
-
-Каркас для создания приложений. 
-
-* [Детальная документация](doc/)
-
-* [zaboy Rql](https://github.com/rollun-com/rollun-datastore/blob/master/doc/RQL_PARSER.md)
-
-* [Запуск тестов](https://github.com/rollun-com/rollun-datastore/blob/master/doc/TESTS.md)
-
-* [DataStore Абстрактные фабрики](https://github.com/rollun-com/rollun-datastore/blob/master/doc/DataStore%20Abstract%20Factory.md)
-
-* [Стандарты](https://github.com/rollun-com/rollun-skeleton/blob/master/docs/Standarts.md)
-
-## Запуск тестов
-
-Установите переменную окружения `'APP_ENV' = "dev"`.
-Так же добавте переменную окружение `HOST` в которую поместите ip или домен вашего приложения
-> Или добавте данные переменную в файл `env_config.php`.
-
-Скопируйте `index.php`и .htaccess из библиотеки в паблик директорию проекта.
-
-Запустите скрипт `composer lib-install`, он создаст таблицы в базе.
-
-# Использование библиотеки
-
-Что бы использовать данную библиотеку в своих приложениях следуйте [данной инструкции](INSTALL.md)
-
+* [Документация](https://rollun-com.github.io/rollun-datastore)
