@@ -1,7 +1,7 @@
 
 # rollun-datastore
 
-### Installation
+### Установка
 
 Установить с помощью [composer](https://getcomposer.org/).
 ```bash
@@ -15,9 +15,9 @@ composer require rollun-com/rollun-datastore
 
 
 ##### Тестирование
-Чтобы запустить тесты нужно указать обязательные переменные в `.env`, установить файлы конфигурации 
-(`rollun\datastore\DataStoreAssetInstaller`) для тестового окружения (при этом конфигурации для фабрик подтянуться 
-тоже)
+Чтобы запустить тесты нужно установить обязательные переменные указанные в `.env`, установить файлы конфигурации 
+(`rollun\datastore\AssetInstaller`) для тестового окружения и подключить `ConfigProvider` в 
+конфигурационный файл.
 
 ```bash
 composer lib install

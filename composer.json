@@ -61,7 +61,6 @@
         "test": "phpunit --colors=always",
         "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",
         "upload-coverage": "coveralls -v",
-        "clear-config-cache": "php bin/clear-config-cache.php",
         "code-sniffer": "phpcs .",
         "code-beautiful": "phpcbf .",
         "server": "php -S 0.0.0.0:8000 -t public public/index.php"

@@ -10,7 +10,6 @@ use Composer\IO\IOInterface;
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataSource\DbTableDataSource;
 use rollun\datastore\DataStore\Aspect\AspectAbstract;
-use rollun\datastore\DataStore\Aspect\AspectInstaller;
 use rollun\datastore\DataStore\Cacheable;
 use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
 use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilderAbstractFactory;
@@ -19,14 +18,8 @@ use rollun\datastore\DataStore\CsvIntId;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\DataStore\Factory\DataStoreAbstractFactory;
 use rollun\datastore\DataStore\HttpClient;
-use rollun\datastore\DataStore\Installers\CacheableInstaller;
-use rollun\datastore\DataStore\Installers\CsvInstaller;
-use rollun\datastore\DataStore\Installers\DbTableInstaller;
-use rollun\datastore\DataStore\Installers\HttpClientInstaller;
-use rollun\datastore\DataStore\Installers\MemoryInstaller;
 use rollun\datastore\DataStore\Memory;
 use rollun\datastore\DataStore\SerializedDbTable;
-use rollun\datastore\Middleware\DataStoreMiddlewareInstaller;
 use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use rollun\datastore\TableGateway\Factory\SqlQueryBuilderAbstractFactory;
 use rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory;
@@ -174,21 +167,6 @@ class AssetInstaller extends InstallerAbstract
                 'tableName' => 'testTable',
             ],
         ];
-
-        $this->db = [
-            'driver' => getenv('DB_DRIVER'),
-            'hostname' => getenv('DB_HOST'),
-            'port' => getenv('DB_PORT'),
-            'database' => getenv('DB_NAME'),
-            'username' => getenv('DB_USER'),
-            'password' => getenv('DB_PASS'),
-        ];
-
-        $this->dependencies = [
-            'aliases' => [
-                'db' => 'Zend\Db\Adapter\AdapterInterface',
-            ],
-        ];
     }
 
     /**
@@ -203,8 +181,6 @@ class AssetInstaller extends InstallerAbstract
             SqlQueryBuilderAbstractFactory::class => $this->sqlQueryBuilder,
             SqlConditionBuilderAbstractFactory::class => $this->sqlConditionBuilder,
             'tableManagerMysql' => $this->tableManagerMysql,
-            'dependencies' => $this->dependencies,
-            'db' => $this->db,
         ];
     }
 
@@ -244,18 +220,5 @@ class AssetInstaller extends InstallerAbstract
         }
 
         return true;
-    }
-
-    public function getDependencyInstallers()
-    {
-        return [
-            CacheableInstaller::class,
-            CsvInstaller::class,
-            DbTableInstaller::class,
-            HttpClientInstaller::class,
-            MemoryInstaller::class,
-            AspectInstaller::class,
-            DataStoreMiddlewareInstaller::class,
-        ];
     }
 }
