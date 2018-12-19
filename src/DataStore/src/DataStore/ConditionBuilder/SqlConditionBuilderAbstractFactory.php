@@ -17,8 +17,13 @@ use Zend\ServiceManager\Factory\AbstractFactoryInterface;
  * The configuration can contain:
  * <code>
  *  SqlConditionBuilderAbstractFactory::class => [
- *      'adapter' => 'db' // optional,
- *      'tableName' => 'someTableName'
+ *      'requestedServiceName1' => [
+ *          'adapter' => 'db' // optional,
+ *          'tableName' => 'someTableName'
+ *      ],
+ *      'requestedServiceName2' => [
+ *          // ...
+ *      ],
  *  ],
  * </code>
  *

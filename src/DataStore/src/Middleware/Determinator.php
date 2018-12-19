@@ -11,6 +11,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\DataStore\DataStorePluginManager;
+use Zend\Diactoros\Response\EmptyResponse;
 
 /**
  * Class Determinator
@@ -43,6 +44,11 @@ class Determinator implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $requestedName = $request->getAttribute(ResourceResolver::RESOURCE_NAME);
+
+        if (!$this->dataStorePluginManager->has($requestedName)) {
+            return new EmptyResponse(404);
+        }
+
         $dataStore = $this->dataStorePluginManager->get($requestedName);
 
         $dataStoreRest = new DataStoreRest($dataStore);

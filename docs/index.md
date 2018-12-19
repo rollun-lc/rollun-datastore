@@ -394,7 +394,7 @@ use rollun\datastore\Middleware\DataStoreApi;
 
 /** @var \Zend\Expressive\Application $app */
 $app->route(
-    '/api/datastore[/{resourceName}[/{id}]]', // route pattern
+    '/api/datastore/{resourceName}[/{id}]', // route pattern
     DataStoreApi::class, // middleware
     ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     DataStoreApi::class // route name
