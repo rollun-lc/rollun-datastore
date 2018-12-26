@@ -1,7 +1,7 @@
 # image: docker
 # services:
 # - docker:dind
-image: php:7.1
+image: php:7.2
 
 cache:
   paths:
@@ -27,15 +27,29 @@ stages:
   - analyse
   - deploy
 
-phpunit:
+phpunit-unit:
   stage: test
-  script: vendor/bin/phpunit --configuration phpunit.xml
+  script: vendor/bin/phpunit --configuration phpunit.xml --testsuite unit
 
-phpunit:7.2:
-  image: php:7.2
+phpunit-functional:
+  variables:
+    DB_DRIVER: "Pdo_Mysql"
+    DB_NAME: "test"
+    DB_USER: "root"
+    DB_PASS: "qwe123321"
+    DB_HOST: "localhost"
+    DB_PORT: "3306"
+  before_script:
+    - apt-get update
+    - apt-get install mysql-server mysql-client -y
+    - mysqld_safe --skip-grant-tables&
+    - mysql --user=root mysql -e "update user set authentication_string=PASSWORD($DB_PASS) where user='root';flush privileges;quit"
+    - service mysql restart
+    - mysql -u root --password=$DB_PASS -e "create database $DB_NAME"
   stage: test
-  allow_failure: true
-  script: vendor/bin/phpunit --configuration phpunit.xml
+  script:
+    - php -S localhost:9000 -t public &
+    - vendor/bin/phpunit --configuration phpunit.xml --testsuite functional
 
 phpcs:
   stage: analyse

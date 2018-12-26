@@ -1,7 +1,20 @@
-<phpunit bootstrap="test/bootstrap.php" colors="true" convertWarningsToExceptions = "false">
+<phpunit bootstrap="test/bootstrap.php" colors="true" convertWarningsToExceptions="false">
+
     <testsuites>
-        <testsuite name="rollun\\test\\datastore\\">
-            <directory>./test/DataStoreTest/DataStore</directory>
+        <testsuite name="unit">
+            <directory>./test/unit</directory>
+        </testsuite>
+    </testsuites>
+
+    <testsuites>
+        <testsuite name="functional">
+            <directory>./test/functional</directory>
+        </testsuite>
+    </testsuites>
+
+    <testsuites>
+        <testsuite name="intagration">
+            <directory>./test/intagration</directory>
         </testsuite>
     </testsuites>
 
