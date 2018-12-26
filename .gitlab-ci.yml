@@ -7,6 +7,14 @@ cache:
   paths:
     - vendor/
 
+variables:
+  DB_DRIVER: "Pdo_Mysql"
+  DB_NAME: "test"
+  DB_USER: "utest"
+  DB_PASS: "qwe123321"
+  DB_HOST: "localhost"
+  DB_PORT: "3306"
+
 before_script:
   # update packages
   - apt-get update -yqq
@@ -33,26 +41,17 @@ phpunit-unit:
 
 phpunit-functional:
   services:
-    - php:7.2
     - mysql:latest
-  image: debian:latest
-  variables:
-    DB_DRIVER: "Pdo_Mysql"
-    DB_NAME: "test"
-    DB_USER: "utest"
-    DB_PASS: "qwe123321"
-    DB_HOST: "localhost"
-    DB_PORT: "3306"
-  before_script:
+  stage: test
+  script:
     - apt-get update
     - apt-get install -y mysql-server mysql-client
+    - service mysql start
     - mysql -u root -p
     - CREATE USER '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';
     - CREATE DATABASE IF NOT EXISTS `$DB_NAME` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci`;
     - GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, CREATE TEMPORARY TABLES, DROP, INDEX, ALTER, LOCK TABLES ON `$DB_NAME`.* TO '$DB_USER'@'localhost';
     - QUIT;
-  stage: test
-  script:
     - php -S localhost:9000 -t public &
     - vendor/bin/phpunit --configuration phpunit.xml --testsuite functional
 
