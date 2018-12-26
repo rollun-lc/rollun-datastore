@@ -42,7 +42,7 @@ phpunit-functional:
   before_script:
     - apt-get update
     - apt-get install mysql-server mysql-client -y
-    - mysqld_safe --skip-grant-tables&
+    - mysqld_safe --skip-grant-tables &
     - mysql --user=root mysql -e "update user set authentication_string=PASSWORD($DB_PASS) where user='root';flush privileges;quit"
     - service mysql restart
     - mysql -u root --password=$DB_PASS -e "create database $DB_NAME"
