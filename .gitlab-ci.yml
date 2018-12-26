@@ -32,6 +32,10 @@ phpunit-unit:
   script: vendor/bin/phpunit --configuration phpunit.xml --testsuite unit
 
 phpunit-functional:
+  services:
+    - php:7
+    - mysql:latest
+  image: debian:latest
   variables:
     DB_DRIVER: "Pdo_Mysql"
     DB_NAME: "test"
@@ -41,7 +45,7 @@ phpunit-functional:
     DB_PORT: "3306"
   before_script:
     - apt-get update
-    - apt-get install -y mysql-server mysql-client
+    - apt-get install -y mysql-server mysql-client libmysqlclient-dev
     - mysql -u root -p
     - CREATE USER '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';
     - CREATE DATABASE IF NOT EXISTS `$DB_NAME` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci`;
