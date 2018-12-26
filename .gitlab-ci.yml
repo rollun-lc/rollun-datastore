@@ -62,7 +62,7 @@ phpunit-intagration:
     - apt-get install -y mysql-server mysql-client
     - service mysql start
     - mysql -u root -e "CREATE USER $DB_USER@localhost IDENTIFIED BY '$DB_PASS';CREATE DATABASE IF NOT EXISTS $DB_NAME;GRANT ALL PRIVILEGES ON $DB_NAME.* TO $DB_USER@localhost;"
-    - php -S 127.0.0.1:9000 -t public/test.php &
+    - php -S 127.0.0.1:9000 -t public public/test.php &
     - vendor/bin/phpunit --configuration phpunit.xml --testsuite intagration
 
 phpcs:
