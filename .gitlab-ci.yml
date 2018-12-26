@@ -24,6 +24,8 @@ before_script:
   # install php-json ext
   - docker-php-ext-install json
   - docker-php-ext-install zip
+  - docker-php-ext-install mysqli
+  - docker-php-ext-install pdo_mysql
   # install composer
   - curl -sS https://getcomposer.org/installer | php
   # install dependencies
