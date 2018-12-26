@@ -4,6 +4,7 @@
  * @license LICENSE.md New BSD License
  */
 
+use rollun\datastore\DataStore\SerializedDbTable;
 use Zend\Db\Adapter\AdapterInterface;
 
 return

@@ -14,6 +14,7 @@ variables:
   DB_PASS: qwe123321q
   DB_HOST: 127.0.0.1
   DB_PORT: 3306
+  APP_ENV: test
 
 before_script:
   # update packages
