@@ -7,15 +7,6 @@ cache:
   paths:
     - vendor/
 
-variables:
-  DB_DRIVER: Pdo_Mysql
-  DB_NAME: test
-  DB_USER: utest
-  DB_PASS: qwe123321q
-  DB_HOST: 127.0.0.1
-  DB_PORT: 3306
-  APP_ENV: test
-
 before_script:
   # update packages
   - apt-get update -yqq
@@ -43,6 +34,14 @@ phpunit-unit:
   script: vendor/bin/phpunit --configuration phpunit.xml --testsuite unit
 
 phpunit-functional:
+  variables:
+    DB_DRIVER: Pdo_Mysql
+    DB_NAME: functional
+    DB_USER: utest
+    DB_PASS: qwe123321q
+    DB_HOST: 127.0.0.1
+    DB_PORT: 3306
+    APP_ENV: test
   services:
     - mysql:latest
   stage: test
@@ -54,6 +53,14 @@ phpunit-functional:
     - vendor/bin/phpunit --configuration phpunit.xml --testsuite functional
 
 phpunit-intagration:
+  variables:
+    DB_DRIVER: Pdo_Mysql
+    DB_NAME: intagration
+    DB_USER: utest
+    DB_PASS: qwe123321q
+    DB_HOST: 127.0.0.1
+    DB_PORT: 3306
+    APP_ENV: test
   services:
     - mysql:latest
   stage: test
