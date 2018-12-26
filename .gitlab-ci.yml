@@ -35,17 +35,18 @@ phpunit-functional:
   variables:
     DB_DRIVER: "Pdo_Mysql"
     DB_NAME: "test"
-    DB_USER: "root"
+    DB_USER: "utest"
     DB_PASS: "qwe123321"
     DB_HOST: "localhost"
     DB_PORT: "3306"
   before_script:
     - apt-get update
-    - apt-get install mysql-server mysql-client -y
-    - mysqld_safe --skip-grant-tables &
-    - mysql --user=root mysql -e "update user set authentication_string=PASSWORD($DB_PASS) where user='root';flush privileges;quit"
-    - service mysql restart
-    - mysql -u root --password=$DB_PASS -e "create database $DB_NAME"
+    - apt-get install -y mysql-server mysql-client libmysqlclient-dev
+    - mysql -u root -p
+    - CREATE USER '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';
+    - CREATE DATABASE IF NOT EXISTS `$DB_NAME` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci`;
+    - GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, CREATE TEMPORARY TABLES, DROP, INDEX, ALTER, LOCK TABLES ON `$DB_NAME`.* TO '$DB_USER'@'localhost';
+    - QUIT;
   stage: test
   script:
     - php -S localhost:9000 -t public &
