@@ -12,7 +12,7 @@ variables:
   DB_NAME: test
   DB_USER: utest
   DB_PASS: qwe123321q
-  DB_HOST: localhost
+  DB_HOST: 127.0.0.1
   DB_PORT: 3306
 
 before_script:
