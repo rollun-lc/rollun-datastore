@@ -33,7 +33,7 @@ phpunit-unit:
 
 phpunit-functional:
   services:
-    - php:7
+    - php:7.2
     - mysql:latest
   image: debian:latest
   variables:
