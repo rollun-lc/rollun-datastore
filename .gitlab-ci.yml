@@ -13,7 +13,7 @@ variables:
   DB_HOST: 127.0.0.1
   DB_PORT: 3306
   APP_ENV: test
-  TEST_HOST: http://locahost:9000
+  TEST_HOST: 'http://locahost:9000'
 
 
 before_script:
