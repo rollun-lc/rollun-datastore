@@ -12,7 +12,7 @@ chdir(dirname(__DIR__));
 $container = require 'config/container.php';
 \rollun\dic\InsideConstruct::setContainer($container);
 
-if (getenv("APP_ENV") != 'dev') {
+if (getenv("APP_ENV") === 'prod') {
     echo "You cannot start test if environment var APP_ENV not set in dev!";
     exit(1);
 }
