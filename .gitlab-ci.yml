@@ -1,0 +1,94 @@
+# image: docker
+# services:
+# - docker:dind
+image: php:7.1
+
+cache:
+  paths:
+    - vendor/
+
+before_script:
+  # update packages
+  - apt-get update -yqq
+  # install git
+  - apt-get install git -yqq
+  - apt-get install zlib1g-dev -yqq
+  # install php-json ext
+  - docker-php-ext-install json
+  - docker-php-ext-install zip
+  # install composer
+  - curl -sS https://getcomposer.org/installer | php
+  # install dependencies
+  - php composer.phar install
+
+stages:
+  - build
+  - test
+  - analyse
+  - deploy
+
+phpunit:
+  stage: test
+  script: vendor/bin/phpunit --configuration phpunit.xml
+
+phpunit:7.2:
+  image: php:7.2
+  stage: test
+  allow_failure: true
+  script: vendor/bin/phpunit --configuration phpunit.xml
+
+phpcs:
+  stage: analyse
+  script: vendor/bin/phpcs .
+
+mkdocs:build:
+  image: python:2.7
+  before_script:
+    - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+    - python get-pip.py
+    - pip install mkdocs
+  stage: build
+  script: mkdocs build
+  artifacts:
+    expire_in: 3 hour
+    paths:
+      - site
+  only:
+    - tags
+  except:
+    - /^(?!master).+@/
+
+mkdocs:deploy:
+  stage: deploy
+  variables:
+    GITPAGES: victorynox.github.io/rollun-datahandler/
+    GITHUB_REPO: git@github.com:victorynox/rollun-datahandler.git
+  image: debian
+  before_script:
+    - apt-get update
+    - apt-get install git -y
+    - 'which ssh-agent || (apt-get install openssh -y )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$GIT_SSH_PRIVAT_KEY")
+    - git config --global user.email $GIT_EMAIL
+    - git config --global user.name $GIT_NAME
+    - mkdir -p ~/.ssh
+    - ssh-keyscan -H -t rsa github.com  >> ~/.ssh/known_hosts
+  script:
+    - cd site
+    - git init
+    - git remote add origin git@github.com:victorynox/rollun-datahandler.git
+    - git fetch
+    - git checkout -b gh-pages
+    - git add *
+    - git commit -m "build docs $CI_COMMIT_TAG"
+    - git push --force origin gh-pages
+  environment:
+    name: github-pages
+    url: https://$GITPAGES
+  dependencies:
+    - mkdocs:build
+  only:
+    - tags
+  except:
+    - /^(?!master).+@/
