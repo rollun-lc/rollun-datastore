@@ -42,7 +42,8 @@ class MultiInsert extends Insert
 
         if ($this->select && $flag == self::VALUES_MERGE) {
             throw new InvalidArgumentException(
-                'An array of values cannot be provided with the merge flag when a Zend\Db\Sql\Select instance already exists as the value source'
+                'An array of values cannot be provided with the merge flag when a '
+                . 'Zend\Db\Sql\Select instance already exists as the value source'
             );
         }
 
@@ -106,7 +107,8 @@ class MultiInsert extends Insert
         PlatformInterface $platform,
         DriverInterface $driver = null,
         ParameterContainer $parameterContainer = null
-    ) {
+    )
+    {
         if ($this->select) {
             return;
         }

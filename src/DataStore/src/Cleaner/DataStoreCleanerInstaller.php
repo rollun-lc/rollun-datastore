@@ -30,7 +30,6 @@ class DataStoreCleanerInstaller extends InstallerAbstract
      */
     public function uninstall()
     {
-
     }
 
     /**
