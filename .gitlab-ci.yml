@@ -89,8 +89,8 @@ mkdocs:build:
 mkdocs:deploy:
   stage: deploy
   variables:
-    GITPAGES: victorynox.github.io/rollun-datahandler/
-    GITHUB_REPO: git@github.com:victorynox/rollun-datahandler.git
+    GITPAGES: rollun-com.github.io/rollun-datastore/
+    GITHUB_REPO: git@github.com:rollun-com/rollun-datastore.git
   image: debian
   before_script:
     - apt-get update
