@@ -45,7 +45,7 @@ phpunit-functional:
     DB_PORT: "3306"
   before_script:
     - apt-get update
-    - apt-get install -y mysql-server mysql-client libmysqlclient-dev
+    - apt-get install -y mysql-server mysql-client
     - mysql -u root -p
     - CREATE USER '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';
     - CREATE DATABASE IF NOT EXISTS `$DB_NAME` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci`;
