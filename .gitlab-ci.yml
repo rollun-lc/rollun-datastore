@@ -11,7 +11,7 @@ variables:
   DB_DRIVER: Pdo_Mysql
   DB_NAME: test
   DB_USER: utest
-  DB_PASS: qwe123321
+  DB_PASS: qwe123321q
   DB_HOST: localhost
   DB_PORT: 3306
 
@@ -47,7 +47,7 @@ phpunit-functional:
     - apt-get update
     - apt-get install -y mysql-server mysql-client
     - service mysql start
-    - mysql -u root -e "CREATE USER $DB_USER@localhost IDENTIFIED BY $DB_PASS;CREATE DATABASE IF NOT EXISTS $DB_NAME;GRANT ALL PRIVILEGES ON $DB_NAME.* TO $DB_USER@localhost;"
+    - mysql -u root -e "CREATE USER $DB_USER@localhost IDENTIFIED BY '$DB_PASS';CREATE DATABASE IF NOT EXISTS $DB_NAME;GRANT ALL PRIVILEGES ON $DB_NAME.* TO $DB_USER@localhost;"
     - php -S localhost:9000 -t public &
     - vendor/bin/phpunit --configuration phpunit.xml --testsuite functional
 
