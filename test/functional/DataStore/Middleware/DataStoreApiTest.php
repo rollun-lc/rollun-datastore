@@ -73,6 +73,11 @@ class DataStoreApiTest extends BaseMiddlewareTest
             ->getMock();
 
         $dataStorePluginManagerMock->expects($this->once())
+            ->method('has')
+            ->with($resourceName)
+            ->willReturn(true);
+
+        $dataStorePluginManagerMock->expects($this->once())
             ->method('get')
             ->with($resourceName)
             ->willReturn($dataStore);
@@ -143,6 +148,11 @@ class DataStoreApiTest extends BaseMiddlewareTest
             ->getMock();
 
         $dataStorePluginManagerMock->expects($this->once())
+            ->method('has')
+            ->with($this->resourceName)
+            ->willReturn(true);
+
+        $dataStorePluginManagerMock->expects($this->once())
             ->method('get')
             ->with($this->resourceName)
             ->willReturn($this->dataStore);
@@ -165,6 +175,10 @@ class DataStoreApiTest extends BaseMiddlewareTest
         $dataStorePluginManagerMock = $this->getMockBuilder(DataStorePluginManager::class)
             ->disableOriginalConstructor()
             ->getMock();
+
+        $dataStorePluginManagerMock->expects($this->once())
+            ->method('has')
+            ->willReturn(true);
 
         $dataStorePluginManagerMock->expects($this->once())
             ->method('get')
@@ -216,6 +230,7 @@ class DataStoreApiTest extends BaseMiddlewareTest
         $request = $request->withMethod('POST');
         $request = $request->withHeader('Content-Type', 'application/json');
         $request = $request->withAttribute('resourceName', $this->resourceName);
+        $request = $request->withAttribute('withContentRange', true);
 
         $resource = "data://text/plain;base64," . base64_encode(json_encode($data));
         $request = $request->withBody(new Stream(fopen($resource, 'r')));
