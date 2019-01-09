@@ -45,6 +45,11 @@ class DeterminatorTest extends TestCase
         $delegate = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
 
         $dataStorePluginManagerMock->expects($this->once())
+            ->method('has')
+            ->with($serviceName)
+            ->willReturn(true);
+
+        $dataStorePluginManagerMock->expects($this->once())
             ->method('get')
             ->with($serviceName)
             ->willReturn($dataStoreMock);
@@ -71,6 +76,11 @@ class DeterminatorTest extends TestCase
 
         /** @var RequestHandlerInterface|PHPUnit_Framework_MockObject_MockObject $delegate */
         $delegate = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
+
+        $dataStorePluginManagerMock->expects($this->once())
+            ->method('has')
+            ->with($serviceName)
+            ->willReturn(true);
 
         $dataStorePluginManagerMock->expects($this->once())
             ->method('get')
