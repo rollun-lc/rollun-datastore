@@ -27,6 +27,7 @@ class RequestDecoderTest extends TestCase
 
     /**
      * @dataProvider dataProviderForOverwriteMode
+     * @dataProvider dataProviderForContentRange
      * @dataProvider dataProviderParseQuery
      * @dataProvider dataProviderParseBody
      * @dataProvider dataProviderRangeHeader
@@ -96,6 +97,44 @@ class RequestDecoderTest extends TestCase
                 },
                 function (ServerRequestInterface $request) {
                     return $request->getAttribute('overwriteMode') === false;
+                },
+            ],
+        ];
+    }
+
+    public function dataProviderForContentRange()
+    {
+        return [
+            [
+                function () {
+                    $request = new ServerRequest();
+
+                    return $request;
+                },
+                function (ServerRequestInterface $request) {
+                    return $request->getAttribute('withContentRange') == false;
+                },
+            ],
+            [
+                function () {
+                    $request = new ServerRequest();
+                    $request = $request->withHeader('With-Content-Range', '*');
+
+                    return $request;
+                },
+                function (ServerRequestInterface $request) {
+                    return $request->getAttribute('withContentRange') === true;
+                },
+            ],
+            [
+                function () {
+                    $request = new ServerRequest();
+                    $request = $request->withHeader('With-Content-Range', 'foo');
+
+                    return $request;
+                },
+                function (ServerRequestInterface $request) {
+                    return $request->getAttribute('withContentRange') === false;
                 },
             ],
         ];

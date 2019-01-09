@@ -106,6 +106,7 @@ class QueryHandlerTest extends BaseHandlerTest
         $request = $request->withMethod('GET');
         $request = $request->withAttribute('rqlQueryObject', $rqlQuery);
         $request = $request->withAttribute('primaryKeyValue', null);
+        $request = $request->withAttribute('withContentRange', true);
 
         $dataStore = $this->createDataStoreEmptyMock();
 
@@ -120,6 +121,36 @@ class QueryHandlerTest extends BaseHandlerTest
             ['Content-Range' => $contentRange],
             [$item]
         );
+
+        $object = $this->createObject($dataStore);
+        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object);
+    }
+
+    /**
+     * @dataProvider queryDataProvider
+     * @param RqlQuery $rqlQuery
+     */
+    public function testProcessSuccessWithOutContentRange(RqlQuery $rqlQuery)
+    {
+        $item = [
+            'id' => 1,
+            'name' => 'name',
+        ];
+
+        $request = new ServerRequest();
+        $request = $request->withMethod('GET');
+        $request = $request->withAttribute('rqlQueryObject', $rqlQuery);
+        $request = $request->withAttribute('primaryKeyValue', null);
+        $request = $request->withAttribute('withContentRange', false);
+
+        $dataStore = $this->createDataStoreEmptyMock();
+
+        $dataStore->expects($this->at(0))
+            ->method('query')
+            ->with($rqlQuery)
+            ->willReturn([$item]);
+
+        $response = $this->createResponse(200, [], [$item]);
 
         $object = $this->createObject($dataStore);
         $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object);
