@@ -15,6 +15,7 @@ use rollun\datastore\DataStore\Factory\CsvAbstractFactory;
 use rollun\datastore\DataStore\Factory\DbTableAbstractFactory;
 use rollun\datastore\DataStore\Factory\HttpClientAbstractFactory;
 use rollun\datastore\DataStore\Factory\MemoryAbstractFactory;
+use rollun\datastore\DataStore\SerializedDbTable;
 use rollun\datastore\Middleware\DataStoreApi;
 use rollun\datastore\Middleware\Determinator;
 use rollun\datastore\Middleware\Factory\DataStoreApiFactory;
@@ -24,6 +25,7 @@ use rollun\datastore\Middleware\ResourceResolver;
 use rollun\datastore\TableGateway\Factory\SqlQueryBuilderAbstractFactory;
 use rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory;
 use rollun\datastore\TableGateway\Factory\TableManagerMysqlFactory;
+use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\datastore\TableGateway\TableManagerMysql;
 use Zend\ServiceManager\Factory\InvokableFactory;
 

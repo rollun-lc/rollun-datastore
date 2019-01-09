@@ -14,9 +14,9 @@ class SerializedDbTable extends DbTable
 {
     protected $tableName;
 
-    public function __construct(TableGateway $dbTable, SqlQueryBuilder $sqlQueryBuilder = null)
+    public function __construct(TableGateway $dbTable)
     {
-        parent::__construct($dbTable, $sqlQueryBuilder);
+        parent::__construct($dbTable);
         $this->tableName = $this->dbTable->getTable();
     }
 
@@ -36,7 +36,6 @@ class SerializedDbTable extends DbTable
         try {
             InsideConstruct::initWakeup([
                 "dbTable" => $this->tableName,
-                "sqlQueryBuilder" => SqlQueryBuilder::class,
             ]);
         } catch (\Throwable $e) {
             throw new DataStoreException("Can't deserialize itself. Reason: {$e->getMessage()}", 0, $e);

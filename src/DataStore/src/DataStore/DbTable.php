@@ -41,17 +41,19 @@ class DbTable extends DataStoreAbstract
     /**
      * DbTable constructor.
      * @param TableGateway $dbTable
-     * @param SqlQueryBuilder $sqlQueryBuilder
      */
-    public function __construct(TableGateway $dbTable, SqlQueryBuilder $sqlQueryBuilder = null)
+    public function __construct(TableGateway $dbTable)
     {
         $this->dbTable = $dbTable;
+    }
 
-        if ($this->sqlQueryBuilder === null) {
+    protected function getSqlQueryBuilder()
+    {
+        if ($this->sqlQueryBuilder == null) {
             $this->sqlQueryBuilder = new SqlQueryBuilder($this->dbTable->getAdapter(), $this->dbTable->table);
-        } else {
-            $this->sqlQueryBuilder = $sqlQueryBuilder;
         }
+
+        return $this->sqlQueryBuilder;
     }
 
     /**
@@ -275,7 +277,7 @@ class DbTable extends DataStoreAbstract
     {
         $adapter = $this->dbTable->getAdapter();
 
-        $sqlString = $this->sqlQueryBuilder->buildSql($query);
+        $sqlString = $this->getSqlQueryBuilder()->buildSql($query);
         $sqlString .= " FOR UPDATE";
 
         $statement = $adapter->getDriver()->createStatement($sqlString);
@@ -317,7 +319,7 @@ class DbTable extends DataStoreAbstract
     public function query(Query $query)
     {
         $adapter = $this->dbTable->getAdapter();
-        $sqlString = $this->sqlQueryBuilder->buildSql($query);
+        $sqlString = $this->getSqlQueryBuilder()->buildSql($query);
 
         try {
             $statement = $adapter->getDriver()->createStatement($sqlString);
