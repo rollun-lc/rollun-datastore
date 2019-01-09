@@ -35,7 +35,7 @@ return [
         'testHttpClient' => [
             'class' => 'rollun\datastore\DataStore\HttpClient',
             'tableName' => 'test_res_http',
-            'url' => 'http://127.0.0.1:9000/api/datastore/testDataSourceDb',
+            'url' => 'http://localhost:9000/api/datastore/testDataSourceDb',
             'options' => [
                 'timeout' => 30,
             ],

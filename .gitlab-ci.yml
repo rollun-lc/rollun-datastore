@@ -6,15 +6,15 @@ image: php:7.2
 cache:
   paths:
     - vendor/
-
 variables:
   DB_DRIVER: Pdo_Mysql
-  DB_NAME: test
   DB_USER: utest
   DB_PASS: qwe123321q
   DB_HOST: 127.0.0.1
   DB_PORT: 3306
   APP_ENV: test
+  TEST_HOST: 'http://localhost:9000'
+
 
 before_script:
   # update packages
@@ -43,6 +43,8 @@ phpunit-unit:
   script: vendor/bin/phpunit --configuration phpunit.xml --testsuite unit
 
 phpunit-functional:
+  variables:
+    DB_NAME: functional
   services:
     - mysql:latest
   stage: test
@@ -54,6 +56,8 @@ phpunit-functional:
     - vendor/bin/phpunit --configuration phpunit.xml --testsuite functional
 
 phpunit-intagration:
+  variables:
+    DB_NAME: intagration
   services:
     - mysql:latest
   stage: test
@@ -62,7 +66,7 @@ phpunit-intagration:
     - apt-get install -y mysql-server mysql-client
     - service mysql start
     - mysql -u root -e "CREATE USER $DB_USER@localhost IDENTIFIED BY '$DB_PASS';CREATE DATABASE IF NOT EXISTS $DB_NAME;GRANT ALL PRIVILEGES ON $DB_NAME.* TO $DB_USER@localhost;"
-    - php -S 127.0.0.1:9000 -t public public/test.php &
+    - php -S localhost:9000 -t public public/test.php &
     - vendor/bin/phpunit --configuration phpunit.xml --testsuite intagration
 
 phpcs:
@@ -89,8 +93,8 @@ mkdocs:build:
 mkdocs:deploy:
   stage: deploy
   variables:
-    GITPAGES: victorynox.github.io/rollun-datahandler/
-    GITHUB_REPO: git@github.com:victorynox/rollun-datahandler.git
+    GITPAGES: rollun-com.github.io/rollun-datastore/
+    GITHUB_REPO: git@github.com:rollun-com/rollun-datastore.git
   image: debian
   before_script:
     - apt-get update
