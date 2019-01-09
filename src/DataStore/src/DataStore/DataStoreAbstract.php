@@ -7,6 +7,7 @@
 namespace rollun\datastore\DataStore;
 
 use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Iterators\DataStoreIterator;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
@@ -21,7 +22,7 @@ use Xiag\Rql\Parser\Query;
  * Class DataStoreAbstract
  * @package rollun\datastore\DataStore
  */
-abstract class DataStoreAbstract implements DataStoresInterface
+abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterface
 {
     /**
      * @var ConditionBuilderAbstract
