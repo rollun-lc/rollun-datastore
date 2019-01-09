@@ -10,7 +10,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
-use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Query;
@@ -45,8 +44,22 @@ class QueryHandler extends AbstractHandler
     {
         /** @var Query $rqlQuery */
         $rqlQuery = $request->getAttribute('rqlQueryObject');
-        $limitNode = $rqlQuery->getLimit();
         $items = $this->dataStore->query($rqlQuery);
+
+        $response = new Response();
+        $response = $response->withBody($this->createStream($items));
+
+        if ($request->getAttribute('withContentRange')) {
+            $contentRange = $this->createContentRange($rqlQuery, $items);
+            $response = $response->withHeader('Content-Range', $contentRange);
+        }
+
+        return $response;
+    }
+
+    protected function createContentRange(Query $rqlQuery, $items)
+    {
+        $limitNode = $rqlQuery->getLimit();
         $total = $this->getTotalItems($rqlQuery);
 
         if ($limitNode) {
@@ -55,13 +68,7 @@ class QueryHandler extends AbstractHandler
             $offset = 0;
         }
 
-        $response = new Response();
-        $response = $response->withBody($this->createStream($items));
-
-        $contentRange = "items " . ($offset + 1) . "-" . ($offset + count($items)) . "/$total";
-        $response = $response->withHeader('Content-Range', $contentRange);
-
-        return $response;
+        return "items " . ($offset + 1) . "-" . ($offset + count($items)) . "/$total";
     }
 
     /**

@@ -89,14 +89,12 @@ class SerializedDbTableTest extends TestCase
     {
         $adapter = clone $this->getContainer()->get('db');
         $tableGateway = new TableGateway($this->tableName, $adapter);
-        $sqlQueryBuilder = new SqlQueryBuilder($adapter, $this->tableName);
 
         $container = clone $this->container;
         $container->setService($this->tableName, $tableGateway);
-        $container->setService(SqlQueryBuilder::class, $sqlQueryBuilder);
         InsideConstruct::setContainer($container);
 
-        $this->object = new SerializedDbTable($tableGateway, $sqlQueryBuilder);
+        $this->object = new SerializedDbTable($tableGateway);
         $this->assertEquals($this->object, unserialize(serialize($this->object)));
     }
 

@@ -33,10 +33,23 @@ class RequestDecoder implements MiddlewareInterface
         $request = $this->parseRqlQuery($request);
         $request = $this->parseHeaderLimit($request);
         $request = $this->parseRequestBody($request);
+        $request = $this->parseContentRange($request);
 
         $response = $handler->handle($request);
 
         return $response;
+    }
+
+    protected function parseContentRange(ServerRequestInterface $request)
+    {
+        $withContentRangeHeader = $request->getHeader('With-Content-Range');
+        $withContentRange = (isset($withContentRangeHeader[0]) && $withContentRangeHeader[0] === '*')
+            ? true
+            : false;
+
+        $request = $request->withAttribute('withContentRange', $withContentRange);
+
+        return $request;
     }
 
     /**

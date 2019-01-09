@@ -41,14 +41,17 @@ class HttpClientTest extends AbstractTest
             [
                 "limit(1)",
                 ["Content-Range" => "items 1-1/4"],
+                ['With-Content-Range' => '*']
             ],
             [
                 "limit(3,1)",
                 ["Content-Range" => "items 2-4/4"],
+                ['With-Content-Range' => '*']
             ],
             [
                 "",
                 ["Content-Range" => "items 1-4/4"],
+                ['With-Content-Range' => '*']
             ],
         ];
     }
@@ -56,14 +59,16 @@ class HttpClientTest extends AbstractTest
     /**
      * @param $queryString
      * @param $headerExpected
+     * @param $headers
      * @dataProvider providerHeader()
      */
-    public function test_header($queryString, $headerExpected)
+    public function test_header($queryString, $headerExpected, $headers)
     {
         $this->_initObject();
         $url = $this->config['testHttpClient']['url'] . "?$queryString";
         $client = new Client($url);
-        $client->setHeaders(['Accept' => 'application/json']);
+        $headers = array_merge($headers, ['Accept' => 'application/json']);
+        $client->setHeaders($headers);
         $client->setOptions(['timeout' => 60]);
         $response = $client->send();
         $headers = $response->getHeaders()->toArray();
