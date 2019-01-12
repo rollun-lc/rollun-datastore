@@ -9,7 +9,9 @@ use Zend\ConfigAggregator\ConfigAggregator;
 use Zend\ConfigAggregator\PhpFileProvider;
 
 // Make environment variables stored in .env accessible via getenv(), $_ENV or $_SERVER.
-(new Dotenv())->load('.env');
+if (is_file('.env')) {
+    (new Dotenv())->load('.env');
+}
 
 // Determine application environment ('dev' or 'prod').
 $appEnv = getenv('APP_ENV');

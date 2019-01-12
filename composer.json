@@ -15,7 +15,7 @@
     }
   ],
   "require": {
-    "php": "^7.2",
+    "php": "^7.1",
     "ext-pdo": "*",
     "ext-json": "*",
     "xiag/rql-parser": "^1.0",
