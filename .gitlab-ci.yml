@@ -1,7 +1,7 @@
 # image: docker
 # services:
 # - docker:dind
-image: php:7.2
+image: php:7.1
 
 cache:
   paths:
@@ -13,7 +13,7 @@ variables:
   DB_HOST: 127.0.0.1
   DB_PORT: 3306
   APP_ENV: test
-  TEST_HOST: 'http://localhost:9000'
+  TEST_HOST: 'http://localhost:9000/'
 
 
 before_script:
