@@ -10,6 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use rollun\datastore\DataStore\Aspect\AspectTyped;
 use rollun\datastore\DataStore\DataStorePluginManager;
 use Zend\Diactoros\Response\EmptyResponse;
 
@@ -53,6 +54,9 @@ class Determinator implements MiddlewareInterface
 
         $dataStoreRest = new DataStoreRest($dataStore);
         $response = $dataStoreRest->process($request, $handler);
+
+        $dataStoreScheme = $dataStore instanceof AspectTyped ? json_encode($dataStore->getScheme()) : '';
+        $response = $response->withHeader('Datastore-Scheme', $dataStoreScheme);
 
         return $response;
     }
