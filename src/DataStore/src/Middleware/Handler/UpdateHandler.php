@@ -27,7 +27,7 @@ class UpdateHandler extends AbstractHandler
         $row = $request->getParsedBody();
 
         if(!$primaryKeyValue && isset($row[$this->dataStore->getIdentifier()])) {
-            $primaryKeyValue = $row[$this->dataStore->getIdentifier()]'
+            $primaryKeyValue = $row[$this->dataStore->getIdentifier()];
         }
         
         $canHandle = $canHandle && isset($primaryKeyValue);
