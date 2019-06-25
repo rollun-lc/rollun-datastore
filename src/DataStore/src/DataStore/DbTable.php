@@ -74,7 +74,7 @@ class DbTable extends DataStoreAbstract
             $adapter->getDriver()->getConnection()->commit();
         } catch (\Throwable $e) {
             $adapter->getDriver()->getConnection()->rollback();
-            throw new DataStoreException("Can't insert item. {$e->getMessage()}", 0, $e);
+            throw new DataStoreException("[{$this->dbTable->getTable()}]Can't insert item. {$e->getMessage()}", 0, $e);
         }
 
         return $insertedItem;
@@ -125,7 +125,7 @@ class DbTable extends DataStoreAbstract
             $adapter->getDriver()->getConnection()->commit();
         } catch (\Throwable $e) {
             $adapter->getDriver()->getConnection()->rollback();
-            throw new DataStoreException("Can't update item. {$e->getMessage()}", 0, $e);
+            throw new DataStoreException("[{$this->dbTable->getTable()}]Can't update item. {$e->getMessage()}", 0, $e);
         }
 
         return $result;
@@ -166,18 +166,18 @@ class DbTable extends DataStoreAbstract
             $statement = $adapter->getDriver()->createStatement($sqlString);
             $result = $statement->execute();
         } catch (\Throwable $e) {
-            throw new DataStoreException("Can't delete records using query", 0, $e);
+            throw new DataStoreException("[{$this->dbTable->getTable()}]Can't delete records using query", 0, $e);
         }
 
         if (count($shouldDeletedIds) === $result->getAffectedRows()) {
             return $shouldDeletedIds;
-        } else {
-            $result = $this->query($query);
+        }
 
-            foreach ($result as $record) {
-                if (in_array($record[$this->getIdentifier()], $shouldDeletedIds)) {
-                    unset($shouldDeletedIds[$record[$this->getIdentifier()]]);
-                }
+        $result = $this->query($query);
+
+        foreach ($result as $record) {
+            if (in_array($record[$this->getIdentifier()], $shouldDeletedIds)) {
+                unset($shouldDeletedIds[$record[$this->getIdentifier()]]);
             }
         }
 
@@ -225,12 +225,13 @@ class DbTable extends DataStoreAbstract
             $updatedIds = [];
 
             if ($selectResult->getAffectedRows() === $updateResult->getAffectedRows()) {
+                /** @noinspection SuspiciousLoopInspection */
                 foreach ($selectResult as $record) {
                     $updatedIds[] = $record[$this->getIdentifier()];
                 }
             } else {
                 $effectedRecords = $this->query($query);
-
+                /** @noinspection SuspiciousLoopInspection */
                 foreach ($selectResult as $record) {
                     if ($record !== $effectedRecords[$this->getIdentifier()]) {
                         $updatedIds[] = $effectedRecords[$this->getIdentifier()];
@@ -238,7 +239,7 @@ class DbTable extends DataStoreAbstract
                 }
             }
         } catch (\Throwable $e) {
-            throw new DataStoreException("Can't update records using query", 0, $e);
+            throw new DataStoreException("[{$this->dbTable->getTable()}]Can't update records using query", 0, $e);
         }
 
         return $updatedIds;
@@ -307,7 +308,7 @@ class DbTable extends DataStoreAbstract
             unset($itemData[$identifier]);
             $this->dbTable->update($itemData, [$identifier => $id]);
         } else {
-            throw new DataStoreException("Can't update item with id = $id");
+            throw new DataStoreException("[{$this->dbTable->getTable()}]Can't update item with id = $id");
         }
 
         return $this->read($id);
@@ -369,9 +370,9 @@ class DbTable extends DataStoreAbstract
 
         if (isset($row)) {
             return $row->getArrayCopy();
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     /**
@@ -380,9 +381,7 @@ class DbTable extends DataStoreAbstract
     public function deleteAll()
     {
         $where = '1=1';
-        $deletedItemsCount = $this->dbTable->delete($where);
-
-        return $deletedItemsCount;
+        return $this->dbTable->delete($where);
     }
 
     /**
@@ -392,7 +391,7 @@ class DbTable extends DataStoreAbstract
     {
         $adapter = $this->dbTable->getAdapter();
 
-        $sql = "SELECT COUNT(*) AS count FROM " . $adapter->getPlatform()->quoteIdentifier($this->dbTable->getTable());
+        $sql = 'SELECT COUNT(*) AS count FROM ' . $adapter->getPlatform()->quoteIdentifier($this->dbTable->getTable());
 
         $statement = $adapter->getDriver()->createStatement($sql);
         $result = $statement->execute();
@@ -420,6 +419,7 @@ class DbTable extends DataStoreAbstract
             $query = new Query();
             $query->setQuery(new InNode($this->getIdentifier(), $identifiers));
             $insertedItems = $this->query($query);
+            $multiInsertTableGw->getAdapter()->getDriver()->getConnection()->commit();
         } catch (\Throwable $throwable) {
             $multiInsertTableGw->getAdapter()->getDriver()->getConnection()->rollback();
 
