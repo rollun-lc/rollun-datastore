@@ -24,9 +24,14 @@ class UpdateHandler extends AbstractHandler
         $canHandle = $request->getMethod() === "PUT";
 
         $primaryKeyValue = $request->getAttribute('primaryKeyValue');
-        $canHandle = $canHandle && isset($primaryKeyValue);
-
         $row = $request->getParsedBody();
+
+        if(!$primaryKeyValue && isset($row[$this->dataStore->getIdentifier()])) {
+            $primaryKeyValue = $row[$this->dataStore->getIdentifier()];
+        }
+        
+        $canHandle = $canHandle && isset($primaryKeyValue);
+        
         $canHandle = $canHandle && isset($row) && is_array($row)
             && array_reduce(
                 array_keys($row),
