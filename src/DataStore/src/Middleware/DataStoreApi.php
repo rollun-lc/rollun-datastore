@@ -11,6 +11,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Diactoros\Response\JsonResponse;
+use Zend\Diactoros\Response\TextResponse;
 use Zend\Stratigility\Middleware\RequestHandlerMiddleware;
 use Zend\Stratigility\MiddlewarePipe;
 
@@ -45,7 +46,14 @@ class DataStoreApi implements MiddlewareInterface
         try {
             return $this->middlewarePipe->process($request, $handler);
         } catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), 500);
+           $accept = $request->getHeader('Accept');
+           if(in_array('application/json', $accept)) {
+                return new JsonResponse([
+                    'error' => $e->getMessage(),
+                ], 500);           
+           } else {
+                return new TextResponse($e->getMessage(), 500);
+           }
         }
     }
 }
