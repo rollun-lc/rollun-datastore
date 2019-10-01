@@ -145,7 +145,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         $field = $this->prepareFieldName($node->getField());
 
         if ($nodeName === 'ie') {
-            $strQuery .= $field . 'IS NULL OR ' . $field . ' IS FALSE';
+            $strQuery .= $field . ' IS NULL OR ' . $field . ' IS FALSE OR ' . $field . ' = \'\' ';
         } else {
             $strQuery .= $field;
         }
