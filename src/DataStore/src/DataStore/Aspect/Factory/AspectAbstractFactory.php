@@ -1,16 +1,17 @@
 <?php
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
- * @license LICENSE.md New BSD License
+ * @license   LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\Aspect\Factory;
 
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\Aspect\AspectAbstract;
-use rollun\datastore\DataStore\Aspect\AspectWithEventManagerInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Factory\DataStoreAbstractFactory;
+use rollun\datastore\DataStore\WithEventManagerInterface;
+use Zend\EventManager\EventManager;
 
 /**
  * Create and return an instance of the DataStore which based on AspectAbstract
@@ -32,6 +33,8 @@ use rollun\datastore\DataStore\Factory\DataStoreAbstractFactory;
  */
 class AspectAbstractFactory extends DataStoreAbstractFactory
 {
+    const KEY_LISTENERS = 'listeners';
+
     protected static $KEY_DATASTORE_CLASS = AspectAbstract::class;
 
     protected static $KEY_IN_CREATE = 0;
@@ -51,14 +54,25 @@ class AspectAbstractFactory extends DataStoreAbstractFactory
             );
         }
 
-        // get interfaces
-        $interfaces = class_implements($requestedClassName);
-
         // create aspect with event manager if it needs
-        if (isset($interfaces[AspectWithEventManagerInterface::class])) {
-            return new $requestedClassName($container->get($serviceConfig['dataStore']), $serviceConfig['dataStore'], $container->get('dataStoreEventManager'));
+        if (is_a($requestedClassName, WithEventManagerInterface::class, true)) {
+            // create event manager
+            $eventManager = new EventManager();
+
+            // attach listeners
+            if (!empty($serviceConfig[self::KEY_LISTENERS]) && is_array($serviceConfig[self::KEY_LISTENERS])) {
+                foreach ($serviceConfig[self::KEY_LISTENERS] as $action => $handlers) {
+                    if (!empty($handlers) && is_array($handlers)) {
+                        foreach ($handlers as $handler) {
+                            $eventManager->attach($action, (is_string($handler)) ? $container->get($handler) : $handler);
+                        }
+                    }
+                }
+            }
+
+            return new $requestedClassName($container->get($serviceConfig[DataStoreAbstractFactory::KEY_DATASTORE]), $eventManager);
         }
 
-        return new $requestedClassName($container->get($serviceConfig['dataStore']));
+        return new $requestedClassName($container->get($serviceConfig[DataStoreAbstractFactory::KEY_DATASTORE]));
     }
 }
