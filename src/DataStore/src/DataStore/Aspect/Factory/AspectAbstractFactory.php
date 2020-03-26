@@ -8,6 +8,7 @@ namespace rollun\datastore\DataStore\Aspect\Factory;
 
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\Aspect\AspectAbstract;
+use rollun\datastore\DataStore\Aspect\AspectWithEventManagerInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Factory\DataStoreAbstractFactory;
 
@@ -20,11 +21,13 @@ use rollun\datastore\DataStore\Factory\DataStoreAbstractFactory;
  *     'real_service_name_for_aspect_datastore' => [
  *         'class' => 'rollun\datastore\DataStore\Aspect\AspectAbstract',
  *         'dataStore' => 'real_service_name_of_any_type_of_datastore'  // this service must be exist
+ *         'listeners' => ['onPostCreate' => ['Callable1', 'Callable2']]
  *     ]
  * ]
  * </code>
  *
  * Class AspectAbstractFactory
+ *
  * @package rollun\datastore\DataStore\Aspect\Factory
  */
 class AspectAbstractFactory extends DataStoreAbstractFactory
@@ -48,8 +51,14 @@ class AspectAbstractFactory extends DataStoreAbstractFactory
             );
         }
 
-        $dataStore = $container->get($serviceConfig['dataStore']);
+        // get interfaces
+        $interfaces = class_implements($requestedClassName);
 
-        return new $requestedClassName($dataStore);
+        // create aspect with event manager if it needs
+        if (isset($interfaces[AspectWithEventManagerInterface::class])) {
+            return new $requestedClassName($container->get($serviceConfig['dataStore']), $serviceConfig['dataStore'], $container->get('dataStoreEventManager'));
+        }
+
+        return new $requestedClassName($container->get($serviceConfig['dataStore']));
     }
 }

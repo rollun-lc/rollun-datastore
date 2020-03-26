@@ -76,6 +76,19 @@ return [
             'class' => 'rollun\datastore\DataStore\SerializedDbTable',
             'tableName' => 'testTable',
         ],
+        'testDataStoreAspect1' => [
+            'class'     => \rollun\datastore\DataStore\Aspect\AspectWithEventManagerAbstract::class,
+            'dataStore' => 'testDataStore1',
+            'listeners' => [
+                'onPostUpdate' => [function (\Zend\EventManager\Event $event) {
+                    file_put_contents('test_on_post_create.json', json_encode($event->getParam('result')));
+                }],
+            ]
+        ],
+        'testDataStore1'       => [
+            'class'           => \rollun\datastore\DataStore\Memory::class,
+            'requiredColumns' => ['id', 'name']
+        ],
     ],
     'tableManagerMysql' => [
         'tablesConfigs' => [
