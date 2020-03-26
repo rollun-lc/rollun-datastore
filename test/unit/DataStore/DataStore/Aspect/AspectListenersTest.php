@@ -1,4 +1,8 @@
 <?php
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
 
 namespace rollun\test\unit\DataStore\DataStore\Aspect;
 
@@ -25,5 +29,21 @@ class AspectListenersTest extends TestCase
         });
 
         $aspect->create($row);
+    }
+
+    /**
+     * Is attached listener didn't called ?
+     */
+    public function testIsListenerDidNotCalled()
+    {
+        $row = ['id' => 1, 'name' => 'name 1'];
+        $aspect = new AspectWithEventManagerAbstract(new Memory(['id', 'name']));
+        $aspect->getEventManager()->attach($aspect->createEventName('onPreUpdate'), function ($event) use ($row) {
+            $this->assertTrue(false);
+        });
+
+        $aspect->create($row);
+
+        $this->assertTrue(true);
     }
 }
