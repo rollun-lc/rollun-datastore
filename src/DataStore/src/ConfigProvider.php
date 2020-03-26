@@ -12,6 +12,7 @@ use rollun\datastore\DataStore\DataStorePluginManager;
 use rollun\datastore\DataStore\DataStorePluginManagerFactory;
 use rollun\datastore\DataStore\Factory\CacheableAbstractFactory;
 use rollun\datastore\DataStore\Factory\CsvAbstractFactory;
+use rollun\datastore\DataStore\Factory\DataStoreEventManagerFactory;
 use rollun\datastore\DataStore\Factory\DbTableAbstractFactory;
 use rollun\datastore\DataStore\Factory\HttpClientAbstractFactory;
 use rollun\datastore\DataStore\Factory\MemoryAbstractFactory;
@@ -55,6 +56,7 @@ class ConfigProvider
     {
         return [
             'factories' => [
+                DataStoreEventManagerFactory::ALIAS => DataStoreEventManagerFactory::class,
                 ResourceResolver::class => InvokableFactory::class,
                 RequestDecoder::class => InvokableFactory::class,
                 Determinator::class => DeterminatorFactory::class,
