@@ -8,6 +8,7 @@ namespace rollun\datastore\DataStore\Aspect\Factory;
 
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\Aspect\AspectAbstract;
+use rollun\datastore\DataStore\Aspect\AspectWithEventManagerInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Factory\DataStoreAbstractFactory;
 
@@ -50,6 +51,14 @@ class AspectAbstractFactory extends DataStoreAbstractFactory
             );
         }
 
-        return new $requestedClassName($container->get($serviceConfig['dataStore']), $serviceConfig['dataStore'], $container->get('dataStoreEventManager'));
+        // get interfaces
+        $interfaces = class_implements($requestedClassName);
+
+        // create aspect with event manager if it needs
+        if (isset($interfaces[AspectWithEventManagerInterface::class])) {
+            return new $requestedClassName($container->get($serviceConfig['dataStore']), $serviceConfig['dataStore'], $container->get('dataStoreEventManager'));
+        }
+
+        return new $requestedClassName($container->get($serviceConfig['dataStore']));
     }
 }

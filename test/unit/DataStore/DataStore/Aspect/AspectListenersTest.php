@@ -3,8 +3,7 @@
 namespace rollun\test\unit\DataStore\DataStore\Aspect;
 
 use PHPUnit\Framework\TestCase;
-use rollun\datastore\DataStore\Aspect\AspectAbstract;
-use rollun\datastore\DataStore\Factory\DataStoreEventManagerFactory;
+use rollun\datastore\DataStore\Aspect\AspectWithEventManagerAbstract;
 use rollun\datastore\DataStore\Memory;
 
 /**
@@ -15,16 +14,13 @@ use rollun\datastore\DataStore\Memory;
 class AspectListenersTest extends TestCase
 {
     /**
-     * Test for onPreCreateLister
+     * Is attached listener called ?
      */
-    public function testOnPreCreateListener()
+    public function testIsListenerCalled()
     {
-        $dataStoreName = 'testDataStore';
-
         $row = ['id' => 1, 'name' => 'name 1'];
-
-        $aspect = new AspectAbstract(new Memory(['id', 'name']), $dataStoreName);
-        $aspect->getEventManager()->attach(DataStoreEventManagerFactory::EVENT_KEY . ".$dataStoreName.onPreCreate", function ($event) use ($row) {
+        $aspect = new AspectWithEventManagerAbstract(new Memory(['id', 'name']));
+        $aspect->getEventManager()->attach($aspect->createEventName('onPreCreate'), function ($event) use ($row) {
             $this->assertEquals($row, $event->getParam('itemData'));
         });
 

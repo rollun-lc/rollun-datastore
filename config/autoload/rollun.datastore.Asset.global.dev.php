@@ -76,6 +76,18 @@ return [
             'class' => 'rollun\datastore\DataStore\SerializedDbTable',
             'tableName' => 'testTable',
         ],
+        'testDataStoreAspect1' => [
+            'class'     => \rollun\datastore\DataStore\Aspect\AspectWithEventManagerAbstract::class,
+            'dataStore' => 'testDataStore1',
+            'listeners' => [
+                'onPostCreate' => [function ($event) {
+                }],
+            ]
+        ],
+        'testDataStore1'       => [
+            'class'           => \rollun\datastore\DataStore\Memory::class,
+            'requiredColumns' => ['id', 'name']
+        ],
     ],
     'tableManagerMysql' => [
         'tablesConfigs' => [

@@ -1,16 +1,13 @@
 <?php
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
- * @license   LICENSE.md New BSD License
+ * @license LICENSE.md New BSD License
  */
 
 namespace rollun\datastore\DataStore\Aspect;
 
-use rollun\datastore\DataStore\Factory\DataStoreEventManagerFactory;
 use Xiag\Rql\Parser\Query;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
-use Zend\EventManager\EventManager;
-use Zend\EventManager\EventManagerInterface;
 
 /**
  * Class AspectAbstract
@@ -21,48 +18,22 @@ use Zend\EventManager\EventManagerInterface;
  * The class is NOT abstract. It is so named because in this view it does nothing and have no difference at work
  * with usual datastore any type.
  *
- * @see     AspectAbstractFactory
+ * @see AspectAbstractFactory
  * @package rollun\datastore\DataStore\Aspect
  */
 class AspectAbstract implements DataStoresInterface
 {
-    /**
-     * @var DataStoresInterface
-     */
+    /** @var DataStoresInterface $dataStore */
     protected $dataStore;
 
     /**
-     * @var EventManagerInterface
-     */
-    protected $eventManager;
-
-    /**
-     * @var string
-     */
-    protected $dataStoreName;
-
-    /**
-     * AspectAbstract constructor.
+     * AspectDataStoreAbstract constructor.
      *
-     * @param DataStoresInterface        $dataStore
-     * @param string|null                $dataStoreName
-     * @param EventManagerInterface|null $eventManager
+     * @param DataStoresInterface $dataStore
      */
-    public function __construct(DataStoresInterface $dataStore, string $dataStoreName = null, EventManagerInterface $eventManager = null)
+    public function __construct(DataStoresInterface $dataStore)
     {
         $this->dataStore = $dataStore;
-
-        if ($dataStoreName === null) {
-            $dataStoreName = 'common';
-        }
-
-        $this->dataStoreName = $dataStoreName;
-
-        if ($eventManager === null) {
-            $eventManager = new EventManager();
-        }
-
-        $this->eventManager = $eventManager;
     }
 
     /**
@@ -92,7 +63,6 @@ class AspectAbstract implements DataStoresInterface
      * By default does nothing
      *
      * @param \Traversable $iterator
-     *
      * @return \Traversable
      */
     protected function postGetIterator(\Traversable $iterator)
@@ -105,15 +75,12 @@ class AspectAbstract implements DataStoresInterface
      *
      * By default does nothing
      *
-     * @param            $itemData
+     * @param $itemData
      * @param bool|false $rewriteIfExist
-     *
      * @return array
      */
     protected function preCreate($itemData, $rewriteIfExist = false)
     {
-        $this->getEventManager()->trigger($this->createEventName('onPreCreate'), $this, ['itemData' => $itemData]);
-
         return $itemData;
     }
 
@@ -138,13 +105,10 @@ class AspectAbstract implements DataStoresInterface
      * @param $result
      * @param $itemData
      * @param $rewriteIfExist
-     *
      * @return mixed
      */
     protected function postCreate($result, $itemData, $rewriteIfExist)
     {
-        $this->getEventManager()->trigger($this->createEventName('onPostCreate'), $this, ['itemData' => $itemData, 'result' => $result]);
-
         return $result;
     }
 
@@ -153,15 +117,12 @@ class AspectAbstract implements DataStoresInterface
      *
      * By default does nothing
      *
-     * @param            $itemData
+     * @param $itemData
      * @param bool|false $createIfAbsent
-     *
      * @return array
      */
     protected function preUpdate($itemData, $createIfAbsent = false)
     {
-        $this->getEventManager()->trigger($this->createEventName('onPreUpdate'), $this, ['itemData' => $itemData]);
-
         return $itemData;
     }
 
@@ -184,15 +145,12 @@ class AspectAbstract implements DataStoresInterface
      * By default does nothing
      *
      * @param mixed $result
-     * @param       $itemData
-     * @param       $createIfAbsent
-     *
+     * @param $itemData
+     * @param $createIfAbsent
      * @return mixed
      */
     protected function postUpdate($result, $itemData, $createIfAbsent)
     {
-        $this->getEventManager()->trigger($this->createEventName('onPostUpdate'), $this, ['itemData' => $itemData, 'result' => $result]);
-
         return $result;
     }
 
@@ -205,7 +163,6 @@ class AspectAbstract implements DataStoresInterface
      */
     protected function preDelete($id)
     {
-        $this->getEventManager()->trigger($this->createEventName('onPreDelete'), $this, ['id' => $id]);
     }
 
     /**
@@ -227,14 +184,11 @@ class AspectAbstract implements DataStoresInterface
      * By default does nothing
      *
      * @param mixed $result
-     * @param       $id
-     *
+     * @param $id
      * @return mixed
      */
     protected function postDelete($result, $id)
     {
-        $this->getEventManager()->trigger($this->createEventName('onPostDelete'), $this, ['id' => $id, 'result' => $result]);
-
         return $result;
     }
 
@@ -245,7 +199,6 @@ class AspectAbstract implements DataStoresInterface
      */
     protected function preDeleteAll()
     {
-        $this->getEventManager()->trigger($this->createEventName('onPreDeleteAll'), $this, []);
     }
 
     /**
@@ -267,13 +220,10 @@ class AspectAbstract implements DataStoresInterface
      * By default does nothing
      *
      * @param mixed $result
-     *
      * @return mixed
      */
     protected function postDeleteAll($result)
     {
-        $this->getEventManager()->trigger($this->createEventName('onPostDeleteAll'), $this, ['result' => $result]);
-
         return $result;
     }
 
@@ -305,7 +255,6 @@ class AspectAbstract implements DataStoresInterface
      * By default does nothing
      *
      * @param mixed $result
-     *
      * @return mixed
      */
     protected function postGetIdentifier($result)
@@ -343,8 +292,7 @@ class AspectAbstract implements DataStoresInterface
      * By default does nothing
      *
      * @param mixed $result
-     * @param       $id
-     *
+     * @param $id
      * @return mixed
      */
     protected function postRead($result, $id)
@@ -383,8 +331,7 @@ class AspectAbstract implements DataStoresInterface
      * By default does nothing
      *
      * @param mixed $result
-     * @param       $id
-     *
+     * @param $id
      * @return mixed
      */
     protected function postHas($result, $id)
@@ -398,7 +345,6 @@ class AspectAbstract implements DataStoresInterface
      * By default does nothing
      *
      * @param Query $query
-     *
      * @return Query
      */
     protected function preQuery(Query $query)
@@ -426,7 +372,6 @@ class AspectAbstract implements DataStoresInterface
      *
      * @param mixed $result
      * @param Query $query
-     *
      * @return mixed
      */
     protected function postQuery($result, Query $query)
@@ -462,29 +407,10 @@ class AspectAbstract implements DataStoresInterface
      * By default does nothing
      *
      * @param mixed $result
-     *
      * @return mixed
      */
     protected function postCount($result)
     {
         return $result;
-    }
-
-    /**
-     * @return EventManagerInterface
-     */
-    public function getEventManager(): EventManagerInterface
-    {
-        return $this->eventManager;
-    }
-
-    /**
-     * @param string $action
-     *
-     * @return string
-     */
-    protected function createEventName(string $action): string
-    {
-        return DataStoreEventManagerFactory::EVENT_KEY . ".{$this->dataStoreName}.$action";
     }
 }
