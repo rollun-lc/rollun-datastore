@@ -70,7 +70,7 @@ class AspectAbstractFactory extends DataStoreAbstractFactory
                 }
             }
 
-            return new $requestedClassName($container->get($serviceConfig[DataStoreAbstractFactory::KEY_DATASTORE]), $eventManager);
+            return new $requestedClassName($container->get($serviceConfig[DataStoreAbstractFactory::KEY_DATASTORE]), $eventManager, $serviceConfig['dataStore']);
         }
 
         return new $requestedClassName($container->get($serviceConfig[DataStoreAbstractFactory::KEY_DATASTORE]));

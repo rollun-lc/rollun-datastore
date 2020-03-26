@@ -27,12 +27,18 @@ class AspectWithEventManagerAbstract extends AspectAbstract implements WithEvent
     protected $eventManager;
 
     /**
+     * @var string|null
+     */
+    protected $dataStoreName;
+
+    /**
      * AspectWithEventManagerAbstract constructor.
      *
      * @param DataStoresInterface        $dataStore
      * @param EventManagerInterface|null $eventManager
+     * @param string|null                $dataStoreName
      */
-    public function __construct(DataStoresInterface $dataStore, EventManagerInterface $eventManager = null)
+    public function __construct(DataStoresInterface $dataStore, EventManagerInterface $eventManager = null, string $dataStoreName = null)
     {
         parent::__construct($dataStore);
 
@@ -41,6 +47,7 @@ class AspectWithEventManagerAbstract extends AspectAbstract implements WithEvent
         }
 
         $this->eventManager = $eventManager;
+        $this->dataStoreName = $dataStoreName;
     }
 
     /**
@@ -257,6 +264,9 @@ class AspectWithEventManagerAbstract extends AspectAbstract implements WithEvent
      */
     protected function triggerEvent(string $action, array $params = []): void
     {
+        // set dataStore name to event
+        $params['dataStoreName'] = $this->dataStoreName;
+
         $this->getEventManager()->trigger($action, $this, $params);
     }
 }
