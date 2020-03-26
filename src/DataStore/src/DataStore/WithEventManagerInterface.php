@@ -6,24 +6,19 @@
 
 declare(strict_types=1);
 
-namespace rollun\datastore\DataStore\Aspect;
+namespace rollun\datastore\DataStore;
 
 use Zend\EventManager\EventManagerInterface;
 
 /**
- * Class AspectWithEventManagerInterface
+ * Class WithEventManagerInterface
  *
  * @author Roman Ratsun <r.ratsun.rollun@gmail.com>
  */
-interface AspectWithEventManagerInterface
+interface WithEventManagerInterface
 {
     /**
      * @return EventManagerInterface
      */
     public function getEventManager(): EventManagerInterface;
-
-    /**
-     * @return string
-     */
-    public function getDataStoreName(): string;
 }

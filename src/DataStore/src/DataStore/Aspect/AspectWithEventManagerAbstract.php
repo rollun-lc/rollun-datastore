@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\DataStore\Aspect;
 
-use rollun\datastore\DataStore\Factory\DataStoreEventManagerFactory;
+use rollun\datastore\DataStore\WithEventManagerInterface;
 use Xiag\Rql\Parser\Query;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use Zend\EventManager\EventManager;
@@ -19,7 +19,7 @@ use Zend\EventManager\EventManagerInterface;
  *
  * @author Roman Ratsun <r.ratsun.rollun@gmail.com>
  */
-class AspectWithEventManagerAbstract extends AspectAbstract implements AspectWithEventManagerInterface
+class AspectWithEventManagerAbstract extends AspectAbstract implements WithEventManagerInterface
 {
     /**
      * @var EventManagerInterface
@@ -27,26 +27,14 @@ class AspectWithEventManagerAbstract extends AspectAbstract implements AspectWit
     protected $eventManager;
 
     /**
-     * @var string
-     */
-    protected $dataStoreName;
-
-    /**
      * AspectWithEventManagerAbstract constructor.
      *
      * @param DataStoresInterface        $dataStore
-     * @param string|null                $dataStoreName
      * @param EventManagerInterface|null $eventManager
      */
-    public function __construct(DataStoresInterface $dataStore, string $dataStoreName = null, EventManagerInterface $eventManager = null)
+    public function __construct(DataStoresInterface $dataStore, EventManagerInterface $eventManager = null)
     {
         parent::__construct($dataStore);
-
-        if ($dataStoreName === null) {
-            $dataStoreName = 'aspectWithEventManager' . time();
-        }
-
-        $this->dataStoreName = $dataStoreName;
 
         if ($eventManager === null) {
             $eventManager = new EventManager();
@@ -264,31 +252,11 @@ class AspectWithEventManagerAbstract extends AspectAbstract implements AspectWit
     }
 
     /**
-     * @inheritDoc
-     */
-    public function getDataStoreName(): string
-    {
-        return $this->dataStoreName;
-    }
-
-    /**
-     * @param string $action
-     *
-     * @return string
-     */
-    public function createEventName(string $action): string
-    {
-        return DataStoreEventManagerFactory::EVENT_KEY . '.' . $this->getDataStoreName() . '.' . $action;
-    }
-
-    /**
      * @param string $action
      * @param array  $params
      */
     protected function triggerEvent(string $action, array $params = []): void
     {
-        $this
-            ->getEventManager()
-            ->trigger($this->createEventName($action), $this, $params);
+        $this->getEventManager()->trigger($action, $this, $params);
     }
 }
