@@ -33,7 +33,37 @@ use Zend\EventManager\EventManager;
  */
 class AspectAbstractFactory extends DataStoreAbstractFactory
 {
+    /**
+     * Listener key
+     */
     const KEY_LISTENERS = 'listeners';
+
+    /**
+     * All declared events of aspects
+     */
+    const EVENTS
+        = [
+            'onPreGetIterator',
+            'onPostGetIterator',
+            'onPreCreate',
+            'onPostCreate',
+            'onPreUpdate',
+            'onPostUpdate',
+            'onPreDelete',
+            'onPostDelete',
+            'onPreDeleteAll',
+            'onPostDeleteAll',
+            'onPreGetIdentifier',
+            'onPostGetIdentifier',
+            'onPreRead',
+            'onPostRead',
+            'onPreHas',
+            'onPostHas',
+            'onPreQuery',
+            'onPostQuery',
+            'onPreCount',
+            'onPostCount'
+        ];
 
     protected static $KEY_DATASTORE_CLASS = AspectAbstract::class;
 
@@ -61,10 +91,25 @@ class AspectAbstractFactory extends DataStoreAbstractFactory
 
             // attach listeners
             if (!empty($serviceConfig[self::KEY_LISTENERS]) && is_array($serviceConfig[self::KEY_LISTENERS])) {
-                foreach ($serviceConfig[self::KEY_LISTENERS] as $action => $handlers) {
-                    if (!empty($handlers) && is_array($handlers)) {
-                        foreach ($handlers as $handler) {
-                            $eventManager->attach($action, (is_string($handler)) ? $container->get($handler) : $handler);
+                foreach ($serviceConfig[self::KEY_LISTENERS] as $k => $value) {
+                    if (!empty($value)) {
+                        // listener as class with events methods
+                        if (is_string($value)) {
+                            $listener = $container->get($value);
+                            foreach (self::EVENTS as $method) {
+                                if (method_exists($listener, $method)) {
+                                    $eventManager->attach($method, function ($event) use ($listener, $method) {
+                                        $listener->$method($event);
+                                    });
+                                }
+                            }
+                        }
+
+                        // listener is a callable class for certain event
+                        if (is_array($value)) {
+                            foreach ($value as $handler) {
+                                $eventManager->attach($k, (is_string($handler)) ? $container->get($handler) : $handler);
+                            }
                         }
                     }
                 }
