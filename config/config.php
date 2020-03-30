@@ -17,10 +17,6 @@ if (is_file('.env')) {
 $appEnv = getenv('APP_ENV');
 
 $aggregator = new ConfigAggregator([
-    \Zend\HttpHandlerRunner\ConfigProvider::class,
-    \Zend\Log\ConfigProvider::class,
-    \Zend\Cache\ConfigProvider::class,
-    \Zend\Mail\ConfigProvider::class,
     \Zend\Db\ConfigProvider::class,
     \Zend\Validator\ConfigProvider::class,
 
