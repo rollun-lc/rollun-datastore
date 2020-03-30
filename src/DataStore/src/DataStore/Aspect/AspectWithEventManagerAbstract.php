@@ -253,6 +253,106 @@ class AspectWithEventManagerAbstract extends AspectAbstract implements WithEvent
     /**
      * @inheritDoc
      */
+    protected function preMultiCreate($records)
+    {
+        $this->triggerEvent('onPreMultiCreate', ['records' => $records]);
+
+        return parent::preMultiCreate($records);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function postMultiCreate($result, $records)
+    {
+        $this->triggerEvent('onPostMultiCreate', ['result' => $result, 'records' => $records]);
+
+        return parent::postMultiCreate($result, $records);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function preMultiUpdate($records)
+    {
+        $this->triggerEvent('onPreMultiUpdate', ['records' => $records]);
+
+        return parent::preMultiUpdate($records);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function postMultiUpdate($result, $records)
+    {
+        $this->triggerEvent('onPostMultiUpdate', ['result' => $result, 'records' => $records]);
+
+        return parent::postMultiUpdate($result, $records);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function preQueriedUpdate(&$record, Query $query)
+    {
+        $this->triggerEvent('onPreQueriedUpdate', ['record' => $record, 'query' => $query]);
+
+        return parent::preQueriedUpdate($record, $query);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function postQueriedUpdate($result, $record, Query $query)
+    {
+        $this->triggerEvent('onPostQueriedUpdate', ['result' => $result, 'record' => $record, 'query' => $query]);
+
+        return parent::postQueriedUpdate($result, $record, $query);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function preRewrite($record)
+    {
+        $this->triggerEvent('onPreRewrite', ['record' => $record]);
+
+        return parent::preRewrite($record);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function postRewrite($result, $record)
+    {
+        $this->triggerEvent('onPostRewrite', ['result' => $result, 'record' => $record]);
+
+        return parent::postRewrite($result, $record);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function preQueriedDelete(Query $query)
+    {
+        $this->triggerEvent('onPreQueriedDelete', ['query' => $query]);
+
+        return parent::preQueriedDelete($query);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function postQueriedDelete($result, Query $query)
+    {
+        $this->triggerEvent('onPostQueriedDelete', ['result' => $result, 'query' => $query]);
+
+        return parent::postQueriedDelete($result, $query);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getEventManager(): EventManagerInterface
     {
         return $this->eventManager;

@@ -23,7 +23,7 @@ use Zend\EventManager\EventManager;
  *     'real_service_name_for_aspect_datastore' => [
  *         'class' => 'rollun\datastore\DataStore\Aspect\AspectAbstract',
  *         'dataStore' => 'real_service_name_of_any_type_of_datastore'  // this service must be exist
- *         'listeners' => ['onPostCreate' => ['Callable1', 'Callable2']]
+ *         'listeners' => [\App\Listener\SomeListener::class, 'onPostCreate' => ['Callable1', 'Callable2']]
  *     ]
  * ]
  * </code>
@@ -63,7 +63,17 @@ class AspectAbstractFactory extends DataStoreAbstractFactory
             'onPreQuery',
             'onPostQuery',
             'onPreCount',
-            'onPostCount'
+            'onPostCount',
+            'onPreMultiCreate',
+            'onPostMultiCreate',
+            'onPreMultiUpdate',
+            'onPostMultiUpdate',
+            'onPreQueriedUpdate',
+            'onPostQueriedUpdate',
+            'onPreRewrite',
+            'onPostRewrite',
+            'onPreQueriedDelete',
+            'onPostQueriedDelete',
         ];
 
     protected static $KEY_DATASTORE_CLASS = AspectAbstract::class;

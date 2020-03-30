@@ -6,8 +6,9 @@
 
 namespace rollun\datastore\DataStore\Aspect;
 
-use Xiag\Rql\Parser\Query;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use Xiag\Rql\Parser\Query;
 
 /**
  * Class AspectAbstract
@@ -21,7 +22,7 @@ use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
  * @see AspectAbstractFactory
  * @package rollun\datastore\DataStore\Aspect
  */
-class AspectAbstract implements DataStoresInterface
+class AspectAbstract implements DataStoresInterface, DataStoreInterface
 {
     /** @var DataStoresInterface $dataStore */
     protected $dataStore;
@@ -410,6 +411,167 @@ class AspectAbstract implements DataStoresInterface
      * @return mixed
      */
     protected function postCount($result)
+    {
+        return $result;
+    }
+
+    /**
+     * @param mixed $records
+     *
+     * @return mixed
+     */
+    protected function preMultiCreate($records)
+    {
+        return $records;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function multiCreate($records)
+    {
+        $records = $this->preMultiCreate($records);
+
+        $result = $this->dataStore->multiCreate($records);
+
+        return $this->postMultiCreate($result, $records);
+    }
+
+    /**
+     * @param mixed $result
+     * @param mixed $records
+     *
+     * @return mixed
+     */
+    protected function postMultiCreate($result, $records)
+    {
+        return $result;
+    }
+
+    /**
+     * @param mixed $records
+     *
+     * @return mixed
+     */
+    protected function preMultiUpdate($records)
+    {
+        return $records;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function multiUpdate($records)
+    {
+        $records = $this->preMultiUpdate($records);
+
+        $result = $this->dataStore->multiUpdate($records);
+
+        return $this->postMultiUpdate($result, $records);
+    }
+
+    /**
+     * @param mixed $result
+     * @param mixed $records
+     *
+     * @return mixed
+     */
+    protected function postMultiUpdate($result, $records)
+    {
+        return $result;
+    }
+
+    /**
+     * @param mixed $record
+     * @param Query $query
+     */
+    protected function preQueriedUpdate(&$record, Query $query)
+    {
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function queriedUpdate($record, Query $query)
+    {
+        $this->preQueriedUpdate($record, $query);
+
+        $result = $this->dataStore->queriedUpdate($record, $query);
+
+        return $this->postQueriedUpdate($result, $record, $query);
+    }
+
+    /**
+     * @param mixed $result
+     * @param mixed $record
+     * @param Query $query
+     *
+     * @return mixed
+     */
+    protected function postQueriedUpdate($result, $record, Query $query)
+    {
+        return $result;
+    }
+
+    /**
+     * @param mixed $record
+     *
+     * @return mixed
+     */
+    protected function preRewrite($record)
+    {
+        return $record;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function rewrite($record)
+    {
+        $record = $this->preRewrite($record);
+
+        $result = $this->dataStore->rewrite($record);
+
+        return $this->postRewrite($result, $record);
+    }
+
+    /**
+     * @param mixed $result
+     * @param mixed $record
+     *
+     * @return mixed
+     */
+    protected function postRewrite($result, $record)
+    {
+        return $result;
+    }
+
+    /**
+     * @param Query $query
+     */
+    protected function preQueriedDelete(Query $query)
+    {
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function queriedDelete(Query $query)
+    {
+        $this->preQueriedDelete($query);
+
+        $result = $this->dataStore->queriedDelete($query);
+
+        return $this->postQueriedDelete($result, $query);
+    }
+
+    /**
+     * @param mixed $result
+     * @param Query $query
+     *
+     * @return mixed
+     */
+    protected function postQueriedDelete($result, Query $query)
     {
         return $result;
     }
