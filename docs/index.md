@@ -983,3 +983,91 @@ var_dump($dataStoreTo->read(3)); // ['id' => 3, 'name' => 'foo3']
     ]
 ]
 ```
+
+#### Apects, EventManager
+Библиотека поддерживает aspect pattern и observer pattern(Zend EventManager), что дает возможность выполнять дополнительные действие до события или после.
+
+Пример конфигурации для оборачивания датастора в аспект с eventManager:
+```php
+[
+        'dataStore' => [
+            'aspectDataStore1' => [ // оборачивает dataStore1 в аспект
+                'class'     => \rollun\datastore\DataStore\Aspect\AspectAbstract::class, //  здесь указываем класс в котором будут методы аспекта, например preCreate
+                'dataStore' => 'dataStore1' // указывем dataStore
+            ],
+            'aspectDataStore2' => [
+                'class'     => \rollun\datastore\DataStore\Aspect\AspectWithEventManagerAbstract::class, // оборачиваем dataStore1 в аспект с event manager
+                'dataStore' => 'dataStore1',
+                'listeners' => [ // указывем слушатели 
+                    \App\Listener\DataStoreMasterListener::class, // указывем класс которые наследник \rollun\datastore\DataStore\Aspect\AbstractAspectListener
+                    // или
+                    'onPostCreate' => ['postCreateUpdateHandler'], //  здесь нужно указать callable 
+                ]
+            ],
+            'dataStore1'       => [
+                'class'     => \rollun\datastore\DataStore\DbTable::class,
+                'tableName' => 'datastore_1',
+            ],
+        ],
+]
+```
+
+Пример слушателя:
+```php
+<?php
+declare(strict_types=1);
+
+namespace App\Listener;
+
+use rollun\datastore\DataStore\Aspect\AbstractAspectListener;
+use rollun\datastore\DataStore\DbTable;
+use rollun\dic\InsideConstruct;
+use Zend\EventManager\Event;
+
+/**
+ * Class DataStoreMasterListener
+ *
+ * @author Roman Ratsun <r.ratsun.rollun@gmail.com>
+ */
+class DataStoreMasterListener extends AbstractAspectListener
+{
+    /**
+     * @var DbTable
+     */
+    private $dataStore;
+
+    /**
+     * DataStoreMasterListener constructor.
+     *
+     * @throws \ReflectionException
+     */
+    public function __construct()
+    {
+        InsideConstruct::init(['dataStore' => 'dataStore2']);
+    }
+
+    /**
+     * @param Event $event
+     */
+    public function onPostCreate(Event $event)
+    {
+       // реализация
+    }
+
+     /**
+     * @inheritDoc
+     */
+    public function __sleep()
+    {
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function __wakeup()
+    {
+        InsideConstruct::initWakeup(['dataStore' => 'dataStore2']);
+    }
+}
+```
