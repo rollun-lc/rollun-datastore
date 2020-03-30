@@ -7,6 +7,7 @@
 namespace rollun\datastore\Middleware;
 
 use Psr\Http\Server\MiddlewareInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 
 /**
@@ -18,16 +19,21 @@ use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 abstract class DataStoreAbstract implements MiddlewareInterface
 {
     /**
-     * @var DataStoresInterface
+     * @var DataStoresInterface|DataStoreInterface
      */
     protected $dataStore;
 
     /**
      * DataStoreAbstract constructor.
-     * @param DataStoresInterface $dataStore
+     *
+     * @param DataStoresInterface|DataStoreInterface $dataStore
      */
-    public function __construct(DataStoresInterface $dataStore)
+    public function __construct($dataStore)
     {
-        $this->dataStore = $dataStore;
+        if ($dataStore instanceof DataStoreInterface || $dataStore instanceof DataStoresInterface) {
+            $this->dataStore = $dataStore;
+        } else {
+            throw new \InvalidArgumentException("DataStore '$dataStore' should be instance of DataStoreInterface or DataStoresInterface");
+        }
     }
 }
