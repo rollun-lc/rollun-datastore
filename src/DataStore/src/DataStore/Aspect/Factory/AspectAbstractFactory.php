@@ -7,6 +7,7 @@
 namespace rollun\datastore\DataStore\Aspect\Factory;
 
 use Interop\Container\ContainerInterface;
+use rollun\datastore\DataStore\Aspect\AbstractAspectListener;
 use rollun\datastore\DataStore\Aspect\AspectAbstract;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Factory\DataStoreAbstractFactory;
@@ -94,14 +95,9 @@ class AspectAbstractFactory extends DataStoreAbstractFactory
                 foreach ($serviceConfig[self::KEY_LISTENERS] as $k => $value) {
                     if (!empty($value)) {
                         // listener as class with events methods
-                        if (is_string($value)) {
-                            $listener = $container->get($value);
+                        if (is_string($value) && is_a($value, AbstractAspectListener::class, true)) {
                             foreach (self::EVENTS as $method) {
-                                if (method_exists($listener, $method)) {
-                                    $eventManager->attach($method, function ($event) use ($listener, $method) {
-                                        $listener->$method($event);
-                                    });
-                                }
+                                $eventManager->attach($method, $container->get($value));
                             }
                         }
 
