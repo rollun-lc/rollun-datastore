@@ -25,6 +25,59 @@ class HttpClientTest extends TestCase
         return new HttpClient($clientMock, $url, $options);
     }
 
+    public function testMultiCreateSuccess()
+    {
+        $items = [['id' => 1, 'name' => 'name']];
+        $url = '';
+        $clientMock = $this->createClientMock('POST', $url);
+        $clientMock->expects($this->once())
+            ->method('setRawBody')
+            ->with(Serializer::jsonSerialize($items));
+
+        $response = $this->createResponse($items);
+        $response->expects($this->once())
+            ->method('isSuccess')
+            ->willReturn(true);
+
+        $clientMock->expects($this->once())
+            ->method('send')
+            ->willReturn($response);
+
+        $this->assertEquals($this->createObject($clientMock, $url)->multiCreate($items), $items);
+    }
+
+    public function testMultiCreateFail()
+    {
+        $items = [['id' => 1, 'name' => 'name']];
+        $url = '';
+
+        $clientMock = $this->createClientMock('POST', $url);
+        $clientMock->expects($this->once())
+            ->method('setRawBody')
+            ->with(Serializer::jsonSerialize($items));
+
+        $response = $this->createResponse('');
+        $response->expects($this->once())
+            ->method('isSuccess')
+            ->willReturn(false);
+
+        $clientMock->expects($this->once())
+            ->method('send')
+            ->willReturn($response);
+
+        try {
+            $this->createObject($clientMock, $url)->multiCreate($items);
+        } catch (DataStoreException $e) {
+            $this->assertEquals("Can't create items POST", $e->getMessage());
+        }
+
+        try {
+            $this->createObject($clientMock, $url)->multiCreate(['id' => 1, 'name' => 'name']);
+        } catch (DataStoreException $e) {
+            $this->assertEquals("Collection of arrays expected", $e->getMessage());
+        }
+    }
+
     public function testCreateSuccess()
     {
         $items = ['id' => 1, 'name' => 'name',];

@@ -200,6 +200,32 @@ class HttpClient extends DataStoreAbstract
     }
 
     /**
+     * @inheritDoc
+     *
+     * @throws DataStoreException
+     * @throws \rollun\utils\Json\Exception
+     */
+    public function multiCreate($records)
+    {
+        if (!isset($records[0]) || !is_array($records[0])) {
+            throw new DataStoreException('Collection of arrays expected');
+        }
+
+        $client = $this->initHttpClient(Request::METHOD_POST, $this->url);
+        $client->setRawBody(Serializer::jsonSerialize($records));
+        $response = $client->send();
+
+        if ($response->isSuccess()) {
+            $result = Serializer::jsonUnserialize($response->getBody());
+        } else {
+            $responseMessage = $this->createResponseMessage($this->url, Request::METHOD_POST, $response);
+            throw new DataStoreException("Can't create items {$responseMessage}");
+        }
+
+        return $result;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function update($itemData, $createIfAbsent = false)
