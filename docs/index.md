@@ -161,12 +161,14 @@ $client = new Client();
 $url = 'http://example.com';
 
 $httpClient = new HttpClient($client, $url);
-$httpClient->create([
-    'id' => 1,
-    'name' => 'foo'
-]);
+$httpClient->multiCreate(
+    [
+        ['id' => 1, 'name' => 'name 1'],
+        ['id' => 2, 'name' => 'name 2']
+    ]
+);
 
-var_dump($httpClient->read(1)); // ['id' => '1', 'name' => 'foo']
+var_dump($httpClient->read(1)); // ['id' => '1', 'name' => 'name 1']
 ```
 
 ##### 4. `Memory`
