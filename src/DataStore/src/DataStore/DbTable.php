@@ -424,7 +424,7 @@ class DbTable extends DataStoreAbstract
             $multiInsertTableGw->getAdapter()->getDriver()->getConnection()->rollback();
 
             throw new DataStoreException(
-                "Exception by multi create to table {$this->dbTable->table}.",
+                "Exception by multi create to table {$this->dbTable->table}. Details: {$throwable->getMessage()}",
                 500,
                 $throwable
             );
