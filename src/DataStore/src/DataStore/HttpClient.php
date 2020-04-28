@@ -286,6 +286,7 @@ class HttpClient extends DataStoreAbstract
             $uri,
             $response->getStatusCode(),
             $response->getReasonPhrase(),
+            $response->getBody(),
         ];
 
         switch ($response->getStatusCode()) {
