@@ -79,6 +79,16 @@ class HttpClient extends DataStoreAbstract
         $this->conditionBuilder = new RqlConditionBuilder();
     }
 
+    public function getIdentifier()
+    {
+        $client = $this->initHttpClient(Request::METHOD_HEAD, $this->url);
+        $response = $client->send();
+        if ($response->isSuccess() && $response->getHeaders()->has('X_DATASTORE_IDENTIFIER')) {
+            return $response->getHeaders()->get('X_DATASTORE_IDENTIFIER')->getFieldValue();
+        }
+        return parent::getIdentifier();
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -211,15 +221,26 @@ class HttpClient extends DataStoreAbstract
             throw new DataStoreException('Collection of arrays expected');
         }
 
-        $client = $this->initHttpClient(Request::METHOD_POST, $this->url);
-        $client->setRawBody(Serializer::jsonSerialize($records));
+        $client = $this->initHttpClient(Request::METHOD_HEAD, $this->url);
         $response = $client->send();
-
-        if ($response->isSuccess()) {
-            $result = Serializer::jsonUnserialize($response->getBody());
+        if ($response->isSuccess() && $response->getHeaders()->get('X_MULTI_CREATE')) {
+            $client = $this->initHttpClient(Request::METHOD_POST, $this->url);
+            $client->setRawBody(Serializer::jsonSerialize($records));
+            $response = $client->send();
+            if ($response->isSuccess()) {
+                $result = Serializer::jsonUnserialize($response->getBody());
+            } else {
+                $responseMessage = $this->createResponseMessage($this->url, Request::METHOD_POST, $response);
+                throw new DataStoreException("Can't create items {$responseMessage}");
+            }
         } else {
-            $responseMessage = $this->createResponseMessage($this->url, Request::METHOD_POST, $response);
-            throw new DataStoreException("Can't create items {$responseMessage}");
+            $client = $this->initHttpClient(Request::METHOD_POST, $this->url);
+            $result = [];
+            foreach ($records as $record) {
+                $client->setRawBody(Serializer::jsonSerialize($record));
+                $response = $client->send();
+                $result[] = Serializer::jsonUnserialize($response->getBody());
+            }
         }
 
         return $result;
