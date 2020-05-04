@@ -81,11 +81,13 @@ class HttpClient extends DataStoreAbstract
 
     public function getIdentifier()
     {
+        /*
+         * NOT USE, when head request not support, cast to GET!
         $client = $this->initHttpClient(Request::METHOD_HEAD, $this->url);
         $response = $client->send();
         if ($response->isSuccess() && $response->getHeaders()->has('X_DATASTORE_IDENTIFIER')) {
             return $response->getHeaders()->get('X_DATASTORE_IDENTIFIER')->getFieldValue();
-        }
+        }*/
         return parent::getIdentifier();
     }
 
