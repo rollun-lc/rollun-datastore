@@ -91,6 +91,16 @@ class HttpClient extends DataStoreAbstract
         return parent::getIdentifier();
     }
 
+    protected function sendHead()
+    {
+        $client = $this->initHttpClient(Request::METHOD_HEAD, "{$this->url}?limit(1)");
+        $response = $client->send();
+        if ($response->isSuccess()) {
+            return $response->getHeaders()->toArray();
+        }
+        return  null;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -223,9 +233,8 @@ class HttpClient extends DataStoreAbstract
             throw new DataStoreException('Collection of arrays expected');
         }
 
-        $client = $this->initHttpClient(Request::METHOD_HEAD, $this->url);
-        $response = $client->send();
-        if ($response->isSuccess() && $response->getHeaders()->get('X_MULTI_CREATE')) {
+        $head = $this->sendHead();
+        if ($head && isset($head['X_MULTI_CREATE'])) {
             $client = $this->initHttpClient(Request::METHOD_POST, $this->url);
             $client->setRawBody(Serializer::jsonSerialize($records));
             $response = $client->send();
