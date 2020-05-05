@@ -105,9 +105,12 @@ class AspectAbstractFactory extends DataStoreAbstractFactory
                 foreach ($serviceConfig[self::KEY_LISTENERS] as $k => $value) {
                     if (!empty($value)) {
                         // listener as class with events methods
-                        if (is_string($value) && is_a($value, AbstractAspectListener::class, true)) {
-                            foreach (self::EVENTS as $method) {
-                                $eventManager->attach($method, $container->get($value));
+                        if (is_string($value) && $container->has($value)) {
+                            $service = $container->get($value);
+                            if ($service instanceof AbstractAspectListener) {
+                                foreach (self::EVENTS as $method) {
+                                    $eventManager->attach($method, $service);
+                                }
                             }
                         }
 
