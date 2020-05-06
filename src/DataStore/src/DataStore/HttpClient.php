@@ -79,6 +79,28 @@ class HttpClient extends DataStoreAbstract
         $this->conditionBuilder = new RqlConditionBuilder();
     }
 
+    public function getIdentifier()
+    {
+        /*
+         * NOT USE, when head request not support, cast to GET!
+        $client = $this->initHttpClient(Request::METHOD_HEAD, $this->url);
+        $response = $client->send();
+        if ($response->isSuccess() && $response->getHeaders()->has('X_DATASTORE_IDENTIFIER')) {
+            return $response->getHeaders()->get('X_DATASTORE_IDENTIFIER')->getFieldValue();
+        }*/
+        return parent::getIdentifier();
+    }
+
+    protected function sendHead()
+    {
+        $client = $this->initHttpClient(Request::METHOD_HEAD, "{$this->url}?limit(1)");
+        $response = $client->send();
+        if ($response->isSuccess()) {
+            return $response->getHeaders()->toArray();
+        }
+        return  null;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -211,15 +233,25 @@ class HttpClient extends DataStoreAbstract
             throw new DataStoreException('Collection of arrays expected');
         }
 
-        $client = $this->initHttpClient(Request::METHOD_POST, $this->url);
-        $client->setRawBody(Serializer::jsonSerialize($records));
-        $response = $client->send();
-
-        if ($response->isSuccess()) {
-            $result = Serializer::jsonUnserialize($response->getBody());
+        $head = $this->sendHead();
+        if ($head && isset($head['X_MULTI_CREATE'])) {
+            $client = $this->initHttpClient(Request::METHOD_POST, $this->url);
+            $client->setRawBody(Serializer::jsonSerialize($records));
+            $response = $client->send();
+            if ($response->isSuccess()) {
+                $result = Serializer::jsonUnserialize($response->getBody());
+            } else {
+                $responseMessage = $this->createResponseMessage($this->url, Request::METHOD_POST, $response);
+                throw new DataStoreException("Can't create items {$responseMessage}");
+            }
         } else {
-            $responseMessage = $this->createResponseMessage($this->url, Request::METHOD_POST, $response);
-            throw new DataStoreException("Can't create items {$responseMessage}");
+            $client = $this->initHttpClient(Request::METHOD_POST, $this->url);
+            $result = [];
+            foreach ($records as $record) {
+                $client->setRawBody(Serializer::jsonSerialize($record));
+                $response = $client->send();
+                $result[] = Serializer::jsonUnserialize($response->getBody());
+            }
         }
 
         return $result;
@@ -286,6 +318,7 @@ class HttpClient extends DataStoreAbstract
             $uri,
             $response->getStatusCode(),
             $response->getReasonPhrase(),
+            $response->getBody(),
         ];
 
         switch ($response->getStatusCode()) {

@@ -123,20 +123,16 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
             : $query->getLimit()
                 ->getOffset();
 
-        if (isset($limitNode) && $query->getSort() !== null) {
-            $data = $this->queryWhere($query, self::LIMIT_INFINITY, 0);
-            $sortedData = $this->querySort($data, $query);
-            $result = array_slice($sortedData, $offset, $limit == self::LIMIT_INFINITY ? null : $limit);
-        } else {
-            $data = $this->queryWhere($query, $limit, $offset);
-            $result = $this->querySort($data, $query);
-        }
+        $data = $this->queryWhere($query, self::LIMIT_INFINITY, 0);//Mus be disable
+        $result = $this->querySort($data, $query);
 
         if ($query instanceof RqlQuery && $query->getGroupBy() != null) {
             $result = $this->queryGroupBy($result, $query);
         } else {
             $result = $this->querySelect($result, $query);
         }
+
+        $result = array_slice($result, $offset, $limit == self::LIMIT_INFINITY ? null : $limit);
 
         // Filled item unset field
         $itemFiled = [];
