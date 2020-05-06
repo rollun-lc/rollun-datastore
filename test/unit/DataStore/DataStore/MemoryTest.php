@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Memory;
+use rollun\datastore\Rql\RqlParser;
 use rollun\datastore\Rql\RqlQuery;
 
 class MemoryTest extends TestCase
@@ -17,6 +18,67 @@ class MemoryTest extends TestCase
     protected function createObject($columns = [])
     {
         return new Memory($columns);
+    }
+
+    /**
+     * @return array
+     */
+    public function getQueryDataProvider(): array
+    {
+        $data = [
+            [
+                'id'    => 1,
+                'name'  => 'name 1',
+                'price' => 440,
+            ],
+            [
+                'id'    => 2,
+                'name'  => 'name 2',
+                'price' => 500,
+            ],
+            [
+                'id'    => 3,
+                'name'  => 'name 3',
+                'price' => 1500,
+            ],
+            [
+                'id'    => 4,
+                'name'  => 'name 4',
+                'price' => 2250,
+            ],
+            [
+                'id'    => 5,
+                'name'  => 'name 2',
+                'price' => 10,
+            ]
+        ];
+
+        return [
+            [$data, 'select(max(price))', '[{"max(price)":2250}]'],
+            [$data, 'select(min(id))', '[{"min(id)":1}]'],
+            [$data, 'select(max(price))&le(id,3)', '[{"max(price)":1500}]'],
+            [$data, 'select(max(price))&gt(id,15)', '[{"max(price)":null}]'],
+            [$data, 'select(id)&gt(id,2)&limit(1,1)', '[{"id":4}]'],
+            [$data, 'select(id,sum(price))&not(eq(id,5))&sort(-id)&limit(1,0)', '[{"id":4,"sum(price)":4690}]'],
+            [$data, 'select(id,name,price)&sort(-name)&limit(2,1)', '[{"id":3,"name":"name 3","price":1500},{"id":2,"name":"name 2","price":500}]'],
+        ];
+    }
+
+    /**
+     * @param array  $data
+     * @param string $query
+     * @param string $expected
+     *
+     * @dataProvider getQueryDataProvider
+     */
+    public function testQuery(array $data, string $query, string $expected)
+    {
+        $memory = $this->createObject();
+        foreach ($data as $row) {
+            $memory->create($row);
+        }
+
+        $this->assertEquals($expected, json_encode($memory->query(RqlParser::rqlDecode($query))));
     }
 
     public function testCreateFailWithItemExist()
