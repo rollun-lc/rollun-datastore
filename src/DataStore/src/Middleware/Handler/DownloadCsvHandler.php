@@ -16,6 +16,7 @@ use Zend\Diactoros\Stream;
  */
 class DownloadCsvHandler extends AbstractHandler
 {
+    const HEADER = 'download';
     const DELIMITER = ',';
     const ENCLOSURE = '"';
     const ESCAPE_CHAR = '\\';
@@ -25,9 +26,11 @@ class DownloadCsvHandler extends AbstractHandler
      */
     public function canHandle(ServerRequestInterface $request): bool
     {
-        foreach ($request->getHeader('download') as $item) {
-            if ($item == 'csv') {
-                return true;
+        if ($request->getMethod() == 'GET') {
+            foreach ($request->getHeader(self::HEADER) as $item) {
+                if ($item == 'csv') {
+                    return true;
+                }
             }
         }
 

@@ -417,9 +417,35 @@ $app->route(
 
 **Заголовки запроса**
 - `Datastore-Scheme` - заголовок в котором указан `json` закодирована схема `Datastore`, если он обернут в `AspectType`.
-
 - `X_MULTI_CREATE` - заголовок, который свидетельствует поддержки multiCreate 
-- `X_DATASTORE_IDENTIFIER` - заголовок в котором указан название ID колонки 
+- `X_DATASTORE_IDENTIFIER` - заголовок в котором указан название ID колонки
+- `Download` - заголовок указывает на то, что мы хотим скачать файл. В значение следует указать тип файла. Например csv.
+
+Псевдокод для скачивания данный по клику на кнопку:
+```javascript
+    $('#GetFile').on('click', function () {
+        $.ajax({
+            beforeSend: function (jqXHR, settings) {
+                jqXHR.setRequestHeader('Download', 'csv');
+            },
+            url: 'http://rollun.local/api/datastore/dataStore1',
+            method: 'GET',
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function (data) {
+                var a = document.createElement('a');
+                var url = window.URL.createObjectURL(data);
+                a.href = url;
+                a.download = 'test.csv';
+                document.body.append(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            }
+        });
+    });
+```  
 
 ### RQL
 
