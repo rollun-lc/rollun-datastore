@@ -417,9 +417,35 @@ $app->route(
 
 **Заголовки запроса**
 - `Datastore-Scheme` - заголовок в котором указан `json` закодирована схема `Datastore`, если он обернут в `AspectType`.
-
 - `X_MULTI_CREATE` - заголовок, который свидетельствует поддержки multiCreate 
-- `X_DATASTORE_IDENTIFIER` - заголовок в котором указан название ID колонки 
+- `X_DATASTORE_IDENTIFIER` - заголовок в котором указан название ID колонки
+- `Download` - заголовок указывает на то, что мы хотим скачать файл. В значение следует указать тип файла. Например csv.
+
+Псевдокод для скачивания данный по клику на кнопку:
+```javascript
+    $('#GetFile').on('click', function () {
+        $.ajax({
+            beforeSend: function (jqXHR, settings) {
+                jqXHR.setRequestHeader('Download', 'csv');
+            },
+            url: 'http://rollun.local/api/datastore/dataStore1',
+            method: 'GET',
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function (data) {
+                var a = document.createElement('a');
+                var url = window.URL.createObjectURL(data);
+                a.href = url;
+                a.download = 'test.csv';
+                document.body.append(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            }
+        });
+    });
+```  
 
 ### RQL
 
@@ -1076,3 +1102,31 @@ class DataStoreMasterListener extends AbstractAspectListener
     }
 }
 ```
+
+#### FileObject
+Библиотека предоставляет объект (расширяет SplFileObject) для работы с файлами. Преимущества данного объекта в том, что здесь реализованы блокировки файлов, что существенно упростят работу.
+Пример использования:
+```php
+<?php
+use rollun\files\FileObject;
+
+$fileObject = new FileObject('some-file.csv');
+$fileObject->fwriteWithCheck('012345');
+$fileObject->moveSubStr(3, 1);
+$fileObject->fseek(0);
+$actual = $fileObject->fread(100); // '0345'
+``` 
+Для более подробного изучения ознакомьтесь с юнит [тестами](../test/unit/Files/FileObject).
+
+#### CsvFileObject, CsvFileObjectWithPrKey
+Библиотека предоставляет объекты для работы с csv файлами. CsvFileObjectWithPrKey работает с файлами используя разные стратегии. По умолчанию используется стратегия бинарного поиска, что в разы ускоряет поиск нужной нам строки.
+Пример использования:
+```php
+<?php
+use rollun\files\Csv\CsvFileObjectWithPrKey;
+
+$fileObject = new CsvFileObjectWithPrKey('some-file.csv');
+$result = $fileObject->getRowById('1'); // array
+
+``` 
+Для более подробного изучения ознакомьтесь с юнит [тестами](../test/unit/Files/CsvFileObject).
