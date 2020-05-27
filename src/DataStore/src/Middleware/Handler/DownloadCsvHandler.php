@@ -21,7 +21,7 @@ class DownloadCsvHandler extends AbstractHandler
     const DELIMITER = ',';
     const ENCLOSURE = '"';
     const ESCAPE_CHAR = '\\';
-    const LIMIT = 5000;
+    const LIMIT = 8000;
 
     /**
      * @inheritDoc
@@ -54,7 +54,7 @@ class DownloadCsvHandler extends AbstractHandler
         $rqlQuery = $request->getAttribute('rqlQueryObject');
 
         // create csv file
-        $file = fopen('php://memory', 'w');
+        $file = fopen('php://temp', 'w');
 
         $offset = 0;
 
