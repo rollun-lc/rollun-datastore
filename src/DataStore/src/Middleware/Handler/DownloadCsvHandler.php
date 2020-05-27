@@ -7,6 +7,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Query;
+use Zend\Diactoros\Response;
+use Zend\Diactoros\Stream;
 
 /**
  * Class DownloadCsvHandler
@@ -51,19 +53,8 @@ class DownloadCsvHandler extends AbstractHandler
         /** @var Query $rqlQuery */
         $rqlQuery = $request->getAttribute('rqlQueryObject');
 
-        /**
-         *  Prepare headers
-         */
-        header("Content-Type: text/csv;charset=utf-8");
-        header("Content-Disposition: attachment;filename=\"$fileName\"");
-        header("Pragma: no-cache");
-        header("Expires: 0");
-
-        // get the headers out immediately to show the download dialog
-        flush();
-
         // create csv file
-        $fp = fopen('php://output', 'w');
+        $file = fopen('php://memory', 'w');
 
         $offset = 0;
 
@@ -73,16 +64,29 @@ class DownloadCsvHandler extends AbstractHandler
             $items = $dataStore->query($rqlQuery);
 
             foreach ($items as $line) {
-                fputcsv($fp, $line, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
+                fputcsv($file, $line, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
             }
-            flush();
 
             $offset = $offset + self::LIMIT;
         }
 
-        fclose($fp);
+        // set pointer to the beginning
+        fseek($file, 0);
 
-        exit();
+        $body = new Stream($file);
+
+        $response = (new Response())
+            ->withHeader('Content-Type', 'text/csv')
+            ->withHeader('Content-Disposition', 'attachment; filename=' . $fileName)
+            ->withHeader('Content-Transfer-Encoding', 'Binary')
+            ->withHeader('Content-Description', 'File Transfer')
+            ->withHeader('Pragma', 'public')
+            ->withHeader('Expires', '0')
+            ->withHeader('Cache-Control', 'must-revalidate')
+            ->withBody($body)
+            ->withHeader('Content-Length', "{$body->getSize()}");
+
+        return $response;
     }
 
     /**
