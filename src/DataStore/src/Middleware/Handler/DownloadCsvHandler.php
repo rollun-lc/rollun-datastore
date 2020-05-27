@@ -5,6 +5,7 @@ namespace rollun\datastore\Middleware\Handler;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Query;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
@@ -20,6 +21,7 @@ class DownloadCsvHandler extends AbstractHandler
     const DELIMITER = ',';
     const ENCLOSURE = '"';
     const ESCAPE_CHAR = '\\';
+    const LIMIT = 8000;
 
     /**
      * @inheritDoc
@@ -42,23 +44,34 @@ class DownloadCsvHandler extends AbstractHandler
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        /** @var Query $rqlQuery */
-        $rqlQuery = $request->getAttribute('rqlQueryObject');
-
-        $items = $this->dataStore->query($rqlQuery);
-
-        // create csv file
-        $file = fopen('php://memory', 'w');
-        foreach ($items as $line) {
-            fputcsv($file, $line, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
-        }
-
-        // set pointer to the beginning
-        fseek($file, 0);
+        $dataStore = $this->dataStore;
 
         // create file name
         $fileName = explode("/", $request->getUri()->getPath());
         $fileName = array_pop($fileName) . '.csv';
+
+        /** @var Query $rqlQuery */
+        $rqlQuery = $request->getAttribute('rqlQueryObject');
+
+        // create csv file
+        $file = fopen('php://temp', 'w');
+
+        $offset = 0;
+
+        $items = [1];
+        while (count($items) > 0) {
+            $rqlQuery->setLimit(new LimitNode(self::LIMIT, $offset));
+            $items = $dataStore->query($rqlQuery);
+
+            foreach ($items as $line) {
+                fputcsv($file, $line, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
+            }
+
+            $offset = $offset + self::LIMIT;
+        }
+
+        // set pointer to the beginning
+        fseek($file, 0);
 
         $body = new Stream($file);
 
