@@ -7,6 +7,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Query;
+use Zend\Diactoros\Response;
 
 /**
  * Class DownloadCsvHandler
@@ -79,7 +80,8 @@ class DownloadCsvHandler extends AbstractHandler
         }
 
         fclose($fp);
-        exit();
+
+        return new Response();
     }
 
     /**
