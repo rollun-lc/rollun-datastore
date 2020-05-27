@@ -7,7 +7,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Query;
-use Zend\Diactoros\Response;
 
 /**
  * Class DownloadCsvHandler
@@ -20,7 +19,7 @@ class DownloadCsvHandler extends AbstractHandler
     const DELIMITER = ',';
     const ENCLOSURE = '"';
     const ESCAPE_CHAR = '\\';
-    const LIMIT = 10000;
+    const LIMIT = 5000;
 
     /**
      * @inheritDoc
@@ -43,6 +42,8 @@ class DownloadCsvHandler extends AbstractHandler
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        $dataStore = $this->dataStore;
+
         // create file name
         $fileName = explode("/", $request->getUri()->getPath());
         $fileName = array_pop($fileName) . '.csv';
@@ -69,7 +70,7 @@ class DownloadCsvHandler extends AbstractHandler
         $items = [1];
         while (count($items) > 0) {
             $rqlQuery->setLimit(new LimitNode(self::LIMIT, $offset));
-            $items = $this->dataStore->query($rqlQuery);
+            $items = $dataStore->query($rqlQuery);
 
             foreach ($items as $line) {
                 fputcsv($fp, $line, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
@@ -81,7 +82,7 @@ class DownloadCsvHandler extends AbstractHandler
 
         fclose($fp);
 
-        return new Response();
+        exit();
     }
 
     /**
