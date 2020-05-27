@@ -5,9 +5,8 @@ namespace rollun\datastore\Middleware\Handler;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Query;
-use Zend\Diactoros\Response;
-use Zend\Diactoros\Stream;
 
 /**
  * Class DownloadCsvHandler
@@ -20,6 +19,7 @@ class DownloadCsvHandler extends AbstractHandler
     const DELIMITER = ',';
     const ENCLOSURE = '"';
     const ESCAPE_CHAR = '\\';
+    const LIMIT = 10000;
 
     /**
      * @inheritDoc
@@ -42,38 +42,44 @@ class DownloadCsvHandler extends AbstractHandler
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        /** @var Query $rqlQuery */
-        $rqlQuery = $request->getAttribute('rqlQueryObject');
-
-        $items = $this->dataStore->query($rqlQuery);
-
-        // create csv file
-        $file = fopen('php://memory', 'w');
-        foreach ($items as $line) {
-            fputcsv($file, $line, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
-        }
-
-        // set pointer to the beginning
-        fseek($file, 0);
-
         // create file name
         $fileName = explode("/", $request->getUri()->getPath());
         $fileName = array_pop($fileName) . '.csv';
 
-        $body = new Stream($file);
+        /** @var Query $rqlQuery */
+        $rqlQuery = $request->getAttribute('rqlQueryObject');
 
-        $response = (new Response())
-            ->withHeader('Content-Type', 'text/csv')
-            ->withHeader('Content-Disposition', 'attachment; filename=' . $fileName)
-            ->withHeader('Content-Transfer-Encoding', 'Binary')
-            ->withHeader('Content-Description', 'File Transfer')
-            ->withHeader('Pragma', 'public')
-            ->withHeader('Expires', '0')
-            ->withHeader('Cache-Control', 'must-revalidate')
-            ->withBody($body)
-            ->withHeader('Content-Length', "{$body->getSize()}");
+        /**
+         *  Prepare headers
+         */
+        header("Content-Type: text/csv;charset=utf-8");
+        header("Content-Disposition: attachment;filename=\"$fileName\"");
+        header("Pragma: no-cache");
+        header("Expires: 0");
 
-        return $response;
+        // get the headers out immediately to show the download dialog
+        flush();
+
+        // create csv file
+        $fp = fopen('php://output', 'w');
+
+        $offset = 0;
+
+        $items = [1];
+        while (count($items) > 0) {
+            $rqlQuery->setLimit(new LimitNode(self::LIMIT, $offset));
+            $items = $this->dataStore->query($rqlQuery);
+
+            foreach ($items as $line) {
+                fputcsv($fp, $line, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
+            }
+            flush();
+
+            $offset = $offset + self::LIMIT;
+        }
+
+        fclose($fp);
+        exit();
     }
 
     /**
