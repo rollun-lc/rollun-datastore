@@ -7,6 +7,8 @@
 namespace rollun\datastore\DataStore;
 
 use rollun\datastore\DataStore\ConditionBuilder\RqlConditionBuilder;
+use rollun\dic\InsideConstruct;
+use rollun\logger\LifeCycleToken;
 use rollun\utils\Json\Serializer;
 use Xiag\Rql\Parser\Query;
 use rollun\datastore\Rql\RqlParser;
@@ -55,13 +57,22 @@ class HttpClient extends DataStoreAbstract
     protected $options = [];
 
     /**
+     * @var LifeCycleToken
+     */
+    protected $lifeCycleToken;
+
+    /**
      * HttpClient constructor.
      * @param Client $client
      * @param $url
-     * @param null $options
+     * @param array $options
+     * @param LifeCycleToken|null $lifeCycleToken
+     * @throws \ReflectionException
      */
-    public function __construct(Client $client, $url, $options = null)
+    public function __construct(Client $client, $url, $options = [], LifeCycleToken $lifeCycleToken = null)
     {
+        InsideConstruct::setConstructParams(['lifeCycleToken' => LifeCycleToken::class]);
+
         $this->client = $client;
         $this->url = rtrim(trim($url), '/');
 
@@ -77,6 +88,23 @@ class HttpClient extends DataStoreAbstract
         }
 
         $this->conditionBuilder = new RqlConditionBuilder();
+    }
+
+    public function __wakeup()
+    {
+        InsideConstruct::initWakeup(['lifeCycleToken' => LifeCycleToken::class]);
+    }
+
+    public function __sleep()
+    {
+        return [
+            'url',
+            'login',
+            'password',
+            'client',
+            'options',
+            'conditionBuilder'
+        ];
     }
 
     public function getIdentifier()
@@ -98,7 +126,7 @@ class HttpClient extends DataStoreAbstract
         if ($response->isSuccess()) {
             return $response->getHeaders()->toArray();
         }
-        return  null;
+        return null;
     }
 
     /**
@@ -137,6 +165,8 @@ class HttpClient extends DataStoreAbstract
 
         $headers['Content-Type'] = 'application/json';
         $headers['Accept'] = 'application/json';
+        $headers['X-Life-Cycle-Token'] = $this->lifeCycleToken->serialize();
+        $headers['LifeCycleToken'] = $this->lifeCycleToken->serialize();
 
         if ($ifMatch) {
             $headers['If-Match'] = '*';
