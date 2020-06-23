@@ -110,7 +110,7 @@ class DbTable extends DataStoreAbstract
     public function update($itemData, $createIfAbsent = false)
     {
         if ($createIfAbsent) {
-            trigger_error("Option 'createIfAbsent' is no more use.", E_DEPRECATED);
+            trigger_error("Option 'createIfAbsent' is no more use.", E_USER_DEPRECATED);
         }
 
         if (!isset($itemData[$this->getIdentifier()])) {
