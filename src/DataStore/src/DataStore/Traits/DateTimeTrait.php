@@ -46,6 +46,6 @@ trait DateTimeTrait
             $itemData[DateTimeInterface::FIELD_UPDATED_AT] = $date->format($this->dateTimeFormat);
         }
 
-        return parent::update($itemData, $createIfAbsent);
+        return parent::updateItem($itemData, $createIfAbsent);
     }
 }
