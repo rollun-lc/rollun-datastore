@@ -211,6 +211,15 @@ class DbTable extends DataStoreAbstract
             $this->getDbTable()->getTable()
         );
 
+        // prepare record
+        foreach ($record as $k => $v) {
+            if ($v === false) {
+                $record[$k] = 0;
+            } elseif ($v === true) {
+                $record[$k] = 1;
+            }
+        }
+
         $sql = new Sql($this->getDbTable()->getAdapter());
         $update = $sql->update($this->getDbTable()->getTable());
         $update->where($conditionBuilder->__invoke($query->getQuery()));
