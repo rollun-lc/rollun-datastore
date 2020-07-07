@@ -29,7 +29,7 @@ trait MappingFieldsTrait
     public function createData($itemData, $rewriteIfExist = false)
     {
         $itemData = $this->prepareData($itemData);
-        return $this->callAttempts(function() use ($itemData) {
+        return $this->callAttempts(function() use ($itemData, $rewriteIfExist) {
             return $this->create($itemData, $rewriteIfExist);
         });
     }
