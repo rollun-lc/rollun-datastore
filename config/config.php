@@ -23,6 +23,7 @@ $aggregator = new ConfigAggregator([
     // Rollun config
     \rollun\uploader\ConfigProvider::class,
     \rollun\datastore\ConfigProvider::class,
+    \rollun\repository\ConfigProvider::class,
 
     // Default App module config
     // Load application config in a pre-defined order in such a way that local settings
