@@ -1,17 +1,17 @@
 <?php
 
 
-namespace rollun\test\unit\DataStore\DataStore\Model;
+namespace rollun\test\unit\Repository;
 
 
 use PHPUnit\Framework\TestCase;
-use rollun\datastore\DataStore\Model\Model;
+use rollun\repository\ModelAbstract;
 
-class ModelTest extends TestCase
+class ModelAbstractTest extends TestCase
 {
     public function testSetAttributeByMethod()
     {
-        $model = new class extends Model{};
+        $model = new class extends ModelAbstract {};
 
         $model->setAttribute('field', 'test');
 
@@ -20,7 +20,7 @@ class ModelTest extends TestCase
 
     public function testSetAttributeByProperty()
     {
-        $model = new class extends Model{};
+        $model = new class extends ModelAbstract {};
 
         $model->field = 'test';
 
@@ -29,7 +29,7 @@ class ModelTest extends TestCase
 
     public function testGetAttributeByMethod()
     {
-        $model = new class extends Model{};
+        $model = new class extends ModelAbstract {};
         $model->field = 'test';
 
         $field = $model->getAttribute('field');
@@ -39,7 +39,7 @@ class ModelTest extends TestCase
 
     public function getGetAttributeProperty()
     {
-        $model = new class extends Model{};
+        $model = new class extends ModelAbstract {};
         $model->field = 'test';
 
         $field = $model->field;
@@ -49,15 +49,32 @@ class ModelTest extends TestCase
 
     public function testFillAttributes()
     {
-        $model = new class extends Model{};
-
         $data = [
             'field' => 'test',
             'name' => 'hello',
         ];
-        $model->fill($data);
+        $model = new class($data) extends ModelAbstract {};
 
         $this->assertEquals($data['field'], $model->getAttributes()['field']);
         $this->assertEquals($data['name'], $model->getAttributes()['name']);
+    }
+
+    public function testHidden()
+    {
+        $data = [
+            'field' => 'test',
+            'name' => 'hello',
+            'hidden' => true,
+        ];
+        $model = new class($data) extends ModelAbstract {
+            public function hidden()
+            {
+                return ['hidden'];
+            }
+        };
+
+        $array = $model->toArray();
+
+        $this->assertFalse(isset($array['hidden']));
     }
 }

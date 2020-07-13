@@ -1,18 +1,13 @@
 <?php
 
-namespace rollun\datastore\DataStore\Model;
+namespace rollun\repository;
 
 
-use rollun\datastore\DataStore\Interfaces\ModelInterface;
-use rollun\datastore\DataStore\Model\ModelDataStore;
+use rollun\repository\Interfaces\ModelInterface;
+use rollun\repository\ModelRepository;
 
-abstract class Model implements ModelInterface
+abstract class ModelAbstract implements ModelInterface
 {
-    /**
-     * @var ModelDataStore
-     */
-    protected $dataStore;
-
     /**
      * @var array
      */
@@ -20,19 +15,11 @@ abstract class Model implements ModelInterface
 
     /**
      * Model constructor.
-     * @param ModelDataStore|null $dataStore
+     * @param array $attributes
      */
-    public function __construct()
+    public function __construct($attributes = [])
     {
-
-    }
-
-    /**
-     * @param ModelDataStore $dataStore
-     */
-    public function setDataStore(?ModelDataStore $dataStore)
-    {
-        $this->dataStore = $dataStore;
+        $this->fill($attributes);
     }
 
     public function __set($name, $value)
@@ -95,6 +82,17 @@ abstract class Model implements ModelInterface
      */
     public function toArray()
     {
-        return $this->getAttributes();
+        $attributes = $this->getAttributes();
+        foreach ($attributes as $key => $attribute) {
+            if (in_array($key, $this->hidden())) {
+                unset($attributes[$key]);
+            }
+        }
+        return $attributes;
+    }
+
+    protected function hidden()
+    {
+        return [];
     }
 }

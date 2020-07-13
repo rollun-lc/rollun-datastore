@@ -1,6 +1,6 @@
 <?php
 
-namespace rollun\datastore\DataStore\Interfaces;
+namespace rollun\repository\Interfaces;
 
 
 interface ModelInterface
