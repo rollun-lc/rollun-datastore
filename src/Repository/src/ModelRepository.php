@@ -29,7 +29,7 @@ class ModelRepository implements ModelRepositoryInterface
     /**
      * @var ModelInterface
      */
-    protected $model;
+    protected $modelClass;
 
     /**
      * @var FieldResolverInterface
@@ -40,15 +40,15 @@ class ModelRepository implements ModelRepositoryInterface
      * ModelRepository constructor.
      *
      * @param DataStoreAbstract $dataStore
-     * @param ModelInterface $model
+     * @param ModelInterface $modelClass
      */
     public function __construct(
         DataStoreAbstract $dataStore,
-        ModelInterface $model,
+        string $modelClass,
         FieldResolverInterface $resolver = null
     ) {
         $this->dataStore = $dataStore;
-        $this->model = $model;
+        $this->modelClass = $modelClass;
         $this->resolver = $resolver;
     }
 
@@ -76,7 +76,7 @@ class ModelRepository implements ModelRepositoryInterface
             $data = $this->resolver->resolve($data);
         }
 
-        $model = new $this->model($data);
+        $model = new $this->modelClass($data);
 
         return $model;
     }
