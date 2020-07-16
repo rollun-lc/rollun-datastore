@@ -3,10 +3,11 @@
 namespace rollun\repository;
 
 
+use rollun\repository\Interfaces\ModelHiddenFieldInterface;
 use rollun\repository\Interfaces\ModelInterface;
 use rollun\repository\ModelRepository;
 
-abstract class ModelAbstract implements ModelInterface
+abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterface
 {
     /**
      * @var array
@@ -91,7 +92,7 @@ abstract class ModelAbstract implements ModelInterface
         return $attributes;
     }
 
-    protected function hidden()
+    public function hidden(): array
     {
         return [];
     }

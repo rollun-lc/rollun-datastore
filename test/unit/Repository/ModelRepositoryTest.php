@@ -4,8 +4,12 @@ namespace rollun\test\unit\Repository;
 
 
 use PHPUnit\Framework\TestCase;
+use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\Memory;
+use rollun\repository\Interfaces\FieldResolverInterface;
 use rollun\repository\Interfaces\ModelInterface;
+use rollun\repository\Interfaces\ModelRepositoryInterface;
+use rollun\repository\BaseFieldResolver;
 use rollun\repository\ModelRepository;
 use rollun\repository\ModelAbstract;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
@@ -25,8 +29,8 @@ class ModelRepositoryTest extends TestCase
     {
         return new class($data) implements ModelInterface {
             public $id;
-
             public $field;
+            public $hello;
 
             public function __construct($attributes)
             {
@@ -105,7 +109,7 @@ class ModelRepositoryTest extends TestCase
         $model = $this->createModelInterface();
         $repository = new ModelRepository($dataStore, $model);
 
-        $repository->deleteById(1);
+        $repository->removeById(1);
 
         $this->assertEmpty($dataStore->read(1));
     }
@@ -121,5 +125,23 @@ class ModelRepositoryTest extends TestCase
 
         $this->assertIsObject($result);
         $this->assertInstanceOf(ModelAbstract::class, $result);
+    }
+
+    public function testRepositoryWithResolver()
+    {
+        $dataStore = new Memory();
+        $dataStore->create($this->getItem());
+        $model = new class() extends ModelAbstract {};
+        $resolver = new class () implements FieldResolverInterface{
+            public function resolve(array $data): array
+            {
+                return ['id' => $data['id'], 'hello' => $data['field']];
+            }
+        };
+        $repository = new ModelRepository($dataStore, $model, $resolver);
+
+        $result = $repository->findById(1);
+
+        $this->assertEquals($result->hello, $this->getItem()['field']);
     }
 }

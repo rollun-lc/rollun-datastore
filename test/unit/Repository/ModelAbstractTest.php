@@ -67,7 +67,7 @@ class ModelAbstractTest extends TestCase
             'hidden' => true,
         ];
         $model = new class($data) extends ModelAbstract {
-            public function hidden()
+            public function hidden(): array
             {
                 return ['hidden'];
             }
