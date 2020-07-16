@@ -56,7 +56,7 @@ class ModelRepositoryAbstractFactory extends AbstractFactoryAbstract
             $resolver = $container->get($resolverClass);
         }
 
-        if (empty($resolver)) {
+        if (!empty($resolver)) {
             $resolver = new $resolverClass();
         }
 
