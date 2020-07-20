@@ -50,7 +50,7 @@ class ModelRepositoryTest extends TestCase
     {
         $dataStore = new Memory();
         $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, $model);
+        $repository = new ModelRepository($dataStore, get_class($model));
 
         $item = $this->createModelInterface($this->getItem());;
         $repository->save($item);
@@ -62,7 +62,7 @@ class ModelRepositoryTest extends TestCase
     {
         $dataStore = new Memory();
         $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, $model);
+        $repository = new ModelRepository($dataStore, get_class($model));
 
         $old = $this->createModelInterface($this->getItem());
         $repository->save($old);
@@ -81,7 +81,7 @@ class ModelRepositoryTest extends TestCase
         $dataStore = new Memory();
         $dataStore->create($this->getItem());
         $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, $model);
+        $repository = new ModelRepository($dataStore, get_class($model));
 
         $result = $repository->findById(1);
 
@@ -93,7 +93,7 @@ class ModelRepositoryTest extends TestCase
         $dataStore = new Memory();
         $dataStore->create($this->getItem());
         $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, $model);
+        $repository = new ModelRepository($dataStore, get_class($model));
 
         $query = new Query();
         $query->setQuery(new EqNode('field', 'test'));
@@ -107,7 +107,7 @@ class ModelRepositoryTest extends TestCase
         $dataStore = new Memory();
         $dataStore->create($this->getItem());
         $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, $model);
+        $repository = new ModelRepository($dataStore, get_class($model));
 
         $repository->removeById(1);
 
@@ -119,7 +119,7 @@ class ModelRepositoryTest extends TestCase
         $dataStore = new Memory();
         $dataStore->create($this->getItem());
         $model = new class() extends ModelAbstract {};
-        $repository = new ModelRepository($dataStore, $model);
+        $repository = new ModelRepository($dataStore, get_class($model));
 
         $result = $repository->findById(1);
 
@@ -138,7 +138,7 @@ class ModelRepositoryTest extends TestCase
                 return ['id' => $data['id'], 'hello' => $data['field']];
             }
         };
-        $repository = new ModelRepository($dataStore, $model, $resolver);
+        $repository = new ModelRepository($dataStore, get_class($model), $resolver);
 
         $result = $repository->findById(1);
 

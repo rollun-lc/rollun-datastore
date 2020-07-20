@@ -14,6 +14,8 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
      */
     protected $attributes = [];
 
+    protected $original = [];
+
     /**
      * Model constructor.
      * @param array $attributes
@@ -21,6 +23,8 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
     public function __construct($attributes = [])
     {
         $this->fill($attributes);
+
+        $this->original = $this->getAttributes();
     }
 
     public function __set($name, $value)
@@ -69,7 +73,7 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
         return $this->attributes;
     }
 
-    public function fill($attributes)
+    protected function fill($attributes)
     {
         foreach ($attributes as $key => $value) {
             $this->{$key} = $value;
