@@ -6,14 +6,9 @@ namespace rollun\repository\Factory;
 
 use Interop\Container\ContainerInterface;
 use rollun\datastore\AbstractFactoryAbstract;
-use rollun\datastore\DataStore\DataStoreException;
-use rollun\datastore\DataStore\Factory\DataStoreAbstractFactory;
 use rollun\repository\Interfaces\FieldResolverInterface;
 use rollun\repository\Interfaces\ModelInterface;
 use rollun\repository\Interfaces\ModelRepositoryInterface;
-use rollun\repository\BaseFieldResolver;
-use rollun\repository\ModelRepository;
-use Zend\Hydrator\HydratorInterface;
 
 /**
  * Class ModelDataStoreAbstractFactory
@@ -51,22 +46,17 @@ class ModelRepositoryAbstractFactory extends AbstractFactoryAbstract
         if (isset($serviceConfig[self::KEY_RESOLVER])) {
             $resolverClass = $serviceConfig[self::KEY_RESOLVER];
             if (!is_a($resolverClass, FieldResolverInterface::class, true)) {
-                throw new \Exception('Hydrator class must implement ' . HydratorInterface::class);
+                throw new \Exception('Resolver class must implement ' . FieldResolverInterface::class);
             }
             $resolver = $container->get($resolverClass);
         }
 
-        if (!empty($resolver)) {
-            $resolver = new $resolverClass();
-        }
-
         $modelClass = $serviceConfig[self::KEY_MODEL];
-        /*if (!is_a($modelClass, ModelInterface::class, true)) {
+        if (!is_a($modelClass, ModelInterface::class, true)) {
             throw new \Exception('Class ' . self::KEY_MODEL . ' must implement ' . ModelInterface::class);
         }
-        $model = new $modelClass();*/
 
-        return new $requestedClassName($dataStore, $modelClass, $resolver);
+        return new $requestedClassName($dataStore, $modelClass, $resolver ?? null);
     }
 
     public function canCreate(ContainerInterface $container, $requestedName)
