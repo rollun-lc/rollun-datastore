@@ -77,4 +77,55 @@ class ModelAbstractTest extends TestCase
 
         $this->assertFalse(isset($array['hidden']));
     }
+
+    public function testSetMutatedAttribute()
+    {
+        $data = [
+            'field' => 'test',
+            'name' => 'hello',
+        ];
+        $model = new class($data) extends ModelAbstract {
+            public function setFieldAttribute($value)
+            {
+                return 'mutated-' . $value;
+            }
+        };
+
+        $expected = 'mutated-' . $data['field'];
+        $this->assertEquals($expected, $model->field);
+    }
+
+    public function testGetMutatedAttribute()
+    {
+        $data = [
+            'field' => 'test',
+            'name' => 'hello',
+        ];
+        $model = new class($data) extends ModelAbstract {
+            public function getFieldAttribute($value)
+            {
+                return 'mutated-' . $value;
+            }
+        };
+
+        $expected = 'mutated-' . $data['field'];
+        $this->assertEquals($expected, $model->field);
+    }
+
+    public function testGetMutatedAttributes()
+    {
+        $data = [
+            'field' => 'test',
+            'name' => 'hello',
+        ];
+        $model = new class($data) extends ModelAbstract {
+            public function getFieldAttribute($value)
+            {
+                return 'mutated-' . $value;
+            }
+        };
+        $attributes = $model->getAttributes();
+        $expected = 'mutated-' . $data['field'];
+        $this->assertEquals($expected, $attributes['field']);
+    }
 }

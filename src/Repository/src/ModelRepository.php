@@ -86,10 +86,27 @@ class ModelRepository implements ModelRepositoryInterface
     {
         $identifier = $this->dataStore->getIdentifier();
         if (isset($model->{$identifier}) && $this->dataStore->has($model->{$identifier})) {
-            return (bool) $this->dataStore->update($model->toArray());
-        } else {
-            return (bool) $this->dataStore->create($model->toArray());
+            return $this->updateModel($model);
         }
+
+        return $this->insertModel($model);
+    }
+
+    public function insertModel($model)
+    {
+        $record = $this->dataStore->create($model->toArray());
+        if ($record) {
+            $identifier = $this->dataStore->getIdentifier();
+            if (isset($record[$identifier])) {
+                $model->{$identifier} = $record[$identifier];
+            }
+        }
+        return (bool) $record;
+    }
+
+    public function updateModel($model)
+    {
+        return (bool) $this->dataStore->update($model->toArray());
     }
 
     public function findById($id): ModelInterface
@@ -114,6 +131,12 @@ class ModelRepository implements ModelRepositoryInterface
         }
 
         return $results;
+    }
+
+    public function all(): array
+    {
+        $query = new Query();
+        return $this->find($query);
     }
 
     /**
