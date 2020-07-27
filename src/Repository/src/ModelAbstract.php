@@ -112,11 +112,12 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
 
     public function getAttributes()
     {
-        $attributes = [];
+        return $this->attributes;
+        /*$attributes = [];
         foreach (array_keys($this->attributes) as $name) {
             $attributes[$name] = $this->getAttribute($name);
         }
-        return $attributes;
+        return $attributes;*/
     }
 
     protected function fill($attributes)

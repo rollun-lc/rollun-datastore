@@ -95,12 +95,15 @@ class ModelRepository implements ModelRepositoryInterface
     public function insertModel($model)
     {
         $record = $this->dataStore->create($model->toArray());
+
+        // TODO
         if ($record) {
             $identifier = $this->dataStore->getIdentifier();
             if (isset($record[$identifier])) {
                 $model->{$identifier} = $record[$identifier];
             }
         }
+
         return (bool) $record;
     }
 
