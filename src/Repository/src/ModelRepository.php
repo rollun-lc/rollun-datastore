@@ -52,6 +52,15 @@ class ModelRepository implements ModelRepositoryInterface
         $this->resolver = $resolver;
     }
 
+    public function __sleep()
+    {
+        return [
+            'dataStore',
+            'modelClass',
+            'resolver',
+        ];
+    }
+
     /**
      * @return DataStoreAbstract
      */
