@@ -27,7 +27,7 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
     {
         $this->fill($attributes);
 
-        $this->original = $this->getAttributes();
+        $this->original = $this->attributes;
     }
 
     public function __set($name, $value)
@@ -146,5 +146,10 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
     public function hidden(): array
     {
         return [];
+    }
+
+    public function isChanged()
+    {
+        return $this->attributes !== $this->original;
     }
 }

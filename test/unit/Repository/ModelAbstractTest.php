@@ -112,6 +112,26 @@ class ModelAbstractTest extends TestCase
         $this->assertEquals($expected, $model->field);
     }
 
+    public function testIsChanged()
+    {
+        $data = [
+            'field' => 'test',
+            'name' => 'hello',
+        ];
+        $model = new class($data) extends ModelAbstract {
+            public function setFieldAttribute($value)
+            {
+                return 'mutated-' . $value;
+            }
+        };
+
+        $this->assertFalse($model->isChanged());
+
+        $model->field = 'changed';
+
+        $this->assertTrue($model->isChanged());
+    }
+
     /*public function testGetMutatedAttributes()
     {
         $data = [
