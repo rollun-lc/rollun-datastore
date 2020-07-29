@@ -25,4 +25,6 @@ interface ModelRepositoryInterface
      * @return mixed
      */
     public function removeById($id): bool;
+
+    public function getDataStore();
 }
