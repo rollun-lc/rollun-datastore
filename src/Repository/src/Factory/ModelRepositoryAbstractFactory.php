@@ -6,7 +6,7 @@ namespace rollun\repository\Factory;
 
 use Interop\Container\ContainerInterface;
 use rollun\datastore\AbstractFactoryAbstract;
-use rollun\repository\Interfaces\FieldResolverInterface;
+use rollun\repository\Interfaces\FieldMapperInterface;
 use rollun\repository\Interfaces\ModelInterface;
 use rollun\repository\Interfaces\ModelRepositoryInterface;
 
@@ -30,7 +30,7 @@ class ModelRepositoryAbstractFactory extends AbstractFactoryAbstract
 
     public const KEY_MODEL = 'modelClass';
 
-    public const KEY_RESOLVER = 'resolver';
+    public const KEY_MAPPER = 'mapper';
 
     protected const KEY_BASE_CLASS = ModelRepositoryInterface::class;
 
@@ -43,12 +43,12 @@ class ModelRepositoryAbstractFactory extends AbstractFactoryAbstract
         $dataStoreClassName = $serviceConfig[self::KEY_DATASTORE];
         $dataStore = $container->get($dataStoreClassName);
 
-        if (isset($serviceConfig[self::KEY_RESOLVER])) {
-            $resolverClass = $serviceConfig[self::KEY_RESOLVER];
-            if (!is_a($resolverClass, FieldResolverInterface::class, true)) {
-                throw new \Exception('Resolver class must implement ' . FieldResolverInterface::class);
+        if (isset($serviceConfig[self::KEY_MAPPER])) {
+            $mapperClass = $serviceConfig[self::KEY_MAPPER];
+            if (!is_a($mapperClass, FieldMapperInterface::class, true)) {
+                throw new \Exception('Mapper class must implement ' . FieldMapperInterface::class);
             }
-            $resolver = $container->get($resolverClass);
+            $mapper = $container->get($mapperClass);
         }
 
         $modelClass = $serviceConfig[self::KEY_MODEL];
@@ -56,7 +56,7 @@ class ModelRepositoryAbstractFactory extends AbstractFactoryAbstract
             throw new \Exception('Class ' . self::KEY_MODEL . ' must implement ' . ModelInterface::class);
         }
 
-        return new $requestedClassName($dataStore, $modelClass, $resolver ?? null);
+        return new $requestedClassName($dataStore, $modelClass, $mapper ?? null);
     }
 
     public function canCreate(ContainerInterface $container, $requestedName)

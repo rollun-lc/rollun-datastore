@@ -6,7 +6,7 @@ namespace rollun\test\unit\Repository;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\Memory;
-use rollun\repository\Interfaces\FieldResolverInterface;
+use rollun\repository\Interfaces\FieldMapperInterface;
 use rollun\repository\Interfaces\ModelInterface;
 use rollun\repository\Interfaces\ModelRepositoryInterface;
 use rollun\repository\BaseFieldResolver;
@@ -127,18 +127,18 @@ class ModelRepositoryTest extends TestCase
         $this->assertInstanceOf(ModelAbstract::class, $result);
     }
 
-    public function testRepositoryWithResolver()
+    public function testRepositoryWithMapper()
     {
         $dataStore = new Memory();
         $dataStore->create($this->getItem());
         $model = new class() extends ModelAbstract {};
-        $resolver = new class () implements FieldResolverInterface{
-            public function resolve(array $data): array
+        $mapper = new class () implements FieldMapperInterface{
+            public function map(array $data): array
             {
                 return ['id' => $data['id'], 'hello' => $data['field']];
             }
         };
-        $repository = new ModelRepository($dataStore, get_class($model), $resolver);
+        $repository = new ModelRepository($dataStore, get_class($model), $mapper);
 
         $result = $repository->findById(1);
 

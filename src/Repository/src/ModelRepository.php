@@ -4,7 +4,7 @@ namespace rollun\repository;
 
 
 use rollun\datastore\DataStore\DataStoreAbstract;
-use rollun\repository\Interfaces\FieldResolverInterface;
+use rollun\repository\Interfaces\FieldMapperInterface;
 use rollun\repository\Interfaces\ModelHiddenFieldInterface;
 use rollun\repository\Interfaces\ModelRepositoryInterface;
 use rollun\repository\Interfaces\ModelInterface;
@@ -32,9 +32,9 @@ class ModelRepository implements ModelRepositoryInterface
     protected $modelClass;
 
     /**
-     * @var FieldResolverInterface
+     * @var FieldMapperInterface
      */
-    protected $resolver;
+    protected $mapper;
 
     /**
      * ModelRepository constructor.
@@ -45,11 +45,11 @@ class ModelRepository implements ModelRepositoryInterface
     public function __construct(
         DataStoreAbstract $dataStore,
         string $modelClass,
-        FieldResolverInterface $resolver = null
+        FieldMapperInterface $mapper = null
     ) {
         $this->dataStore = $dataStore;
         $this->modelClass = $modelClass;
-        $this->resolver = $resolver;
+        $this->mapper = $mapper;
     }
 
     public function __sleep()
@@ -57,7 +57,7 @@ class ModelRepository implements ModelRepositoryInterface
         return [
             'dataStore',
             'modelClass',
-            'resolver',
+            'mapper',
         ];
     }
 
@@ -81,8 +81,8 @@ class ModelRepository implements ModelRepositoryInterface
 
         $this->resolver->fill($data, $model);*/
 
-        if ($this->resolver) {
-            $data = $this->resolver->resolve($data);
+        if ($this->mapper) {
+            $data = $this->mapper->map($data);
         }
 
         $model = new $this->modelClass($data);

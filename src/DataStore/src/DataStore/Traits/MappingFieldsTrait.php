@@ -10,7 +10,9 @@ use rollun\utils\CallAttemptsTrait;
  * Trait MappingFieldsTrait
  * Трейт для датасторов, который умеет мапить данные с массивов и сохранять в базу данных с нужными полями
  * 
- * @todo Написать тесты
+ * @todo Add tests
+ *
+ * @todo Move to repository
  * 
  * @package rollun\datastore\DataStore\Traits
  */
