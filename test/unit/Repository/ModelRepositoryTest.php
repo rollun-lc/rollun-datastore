@@ -32,6 +32,8 @@ class ModelRepositoryTest extends TestCase
             public $field;
             public $hello;
 
+            protected $exists = false;
+
             public function __construct($attributes)
             {
                 foreach ($attributes as $key => $attribute) {
@@ -39,9 +41,21 @@ class ModelRepositoryTest extends TestCase
                 }
             }
 
-            public function toArray()
+            public function toArray(): array
             {
                 return ['id' => $this->id, 'field' => $this->field];
+            }
+
+            public function isChanged(): bool {}
+
+            public function getChanged(): array {}
+
+            public function isExists(): bool {
+                return $this->exists;
+            }
+
+            public function setExists(bool $exists): void {
+                $this->exists = $exists;
             }
         };
     }
@@ -64,16 +78,14 @@ class ModelRepositoryTest extends TestCase
         $model = $this->createModelInterface();
         $repository = new ModelRepository($dataStore, get_class($model));
 
-        $old = $this->createModelInterface($this->getItem());
-        $repository->save($old);
-        $newData = [
-            'id' => 1,
-            'field' => 'hello',
-        ];
-        $new = new class($newData) extends ModelAbstract {};
+        $item = $this->createModelInterface($this->getItem());
+        //$old->setExists(true);
+        $repository->save($item);
 
-        $repository->save($new);
-        $this->assertSame($newData, $dataStore->read(1));
+        $item->field = 'hello';
+
+        $repository->save($item);
+        $this->assertSame(['id' => 1, 'field' => 'hello'], $dataStore->read(1));
     }
 
     public function testRead()

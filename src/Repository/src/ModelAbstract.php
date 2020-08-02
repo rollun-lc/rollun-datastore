@@ -19,15 +19,19 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
 
     protected $original = [];
 
+    protected $exists = false;
+
     /**
      * Model constructor.
      * @param array $attributes
      */
-    public function __construct($attributes = [])
+    public function __construct($attributes = [], $exists = false)
     {
         $this->fill($attributes);
 
         $this->original = $this->attributes;
+
+        $this->exists = $exists;
     }
 
     public function __set($name, $value)
@@ -132,7 +136,7 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
      *
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         $attributes = $this->getAttributes();
         foreach ($attributes as $key => $attribute) {
@@ -148,13 +152,23 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
         return [];
     }
 
-    public function isChanged()
+    public function isChanged(): bool
     {
         return $this->attributes !== $this->original;
     }
 
-    public function getChangedAttributes()
+    public function getChanged(): array
     {
         return array_diff($this->attributes, $this->original);
+    }
+
+    public function isExists(): bool
+    {
+        return $this->exists;
+    }
+
+    public function setExists(bool $exists): void
+    {
+        $this->exists = $exists;
     }
 }

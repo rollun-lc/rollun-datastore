@@ -140,11 +140,11 @@ class ModelAbstractTest extends TestCase
         ];
         $model = new class($data) extends ModelAbstract {};
 
-        $this->assertEmpty($model->getChangedAttributes());
+        $this->assertEmpty($model->getChanged());
 
         $model->field = 'changed';
 
-        $this->assertSame(['field' => 'changed'], $model->getChangedAttributes());
+        $this->assertSame(['field' => 'changed'], $model->getChanged());
     }
 
     /*public function testGetMutatedAttributes()

@@ -77,15 +77,14 @@ class ModelRepository implements ModelRepositoryInterface
 
     protected function make($record = []): ModelInterface
     {
-        /*$model = clone $this->model;
-
-        $this->resolver->fill($data, $model);*/
-
         if ($this->mapper) {
             $record = $this->mapper->map($record);
         }
 
+        /** @var ModelInterface $model */
         $model = new $this->modelClass($record);
+
+        $model->setExists(true);
 
         return $model;
     }
@@ -99,14 +98,31 @@ class ModelRepository implements ModelRepositoryInterface
         return $models;
     }
 
+    /**
+     * @todo Test
+     *
+     * @param ModelInterface $model
+     *
+     * @return bool
+     */
     public function save(ModelInterface $model): bool
     {
-        $identifier = $this->dataStore->getIdentifier();
-        if (isset($model->{$identifier}) && $this->dataStore->has($model->{$identifier})) {
+        if ($model->isExists()) {
+            /*$identifier = $this->dataStore->getIdentifier();
+            if (!isset($model->{$identifier}) || !$this->dataStore->has($model->{$identifier})) {
+                throw new \Exception();
+            }*/
             return $this->updateModel($model);
         }
 
-        return $this->insertModel($model);
+        $result = $this->insertModel($model);
+
+        if ($result) {
+            $model->setExists(true);
+            return $result;
+        }
+
+        throw new \Exception('Can not save model');
     }
 
     /**

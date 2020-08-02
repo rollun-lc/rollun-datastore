@@ -59,10 +59,18 @@ class ModelRepositoryInterfaceTest extends TestCase
                         $this->field = $field;
                     }
 
-                    public function toArray()
+                    public function toArray(): array
                     {
                         return ['id' => $this->id, 'field' => $this->field];
                     }
+
+                    public function isChanged(): bool {}
+
+                    public function getChanged(): array{}
+
+                    public function isExists(): bool{}
+
+                    public function setExists(bool $exists): void{}
                 };
             }
         };
