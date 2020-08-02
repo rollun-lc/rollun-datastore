@@ -75,21 +75,29 @@ class ModelRepository implements ModelRepositoryInterface
         return $this->dataStore->has($id);
     }
 
-    protected function make($data = []): ModelInterface
+    protected function make($record = []): ModelInterface
     {
         /*$model = clone $this->model;
 
         $this->resolver->fill($data, $model);*/
 
         if ($this->mapper) {
-            $data = $this->mapper->map($data);
+            $record = $this->mapper->map($record);
         }
 
-        $model = new $this->modelClass($data);
+        $model = new $this->modelClass($record);
 
         return $model;
     }
 
+    protected function makeModels($records)
+    {
+        $models = [];
+        foreach ($records as $data) {
+            $models[] = $this->make($data);
+        }
+        return $models;
+    }
 
     public function save(ModelInterface $model): bool
     {
@@ -101,6 +109,12 @@ class ModelRepository implements ModelRepositoryInterface
         return $this->insertModel($model);
     }
 
+    /**
+     * @param $model
+     * @return bool
+     * 
+     * @todo * @todo update field created_at
+     */
     public function insertModel($model)
     {
         $record = $this->dataStore->create($model->toArray());
@@ -116,33 +130,35 @@ class ModelRepository implements ModelRepositoryInterface
         return (bool) $record;
     }
 
+    /**
+     * @param $model
+     * @return bool
+     * 
+     * @todo update field updated_at
+     */
     public function updateModel($model)
     {
         return (bool) $this->dataStore->update($model->toArray());
     }
 
-    public function findById($id): ModelInterface
+    public function findById($id): ?ModelInterface
     {
-        $result = $this->dataStore->read($id);
-        if ($result) {
-            return $this->make($result);
+        $record = $this->dataStore->read($id);
+        if ($record) {
+            return $this->make($record);
         }
 
-        return $result;
+        return $record;
     }
 
     public function find(Query $query): array
     {
-        $results =  $this->dataStore->query($query);
-        if ($results) {
-            $models = [];
-            foreach ($results as $data) {
-                $models[] = $this->make($data);
-            }
-            return $models;
+        $records =  $this->dataStore->query($query);
+        if ($records) {
+            return $this->makeModels($records);
         }
 
-        return $results;
+        return $records;
     }
 
     public function all(): array
@@ -171,5 +187,10 @@ class ModelRepository implements ModelRepositoryInterface
         }
 
         return false;
+    }
+
+    public function count(): int
+    {
+        return (int) $this->dataStore->count();
     }
 }

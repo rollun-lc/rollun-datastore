@@ -13,7 +13,7 @@ interface ModelRepositoryInterface
 
     public function find(Query $query): array;
 
-    public function findById($id): ModelInterface;
+    public function findById($id): ?ModelInterface;
 
     public function remove(ModelInterface $model): bool;
 
@@ -25,6 +25,8 @@ interface ModelRepositoryInterface
      * @return mixed
      */
     public function removeById($id): bool;
+
+    public function count(): int;
 
     public function getDataStore();
 }

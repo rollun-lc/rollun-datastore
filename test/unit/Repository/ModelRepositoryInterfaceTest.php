@@ -31,14 +31,19 @@ class ModelRepositoryInterfaceTest extends TestCase
                 $this->dataStore = $dataStore;
             }
 
-            public function make($attributes = []): ModelInterface
-            {}
+            public function make($attributes = []): ModelInterface {}
 
-            public function save(ModelInterface $model): bool
-            {}
+            public function save(ModelInterface $model): bool {}
 
-            public function find(Query $query): array
-            {}
+            public function find(Query $query): array {}
+
+            public function removeById($id): bool {}
+
+            public function remove(ModelInterface $model): bool {}
+
+            public function count(): int {}
+
+            public function getDataStore() {}
 
             public function findById($id): ModelInterface
             {
@@ -60,12 +65,6 @@ class ModelRepositoryInterfaceTest extends TestCase
                     }
                 };
             }
-
-            public function removeById($id): bool
-            {}
-
-            public function remove(ModelInterface $model): bool
-            {}
         };
     }
 

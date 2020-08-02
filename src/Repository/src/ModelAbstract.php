@@ -120,7 +120,7 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
         return $attributes;*/
     }
 
-    protected function fill($attributes)
+    public function fill($attributes)
     {
         foreach ($attributes as $key => $value) {
             $this->{$key} = $value;
@@ -151,5 +151,10 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
     public function isChanged()
     {
         return $this->attributes !== $this->original;
+    }
+
+    public function getChangedAttributes()
+    {
+        return array_diff($this->attributes, $this->original);
     }
 }
