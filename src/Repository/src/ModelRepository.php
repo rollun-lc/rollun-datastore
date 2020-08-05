@@ -147,6 +147,31 @@ class ModelRepository implements ModelRepositoryInterface
     }
 
     /**
+     * @param ModelInterface[] $models
+     */
+    public function multiSave($models)
+    {
+        $singleInsertedIds = [];
+        $multiInsertedIds = [];
+        $identifier = $this->dataStore->getIdentifier();
+
+        foreach ($models as $key => $model) {
+            if ($model->isExists()) {
+                $this->dataStore->update($model->toArray());
+                $singleInsertedIds[] = $model->{$identifier};
+            } else {
+                $multiCreated[] = $model->toArray();
+            }
+        }
+
+        if (!empty($multiCreated)) {
+            $multiInsertedIds = $this->dataStore->multiCreate($multiCreated);
+        }
+
+        return array_merge($singleInsertedIds, $multiInsertedIds);
+    }
+
+    /**
      * @param $model
      * @return bool
      * 
@@ -196,8 +221,8 @@ class ModelRepository implements ModelRepositoryInterface
     }
 
     public function remove(ModelInterface $model): bool
-    {
-        $identifier = $this->dataStore->getIdentifier();
+    {$identifier
+         = $this->dataStore->getIdentifier();
         if (isset($model->{$identifier}) && $this->dataStore->has($model->{$identifier})) {
             return (bool) $this->dataStore->delete($model->{$identifier});
         }

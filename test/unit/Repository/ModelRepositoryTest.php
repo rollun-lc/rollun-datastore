@@ -156,4 +156,20 @@ class ModelRepositoryTest extends TestCase
 
         $this->assertEquals($result->hello, $this->getItem()['field']);
     }
+
+    public function testMultiCreate()
+    {
+        $dataStore = new Memory();
+        $dataStore->create($this->getItem());
+        $model = $this->createModelInterface();
+        $repository = new ModelRepository($dataStore, get_class($model));
+        $models = [
+            $repository->findById(1),
+            $this->createModelInterface(['id' => 2, 'field' => 'field2']),
+            $this->createModelInterface(['id' => 3, 'field' => 'field2']),
+        ];
+        $results = $repository->multiSave($models);
+
+        $this->assertEquals(3, count($results));
+    }
 }
