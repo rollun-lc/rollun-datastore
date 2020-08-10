@@ -7,10 +7,12 @@ use ArrayAccess;
 use rollun\repository\Interfaces\ModelHiddenFieldInterface;
 use rollun\repository\Interfaces\ModelInterface;
 use rollun\repository\Traits\ModelArrayAccess;
+use rollun\repository\Traits\ModelDataTime;
 
 abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterface, ArrayAccess
 {
     use ModelArrayAccess;
+    use ModelDataTime;
 
     /**
      * @var array
