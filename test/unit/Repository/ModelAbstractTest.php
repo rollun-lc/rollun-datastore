@@ -163,4 +163,16 @@ class ModelAbstractTest extends TestCase
         $expected = 'mutated-' . $data['field'];
         $this->assertEquals($expected, $attributes['field']);
     }*/
+
+    public function testChangedNumeric()
+    {
+        $data = [
+            'field' => '1.0',
+        ];
+        $model = new class($data) extends ModelAbstract {};
+
+        $model->field = '1.00';
+
+        $this->assertEmpty($model->getChanged());
+    }
 }

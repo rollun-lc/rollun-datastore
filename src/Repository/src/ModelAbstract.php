@@ -156,12 +156,46 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
 
     public function isChanged(): bool
     {
-        return $this->attributes !== $this->original;
+        //return $this->attributes !== $this->original;
+        foreach ($this->attributes as $name => $value) {
+            if (!$this->isChangedAttribute($name)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
+    /**
+     * @todo
+     *
+     * @param $name
+     *
+     * @return bool
+     */
+    protected function isChangedAttribute($name)
+    {
+        if ($this->attributes[$name] == $this->original[$name]) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return array
+     */
     public function getChanged(): array
     {
-        return array_diff($this->attributes, $this->original);
+        //return array_diff($this->attributes, $this->original);
+        $changed = [];
+        foreach ($this->attributes as $name => $value) {
+            if (!$this->isChangedAttribute($name)) {
+                $changed[$name] = $value;
+            }
+        }
+
+        return $changed;
     }
 
     public function isExists(): bool
