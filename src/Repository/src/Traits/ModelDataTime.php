@@ -4,6 +4,11 @@
 namespace rollun\repository\Traits;
 
 
+/**
+ * Trait ModelDataTime
+ *
+ * @package rollun\repository\Traits
+ */
 trait ModelDataTime
 {
     protected $createAtField = 'created_at';
@@ -14,12 +19,18 @@ trait ModelDataTime
 
     protected $defaultTimezone = 'UTC';
 
+    /**
+     * @throws \Exception
+     */
     public function setCreatedAt()
     {
         $date = new \DateTime('now', new \DateTimeZone($this->defaultTimezone));
         $this->{$this->createAtField} = $date->format($this->timestampFormat);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function renewUpdatedAt()
     {
         $date = new \DateTime('now', new \DateTimeZone($this->defaultTimezone));

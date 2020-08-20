@@ -9,6 +9,11 @@ use rollun\repository\Interfaces\ModelInterface;
 use rollun\repository\Traits\ModelArrayAccess;
 use rollun\repository\Traits\ModelDataTime;
 
+/**
+ * Class ModelAbstract
+ *
+ * @package rollun\repository
+ */
 abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterface, ArrayAccess
 {
     use ModelArrayAccess;
@@ -19,13 +24,21 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
      */
     protected $attributes = [];
 
+    /**
+     * @var array
+     */
     protected $original = [];
 
+    /**
+     * @var bool
+     */
     protected $exists = false;
 
     /**
-     * Model constructor.
+     * ModelAbstract constructor.
+     *
      * @param array $attributes
+     * @param false $exists
      */
     public function __construct($attributes = [], $exists = false)
     {
@@ -36,21 +49,38 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
         $this->exists = $exists;
     }
 
+    /**
+     * @param $name
+     * @param $value
+     */
     public function __set($name, $value)
     {
         $this->setAttribute($name, $value);
     }
 
+    /**
+     * @param $name
+     *
+     * @return mixed|null
+     */
     public function __get($name)
     {
         return $this->getAttribute($name);
     }
 
+    /**
+     * @param $name
+     *
+     * @return bool
+     */
     public function __isset($name)
     {
         return $this->hasAttribute($name);
     }
 
+    /**
+     * @param $name
+     */
     public function __unset($name)
     {
         unset($this->attributes[$name]);
@@ -64,6 +94,9 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
         $this->attributes = [];
     }
 
+    /**
+     *
+     */
     public function clone()
     {
         $attributes = $this->attributes;
@@ -71,23 +104,47 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
         $model->fill($attributes);
     }
 
+    /**
+     * @param $type
+     * @param $name
+     *
+     * @return string
+     */
     protected function getMutatorMethod($type, $name)
     {
         return $type . str_replace('_', '', ucwords($name, '_')) . 'Attribute';
     }
 
+    /**
+     * @param $type
+     * @param $name
+     *
+     * @return bool
+     */
     protected function hasMutator($type, $name)
     {
         $method = $this->getMutatorMethod($type, $name);
         return method_exists($this, $method);
     }
 
+    /**
+     * @param $type
+     * @param $name
+     * @param $value
+     *
+     * @return mixed
+     */
     protected function mutate($type, $name, $value)
     {
         $method = $this->getMutatorMethod($type, $name);
         return $this->$method($value);
     }
 
+    /**
+     * @param $name
+     *
+     * @return mixed|null
+     */
     public function getAttribute($name)
     {
         if (isset($this->attributes[$name])) {
@@ -103,6 +160,10 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
         return null;
     }
 
+    /**
+     * @param $name
+     * @param $value
+     */
     public function setAttribute($name, $value)
     {
         if ($this->hasMutator('set', $name)) {
@@ -112,10 +173,18 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
         $this->attributes[$name] = $value;
     }
 
+    /**
+     * @param $name
+     *
+     * @return bool
+     */
     public function hasAttribute($name) {
         return isset($this->attributes[$name]);
     }
 
+    /**
+     * @return array
+     */
     public function getAttributes()
     {
         return $this->attributes;
@@ -126,6 +195,9 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
         return $attributes;*/
     }
 
+    /**
+     * @param $attributes
+     */
     public function fill($attributes)
     {
         foreach ($attributes as $key => $value) {
@@ -134,8 +206,6 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
     }
 
     /**
-     * @todo Make public and private attributes
-     *
      * @return array
      */
     public function toArray(): array
@@ -149,11 +219,17 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
         return $attributes;
     }
 
+    /**
+     * @return array
+     */
     public function hidden(): array
     {
         return [];
     }
 
+    /**
+     * @return bool
+     */
     public function isChanged(): bool
     {
         //return $this->attributes !== $this->original;
@@ -198,11 +274,17 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
         return $changed;
     }
 
+    /**
+     * @return bool
+     */
     public function isExists(): bool
     {
         return $this->exists;
     }
 
+    /**
+     * @param bool $exists
+     */
     public function setExists(bool $exists): void
     {
         $this->exists = $exists;

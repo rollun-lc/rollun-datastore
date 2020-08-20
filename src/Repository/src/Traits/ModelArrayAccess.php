@@ -6,6 +6,11 @@ namespace rollun\repository\Traits;
 
 use \Exception;
 
+/**
+ * Trait ModelArrayAccess
+ *
+ * @package rollun\repository\Traits
+ */
 trait ModelArrayAccess
 {
     /**

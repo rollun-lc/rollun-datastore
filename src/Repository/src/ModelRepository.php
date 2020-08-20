@@ -5,19 +5,14 @@ namespace rollun\repository;
 
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\repository\Interfaces\FieldMapperInterface;
-use rollun\repository\Interfaces\ModelHiddenFieldInterface;
 use rollun\repository\Interfaces\ModelRepositoryInterface;
 use rollun\repository\Interfaces\ModelInterface;
 use Xiag\Rql\Parser\Query;
-use Zend\Hydrator\HydratorInterface;
-use Zend\Hydrator\ObjectPropertyHydrator;
 
 /**
  * Class ModelRepository
  *
  * @package rollun\datastore\DataStore\Model
- *
- * @todo getDataStore
  */
 class ModelRepository implements ModelRepositoryInterface
 {
@@ -40,7 +35,8 @@ class ModelRepository implements ModelRepositoryInterface
      * ModelRepository constructor.
      *
      * @param DataStoreAbstract $dataStore
-     * @param ModelInterface $modelClass
+     * @param ModelInterface $modelClass,
+     * @param FieldMapperInterface $mapper
      */
     public function __construct(
         DataStoreAbstract $dataStore,
@@ -52,6 +48,9 @@ class ModelRepository implements ModelRepositoryInterface
         $this->mapper = $mapper;
     }
 
+    /**
+     * @return string[]
+     */
     public function __sleep()
     {
         return [
@@ -69,12 +68,21 @@ class ModelRepository implements ModelRepositoryInterface
         return $this->dataStore;
     }
 
-
+    /**
+     * @param $id
+     *
+     * @return bool
+     */
     public function has($id)
     {
         return $this->dataStore->has($id);
     }
 
+    /**
+     * @param array $record
+     *
+     * @return ModelInterface
+     */
     protected function make($record = []): ModelInterface
     {
         if ($this->mapper) {
@@ -89,6 +97,11 @@ class ModelRepository implements ModelRepositoryInterface
         return $model;
     }
 
+    /**
+     * @param $records
+     *
+     * @return array
+     */
     protected function makeModels($records)
     {
         $models = [];
@@ -127,6 +140,7 @@ class ModelRepository implements ModelRepositoryInterface
 
     /**
      * @param $model
+     *
      * @return bool
      * 
      * @todo * @todo update field created_at
@@ -173,6 +187,7 @@ class ModelRepository implements ModelRepositoryInterface
 
     /**
      * @param $model
+     *
      * @return bool
      * 
      * @todo update field updated_at
@@ -182,6 +197,11 @@ class ModelRepository implements ModelRepositoryInterface
         return (bool) $this->dataStore->update($model->toArray());
     }
 
+    /**
+     * @param $id
+     *
+     * @return ModelInterface|null
+     */
     public function findById($id): ?ModelInterface
     {
         $record = $this->dataStore->read($id);
@@ -192,6 +212,11 @@ class ModelRepository implements ModelRepositoryInterface
         return $record;
     }
 
+    /**
+     * @param Query $query
+     *
+     * @return array
+     */
     public function find(Query $query): array
     {
         $records =  $this->dataStore->query($query);
@@ -202,6 +227,9 @@ class ModelRepository implements ModelRepositoryInterface
         return $records;
     }
 
+    /**
+     * @return array
+     */
     public function all(): array
     {
         $query = new Query();
@@ -220,6 +248,11 @@ class ModelRepository implements ModelRepositoryInterface
         return (bool) $this->dataStore->delete($id);
     }
 
+    /**
+     * @param ModelInterface $model
+     *
+     * @return bool
+     */
     public function remove(ModelInterface $model): bool
     {$identifier
          = $this->dataStore->getIdentifier();
@@ -230,6 +263,9 @@ class ModelRepository implements ModelRepositoryInterface
         return false;
     }
 
+    /**
+     * @return int
+     */
     public function count(): int
     {
         return (int) $this->dataStore->count();

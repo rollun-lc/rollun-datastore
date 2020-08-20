@@ -34,6 +34,15 @@ class ModelRepositoryAbstractFactory extends AbstractFactoryAbstract
 
     protected const KEY_BASE_CLASS = ModelRepositoryInterface::class;
 
+    /**
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     * @param array|null $options
+     *
+     * @return mixed|\rollun\datastore\DataStore\Interfaces\DataStoresInterface
+     *
+     * @throws \Exception
+     */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $config = $container->get('config');
@@ -59,6 +68,12 @@ class ModelRepositoryAbstractFactory extends AbstractFactoryAbstract
         return new $requestedClassName($dataStore, $modelClass, $mapper ?? null);
     }
 
+    /**
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     *
+     * @return bool
+     */
     public function canCreate(ContainerInterface $container, $requestedName)
     {
         $config = $container->get('config');

@@ -4,12 +4,9 @@ namespace rollun\test\unit\Repository;
 
 
 use PHPUnit\Framework\TestCase;
-use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\Memory;
 use rollun\repository\Interfaces\FieldMapperInterface;
 use rollun\repository\Interfaces\ModelInterface;
-use rollun\repository\Interfaces\ModelRepositoryInterface;
-use rollun\repository\BaseFieldResolver;
 use rollun\repository\ModelRepository;
 use rollun\repository\ModelAbstract;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
