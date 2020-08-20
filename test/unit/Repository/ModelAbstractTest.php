@@ -67,7 +67,7 @@ class ModelAbstractTest extends TestCase
             'hidden' => true,
         ];
         $model = new class($data) extends ModelAbstract {
-            public function hidden()
+            public function hidden(): array
             {
                 return ['hidden'];
             }
@@ -76,5 +76,103 @@ class ModelAbstractTest extends TestCase
         $array = $model->toArray();
 
         $this->assertFalse(isset($array['hidden']));
+    }
+
+    public function testSetMutatedAttribute()
+    {
+        $data = [
+            'field' => 'test',
+            'name' => 'hello',
+        ];
+        $model = new class($data) extends ModelAbstract {
+            public function setFieldAttribute($value)
+            {
+                return 'mutated-' . $value;
+            }
+        };
+
+        $expected = 'mutated-' . $data['field'];
+        $this->assertEquals($expected, $model->field);
+    }
+
+    public function testGetMutatedAttribute()
+    {
+        $data = [
+            'field' => 'test',
+            'name' => 'hello',
+        ];
+        $model = new class($data) extends ModelAbstract {
+            public function getFieldAttribute($value)
+            {
+                return 'mutated-' . $value;
+            }
+        };
+
+        $expected = 'mutated-' . $data['field'];
+        $this->assertEquals($expected, $model->field);
+    }
+
+    public function testIsChanged()
+    {
+        $data = [
+            'field' => 'test',
+            'name' => 'hello',
+        ];
+        $model = new class($data) extends ModelAbstract {
+            public function setFieldAttribute($value)
+            {
+                return 'mutated-' . $value;
+            }
+        };
+
+        $this->assertFalse($model->isChanged());
+
+        $model->field = 'changed';
+
+        $this->assertTrue($model->isChanged());
+    }
+
+    public function testGetChangedAttributes()
+    {
+        $data = [
+            'field' => 'test',
+            'name' => 'hello',
+        ];
+        $model = new class($data) extends ModelAbstract {};
+
+        $this->assertEmpty($model->getChanged());
+
+        $model->field = 'changed';
+
+        $this->assertSame(['field' => 'changed'], $model->getChanged());
+    }
+
+    /*public function testGetMutatedAttributes()
+    {
+        $data = [
+            'field' => 'test',
+            'name' => 'hello',
+        ];
+        $model = new class($data) extends ModelAbstract {
+            public function getFieldAttribute($value)
+            {
+                return 'mutated-' . $value;
+            }
+        };
+        $attributes = $model->getAttributes();
+        $expected = 'mutated-' . $data['field'];
+        $this->assertEquals($expected, $attributes['field']);
+    }*/
+
+    public function testChangedNumeric()
+    {
+        $data = [
+            'field' => '1.0',
+        ];
+        $model = new class($data) extends ModelAbstract {};
+
+        $model->field = '1.00';
+
+        $this->assertEmpty($model->getChanged());
     }
 }

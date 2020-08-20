@@ -18,7 +18,7 @@ class SimpleModelExtendedAbstract extends ModelAbstract
         InsideConstruct::setConstructParams(['memory' => Memory::class]);
     }
 
-    public function hidden()
+    public function hidden(): array
     {
         return ['hidden'];
     }

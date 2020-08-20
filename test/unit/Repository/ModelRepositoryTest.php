@@ -5,6 +5,7 @@ namespace rollun\test\unit\Repository;
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\Memory;
+use rollun\repository\Interfaces\FieldMapperInterface;
 use rollun\repository\Interfaces\ModelInterface;
 use rollun\repository\ModelRepository;
 use rollun\repository\ModelAbstract;
@@ -25,8 +26,10 @@ class ModelRepositoryTest extends TestCase
     {
         return new class($data) implements ModelInterface {
             public $id;
-
             public $field;
+            public $hello;
+
+            protected $exists = false;
 
             public function __construct($attributes)
             {
@@ -35,9 +38,21 @@ class ModelRepositoryTest extends TestCase
                 }
             }
 
-            public function toArray()
+            public function toArray(): array
             {
                 return ['id' => $this->id, 'field' => $this->field];
+            }
+
+            public function isChanged(): bool {}
+
+            public function getChanged(): array {}
+
+            public function isExists(): bool {
+                return $this->exists;
+            }
+
+            public function setExists(bool $exists): void {
+                $this->exists = $exists;
             }
         };
     }
@@ -46,7 +61,7 @@ class ModelRepositoryTest extends TestCase
     {
         $dataStore = new Memory();
         $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, $model);
+        $repository = new ModelRepository($dataStore, get_class($model));
 
         $item = $this->createModelInterface($this->getItem());;
         $repository->save($item);
@@ -58,18 +73,16 @@ class ModelRepositoryTest extends TestCase
     {
         $dataStore = new Memory();
         $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, $model);
+        $repository = new ModelRepository($dataStore, get_class($model));
 
-        $old = $this->createModelInterface($this->getItem());
-        $repository->save($old);
-        $newData = [
-            'id' => 1,
-            'field' => 'hello',
-        ];
-        $new = new class($newData) extends ModelAbstract {};
+        $item = $this->createModelInterface($this->getItem());
+        //$old->setExists(true);
+        $repository->save($item);
 
-        $repository->save($new);
-        $this->assertSame($newData, $dataStore->read(1));
+        $item->field = 'hello';
+
+        $repository->save($item);
+        $this->assertSame(['id' => 1, 'field' => 'hello'], $dataStore->read(1));
     }
 
     public function testRead()
@@ -77,7 +90,7 @@ class ModelRepositoryTest extends TestCase
         $dataStore = new Memory();
         $dataStore->create($this->getItem());
         $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, $model);
+        $repository = new ModelRepository($dataStore, get_class($model));
 
         $result = $repository->findById(1);
 
@@ -89,7 +102,7 @@ class ModelRepositoryTest extends TestCase
         $dataStore = new Memory();
         $dataStore->create($this->getItem());
         $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, $model);
+        $repository = new ModelRepository($dataStore, get_class($model));
 
         $query = new Query();
         $query->setQuery(new EqNode('field', 'test'));
@@ -103,9 +116,9 @@ class ModelRepositoryTest extends TestCase
         $dataStore = new Memory();
         $dataStore->create($this->getItem());
         $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, $model);
+        $repository = new ModelRepository($dataStore, get_class($model));
 
-        $repository->deleteById(1);
+        $repository->removeById(1);
 
         $this->assertEmpty($dataStore->read(1));
     }
@@ -115,11 +128,45 @@ class ModelRepositoryTest extends TestCase
         $dataStore = new Memory();
         $dataStore->create($this->getItem());
         $model = new class() extends ModelAbstract {};
-        $repository = new ModelRepository($dataStore, $model);
+        $repository = new ModelRepository($dataStore, get_class($model));
 
         $result = $repository->findById(1);
 
         $this->assertIsObject($result);
         $this->assertInstanceOf(ModelAbstract::class, $result);
+    }
+
+    public function testRepositoryWithMapper()
+    {
+        $dataStore = new Memory();
+        $dataStore->create($this->getItem());
+        $model = new class() extends ModelAbstract {};
+        $mapper = new class () implements FieldMapperInterface{
+            public function map(array $data): array
+            {
+                return ['id' => $data['id'], 'hello' => $data['field']];
+            }
+        };
+        $repository = new ModelRepository($dataStore, get_class($model), $mapper);
+
+        $result = $repository->findById(1);
+
+        $this->assertEquals($result->hello, $this->getItem()['field']);
+    }
+
+    public function testMultiCreate()
+    {
+        $dataStore = new Memory();
+        $dataStore->create($this->getItem());
+        $model = $this->createModelInterface();
+        $repository = new ModelRepository($dataStore, get_class($model));
+        $models = [
+            $repository->findById(1),
+            $this->createModelInterface(['id' => 2, 'field' => 'field2']),
+            $this->createModelInterface(['id' => 3, 'field' => 'field2']),
+        ];
+        $results = $repository->multiSave($models);
+
+        $this->assertEquals(3, count($results));
     }
 }
