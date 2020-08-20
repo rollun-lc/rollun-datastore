@@ -12,15 +12,17 @@ trait ModelDataTime
 
     protected $timestampFormat = 'Y-m-d H:i:s.v';
 
+    protected $defaultTimezone = 'UTC';
+
     public function setCreatedAt()
     {
-        $date = new \DateTime();
+        $date = new \DateTime('now', new \DateTimeZone($this->defaultTimezone));
         $this->{$this->createAtField} = $date->format($this->timestampFormat);
     }
 
     public function renewUpdatedAt()
     {
-        $date = new \DateTime();
+        $date = new \DateTime('now', new \DateTimeZone($this->defaultTimezone));
         $this->{$this->updatedAtField} = $date->format($this->timestampFormat);
     }
 }
