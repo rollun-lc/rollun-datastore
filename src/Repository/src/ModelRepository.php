@@ -4,18 +4,17 @@ namespace rollun\repository;
 
 
 use rollun\datastore\DataStore\DataStoreAbstract;
-use rollun\repository\Interfaces\ModelDataStoreInterface;
+use rollun\repository\Interfaces\FieldMapperInterface;
+use rollun\repository\Interfaces\ModelRepositoryInterface;
 use rollun\repository\Interfaces\ModelInterface;
 use Xiag\Rql\Parser\Query;
-use Zend\Hydrator\ObjectPropertyHydrator;
 
 /**
- * Class ModelDataStore
- * @package rollun\datastore\DataStore\Model
+ * Class ModelRepository
  *
- * @todo getDataStore
+ * @package rollun\datastore\DataStore\Model
  */
-class ModelRepository implements ModelDataStoreInterface
+class ModelRepository implements ModelRepositoryInterface
 {
     /**
      * @var \rollun\datastore\DataStore\DataStoreAbstract
@@ -25,18 +24,40 @@ class ModelRepository implements ModelDataStoreInterface
     /**
      * @var ModelInterface
      */
-    protected $model;
+    protected $modelClass;
+
+    /**
+     * @var FieldMapperInterface
+     */
+    protected $mapper;
 
     /**
      * ModelRepository constructor.
      *
      * @param DataStoreAbstract $dataStore
-     * @param ModelInterface $model
+     * @param ModelInterface $modelClass,
+     * @param FieldMapperInterface $mapper
      */
-    public function __construct(DataStoreAbstract $dataStore, ModelInterface $model)
-    {
+    public function __construct(
+        DataStoreAbstract $dataStore,
+        string $modelClass,
+        FieldMapperInterface $mapper = null
+    ) {
         $this->dataStore = $dataStore;
-        $this->model = $model;
+        $this->modelClass = $modelClass;
+        $this->mapper = $mapper;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function __sleep()
+    {
+        return [
+            'dataStore',
+            'modelClass',
+            'mapper',
+        ];
     }
 
     /**
@@ -47,59 +68,172 @@ class ModelRepository implements ModelDataStoreInterface
         return $this->dataStore;
     }
 
-
+    /**
+     * @param $id
+     *
+     * @return bool
+     */
     public function has($id)
     {
         return $this->dataStore->has($id);
     }
 
-    public function make($data = []): ModelInterface
+    /**
+     * @param array $record
+     *
+     * @return ModelInterface
+     */
+    protected function make($record = []): ModelInterface
     {
-        $model = clone $this->model;
-
-        if ($model instanceof ModelAbstract) {
-            $model->fill($data);
-        } else {
-            $hydrator = new ObjectPropertyHydrator();
-            $hydrator->hydrate($data, $model);
+        if ($this->mapper) {
+            $record = $this->mapper->map($record);
         }
+
+        /** @var ModelInterface $model */
+        $model = new $this->modelClass($record);
+
+        $model->setExists(true);
 
         return $model;
     }
 
-
-    public function save(ModelInterface $model)
+    /**
+     * @param $records
+     *
+     * @return array
+     */
+    protected function makeModels($records)
     {
-        $identifier = $this->dataStore->getIdentifier();
-        if (isset($model->{$identifier}) && $this->dataStore->has($model->{$identifier})) {
-            $this->dataStore->update($model->toArray());
-        } else {
-            $this->dataStore->create($model->toArray());
+        $models = [];
+        foreach ($records as $data) {
+            $models[] = $this->make($data);
         }
+        return $models;
     }
 
-    public function findById($id)
+    /**
+     * @todo Test
+     *
+     * @param ModelInterface $model
+     *
+     * @return bool
+     */
+    public function save(ModelInterface $model): bool
     {
-        $result = $this->dataStore->read($id);
+        if ($model->isExists()) {
+            /*$identifier = $this->dataStore->getIdentifier();
+            if (!isset($model->{$identifier}) || !$this->dataStore->has($model->{$identifier})) {
+                throw new \Exception();
+            }*/
+            return $this->updateModel($model);
+        }
+
+        $result = $this->insertModel($model);
+
         if ($result) {
-            return $this->make($result);
+            $model->setExists(true);
+            return $result;
         }
 
-        return $result;
+        throw new \Exception('Can not save model');
     }
 
-    public function find(Query $query)
+    /**
+     * @param $model
+     *
+     * @return bool
+     * 
+     * @todo * @todo update field created_at
+     */
+    public function insertModel($model)
     {
-        $results =  $this->dataStore->query($query);
-        if ($results) {
-            $models = [];
-            foreach ($results as $data) {
-                $models[] = $this->make($data);
+        $record = $this->dataStore->create($model->toArray());
+
+        // TODO
+        if ($record) {
+            $identifier = $this->dataStore->getIdentifier();
+            if (isset($record[$identifier])) {
+                $model->{$identifier} = $record[$identifier];
             }
-            return $models;
         }
 
-        return $results;
+        return (bool) $record;
+    }
+
+    /**
+     * @param ModelInterface[] $models
+     */
+    public function multiSave($models)
+    {
+        $singleInsertedIds = [];
+        $multiInsertedIds = [];
+        $identifier = $this->dataStore->getIdentifier();
+
+        foreach ($models as $key => $model) {
+            if ($model->isExists()) {
+                $this->dataStore->update($model->toArray());
+                $singleInsertedIds[] = $model->{$identifier};
+            } else {
+                $multiCreated[] = $model->toArray();
+            }
+        }
+
+        if (!empty($multiCreated)) {
+            $multiInsertedIds = $this->dataStore->multiCreate($multiCreated);
+        }
+
+        return array_merge($singleInsertedIds, $multiInsertedIds);
+    }
+
+    /**
+     * @param $model
+     *
+     * @return bool
+     * 
+     * @todo update field updated_at
+     */
+    public function updateModel($model)
+    {
+        return (bool) $this->dataStore->update($model->toArray());
+    }
+
+    /**
+     * @param $id
+     *
+     * @return ModelInterface|null
+     */
+    public function findById($id): ?ModelInterface
+    {
+        $record = $this->dataStore->read($id);
+        if ($record) {
+            return $this->make($record);
+        }
+
+        return $record;
+    }
+
+    /**
+     * @param Query $query
+     *
+     * @return array
+     */
+    public function find(Query $query): array
+    {
+        $records =  $this->dataStore->query($query);
+        if ($records) {
+            return $this->makeModels($records);
+        }
+
+        return $records;
+    }
+
+    /**
+     * @return array
+     */
+    public function all(): array
+    {
+        $query = new Query();
+        return $this->find($query);
     }
 
     /**
@@ -109,8 +243,31 @@ class ModelRepository implements ModelDataStoreInterface
      *
      * @return mixed|void
      */
-    public function deleteById($id)
+    public function removeById($id): bool
     {
-        $this->dataStore->delete($id);
+        return (bool) $this->dataStore->delete($id);
+    }
+
+    /**
+     * @param ModelInterface $model
+     *
+     * @return bool
+     */
+    public function remove(ModelInterface $model): bool
+    {$identifier
+         = $this->dataStore->getIdentifier();
+        if (isset($model->{$identifier}) && $this->dataStore->has($model->{$identifier})) {
+            return (bool) $this->dataStore->delete($model->{$identifier});
+        }
+
+        return false;
+    }
+
+    /**
+     * @return int
+     */
+    public function count(): int
+    {
+        return (int) $this->dataStore->count();
     }
 }

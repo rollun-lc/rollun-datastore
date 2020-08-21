@@ -6,10 +6,9 @@ namespace rollun\repository\Factory;
 
 use Interop\Container\ContainerInterface;
 use rollun\datastore\AbstractFactoryAbstract;
-use rollun\datastore\DataStore\DataStoreException;
-use rollun\datastore\DataStore\Factory\DataStoreAbstractFactory;
+use rollun\repository\Interfaces\FieldMapperInterface;
 use rollun\repository\Interfaces\ModelInterface;
-use rollun\repository\ModelRepository;
+use rollun\repository\Interfaces\ModelRepositoryInterface;
 
 /**
  * Class ModelDataStoreAbstractFactory
@@ -31,8 +30,19 @@ class ModelRepositoryAbstractFactory extends AbstractFactoryAbstract
 
     public const KEY_MODEL = 'modelClass';
 
-    protected const KEY_BASE_CLASS = ModelRepository::class;
+    public const KEY_MAPPER = 'mapper';
 
+    protected const KEY_BASE_CLASS = ModelRepositoryInterface::class;
+
+    /**
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     * @param array|null $options
+     *
+     * @return mixed|\rollun\datastore\DataStore\Interfaces\DataStoresInterface
+     *
+     * @throws \Exception
+     */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $config = $container->get('config');
@@ -42,15 +52,28 @@ class ModelRepositoryAbstractFactory extends AbstractFactoryAbstract
         $dataStoreClassName = $serviceConfig[self::KEY_DATASTORE];
         $dataStore = $container->get($dataStoreClassName);
 
+        if (isset($serviceConfig[self::KEY_MAPPER])) {
+            $mapperClass = $serviceConfig[self::KEY_MAPPER];
+            if (!is_a($mapperClass, FieldMapperInterface::class, true)) {
+                throw new \Exception('Mapper class must implement ' . FieldMapperInterface::class);
+            }
+            $mapper = $container->get($mapperClass);
+        }
+
         $modelClass = $serviceConfig[self::KEY_MODEL];
         if (!is_a($modelClass, ModelInterface::class, true)) {
             throw new \Exception('Class ' . self::KEY_MODEL . ' must implement ' . ModelInterface::class);
         }
-        $model = new $modelClass();
 
-        return new $requestedClassName($dataStore, $model);
+        return new $requestedClassName($dataStore, $modelClass, $mapper ?? null);
     }
 
+    /**
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     *
+     * @return bool
+     */
     public function canCreate(ContainerInterface $container, $requestedName)
     {
         $config = $container->get('config');

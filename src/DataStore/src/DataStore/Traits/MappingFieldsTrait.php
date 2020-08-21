@@ -10,81 +10,14 @@ use rollun\utils\CallAttemptsTrait;
  * Trait MappingFieldsTrait
  * Трейт для датасторов, который умеет мапить данные с массивов и сохранять в базу данных с нужными полями
  * 
- * @todo Написать тесты
+ * @todo Add tests
+ *
+ * @todo Move to repository
  * 
  * @package rollun\datastore\DataStore\Traits
  */
 trait MappingFieldsTrait
 {
-    use CallAttemptsTrait;
-
-    /**
-     * Добавляет запись в базу данных.
-     * Пытается сделать это определенное количество раз, если с первого раза не получается
-     * 
-     * @return array
-     * 
-     * @throws \Throwable
-     */
-    public function createData($itemData, $rewriteIfExist = false)
-    {
-        $itemData = $this->prepareData($itemData);
-        return $this->callAttempts(function() use ($itemData, $rewriteIfExist) {
-            return $this->create($itemData, $rewriteIfExist);
-        });
-    }
-
-    /**
-     * Алиас для createData
-     * @see MappingFieldsTrait::createData()
-     *
-     * @param $itemData
-     * @return array
-     * 
-     * @deprecated 
-     *
-     * @throws \Throwable
-     */
-    public function insertData($itemData)
-    {
-        return $this->createData($itemData);
-    }
-
-    /**
-     * Обновляет запись в базе данных.
-     * Пытается сделать это определенное количество раз, если с первого раза не получается
-     *
-     * @param $itemData
-     * @param bool $createIfAbsent
-     *
-     * @return array
-     *
-     * @throws \Throwable
-     */
-    public function updateData($itemData, $createIfAbsent = false)
-    {
-        $itemData = $this->prepareData($itemData);
-        return $this->callAttempts(function() use ($itemData, $createIfAbsent){
-            return $this->update($itemData, $createIfAbsent);
-        });
-    }
-
-    /**
-     * @param $record
-     *
-     * @return array
-     *
-     * @throws \Exception
-     */
-    public function rewriteData($record)
-    {
-        $itemData = $this->prepareData($record);
-        return $this->callAttempts(function() use ($itemData){
-            return $this->rewrite($itemData);
-        });
-        //return $this->callAttemptsMethod('rewrite', $itemData);
-    }
-
     /**
      * Возвращает путь в массиве для конкретного поля.
      * Данные берутся из поля $fields соответствующего класса.

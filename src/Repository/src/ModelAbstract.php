@@ -3,45 +3,100 @@
 namespace rollun\repository;
 
 
+use ArrayAccess;
+use rollun\repository\Interfaces\ModelHiddenFieldInterface;
 use rollun\repository\Interfaces\ModelInterface;
-use rollun\repository\ModelRepository;
+use rollun\repository\Traits\ModelArrayAccess;
+use rollun\repository\Traits\ModelDataTime;
 
-abstract class ModelAbstract implements ModelInterface
+/**
+ * Class ModelAbstract
+ *
+ * @package rollun\repository
+ */
+abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterface, ArrayAccess
 {
+    use ModelArrayAccess;
+    use ModelDataTime;
+
     /**
      * @var array
      */
     protected $attributes = [];
 
     /**
-     * Model constructor.
-     * @param array $attributes
+     * @var array
      */
-    public function __construct($attributes = [])
+    protected $original = [];
+
+    /**
+     * @var bool
+     */
+    protected $exists = false;
+
+    /**
+     * ModelAbstract constructor.
+     *
+     * @param array $attributes
+     * @param false $exists
+     */
+    public function __construct($attributes = [], $exists = false)
     {
         $this->fill($attributes);
+
+        $this->original = $this->attributes;
+
+        $this->exists = $exists;
     }
 
+    /**
+     * @param $name
+     * @param $value
+     */
     public function __set($name, $value)
     {
         $this->setAttribute($name, $value);
     }
 
+    /**
+     * @param $name
+     *
+     * @return mixed|null
+     */
     public function __get($name)
     {
         return $this->getAttribute($name);
     }
 
+    /**
+     * @param $name
+     *
+     * @return bool
+     */
     public function __isset($name)
     {
-        return array_key_exists($name, $this->attributes);
+        return $this->hasAttribute($name);
     }
 
+    /**
+     * @param $name
+     */
+    public function __unset($name)
+    {
+        unset($this->attributes[$name]);
+    }
+
+    /**
+     * @todo
+     */
     public function __clone()
     {
         $this->attributes = [];
     }
 
+    /**
+     *
+     */
     public function clone()
     {
         $attributes = $this->attributes;
@@ -49,25 +104,100 @@ abstract class ModelAbstract implements ModelInterface
         $model->fill($attributes);
     }
 
+    /**
+     * @param $type
+     * @param $name
+     *
+     * @return string
+     */
+    protected function getMutatorMethod($type, $name)
+    {
+        return $type . str_replace('_', '', ucwords($name, '_')) . 'Attribute';
+    }
+
+    /**
+     * @param $type
+     * @param $name
+     *
+     * @return bool
+     */
+    protected function hasMutator($type, $name)
+    {
+        $method = $this->getMutatorMethod($type, $name);
+        return method_exists($this, $method);
+    }
+
+    /**
+     * @param $type
+     * @param $name
+     * @param $value
+     *
+     * @return mixed
+     */
+    protected function mutate($type, $name, $value)
+    {
+        $method = $this->getMutatorMethod($type, $name);
+        return $this->$method($value);
+    }
+
+    /**
+     * @param $name
+     *
+     * @return mixed|null
+     */
     public function getAttribute($name)
     {
         if (isset($this->attributes[$name])) {
-            return $this->attributes[$name];
+            $value = $this->attributes[$name];
+
+            if ($this->hasMutator('get', $name)) {
+                $value = $this->mutate('get', $name, $value);
+            }
+
+            return $value;
         }
 
         return null;
     }
 
+    /**
+     * @param $name
+     * @param $value
+     */
     public function setAttribute($name, $value)
     {
+        if ($this->hasMutator('set', $name)) {
+            $value = $this->mutate('set', $name, $value);
+        }
+
         $this->attributes[$name] = $value;
     }
 
+    /**
+     * @param $name
+     *
+     * @return bool
+     */
+    public function hasAttribute($name) {
+        return isset($this->attributes[$name]);
+    }
+
+    /**
+     * @return array
+     */
     public function getAttributes()
     {
         return $this->attributes;
+        /*$attributes = [];
+        foreach (array_keys($this->attributes) as $name) {
+            $attributes[$name] = $this->getAttribute($name);
+        }
+        return $attributes;*/
     }
 
+    /**
+     * @param $attributes
+     */
     public function fill($attributes)
     {
         foreach ($attributes as $key => $value) {
@@ -76,11 +206,9 @@ abstract class ModelAbstract implements ModelInterface
     }
 
     /**
-     * @todo Make public and private attributes
-     *
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         $attributes = $this->getAttributes();
         foreach ($attributes as $key => $attribute) {
@@ -91,8 +219,74 @@ abstract class ModelAbstract implements ModelInterface
         return $attributes;
     }
 
-    protected function hidden()
+    /**
+     * @return array
+     */
+    public function hidden(): array
     {
         return [];
+    }
+
+    /**
+     * @return bool
+     */
+    public function isChanged(): bool
+    {
+        //return $this->attributes !== $this->original;
+        foreach ($this->attributes as $name => $value) {
+            if (!$this->isChangedAttribute($name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @todo
+     *
+     * @param $name
+     *
+     * @return bool
+     */
+    protected function isChangedAttribute($name)
+    {
+        if ($this->attributes[$name] == $this->original[$name]) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return array
+     */
+    public function getChanged(): array
+    {
+        //return array_diff($this->attributes, $this->original);
+        $changed = [];
+        foreach ($this->attributes as $name => $value) {
+            if (!$this->isChangedAttribute($name)) {
+                $changed[$name] = $value;
+            }
+        }
+
+        return $changed;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isExists(): bool
+    {
+        return $this->exists;
+    }
+
+    /**
+     * @param bool $exists
+     */
+    public function setExists(bool $exists): void
+    {
+        $this->exists = $exists;
     }
 }
