@@ -251,6 +251,10 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
      */
     protected function isChangedAttribute($name)
     {
+        if (!array_key_exists($name, $this->original)) {
+            return true;
+        }
+
         if ($this->attributes[$name] == $this->original[$name]) {
             return true;
         }
