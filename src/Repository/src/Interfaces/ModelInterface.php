@@ -23,7 +23,7 @@ interface ModelInterface
     /**
      * @return array
      */
-    public function getChanged(): array;
+    public function getChanges(): array;
 
     /**
      * @return bool
