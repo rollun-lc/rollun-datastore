@@ -118,7 +118,7 @@ class ModelAbstractTest extends TestCase
             'field' => 'test',
             'name' => 'hello',
         ];
-        $model = new class($data) extends ModelAbstract {
+        $model = new class($data, true) extends ModelAbstract {
             public function setFieldAttribute($value)
             {
                 return 'mutated-' . $value;
@@ -138,13 +138,13 @@ class ModelAbstractTest extends TestCase
             'field' => 'test',
             'name' => 'hello',
         ];
-        $model = new class($data) extends ModelAbstract {};
+        $model = new class($data, true) extends ModelAbstract {};
 
-        $this->assertEmpty($model->getChanged());
+        $this->assertEmpty($model->getChanges());
 
         $model->field = 'changed';
 
-        $this->assertSame(['field' => 'changed'], $model->getChanged());
+        $this->assertSame(['field' => 'changed'], $model->getChanges());
     }
 
     /*public function testGetMutatedAttributes()
@@ -169,10 +169,24 @@ class ModelAbstractTest extends TestCase
         $data = [
             'field' => '1.0',
         ];
-        $model = new class($data) extends ModelAbstract {};
+        $model = new class($data, true) extends ModelAbstract {};
 
         $model->field = '1.00';
 
-        $this->assertEmpty($model->getChanged());
+        $this->assertEmpty($model->getChanges());
+    }
+
+    public function testChangesNew()
+    {
+        $data = [
+            'field' => 'test',
+        ];
+        $model = new class($data) extends ModelAbstract {};
+
+        $this->assertEquals($data, $model->getChanges());
+
+        $model->field = 'hello';
+
+        $this->assertEquals(['field' => 'hello'], $model->getChanges());
     }
 }

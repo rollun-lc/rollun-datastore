@@ -45,7 +45,7 @@ class ModelRepositoryTest extends TestCase
 
             public function isChanged(): bool {}
 
-            public function getChanged(): array {}
+            public function getChanges(): array {}
 
             public function isExists(): bool {
                 return $this->exists;

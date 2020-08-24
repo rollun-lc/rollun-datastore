@@ -27,7 +27,7 @@ class SimpleModelImplementedInterface implements ModelInterface
         return $this->changed;
     }
 
-    public function getChanged(): array
+    public function getChanges(): array
     {
         // TODO: Implement getChanged() method.
     }

@@ -42,11 +42,20 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
      */
     public function __construct($attributes = [], $exists = false)
     {
+        $this->updateOriginal();
+
         $this->fill($attributes);
 
-        $this->original = $this->attributes;
+        //$this->original = $this->attributes;
 
-        $this->exists = $exists;
+        //$this->exists = $exists;
+
+        $this->setExists($exists);
+    }
+
+    public function updateOriginal()
+    {
+        $this->original = $this->attributes;
     }
 
     /**
@@ -234,7 +243,7 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
     {
         //return $this->attributes !== $this->original;
         foreach ($this->attributes as $name => $value) {
-            if (!$this->isChangedAttribute($name)) {
+            if ($this->isChangedAttribute($name)) {
                 return true;
             }
         }
@@ -255,7 +264,7 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
             return true;
         }
 
-        if ($this->attributes[$name] == $this->original[$name]) {
+        if ($this->attributes[$name] != $this->original[$name]) {
             return true;
         }
 
@@ -265,17 +274,17 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
     /**
      * @return array
      */
-    public function getChanged(): array
+    public function getChanges(): array
     {
         //return array_diff($this->attributes, $this->original);
-        $changed = [];
+        $changes = [];
         foreach ($this->attributes as $name => $value) {
-            if (!$this->isChangedAttribute($name)) {
-                $changed[$name] = $value;
+            if ($this->isChangedAttribute($name)) {
+                $changes[$name] = $value;
             }
         }
 
-        return $changed;
+        return $changes;
     }
 
     /**
@@ -287,10 +296,16 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
     }
 
     /**
+     * @todo
+     *
      * @param bool $exists
      */
     public function setExists(bool $exists): void
     {
         $this->exists = $exists;
+
+        if ($exists) {
+            $this->updateOriginal();
+        }
     }
 }
