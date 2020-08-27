@@ -240,6 +240,7 @@ class DataStoreApiTest extends BaseMiddlewareTest
             $request->getUri()
                 ->getPath()
         );
+        $response = $response->withHeader('Datastore-Scheme', '');
 
         /** @var RequestHandlerInterface $delegateMock */
         $delegateMock = $this->createMock(RequestHandlerInterface::class);

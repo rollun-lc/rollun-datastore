@@ -58,8 +58,11 @@ class HttpClientTest extends BaseDataStoreTest
         parent::setUp();
 
         /** @var ContainerInterface $container */
-        $this->container = include './config/container.php';
-        $adapter = $container->get('db');
+        //$this->container = include './config/container.php';
+        global $container;
+        $this->container = $container;
+
+        $adapter = $this->container->get('db');
         $this->mysqlManager = new TableManagerMysql($adapter);
 
         if ($this->mysqlManager->hasTable($this->tableName)) {

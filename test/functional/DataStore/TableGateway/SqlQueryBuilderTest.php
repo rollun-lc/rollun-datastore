@@ -4,7 +4,7 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\test\functional\DataStore\Middleware\Handler;
+namespace rollun\test\functional\DataStore\TableGateway;
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
@@ -98,7 +98,7 @@ class SqlQueryBuilderTest extends TestCase
         ]));
 
         $select = "SELECT `table`.* FROM `table` ";
-        $where = "WHERE ((`a`IS NULL OR `a` IS FALSE) AND (`a` IS TRUE) AND (`a` IS FALSE) AND (`a` IS NULL))";
+        $where = "WHERE ((`a` IS NULL OR `a` IS FALSE OR `a` = '') AND (`a` IS TRUE) AND (`a` IS FALSE) AND (`a` IS NULL))";
 
         $this->assertEquals($select.$where, $object->buildSql($rqlQuery));
     }

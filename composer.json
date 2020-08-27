@@ -30,6 +30,7 @@
     "ajgl/csv-rfc": "^0.3.0"
   },
   "require-dev": {
+    "zendframework/zend-expressive": "^3.2.1",
     "zendframework/zend-component-installer": "^2.0",
     "zendframework/zend-config-aggregator": "^1.0",
     "phpunit/phpunit": "^7.0",

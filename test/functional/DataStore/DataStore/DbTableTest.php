@@ -153,9 +153,13 @@ class DbTableTest extends TestCase
 
     public function testUpdateFailWithItemDoesNotExist()
     {
-        $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessage("Can't update item. Can't update item with id = 1");
         $object = $this->createObject();
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage(
+            "[{$this->tableName}]Can't update item. [{$this->tableName}]Can't update item with id = 1"
+        );
+
         $object->update([
             'id' => 1,
             'name' => 'name'

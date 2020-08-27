@@ -145,7 +145,7 @@ class ModelRepository implements ModelRepositoryInterface
      * 
      * @todo * @todo update field created_at
      */
-    public function insertModel($model)
+    public function insertModel(ModelInterface $model)
     {
         $record = $this->dataStore->create($model->toArray());
 
@@ -154,10 +154,33 @@ class ModelRepository implements ModelRepositoryInterface
             $identifier = $this->dataStore->getIdentifier();
             if (isset($record[$identifier])) {
                 $model->{$identifier} = $record[$identifier];
+                $model->setExists(true);
             }
         }
 
         return (bool) $record;
+    }
+
+    /**
+     * @todo
+     *
+     * @param $models
+     */
+    public function multiInserModels($models)
+    {
+        $data = [];
+        foreach ($models as $model) {
+            $data[] = $model->toArray();
+        }
+        $multiInsertedIds = $this->dataStore->multiCreate($data);
+
+        $identifier = $this->dataStore->getIdentifier();
+        foreach ($models as $key => $model) {
+            $model->{$identifier} = $multiInsertedIds[$key];
+            $model->setExists(true);
+        }
+
+        return $multiInsertedIds;
     }
 
     /**
@@ -170,16 +193,16 @@ class ModelRepository implements ModelRepositoryInterface
         $identifier = $this->dataStore->getIdentifier();
 
         foreach ($models as $key => $model) {
-            if ($model->isExists()) {
-                $this->dataStore->update($model->toArray());
+            if ($model->isExists() && $this->dataStore->update($model->toArray())) {
                 $singleInsertedIds[] = $model->{$identifier};
+                $model->setExists(true);
             } else {
-                $multiCreated[] = $model->toArray();
+                $multiCreated[] = $model;
             }
         }
 
         if (!empty($multiCreated)) {
-            $multiInsertedIds = $this->dataStore->multiCreate($multiCreated);
+            $multiInsertedIds = $this->multiInserModels($multiCreated);
         }
 
         return array_merge($singleInsertedIds, $multiInsertedIds);
@@ -191,10 +214,16 @@ class ModelRepository implements ModelRepositoryInterface
      * @return bool
      * 
      * @todo update field updated_at
+     * @todo updating abstract model original
      */
-    public function updateModel($model)
+    public function updateModel(ModelInterface $model)
     {
-        return (bool) $this->dataStore->update($model->toArray());
+        $result = $this->dataStore->update($model->toArray());
+        if ($result) {
+            $model->setExists(true);
+        }
+
+        return (bool) $result;
     }
 
     /**
