@@ -122,7 +122,7 @@ class SqlConditionBuilderTest extends ConditionBuilderTest
                 ]))
                     ->getQuery()
                     ->getQuery(),
-                "((`a` IS NULL) AND (`b` IS TRUE) AND (`c` IS FALSE) AND (`d`IS NULL OR `d` IS FALSE) AND (`a` LIKE '%abc_'))",
+                "((`a` IS NULL) AND (`b` IS TRUE) AND (`c` IS FALSE) AND (`d` IS NULL OR `d` IS FALSE OR `d` = '') AND (`a` LIKE '%abc_'))",
             ],
         ];
     }

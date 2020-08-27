@@ -61,7 +61,8 @@ class SerializedDbTableTest extends TestCase
     protected function getContainer()
     {
         if ($this->container === null) {
-            $this->container = include './config/container.php';
+            global $container;
+            $this->container = $container;
         }
 
         return $this->container;

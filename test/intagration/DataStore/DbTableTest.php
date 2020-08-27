@@ -59,7 +59,9 @@ class DbTableTest extends BaseDataStoreTest
     public function getContainer()
     {
         if ($this->container === null) {
-            $this->container = include './config/container.php';
+            //$this->container = include './config/container.php';
+            global $container;
+            $this->container = $container;
         }
 
         return $this->container;
