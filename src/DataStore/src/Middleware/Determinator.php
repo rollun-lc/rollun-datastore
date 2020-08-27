@@ -56,7 +56,10 @@ class Determinator implements MiddlewareInterface
         $response = $dataStoreRest->process($request, $handler);
 
         $dataStoreScheme = $dataStore instanceof AspectTyped ? json_encode($dataStore->getScheme()) : '';
+
+        // TODO
         $response = $response->withHeader('Datastore-Scheme', $dataStoreScheme);
+        $response = $response->withHeader('X_DATASTORE_IDENTIFIER', $dataStore->getIdentifier());
 
         return $response;
     }
