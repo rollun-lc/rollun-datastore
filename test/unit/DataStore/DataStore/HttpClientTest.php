@@ -17,6 +17,7 @@ use rollun\utils\Json\Serializer;
 use Zend\Http\Client;
 use Zend\Http\Header\HeaderInterface;
 use Zend\Http\Headers;
+use Zend\Http\Request;
 use Zend\Http\Response;
 
 class HttpClientTest extends TestCase
@@ -37,7 +38,27 @@ class HttpClientTest extends TestCase
         return new HttpClient($clientMock, $url, $options, $this->container->get(LifeCycleToken::class));
     }
 
-    /*public function testMultiCreateSuccess()
+    /**
+     * @param Client $clientMock
+     * @param string $url
+     * @param array  $options
+     *
+     * @return HttpClient
+     */
+    protected function createObjectForMultiCreate(Client $clientMock, $url = '', $options = [])
+    {
+        return new class($clientMock, $url, $options, $this->container->get(LifeCycleToken::class)) extends HttpClient {
+            /**
+             * @inheritDoc
+             */
+            protected function sendHead()
+            {
+                return ['X_MULTI_CREATE' => true];
+            }
+        };
+    }
+
+    public function testMultiCreateSuccess()
     {
         $items = [['id' => 1, 'name' => 'name']];
         $url = '';
@@ -55,10 +76,10 @@ class HttpClientTest extends TestCase
             ->method('send')
             ->willReturn($response);
 
-        $this->assertEquals($this->createObject($clientMock, $url)->multiCreate($items), $items);
-    }*/
+        $this->assertEquals($this->createObjectForMultiCreate($clientMock, $url)->multiCreate($items), $items);
+    }
 
-    /*public function testMultiCreateFail()
+    public function testMultiCreateFail()
     {
         $items = [['id' => 1, 'name' => 'name']];
         $url = '';
@@ -78,17 +99,17 @@ class HttpClientTest extends TestCase
             ->willReturn($response);
 
         try {
-            $this->createObject($clientMock, $url)->multiCreate($items);
+            $this->createObjectForMultiCreate($clientMock, $url)->multiCreate($items);
         } catch (DataStoreException $e) {
-            $this->assertEquals("Can't create items POST", $e->getMessage());
+            $this->assertEquals('Can\'t create items POST    ""', $e->getMessage());
         }
 
         try {
-            $this->createObject($clientMock, $url)->multiCreate(['id' => 1, 'name' => 'name']);
+            $this->createObjectForMultiCreate($clientMock, $url)->multiCreate(['id' => 1, 'name' => 'name']);
         } catch (DataStoreException $e) {
             $this->assertEquals("Collection of arrays expected", $e->getMessage());
         }
-    }*/
+    }
 
     public function testCreateSuccess()
     {
