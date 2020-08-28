@@ -17,7 +17,6 @@ use rollun\utils\Json\Serializer;
 use Zend\Http\Client;
 use Zend\Http\Header\HeaderInterface;
 use Zend\Http\Headers;
-use Zend\Http\Request;
 use Zend\Http\Response;
 
 class HttpClientTest extends TestCase
