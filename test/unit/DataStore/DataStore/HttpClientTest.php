@@ -580,4 +580,45 @@ class HttpClientTest extends TestCase
 
         $object->create($items, 1);
     }
+
+    public function testHeaderIdentifier()
+    {
+        $items = ['test' => 1, 'name' => 'name',];
+        $url = '';
+        $clientMock = $this->createClientMock('GET', $url . '/1', []);
+
+        $response = $this->createResponse($items);
+        $response->expects($this->once())
+            ->method('isOk')
+            ->willReturn(true);
+
+        $header = $this->createMock(HeaderInterface::class);
+        $header->expects($this->once())
+            ->method('getFieldValue')
+            ->willReturn('test');
+
+        $headers = $this->createMock(Headers::class);
+        $headers->expects($this->once())
+            ->method('get')
+            ->with('X_DATASTORE_IDENTIFIER')
+            ->willReturn($header);
+        $headers->expects($this->once())
+            ->method('has')
+            ->with('X_DATASTORE_IDENTIFIER')
+            ->willReturn(true);
+
+        $response->expects($this->once())
+            ->method('getHeaders')
+            ->willReturn($headers);
+
+        $clientMock->expects($this->once())
+            ->method('send')
+            ->willReturn($response);
+
+        $object = $this->createObject($clientMock, $url);
+
+        $object->read($items['test']);
+
+        $this->assertEquals('test', $object->getIdentifier());
+    }
 }

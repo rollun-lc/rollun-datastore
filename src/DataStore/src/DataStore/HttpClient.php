@@ -13,6 +13,7 @@ use rollun\utils\Json\Serializer;
 use Xiag\Rql\Parser\Query;
 use rollun\datastore\Rql\RqlParser;
 use Zend\Http\Client;
+use Zend\Http\Headers;
 use Zend\Http\Request;
 use Zend\Http\Response;
 
@@ -22,6 +23,8 @@ use Zend\Http\Response;
  */
 class HttpClient extends DataStoreAbstract
 {
+    protected const DATASTORE_IDENTIFIER_HEADER = 'X_DATASTORE_IDENTIFIER';
+
     /**
      * @var string 'http://example.org'
      */
@@ -60,6 +63,8 @@ class HttpClient extends DataStoreAbstract
      * @var LifeCycleToken
      */
     protected $lifeCycleToken;
+
+    protected $identifier;
 
     /**
      * HttpClient constructor.
@@ -116,14 +121,30 @@ class HttpClient extends DataStoreAbstract
         if ($response->isSuccess() && $response->getHeaders()->has('X_DATASTORE_IDENTIFIER')) {
             return $response->getHeaders()->get('X_DATASTORE_IDENTIFIER')->getFieldValue();
         }*/
+
+        if ($this->identifier) {
+            return $this->identifier;
+        }
+
         return parent::getIdentifier();
+    }
+
+    protected function checkResonseHeaderIdentifier(Response $response)
+    {
+        if (($headers = $response->getHeaders()) && $headers->has(self::DATASTORE_IDENTIFIER_HEADER)) {
+            $this->identifier = $headers->get(self::DATASTORE_IDENTIFIER_HEADER)->getFieldValue();
+        }
     }
 
     protected function sendHead()
     {
         $client = $this->initHttpClient(Request::METHOD_HEAD, "{$this->url}?limit(1)");
         $response = $client->send();
+
         if ($response->isSuccess()) {
+
+            $this->checkResonseHeaderIdentifier($response);
+
             return $response->getHeaders()->toArray();
         }
         return null;
@@ -138,6 +159,8 @@ class HttpClient extends DataStoreAbstract
         $uri = $this->createUri(null, $id);
         $client = $this->initHttpClient(Request::METHOD_GET, $uri);
         $response = $client->send();
+
+        $this->checkResonseHeaderIdentifier($response);
 
         if ($response->isOk()) {
             $result = Serializer::jsonUnserialize($response->getBody());
@@ -217,6 +240,8 @@ class HttpClient extends DataStoreAbstract
         $client = $this->initHttpClient(Request::METHOD_GET, $uri);
         $response = $client->send();
 
+        $this->checkResonseHeaderIdentifier($response);
+
         if ($response->isOk()) {
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
@@ -240,6 +265,8 @@ class HttpClient extends DataStoreAbstract
         $json = Serializer::jsonSerialize($itemData);
         $client->setRawBody($json);
         $response = $client->send();
+
+        $this->checkResonseHeaderIdentifier($response);
 
         if ($response->isSuccess()) {
             $result = Serializer::jsonUnserialize($response->getBody());
@@ -311,6 +338,8 @@ class HttpClient extends DataStoreAbstract
         $client->setRawBody(Serializer::jsonSerialize($itemData));
         $response = $client->send();
 
+        $this->checkResonseHeaderIdentifier($response);
+
         if ($response->isSuccess()) {
             $result = Serializer::jsonUnserialize($response->getBody());
         } else {
@@ -330,6 +359,8 @@ class HttpClient extends DataStoreAbstract
         $uri = $this->createUri(null, $id);
         $client = $this->initHttpClient(Request::METHOD_DELETE, $uri);
         $response = $client->send();
+
+        $this->checkResonseHeaderIdentifier($response);
 
         if ($response->isSuccess()) {
             $result = !empty($response->getBody()) ? Serializer::jsonUnserialize($response->getBody()) : null;

@@ -89,6 +89,14 @@ return [
             'class' => \rollun\datastore\DataStore\Memory::class,
             'requiredColumns' => ['id', 'name']
         ],
+        'testDataStore2' => [
+            'class' => new class extends \rollun\datastore\DataStore\Memory {
+                public function getIdentifier()
+                {
+                    return 'test';
+                }
+            },
+        ]
     ],
     'tableManagerMysql' => [
         'tablesConfigs' => [

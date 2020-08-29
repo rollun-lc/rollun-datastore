@@ -90,4 +90,16 @@ class HttpClientTest extends BaseDataStoreTest
 
         return new HttpClient($client, $url);
     }
+
+    public function testHeaderIdentifier()
+    {
+        $dataStoreService = 'testDataStore2';
+        $url = getenv('TEST_HOST') . "api/datastore/{$dataStoreService}";
+        $client = new Client();
+
+        $object = new HttpClient($client, $url);
+        $object->read(1);
+
+        $this->assertEquals('test', $object->getIdentifier());
+    }
 }
