@@ -5,6 +5,7 @@ namespace rollun\datastore\Middleware\Handler;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use Zend\Diactoros\Response;
 
@@ -70,17 +71,23 @@ class MultiCreateHandler extends AbstractHandler
         $rows = $request->getParsedBody();
 
         if ($this->dataStore instanceof DataStoreInterface) {
-            $this->dataStore->multiCreate($rows);
+            $result = $this->dataStore->multiCreate($rows);
         } else {
+            $result = [];
             foreach ($rows as $row) {
-                $this->dataStore->create($row);
+                try {
+                    $result[] = $this->dataStore->create($row);
+                } catch (DataStoreException $exception) {
+                    //Ignore result...
+                }
             }
+            $result = array_column($result, $this->dataStore->getIdentifier());
         }
 
         $response = new Response();
         $response = $response->withStatus(201);
         $response = $response->withHeader('Location', $request->getUri()->getPath());
-        $response = $response->withBody($this->createStream($rows));
+        $response = $response->withBody($this->createStream($result));
 
         return $response;
     }
