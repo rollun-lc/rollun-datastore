@@ -144,7 +144,6 @@ class HttpClient extends DataStoreAbstract
     {
         $query = new Query();
         $query->setLimit(new LimitNode(1));
-        $query->setQuery(new EqnNode('id'));
         $uri = $this->createUri($query);
         $client = $this->initHttpClient(Request::METHOD_GET, $uri);
         $response = $client->send();
