@@ -185,6 +185,7 @@ class HttpClientTest extends TestCase
             ->willReturn($response);
 
         $object = $this->createObject($clientMock, $url);
+        $object->setIdendifier('id');
 
         $this->assertEquals($object->update($itemsWithId), $itemsWithId);
     }
@@ -211,6 +212,7 @@ class HttpClientTest extends TestCase
             ->willReturn($response);
 
         $object = $this->createObject($clientMock, $url);
+        $object->setIdendifier('id');
 
         $this->assertEquals($object->update($itemsWithId, 1), $itemsWithId);
     }
@@ -238,6 +240,7 @@ class HttpClientTest extends TestCase
             ->willReturn($response);
 
         $object = $this->createObject($clientMock, $url);
+        $object->setIdendifier('id');
 
         $object->update($itemsWithId, 1);
     }

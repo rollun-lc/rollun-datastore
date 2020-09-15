@@ -7,9 +7,11 @@
 namespace rollun\datastore\DataStore;
 
 use rollun\datastore\DataStore\ConditionBuilder\RqlConditionBuilder;
+use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
 use rollun\dic\InsideConstruct;
 use rollun\logger\LifeCycleToken;
 use rollun\utils\Json\Serializer;
+use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Query;
 use rollun\datastore\Rql\RqlParser;
 use Zend\Http\Client;
@@ -112,6 +114,11 @@ class HttpClient extends DataStoreAbstract
         ];
     }
 
+    public function setIdendifier($identifier)
+    {
+        $this->identifier = $identifier;
+    }
+
     public function getIdentifier()
     {
         /*
@@ -122,6 +129,10 @@ class HttpClient extends DataStoreAbstract
             return $response->getHeaders()->get('X_DATASTORE_IDENTIFIER')->getFieldValue();
         }*/
 
+        if (empty($this->identifier)) {
+            $this->queryForHeaderIdentifier();
+        }
+
         if ($this->identifier) {
             return $this->identifier;
         }
@@ -129,9 +140,25 @@ class HttpClient extends DataStoreAbstract
         return parent::getIdentifier();
     }
 
+    protected function queryForHeaderIdentifier()
+    {
+        $query = new Query();
+        $query->setLimit(new LimitNode(1));
+        $query->setQuery(new EqnNode('id'));
+        $uri = $this->createUri($query);
+        $client = $this->initHttpClient(Request::METHOD_GET, $uri);
+        $response = $client->send();
+
+        $this->checkResonseHeaderIdentifier($response);
+    }
+
     protected function checkResonseHeaderIdentifier(Response $response)
     {
-        if (($headers = $response->getHeaders()) && $headers->has(self::DATASTORE_IDENTIFIER_HEADER)) {
+        if (
+            $this->identifier === null
+            && ($headers = $response->getHeaders())
+            && $headers->has(self::DATASTORE_IDENTIFIER_HEADER)
+        ) {
             $this->identifier = $headers->get(self::DATASTORE_IDENTIFIER_HEADER)->getFieldValue();
         }
     }
