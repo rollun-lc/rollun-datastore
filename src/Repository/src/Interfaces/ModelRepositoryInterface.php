@@ -59,4 +59,11 @@ interface ModelRepositoryInterface
      * @return mixed
      */
     public function getDataStore();
+
+    /**
+     * @param $id
+     *
+     * @return bool
+     */
+    public function has($id): bool;
 }

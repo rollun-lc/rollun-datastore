@@ -73,7 +73,7 @@ class ModelRepository implements ModelRepositoryInterface
      *
      * @return bool
      */
-    public function has($id)
+    public function has($id): bool
     {
         return $this->dataStore->has($id);
     }
