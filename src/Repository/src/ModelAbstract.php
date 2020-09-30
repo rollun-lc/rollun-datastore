@@ -7,6 +7,7 @@ use ArrayAccess;
 use rollun\repository\Interfaces\ModelHiddenFieldInterface;
 use rollun\repository\Interfaces\ModelInterface;
 use rollun\repository\Traits\ModelArrayAccess;
+use rollun\repository\Traits\ModelCastingTrait;
 use rollun\repository\Traits\ModelDataTime;
 
 /**
@@ -18,6 +19,7 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
 {
     use ModelArrayAccess;
     use ModelDataTime;
+    use ModelCastingTrait;
 
     /**
      * @var array
@@ -33,6 +35,8 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
      * @var bool
      */
     protected $exists = false;
+
+    protected $casting = [];
 
     /**
      * ModelAbstract constructor.
@@ -161,6 +165,10 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
 
             if ($this->hasMutator('get', $name)) {
                 $value = $this->mutate('get', $name, $value);
+            }
+
+            if (array_key_exists($name, $this->casting)) {
+                $value = $this->cast($name, $value);
             }
 
             return $value;

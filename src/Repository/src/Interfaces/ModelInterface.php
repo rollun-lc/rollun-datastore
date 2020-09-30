@@ -3,18 +3,15 @@
 namespace rollun\repository\Interfaces;
 
 
+use rollun\utils\Interfaces\ArrayableInterface;
+
 /**
  * Interface ModelInterface
  *
  * @package rollun\repository\Interfaces
  */
-interface ModelInterface
+interface ModelInterface extends ArrayableInterface
 {
-    /**
-     * @return array
-     */
-    public function toArray(): array;
-
     /**
      * @return bool
      */

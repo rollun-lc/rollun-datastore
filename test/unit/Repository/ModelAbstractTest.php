@@ -6,6 +6,7 @@ namespace rollun\test\unit\Repository;
 
 use PHPUnit\Framework\TestCase;
 use rollun\repository\ModelAbstract;
+use rollun\repository\Traits\ModelCastingTrait;
 
 class ModelAbstractTest extends TestCase
 {
@@ -188,5 +189,31 @@ class ModelAbstractTest extends TestCase
         $model->field = 'hello';
 
         $this->assertEquals(['field' => 'hello'], $model->getChanges());
+    }
+
+    public function testCasing()
+    {
+        $data = [
+            'field1' => '1234',
+            'field2' => '12.34',
+            'field3' => '{"key":"value"}',
+            'field4' => 'a:1:{s:3:"key";s:5:"value";}',
+
+        ];
+        $model = new class($data) extends ModelAbstract {
+            use ModelCastingTrait;
+
+            protected $casting = [
+                'field1' => 'int',
+                'field2' => 'float',
+                'field3' => 'array',
+                'field4' => 'array',
+            ];
+        };
+
+        $this->assertIsInt($model->field1);
+        $this->assertIsFloat($model->field2);
+        $this->assertIsArray($model->field3);
+        $this->assertIsArray($model->field4);
     }
 }
