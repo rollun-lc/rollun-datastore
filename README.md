@@ -5,4 +5,14 @@
 Существующие реализации: DbTable (для таблицы бд), CsvBase (для csv файлов), HttpClient (для внешнего ресурса через 
 http), Memory (для [RAM](https://en.wikipedia.org/wiki/Random-access_memory)).
 
-* [Документация](https://rollun-com.github.io/rollun-datastore)
+* [Документация](docs/index.md)
+
+### Для сторонних клиентов
+
+В DataStore используется дополненная версия `rawurlencode`.
+К перечню стандартных символов добавлены следующие преобразования
+
+* `-` => `%2D`
+* `_` => `%5F`
+* `.` => `%2E`
+* `~` => `%7E`
