@@ -23,6 +23,7 @@ use Zend\Http\Client;
  *         'class' => 'rollun\datastore\DataStore\HttpDatastoreClassName',
  *          'url' => 'http://site.com/api/resource-name',
  *          'options' => [
+ *              'identifier' => 'custom_id_field',
  *              'timeout' => 30,
  *              'adapter' => 'Zend\Http\Client\Adapter\Socket',
  *          ]

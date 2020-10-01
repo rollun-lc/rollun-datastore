@@ -7,15 +7,13 @@
 namespace rollun\datastore\DataStore;
 
 use rollun\datastore\DataStore\ConditionBuilder\RqlConditionBuilder;
-use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
+use rollun\datastore\Rql\RqlParser;
 use rollun\dic\InsideConstruct;
 use rollun\logger\LifeCycleToken;
 use rollun\utils\Json\Serializer;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Query;
-use rollun\datastore\Rql\RqlParser;
 use Zend\Http\Client;
-use Zend\Http\Headers;
 use Zend\Http\Request;
 use Zend\Http\Response;
 
@@ -87,6 +85,9 @@ class HttpClient extends DataStoreAbstract
             if (isset($options['login']) && isset($options['password'])) {
                 $this->login = $options['login'];
                 $this->password = $options['password'];
+            }
+            if (isset($options['identifier'])) {
+                $this->identifier = $options['identifier'];
             }
 
             $supportedKeys = ['maxredirects', 'useragent', 'adapter', 'timeout', 'curloptions'];

@@ -959,6 +959,8 @@ var_dump($dataStoreTo->read(3)); // ['id' => 3, 'name' => 'foo3']
 
 ##### 3. `HttpClientAbstractFactory`
 
+> Используя ключ `identifier` в опциях клиента, можно указать специфический id удаленного репозитория 
+
 Пример конфигурации:
 ```php
 [
@@ -967,6 +969,7 @@ var_dump($dataStoreTo->read(3)); // ['id' => 3, 'name' => 'foo3']
             'class' => 'rollun\datastore\DataStore\HttpDatastoreClassName',
             'url' => 'http://site.com/api/resource-name', // general url scheme: {scheme}://{host}[:{port}]/api/{sourceName}
             'options' => [
+                'identifier' => 'custom_id_fields',
                 'timeout' => 30,
                 'adapter' => 'Zend\Http\Client\Adapter\Socket',
             ]
@@ -975,8 +978,9 @@ var_dump($dataStoreTo->read(3)); // ['id' => 3, 'name' => 'foo3']
             // ...
         ],
     ]
-]
+];
 ```
+
 
 ##### 4. `MemoryAbstractFactory`
 
