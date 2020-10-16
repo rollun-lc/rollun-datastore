@@ -108,6 +108,28 @@ trait MappingFieldsTrait
     }
 
     /**
+     * @param $fields
+     */
+    public function setFields($fields)
+    {
+        if (property_exists($this, 'fields')) {
+            $this->fields = $fields;
+        }
+    }
+
+    /**
+     * @param $key
+     *
+     * @param $value
+     */
+    public function addField($key, $value)
+    {
+        if (property_exists($this, 'fields')) {
+            $this->fields[$key] = $value;
+        }
+    }
+
+    /**
      * Преобразовывает данные в нужный тип
      * 
      * @param $type
