@@ -193,9 +193,8 @@ class ModelRepository implements ModelRepositoryInterface
         $identifier = $this->dataStore->getIdentifier();
 
         foreach ($models as $key => $model) {
-            if ($model->isExists() && $this->dataStore->update($model->toArray())) {
+            if ($model->isExists() && $this->updateModel($model)) {
                 $singleInsertedIds[] = $model->{$identifier};
-                $model->setExists(true);
             } else {
                 $multiCreated[] = $model;
             }
