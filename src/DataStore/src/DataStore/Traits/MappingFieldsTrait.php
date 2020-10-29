@@ -4,15 +4,11 @@
 namespace rollun\datastore\DataStore\Traits;
 
 
-use rollun\utils\CallAttemptsTrait;
-
 /**
  * Trait MappingFieldsTrait
  * Трейт для датасторов, который умеет мапить данные с массивов и сохранять в базу данных с нужными полями
- * 
- * @todo Add tests
  *
- * @todo Move to repository
+ * @todo Move to repository or utils
  * 
  * @package rollun\datastore\DataStore\Traits
  */
@@ -52,9 +48,8 @@ trait MappingFieldsTrait
                 $result = $this->$formatMethod($result);
             }
 
-            if (isset($this->casting) && is_array($this->casting)
-                && array_key_exists($field, $this->casting) && $this->fields) {
-                $result = $this->cast($this->casting[$field], $result);
+            if ($this->needCast($field)) {
+                $result = $this->cast($this->getCasting()[$field], $result);
             }
         }
 
@@ -75,7 +70,11 @@ trait MappingFieldsTrait
         $paths = explode('.', $path);
         $current = $itemData;
         foreach ($paths as $item) {
-            $current = $current[$item] ?? null;
+            if (is_object($current)) {
+                $current = $current->{$item} ?? null;
+            } else {
+                $current = $current[$item] ?? null;
+            }
         }
         return $current;
     }
@@ -84,17 +83,25 @@ trait MappingFieldsTrait
      * Формирует массив для записи в таблицу БД.
      * Ключи и значения массива берутся из поля $fields текущего обьекта
      *
-     * @todo
-     *
      * @param $itemData
      *
+     * @param null $callback
+     *
      * @return array
+     *
+     * @todo
+     *
      */
-    public function prepareData($itemData)
+    public function prepareData($itemData, $callback = null)
     {
         $data = [];
         foreach ($this->getFields() as $key => $path) {
-            $data[$key] = $this->getValueByFieldName($itemData, $key);
+            $value = $this->getValueByFieldName($itemData, $key);
+            // TODO
+            if (is_callable($callback)) {
+                $value = $callback($value, $key, $itemData);
+            }
+            $data[$key] = $value;
         }
         return $data;
     }
@@ -130,6 +137,49 @@ trait MappingFieldsTrait
     }
 
     /**
+     * @return array
+     */
+    public function getCasting()
+    {
+        return $this->casting ?? [];
+    }
+
+    /**
+     * @param $casting
+     */
+    public function setCasting($casting)
+    {
+        if (property_exists($this, 'casting')) {
+            $this->casting = $casting;
+        }
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     */
+    public function addCasting($key, $value)
+    {
+        if (property_exists($this, 'casting')) {
+            $this->casting[$key] = $value;
+        }
+    }
+
+    /**
+     * @param $field
+     * @return bool
+     *
+     * @todo
+     */
+    protected function needCast($field)
+    {
+        return isset($this->casting)
+            && is_array($this->casting)
+            && array_key_exists($field, $this->casting)
+            && $this->getFields();
+    }
+
+    /**
      * Преобразовывает данные в нужный тип
      * 
      * @param $type
@@ -138,7 +188,7 @@ trait MappingFieldsTrait
      */
     protected function cast($type, $value)
     {
-        $method = 'cast' . ucfirst($type);
+        $method = 'cast' . str_replace('_', '', ucwords($type, '_'));
         if (method_exists($this, $method)) {
             return $this->$method($value);
         }
@@ -150,8 +200,62 @@ trait MappingFieldsTrait
      * @param $value
      * @return false|string
      */
-    protected function castArray($value)
+    protected function castJson($value)
     {
         return json_encode($value);
+    }
+
+    /**
+     * @param $value
+     * @return array
+     */
+    protected function castArray($value)
+    {
+        return (array) $value;
+    }
+
+    /**
+     * @param $value
+     * @return int
+     */
+    protected function castInteger($value)
+    {
+        return (int) $value;
+    }
+
+    /**
+     * @param $value
+     * @return int
+     */
+    protected function castInt($value)
+    {
+        return $this->castInteger($value);
+    }
+
+    /**
+     * @param $value
+     * @return float
+     */
+    protected function castFloat($value)
+    {
+        return (float) $value;
+    }
+
+    /**
+     * @param $value
+     * @return float
+     */
+    protected function castDouble($value)
+    {
+        return $this->castFloat($value);
+    }
+
+    /**
+     * @param $value
+     * @return string
+     */
+    protected function castString($value)
+    {
+        return (string) $value;
     }
 }
