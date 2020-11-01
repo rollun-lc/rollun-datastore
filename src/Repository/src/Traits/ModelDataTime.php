@@ -24,8 +24,8 @@ trait ModelDataTime
      */
     public function setCreatedAt()
     {
-        $date = new \DateTime('now', new \DateTimeZone($this->defaultTimezone));
-        $this->{$this->createAtField} = $date->format($this->timestampFormat);
+        $date = new \DateTime('now', new \DateTimeZone($this->getDefaultTimezone()));
+        $this->{$this->getCreatedAtField()} = $date->format($this->getTimestamFormat());
     }
 
     /**
@@ -33,7 +33,39 @@ trait ModelDataTime
      */
     public function renewUpdatedAt()
     {
-        $date = new \DateTime('now', new \DateTimeZone($this->defaultTimezone));
-        $this->{$this->updatedAtField} = $date->format($this->timestampFormat);
+        $date = new \DateTime('now', new \DateTimeZone($this->getDefaultTimezone()));
+        $this->{$this->getUpdatedAtField()} = $date->format($this->getTimestamFormat());
+    }
+
+    /**
+     * @return string
+     */
+    public function getCreatedAtField()
+    {
+        return $this->createAtField;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUpdatedAtField()
+    {
+        return $this->updatedAtField;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTimestamFormat()
+    {
+        return $this->timestampFormat;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultTimezone()
+    {
+        return $this->defaultTimezone;
     }
 }

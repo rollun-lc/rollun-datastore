@@ -7,6 +7,7 @@ use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\repository\Interfaces\FieldMapperInterface;
 use rollun\repository\Interfaces\ModelRepositoryInterface;
 use rollun\repository\Interfaces\ModelInterface;
+use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
 use Xiag\Rql\Parser\Query;
 
 /**
@@ -184,27 +185,69 @@ class ModelRepository implements ModelRepositoryInterface
     }
 
     /**
-     * @param ModelInterface[] $models
+     * @param $models
+     *
+     * @return array
+     *
+     * @throws \rollun\datastore\DataStore\DataStoreException
      */
-    public function multiSave($models)
+    public function multiUpdateModels($models)
     {
-        $singleInsertedIds = [];
-        $multiInsertedIds = [];
         $identifier = $this->dataStore->getIdentifier();
+        $ids = array_column($models, $identifier);
+        if (!$this->isSameChanges($models)) {
+            foreach ($models as $model) {
+                $this->updateModel($model);
+            }
+        } else {
+            $changes = $models[0]->getChanges();
+            $query = new Query();
+            $query->setQuery(new InNode($identifier, $ids));
+            $this->dataStore->queriedUpdate($changes, $query);
+        }
+
+        return $ids;
+    }
+
+    protected function isSameChanges($models)
+    {
+        $changes = $models[0]->getChanges();
+        foreach ($models as $model) {
+            $modelChanges = $model->getChanges();
+            if ($changes !== $modelChanges) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param ModelInterface[] $models
+     *
+     * @return array
+     */
+    public function multiSave(array $models)
+    {
+        $multiUpdatedIds = $multiInsertedIds = [];
 
         foreach ($models as $key => $model) {
-            if ($model->isExists() && $this->updateModel($model)) {
-                $singleInsertedIds[] = $model->{$identifier};
+            if ($model->isExists() /*&& $model->isChanged()*/) {
+                $multiUpdated[] = $model;
             } else {
                 $multiCreated[] = $model;
             }
+        }
+
+        if (!empty($multiUpdated)) {
+            $multiUpdatedIds = $this->multiUpdateModels($multiUpdated);
         }
 
         if (!empty($multiCreated)) {
             $multiInsertedIds = $this->multiInserModels($multiCreated);
         }
 
-        return array_merge($singleInsertedIds, $multiInsertedIds);
+        return array_merge($multiUpdatedIds, $multiInsertedIds);
     }
 
     /**
