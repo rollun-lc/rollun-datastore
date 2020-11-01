@@ -29,12 +29,15 @@ class ModelRepositoryTest extends TestCase
             public $field;
             public $hello;
 
+            protected $origin = [];
+
             protected $exists = false;
 
             public function __construct($attributes)
             {
-                foreach ($attributes as $key => $attribute) {
-                    $this->{$key} = $attribute;
+                foreach ($attributes as $key => $value) {
+                    $this->{$key} = $value;
+                    $this->origin[$key] = $value;
                 }
             }
 
@@ -43,9 +46,23 @@ class ModelRepositoryTest extends TestCase
                 return ['id' => $this->id, 'field' => $this->field];
             }
 
-            public function isChanged(): bool {}
+            public function isChanged(): bool {
+                return !empty($this->getChanges());
+            }
 
-            public function getChanges(): array {}
+            public function getChanges(): array {
+                $changes = [];
+                foreach (['id', 'field', 'hello'] as $field) {
+                    if (!isset($this->origin[$field]) && !isset($this->{$field})) {
+                        continue;
+                    }
+                    if ($this->{$field} != $this->origin[$field]) {
+                        $changes[$field] = $this->{$field};
+                    }
+                }
+
+                return $changes;
+            }
 
             public function isExists(): bool {
                 return $this->exists;
@@ -163,10 +180,64 @@ class ModelRepositoryTest extends TestCase
         $models = [
             $repository->findById(1),
             $this->createModelInterface(['id' => 2, 'field' => 'field2']),
-            $this->createModelInterface(['id' => 3, 'field' => 'field2']),
+            $this->createModelInterface(['id' => 3, 'field' => 'field3']),
         ];
         $results = $repository->multiSave($models);
 
         $this->assertEquals(3, count($results));
+        $this->assertEquals('test', $dataStore->read(1)['field']);
+        $this->assertEquals('field2', $dataStore->read(2)['field']);
+        $this->assertEquals('field3', $dataStore->read(3)['field']);
+    }
+
+    public function testMultiUpdateSame()
+    {
+        $dataStore = new Memory();
+        $dataStore->create(['id' => 1, 'field' => 'field1']);
+        $dataStore->create(['id' => 2, 'field' => 'field2']);
+
+        $model = $this->createModelInterface();
+        $repository = new ModelRepository($dataStore, get_class($model));
+
+        $models = $repository->find(new Query());
+
+        foreach ($models as $model) {
+            $model->field = 'changed';
+        }
+
+        $model = $this->createModelInterface(['id' => 3, 'field' => 'field3']);
+        $models[] = $model;
+
+        $results = $repository->multiSave($models);
+
+        $this->assertEquals(3, count($results));
+        $this->assertEquals('changed', $dataStore->read(1)['field']);
+        $this->assertEquals('changed', $dataStore->read(2)['field']);
+        $this->assertEquals('field3', $dataStore->read(3)['field']);
+    }
+
+    public function testMultiUpdateNotSame()
+    {
+        $dataStore = new Memory();
+        $dataStore->create(['id' => 1, 'field' => 'field1']);
+        $dataStore->create(['id' => 2, 'field' => 'field2']);
+
+        $model = $this->createModelInterface();
+        $repository = new ModelRepository($dataStore, get_class($model));
+
+        $models = $repository->find(new Query());
+
+        $models[0]->field = 'changed1';
+        $models[1]->field = 'changed2';
+
+        $model = $this->createModelInterface(['id' => 3, 'field' => 'field3']);
+        $models[] = $model;
+
+        $results = $repository->multiSave($models);
+
+        $this->assertEquals(3, count($results));
+        $this->assertEquals('changed1', $dataStore->read(1)['field']);
+        $this->assertEquals('changed2', $dataStore->read(2)['field']);
+        $this->assertEquals('field3', $dataStore->read(3)['field']);
     }
 }

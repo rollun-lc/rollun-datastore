@@ -21,6 +21,13 @@ interface ModelRepositoryInterface
     public function save(ModelInterface $model): bool;
 
     /**
+     * @param ModelInterface[] $models
+     *
+     * @return mixed
+     */
+    public function multiSave(array $models);
+
+    /**
      * @param Query $query
      *
      * @return array
