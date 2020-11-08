@@ -24,6 +24,8 @@ interface ModelRepositoryInterface
      * @param ModelInterface[] $models
      *
      * @return mixed
+     *
+     * @todo
      */
     public function multiSave(array $models);
 

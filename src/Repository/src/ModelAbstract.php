@@ -4,6 +4,7 @@ namespace rollun\repository;
 
 
 use ArrayAccess;
+use rollun\repository\Interfaces\ModelCastingInterface;
 use rollun\repository\Interfaces\ModelHiddenFieldInterface;
 use rollun\repository\Interfaces\ModelInterface;
 use rollun\repository\Traits\ModelArrayAccess;
@@ -167,7 +168,7 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
                 $value = $this->mutate('get', $name, $value);
             }
 
-            if (array_key_exists($name, $this->casting)) {
+            if ($this->needCast($name)) {
                 $value = $this->cast($name, $value);
             }
 
@@ -185,6 +186,10 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
     {
         if ($this->hasMutator('set', $name)) {
             $value = $this->mutate('set', $name, $value);
+        }
+
+        if ($this->needCast($name)) {
+            $value = $this->cast($name, $value, ModelCastingInterface::DIRECTION_SET);
         }
 
         $this->attributes[$name] = $value;
