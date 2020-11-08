@@ -5,8 +5,8 @@ namespace rollun\test\unit\Repository;
 
 
 use PHPUnit\Framework\TestCase;
+use rollun\repository\Interfaces\ModelCastingInterface;
 use rollun\repository\ModelAbstract;
-use rollun\repository\Traits\ModelCastingTrait;
 
 class ModelAbstractTest extends TestCase
 {
@@ -182,7 +182,12 @@ class ModelAbstractTest extends TestCase
         $data = [
             'field' => 'test',
         ];
-        $model = new class($data) extends ModelAbstract {};
+        $model = new class($data) extends ModelAbstract {
+            public function castJsonToArray()
+            {
+
+            }
+        };
 
         $this->assertEquals($data, $model->getChanges());
 
@@ -196,24 +201,46 @@ class ModelAbstractTest extends TestCase
         $data = [
             'field1' => '1234',
             'field2' => '12.34',
-            'field3' => '{"key":"value"}',
-            'field4' => 'a:1:{s:3:"key";s:5:"value";}',
-
+            'field3' => ['key' => 'value'],
+            'field4' => ['key' => 'value'],
+            'field5' => (object) ['key' => 'value'],
+            'field6' => ['key' => 'value'],
+            'field7' => ['value1', 'value2'],
         ];
-        $model = new class($data) extends ModelAbstract {
-            use ModelCastingTrait;
 
+        $model = new class($data) extends ModelAbstract {
             protected $casting = [
-                'field1' => 'int',
-                'field2' => 'float',
-                'field3' => 'array',
-                'field4' => 'array',
+                'field1' => ModelCastingInterface::CAST_INT,
+                'field2' => ModelCastingInterface::CAST_FLOAT,
+                'field3' => ModelCastingInterface::CAST_JSON,
+                'field4' => ModelCastingInterface::CAST_SERIALIZE,
+                'field5' => ModelCastingInterface::CAST_ARRAY,
+                'field6' => ModelCastingInterface::CAST_OBJECT,
             ];
+            public function __construct($attributes = [], $exists = false)
+            {
+                $custom = new class() implements ModelCastingInterface{
+                    public function get($value)
+                    {
+                        return explode('/', $value);
+                    }
+
+                    public function set($value)
+                    {
+                        return str_replace(['1', '2'], ['-one', '-two'], implode('/', $value));
+                    }
+                };
+                $this->casting['field7'] = get_class($custom);
+                parent::__construct($attributes, $exists);
+            }
         };
 
         $this->assertIsInt($model->field1);
         $this->assertIsFloat($model->field2);
-        $this->assertIsArray($model->field3);
+        $this->assertIsObject($model->field3);
         $this->assertIsArray($model->field4);
+        $this->assertIsArray($model->field5);
+        $this->assertIsObject($model->field6);
+        $this->assertEquals(['value-one', 'value-two'], $model->field7);
     }
 }
