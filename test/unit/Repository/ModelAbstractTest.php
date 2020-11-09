@@ -207,6 +207,11 @@ class ModelAbstractTest extends TestCase
             'field8' => [],
             'field9' => 'string',
             'field10' => 'string',
+            'field11' => null,
+            'field12' => '',
+            'field13' => [],
+            'field14' => '{"key": "value"}',
+            'field15' => '{"key": "value"}',
         ];
 
         $custom = new class() implements ModelCastingInterface{
@@ -232,6 +237,11 @@ class ModelAbstractTest extends TestCase
             'field8' => ModelCastingInterface::CAST_ARRAY,
             'field9' => ModelCastingInterface::CAST_ARRAY,
             'field10' => ModelCastingInterface::CAST_OBJECT,
+            'field11' => ModelCastingInterface::CAST_ARRAY,
+            'field12' => ModelCastingInterface::CAST_OBJECT,
+            'field13' => ModelCastingInterface::CAST_OBJECT,
+            'field14' => ModelCastingInterface::CAST_ARRAY,
+            'field15' => ModelCastingInterface::CAST_OBJECT,
         ];
 
         $model = new class(array_merge(['casting' => $casting], $data)) extends ModelAbstract {};
@@ -246,5 +256,12 @@ class ModelAbstractTest extends TestCase
         $this->assertEquals([], $model->field8);
         $this->assertEquals(['string'], $model->field9);
         $this->assertIsObject($model->field10);
+        $this->assertEquals([], $model->field11);
+        $this->assertEquals(null, $model->getRawAttribute('field11'));
+        $this->assertEquals(null, $model->field12);
+        $this->assertEquals('', $model->getRawAttribute('field12'));
+        $this->assertIsObject($model->field13);
+        $this->assertEquals(['key' => 'value'], $model->field14);
+        $this->assertEquals((object) ['key' => 'value'], $model->field15);
     }
 }
