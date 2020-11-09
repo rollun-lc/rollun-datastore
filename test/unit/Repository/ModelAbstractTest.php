@@ -182,12 +182,7 @@ class ModelAbstractTest extends TestCase
         $data = [
             'field' => 'test',
         ];
-        $model = new class($data) extends ModelAbstract {
-            public function castJsonToArray()
-            {
-
-            }
-        };
+        $model = new class($data) extends ModelAbstract {};
 
         $this->assertEquals($data, $model->getChanges());
 
@@ -196,6 +191,9 @@ class ModelAbstractTest extends TestCase
         $this->assertEquals(['field' => 'hello'], $model->getChanges());
     }
 
+    /**
+     * @todo move to casting test
+     */
     public function testCasing()
     {
         $data = [
@@ -203,44 +201,50 @@ class ModelAbstractTest extends TestCase
             'field2' => '12.34',
             'field3' => ['key' => 'value'],
             'field4' => ['key' => 'value'],
-            'field5' => (object) ['key' => 'value'],
-            'field6' => ['key' => 'value'],
-            'field7' => ['value1', 'value2'],
+            'field5' => ['key' => 'value'],
+            'field6' => ['value1', 'value2'],
+            'field7' => (object) ['key' => 'value'],
+            'field8' => [],
+            'field9' => 'string',
+            'field10' => 'string',
         ];
 
-        $model = new class($data) extends ModelAbstract {
-            protected $casting = [
-                'field1' => ModelCastingInterface::CAST_INT,
-                'field2' => ModelCastingInterface::CAST_FLOAT,
-                'field3' => ModelCastingInterface::CAST_JSON,
-                'field4' => ModelCastingInterface::CAST_SERIALIZE,
-                'field5' => ModelCastingInterface::CAST_ARRAY,
-                'field6' => ModelCastingInterface::CAST_OBJECT,
-            ];
-            public function __construct($attributes = [], $exists = false)
+        $custom = new class() implements ModelCastingInterface{
+            public function get($value)
             {
-                $custom = new class() implements ModelCastingInterface{
-                    public function get($value)
-                    {
-                        return explode('/', $value);
-                    }
+                return explode('/', $value);
+            }
 
-                    public function set($value)
-                    {
-                        return str_replace(['1', '2'], ['-one', '-two'], implode('/', $value));
-                    }
-                };
-                $this->casting['field7'] = get_class($custom);
-                parent::__construct($attributes, $exists);
+            public function set($value)
+            {
+                return str_replace(['1', '2'], ['-one', '-two'], implode('/', $value));
             }
         };
+
+        $casting = [
+            'field1' => ModelCastingInterface::CAST_INT,
+            'field2' => ModelCastingInterface::CAST_FLOAT,
+            'field3' => ModelCastingInterface::CAST_JSON,
+            'field4' => ModelCastingInterface::CAST_SERIALIZE,
+            'field5' => ModelCastingInterface::CAST_OBJECT,
+            'field6' => get_class($custom),
+            'field7' => ModelCastingInterface::CAST_ARRAY,
+            'field8' => ModelCastingInterface::CAST_ARRAY,
+            'field9' => ModelCastingInterface::CAST_ARRAY,
+            'field10' => ModelCastingInterface::CAST_OBJECT,
+        ];
+
+        $model = new class(array_merge(['casting' => $casting], $data)) extends ModelAbstract {};
 
         $this->assertIsInt($model->field1);
         $this->assertIsFloat($model->field2);
         $this->assertIsObject($model->field3);
         $this->assertIsArray($model->field4);
-        $this->assertIsArray($model->field5);
-        $this->assertIsObject($model->field6);
-        $this->assertEquals(['value-one', 'value-two'], $model->field7);
+        $this->assertIsObject($model->field5);
+        $this->assertEquals(['value-one', 'value-two'], $model->field6);
+        $this->assertIsArray($model->field7);
+        $this->assertEquals([], $model->field8);
+        $this->assertEquals(['string'], $model->field9);
+        $this->assertIsObject($model->field10);
     }
 }
