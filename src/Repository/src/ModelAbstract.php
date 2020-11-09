@@ -37,12 +37,16 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
      */
     protected $exists = false;
 
+    /**
+     * @var array
+     */
     protected $casting = [];
 
     /**
      * ModelAbstract constructor.
      *
      * @param array $attributes
+     *
      * @param false $exists
      */
     public function __construct($attributes = [], $exists = false)
@@ -51,13 +55,12 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
 
         $this->fill($attributes);
 
-        //$this->original = $this->attributes;
-
-        //$this->exists = $exists;
-
         $this->setExists($exists);
     }
 
+    /**
+     * @return void
+     */
     public function updateOriginal()
     {
         $this->original = $this->attributes;
@@ -65,6 +68,7 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
 
     /**
      * @param $name
+     *
      * @param $value
      */
     public function __set($name, $value)
@@ -206,6 +210,8 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
 
     /**
      * @return array
+     *
+     * @todo
      */
     public function getAttributes()
     {

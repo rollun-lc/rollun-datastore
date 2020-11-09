@@ -8,14 +8,26 @@ use rollun\repository\Interfaces\ModelCastingInterface;
 
 class ArrayCasting implements ModelCastingInterface
 {
-
+    /**
+     * @param $value
+     *
+     * @return mixed
+     */
     public function get($value)
     {
         return json_decode($value, true);
     }
 
+    /**
+     * @param $value
+     *
+     * @return false|string
+     */
     public function set($value)
     {
-        return json_encode($value, JSON_OBJECT_AS_ARRAY);
+        if (!is_array($value) && !is_object($value)) {
+            $value = (array) $value;
+        }
+        return json_encode($value, JSON_NUMERIC_CHECK);
     }
 }

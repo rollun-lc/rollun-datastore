@@ -6,10 +6,28 @@ namespace rollun\repository\Traits;
 
 use rollun\repository\Interfaces\ModelCastingInterface;
 
+/**
+ * Trait ModelCastingTrait
+ *
+ * @package rollun\repository\Traits
+ */
 trait ModelCastingTrait
 {
+    /**
+     * @var array
+     */
     protected $castObjects = [];
 
+    /**
+     * @param string $name
+     *
+     * @param mixed $value
+     *
+     * @param string $direction
+     *
+     * @return mixed
+     * @throws \Exception
+     */
     protected function cast($name, $value, $direction = ModelCastingInterface::DIRECTION_GET)
     {
         $type = $this->casting[$name];
@@ -44,6 +62,13 @@ trait ModelCastingTrait
         return $castingObject->{$direction}($value);
     }
 
+    /**
+     * @param $type
+     *
+     * @return ModelCastingInterface
+     *
+     * @todo add getting object from service manager
+     */
     protected function getCastingObject($type)
     {
         if (!array_key_exists($type, $this->castObjects)) {
@@ -53,6 +78,11 @@ trait ModelCastingTrait
         return $this->castObjects[$type];
     }
 
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
     protected function needCast($name)
     {
         return (
@@ -62,21 +92,41 @@ trait ModelCastingTrait
         );
     }
 
+    /**
+     * @param $value
+     *
+     * @return int
+     */
     protected function castInt($value)
     {
         return (int) $value;
     }
 
+    /**
+     * @param $value
+     *
+     * @return int
+     */
     protected function castInteger($value)
     {
         return $this->castInt($value);
     }
 
+    /**
+     * @param $value
+     *
+     * @return float
+     */
     protected function castFloat($value)
     {
         return (float) $value;
     }
 
+    /**
+     * @param $value
+     *
+     * @return float
+     */
     protected function castDouble($value)
     {
         return $this->castFloat($value);
@@ -84,6 +134,7 @@ trait ModelCastingTrait
 
     /**
      * @param $value
+     *
      * @return string
      */
     protected function castString($value)
