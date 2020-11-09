@@ -165,7 +165,7 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
      */
     public function getAttribute($name)
     {
-        if (isset($this->attributes[$name])) {
+        if (array_key_exists($name, $this->attributes)) {
             $value = $this->attributes[$name];
 
             if ($this->hasMutator('get', $name)) {
@@ -180,6 +180,11 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
         }
 
         return null;
+    }
+
+    public function getRawAttribute($name)
+    {
+        return $this->attributes[$name] ?? null;
     }
 
     /**

@@ -16,7 +16,7 @@ trait ModelCastingTrait
     /**
      * @var array
      */
-    protected $castObjects = [];
+    static protected $castObjects = [];
 
     /**
      * @param string $name
@@ -71,11 +71,11 @@ trait ModelCastingTrait
      */
     protected function getCastingObject($type)
     {
-        if (!array_key_exists($type, $this->castObjects)) {
-            $this->castObjects[$type] = new $type();
+        if (!array_key_exists($type, self::$castObjects)) {
+            self::$castObjects[$type] = new $type();
         }
 
-        return $this->castObjects[$type];
+        return self::$castObjects[$type];
     }
 
     /**
