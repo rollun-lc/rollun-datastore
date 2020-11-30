@@ -4,6 +4,8 @@
 namespace rollun\repository\Traits;
 
 
+use DateTimeInterface;
+
 /**
  * Trait ModelDataTime
  *
@@ -22,10 +24,22 @@ trait ModelDataTime
     /**
      * @throws \Exception
      */
-    public function setCreatedAt()
+    public function setCreatedAt(?DateTimeInterface $date = null)
     {
-        $date = new \DateTime('now', new \DateTimeZone($this->getDefaultTimezone()));
+        if ($date === null) {
+            $date = new \DateTime('now', new \DateTimeZone($this->getDefaultTimezone()));
+        }
+
         $this->{$this->getCreatedAtField()} = $date->format($this->getTimestamFormat());
+    }
+
+    public function setUpdatedAt(?DateTimeInterface $date = null)
+    {
+        if ($date === null) {
+            $date = new \DateTime('now', new \DateTimeZone($this->getDefaultTimezone()));
+        }
+
+        $this->{$this->getUpdatedAtField()} = $date->format($this->getTimestamFormat());
     }
 
     /**
