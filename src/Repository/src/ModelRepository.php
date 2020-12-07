@@ -211,11 +211,17 @@ class ModelRepository implements ModelRepositoryInterface
 
     protected function isSameChanges($models)
     {
-        $changes = $models[0]->getChanges();
+        $changes = [];
         foreach ($models as $model) {
-            $modelChanges = $model->getChanges();
-            if ($changes !== $modelChanges) {
-                return false;
+            foreach ($model->getChanges() as $field => $value) {
+                if (!isset($changes[$field])) {
+                    $changes[$field] = $value;
+                    continue;
+                }
+
+                if ($changes[$field] != $value) {
+                    return false;
+                }
             }
         }
 
@@ -231,9 +237,16 @@ class ModelRepository implements ModelRepositoryInterface
      */
     public function multiSave(array $models)
     {
-        $multiUpdatedIds = $multiInsertedIds = [];
+        $multiUpdatedIds = $multiInsertedIds = $notChangedIds = [];
+
+        $identifier = $this->dataStore->getIdentifier();
 
         foreach ($models as $key => $model) {
+            if (!$model->isChanged()) {
+                $notChangedIds[] = $model->{$identifier};
+                continue;
+            }
+
             if ($model->isExists() /*&& $model->isChanged()*/) {
                 $multiUpdated[] = $model;
             } else {
@@ -249,7 +262,7 @@ class ModelRepository implements ModelRepositoryInterface
             $multiInsertedIds = $this->multiInserModels($multiCreated);
         }
 
-        return array_merge($multiUpdatedIds, $multiInsertedIds);
+        return array_merge($notChangedIds, $multiUpdatedIds, $multiInsertedIds);
     }
 
     /**

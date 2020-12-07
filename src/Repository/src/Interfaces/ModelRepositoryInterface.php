@@ -4,6 +4,7 @@
 namespace rollun\repository\Interfaces;
 
 
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use Xiag\Rql\Parser\Query;
 
 /**
@@ -65,7 +66,7 @@ interface ModelRepositoryInterface
     public function count(): int;
 
     /**
-     * @return mixed
+     * @return DataStoreInterface
      */
     public function getDataStore();
 
