@@ -47,7 +47,7 @@ class ModelRepositoryTest extends TestCase
             }
 
             public function isChanged(): bool {
-                return !empty($this->getChanges());
+                return !$this->exists || !empty($this->getChanges());
             }
 
             public function getChanges(): array {
