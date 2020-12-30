@@ -77,6 +77,10 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
     {
         $fieldValue = parent::prepareFieldValue($fieldValue);
 
+        if (is_int($fieldValue)) {
+            return $fieldValue;
+        }
+
         return $this->db->platform->quoteValue($fieldValue);
     }
 
@@ -145,7 +149,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         $field = $this->prepareFieldName($node->getField());
 
         if ($nodeName === 'ie') {
-            $strQuery .= $field . ' IS NULL OR ' . $field . ' IS FALSE OR ' . $field . ' = \'\' ';
+            $strQuery .= $field . ' IS NULL OR ' . $field . ' IS FALSE OR ' . $field . ' = \'\'';
         } else {
             $strQuery .= $field;
         }
