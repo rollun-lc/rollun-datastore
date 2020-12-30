@@ -61,7 +61,7 @@ class SqlConditionBuilderTest extends ConditionBuilderTest
     public function providerInvoke()
     {
         return [
-            [null, "'1' = '1'"],
+            [null, "1 = 1"],
             [
                 (new QueryBuilder())->addQuery(new EqNode('name', 'value'))
                     ->getQuery()
@@ -78,7 +78,7 @@ class SqlConditionBuilderTest extends ConditionBuilderTest
                     ->addQuery(new LikeNode('g', new Glob('*abc?')))
                     ->getQuery()
                     ->getQuery(),
-                "((`a`='1') AND (`b`<>'2') AND (`c`<'3') AND (`d`>'4') AND (`e`<='5') AND (`f`>='6') AND (`g` LIKE BINARY '%abc_'))",
+                "((`a`=1) AND (`b`<>2) AND (`c`<3) AND (`d`>4) AND (`e`<=5) AND (`f`>=6) AND (`g` LIKE BINARY '%abc_'))",
             ],
             [
                 (new QueryBuilder())->addQuery(new AndNode([
@@ -94,7 +94,7 @@ class SqlConditionBuilderTest extends ConditionBuilderTest
                     ]))
                     ->getQuery()
                     ->getQuery(),
-                "((`a`='b') AND (`c`<'d') AND ((`g`<'5') OR (`g`>'2')) AND ( NOT ((`h`<>'3')) ))",
+                "((`a`='b') AND (`c`<'d') AND ((`g`<5) OR (`g`>2)) AND ( NOT ((`h`<>3)) ))",
             ],
             [
                 (new QueryBuilder())->addQuery(new AndNode([
@@ -110,7 +110,7 @@ class SqlConditionBuilderTest extends ConditionBuilderTest
                     ]))
                     ->getQuery()
                     ->getQuery(),
-                "((`a`='') AND (`c`<'d') AND ((`g`<'5') OR (`g`>'2')) AND ( NOT ((`h`<>'3')) ))",
+                "((`a`='') AND (`c`<'d') AND ((`g`<5) OR (`g`>2)) AND ( NOT ((`h`<>3)) ))",
             ],
             [
                 (new QueryBuilder())->addQuery(new AndNode([

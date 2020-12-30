@@ -1,7 +1,7 @@
 <?php
 
 
-namespace rollun\test\intagration\DataStore;
+namespace rollun\test\functional\DataStore;
 
 
 use PHPUnit\Framework\TestCase;
@@ -40,6 +40,12 @@ class QueryDateTimeTest extends TestCase
         'created_at' => [
             'field_type' => 'Datetime',
         ],
+        'updated_at' => [
+            'field_type' => 'Varchar',
+            'field_params' => [
+                'length' => 255
+            ]
+        ]
     ];
 
     public function setUp()
@@ -62,6 +68,7 @@ class QueryDateTimeTest extends TestCase
             $this->tableGateway->insert([
                 'id' => $i,
                 'created_at' => "2020-01-01 00:0{$i}:12",
+                'updated_at' => "2020-01-01T21:00:00+00:00"
             ]);
         }
     }

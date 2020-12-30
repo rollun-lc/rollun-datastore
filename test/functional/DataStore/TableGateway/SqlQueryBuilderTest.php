@@ -172,7 +172,7 @@ class SqlQueryBuilderTest extends TestCase
         $rqlQuery->setLimit(new LimitNode(5));
 
         $select = "SELECT `table`.* FROM `table` ";
-        $where = "WHERE '1' = '1' ";
+        $where = "WHERE 1 = 1 ";
         $limit = "LIMIT 5";
 
         $this->assertEquals($select.$where.$limit, $object->buildSql($rqlQuery));
@@ -187,7 +187,7 @@ class SqlQueryBuilderTest extends TestCase
         $rqlQuery->setSort(new SortNode(['a' => SortNode::SORT_ASC]));
 
         $select = "SELECT `table`.* FROM `table` ";
-        $where = "WHERE '1' = '1' ";
+        $where = "WHERE 1 = 1 ";
         $sort = "ORDER BY `a` ASC";
 
         $this->assertEquals($select.$where.$sort, $object->buildSql($rqlQuery));
@@ -209,7 +209,7 @@ class SqlQueryBuilderTest extends TestCase
         $rqlQuery->setGroupBy(new GroupbyNode(['a', 'b']));
 
         $select = "SELECT `table`.* FROM `table` ";
-        $where = "WHERE '1' = '1' ";
+        $where = "WHERE 1 = 1 ";
         $groupBy = "GROUP BY `a`, `b`";
 
         $this->assertEquals($select.$where.$groupBy, $object->buildSql($rqlQuery));
@@ -225,7 +225,7 @@ class SqlQueryBuilderTest extends TestCase
             new AggregateFunctionNode('count', 'a'),
         ]));
 
-        $sql = "SELECT count(a) AS `count(a)` FROM `table` WHERE '1' = '1'";
+        $sql = "SELECT count(a) AS `count(a)` FROM `table` WHERE 1 = 1";
         $this->assertEquals($sql, $object->buildSql($rqlQuery));
     }
 

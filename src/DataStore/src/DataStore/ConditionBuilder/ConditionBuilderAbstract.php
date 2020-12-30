@@ -148,7 +148,7 @@ abstract class ConditionBuilderAbstract
      *
      * It may be quoting for example
      *
-     * @param string $fieldValue
+     * @param mixed $fieldValue
      * @return string
      */
     public function prepareFieldValue($fieldValue)
