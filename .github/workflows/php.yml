@@ -38,14 +38,17 @@ jobs:
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
-    - name: Functional tests
+  #  - name: Functional tests
+  #    env:
+  #      DB_PORT: ${{ job.services.mysql.ports[3306] }}
+  #      DB_HOST: 127.0.0.1
+  #    run: |
+  #      mysql --host=$DB_HOST --port=$DB_PORT -u root -e "CREATE DATABASE IF NOT EXISTS functional;"
+  #      vendor/bin/phpunit --configuration phpunit.xml --testsuite functional
+    - name: Intergation tests
       env:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
         DB_HOST: 127.0.0.1
-      run: |
-        mysql --host=$DB_HOST --port=$DB_PORT -u root -e "CREATE DATABASE IF NOT EXISTS functional;"
-        vendor/bin/phpunit --configuration phpunit.xml --testsuite functional
-    - name: Intergation tests
       run: |
         mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS intagration;"
         php -S localhost:9000 -t public public/test.php & vendor/bin/phpunit --configuration phpunit.xml --testsuite intagration
