@@ -10,7 +10,14 @@ jobs:
   run-tests:
 
     runs-on: ubuntu-latest
-
+    services:
+      mysql:
+        image: mysql:latest
+        env:
+            MYSQL_ALLOW_EMPTY_PASSWORD: yes
+        ports:
+            - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
     - uses: actions/checkout@v2
 
@@ -31,17 +38,6 @@ jobs:
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
-   # - name: Unit
-   #   run: vendor/bin/phpunit --configuration phpunit.xml --testsuite unit
-#     - uses: samin/mysql-action@v1
-#       with:
-#         container port: 3306 # Optional, default value is 3306. The port of container
-#         character set server: 'utf8' # Optional, default value is 'utf8mb4'. The '--character-set-server' option for mysqld
-#         collation server: 'utf8_general_ci' # Optional, default value is 'utf8mb4_general_ci'. The '--collation-server' option for mysqld
-#         mysql version: 'latest' # Optional, default value is "latest". The version of the MySQL
-#         mysql root password: 'root' # Required if "mysql user" is empty, default is empty. The root superuser password
-#         mysql user: 'test' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Of course you can use secrets, too
-#         mysql password: 'test' # Required if "mysql user" exists. The password for the "mysql user"
     - name: Functional tests
       run: |
         mysql -h 0.0.0.0 -u root -e "CREATE DATABASE IF NOT EXISTS functional;"
