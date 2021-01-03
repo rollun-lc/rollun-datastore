@@ -43,7 +43,7 @@ jobs:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
         DB_HOST: 127.0.0.1
       run: |
-        mysql -h$DB_HOST -p$DB_PORT -u root -e "CREATE DATABASE IF NOT EXISTS functional;"
+        mysql --host=$DB_HOST --port=$DB_PORT -u root -e "CREATE DATABASE IF NOT EXISTS functional;"
         vendor/bin/phpunit --configuration phpunit.xml --testsuite functional
     - name: Intergation tests
       run: |
