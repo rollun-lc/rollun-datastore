@@ -44,9 +44,9 @@ jobs:
 #         mysql password: 'test' # Required if "mysql user" exists. The password for the "mysql user"
     - name: Functional tests
       run: |
-        mysql -u root -e "CREATE DATABASE IF NOT EXISTS functional;"
+        mysql -h 0.0.0.0 -u root -e "CREATE DATABASE IF NOT EXISTS functional;"
         vendor/bin/phpunit --configuration phpunit.xml --testsuite functional
     - name: Intergation tests
       run: |
-        mysql -u root -e "CREATE DATABASE IF NOT EXISTS intagration;"
+        mysql -h 0.0.0.0 -u root -e "CREATE DATABASE IF NOT EXISTS intagration;"
         php -S localhost:9000 -t public public/test.php & vendor/bin/phpunit --configuration phpunit.xml --testsuite intagration
