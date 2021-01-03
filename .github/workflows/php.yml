@@ -31,8 +31,8 @@ jobs:
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
-    - name: Unit
-      run: vendor/bin/phpunit --configuration phpunit.xml --testsuite unit
+   # - name: Unit
+   #   run: vendor/bin/phpunit --configuration phpunit.xml --testsuite unit
     - uses: samin/mysql-action@v1
       with:
         container port: 3306 # Optional, default value is 3306. The port of container
