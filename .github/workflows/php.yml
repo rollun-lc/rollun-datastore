@@ -1,0 +1,54 @@
+name: PHP Composer
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  run-tests:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Validate composer.json and composer.lock
+      run: composer validate
+
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v2
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+
+    - name: Install dependencies
+      if: steps.composer-cache.outputs.cache-hit != 'true'
+      run: composer install --prefer-dist --no-progress --no-suggest
+
+    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
+    # Docs: https://getcomposer.org/doc/articles/scripts.md
+
+    - name: Unit
+      run: vendor/bin/phpunit --configuration phpunit.xml --testsuite unit
+    - uses: samin/mysql-action@v1
+      with:
+        container port: 3306 # Optional, default value is 3306. The port of container
+        character set server: 'utf8' # Optional, default value is 'utf8mb4'. The '--character-set-server' option for mysqld
+        collation server: 'utf8_general_ci' # Optional, default value is 'utf8mb4_general_ci'. The '--collation-server' option for mysqld
+        mysql version: 'latest' # Optional, default value is "latest". The version of the MySQL
+        mysql root password: 'root' # Required if "mysql user" is empty, default is empty. The root superuser password
+        mysql user: 'test' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Of course you can use secrets, too
+        mysql password: 'test' # Required if "mysql user" exists. The password for the "mysql user"
+    - name: Functional tests
+      run: |
+        mysql -u root -e "CREATE DATABASE IF NOT EXISTS functional;"
+        vendor/bin/phpunit --configuration phpunit.xml --testsuite functional
+    - name: Intergation tests
+      run: |
+        mysql -u root -e "CREATE DATABASE IF NOT EXISTS intagration;"
+        php -S localhost:9000 -t public public/test.php & vendor/bin/phpunit --configuration phpunit.xml --testsuite intagration
