@@ -41,10 +41,11 @@ jobs:
     - name: Functional tests
       env:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
+        DB_HOST: 127.0.0.1
       run: |
-        mysql -u root -e "CREATE DATABASE IF NOT EXISTS functional;"
+        mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS functional;"
         vendor/bin/phpunit --configuration phpunit.xml --testsuite functional
     - name: Intergation tests
       run: |
-        mysql -h 0.0.0.0 -u root -e "CREATE DATABASE IF NOT EXISTS intagration;"
+        mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS intagration;"
         php -S localhost:9000 -t public public/test.php & vendor/bin/phpunit --configuration phpunit.xml --testsuite intagration
