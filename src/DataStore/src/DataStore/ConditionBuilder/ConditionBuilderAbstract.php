@@ -118,6 +118,8 @@ abstract class ConditionBuilderAbstract
             );
         }
 
+        // TODO: fix hardcode datetime format
+        // (see rollun\test\functional\DataStore\DataStore\QueryDateTimeTest::testDateTime)
         $value = $node->getValue() instanceof \DateTime ? $node->getValue()
             ->format("Y-m-d") : $node->getValue();
 
