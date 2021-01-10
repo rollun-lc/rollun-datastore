@@ -36,6 +36,10 @@ jobs:
       run: composer install --prefer-dist --no-progress --no-suggest
 
     - name: Unit test
+      env:
+        DB_PORT: ${{ job.services.mysql.ports[3306] }}
+        DB_HOST: 127.0.0.1
+        DB_PASS: password
       run: vendor/bin/phpunit --configuration phpunit.xml --testsuite unit
   functional:
     runs-on: ubuntu-latest
@@ -69,6 +73,7 @@ jobs:
       env:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
         DB_HOST: 127.0.0.1
+        DB_PASS: password
       run: |
         mysql --host=$DB_HOST --port=$DB_PORT -uroot -ppassword -e "CREATE DATABASE IF NOT EXISTS functional;"
         vendor/bin/phpunit --configuration phpunit.xml --testsuite functional
@@ -104,6 +109,7 @@ jobs:
       env:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
         DB_HOST: 127.0.0.1
+        DB_PASS: password
       run: |
         mysql --host=$DB_HOST --port=$DB_PORT -uroot -ppassword -e "CREATE DATABASE IF NOT EXISTS intagration;"
         php -S localhost:9000 -t public public/test.php & vendor/bin/phpunit --configuration phpunit.xml --testsuite intagration
