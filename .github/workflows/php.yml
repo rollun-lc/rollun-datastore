@@ -68,7 +68,7 @@ jobs:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
         DB_HOST: 127.0.0.1
       run: |
-        mysql --host=$DB_HOST --port=$DB_PORT -u root --password=root -e "CREATE DATABASE IF NOT EXISTS functional;"
+        mysql --host=$DB_HOST --port=$DB_PORT -uroot -ppassword -e "CREATE DATABASE IF NOT EXISTS functional;"
         vendor/bin/phpunit --configuration phpunit.xml --testsuite functional
   integration:
     runs-on: ubuntu-latest
@@ -102,5 +102,5 @@ jobs:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
         DB_HOST: 127.0.0.1
       run: |
-        mysql --host=$DB_HOST --port=$DB_PORT -u root --password=root -e "CREATE DATABASE IF NOT EXISTS intagration;"
+        mysql --host=$DB_HOST --port=$DB_PORT -uroot -ppassword -e "CREATE DATABASE IF NOT EXISTS intagration;"
         php -S localhost:9000 -t public public/test.php & vendor/bin/phpunit --configuration phpunit.xml --testsuite intagration
