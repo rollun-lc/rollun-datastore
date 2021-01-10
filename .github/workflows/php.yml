@@ -7,62 +7,42 @@ on:
     branches: [ master ]
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:latest
+        env:
+            MYSQL_ALLOW_EMPTY_PASSWORD: yes
+        ports:
+            - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup PHP with PECL extension
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.2'
+        extensions: json, zip, mysqli, pdo_mysql
+        tools: composer:v1
+
+    - name: Validate composer.json and composer.lock
+      run: composer validate
+      
+    - name: Install dependencies
+      if: steps.composer-cache.outputs.cache-hit != 'true'
+      run: composer install --prefer-dist --no-progress --no-suggest
+
   unit:
     runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:latest
-        env:
-            MYSQL_ALLOW_EMPTY_PASSWORD: yes
-        ports:
-            - 3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    needs: prepare
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Setup PHP with PECL extension
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '7.2'
-        extensions: json, zip, mysqli, pdo_mysql
-        tools: composer:v1
-
-    - name: Validate composer.json and composer.lock
-      run: composer validate
-      
-    - name: Install dependencies
-      if: steps.composer-cache.outputs.cache-hit != 'true'
-      run: composer install --prefer-dist --no-progress --no-suggest
-
-    - name: Unit test
-      run: vendor/bin/phpunit --configuration phpunit.xml --testsuite unit
+      - name: Unit test
+        run: vendor/bin/phpunit --configuration phpunit.xml --testsuite unit
   functional:
     runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:latest
-        env:
-            MYSQL_ALLOW_EMPTY_PASSWORD: yes
-        ports:
-            - 3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Setup PHP with PECL extension
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '7.2'
-        extensions: json, zip, mysqli, pdo_mysql
-        tools: composer:v1
-
-    - name: Validate composer.json and composer.lock
-      run: composer validate
-      
-    - name: Install dependencies
-      if: steps.composer-cache.outputs.cache-hit != 'true'
-      run: composer install --prefer-dist --no-progress --no-suggest
-      
     - name: Functional tests
       env:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
@@ -72,31 +52,7 @@ jobs:
         vendor/bin/phpunit --configuration phpunit.xml --testsuite functional
   integration:
     runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:latest
-        env:
-            MYSQL_ALLOW_EMPTY_PASSWORD: yes
-        ports:
-            - 3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Setup PHP with PECL extension
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '7.2'
-        extensions: json, zip, mysqli, pdo_mysql
-        tools: composer:v1
-
-    - name: Validate composer.json and composer.lock
-      run: composer validate
-      
-    - name: Install dependencies
-      if: steps.composer-cache.outputs.cache-hit != 'true'
-      run: composer install --prefer-dist --no-progress --no-suggest
-      
     - name: Intergation tests
       env:
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
