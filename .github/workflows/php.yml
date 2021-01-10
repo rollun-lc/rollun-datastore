@@ -75,6 +75,7 @@ jobs:
         DB_HOST: 127.0.0.1
         DB_PASS: password
       run: |
+        mysql --host=$DB_HOST --port=$DB_PORT -uroot -ppassword -e "alter user 'root'@'%' identified with mysql_native_password by 'password';
         mysql --host=$DB_HOST --port=$DB_PORT -uroot -ppassword -e "CREATE DATABASE IF NOT EXISTS functional;"
         vendor/bin/phpunit --configuration phpunit.xml --testsuite functional
   integration:
@@ -111,5 +112,6 @@ jobs:
         DB_HOST: 127.0.0.1
         DB_PASS: password
       run: |
+        mysql --host=$DB_HOST --port=$DB_PORT -uroot -ppassword -e "alter user 'root'@'%' identified with mysql_native_password by 'password';
         mysql --host=$DB_HOST --port=$DB_PORT -uroot -ppassword -e "CREATE DATABASE IF NOT EXISTS intagration;"
         php -S localhost:9000 -t public public/test.php & vendor/bin/phpunit --configuration phpunit.xml --testsuite intagration
