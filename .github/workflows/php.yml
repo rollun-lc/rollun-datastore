@@ -37,6 +37,8 @@ jobs:
 
     - name: Unit test
       env:
+        DB_NAME: unit
+        DB_USER: root
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
         DB_HOST: 127.0.0.1
         DB_PASS: password
@@ -71,6 +73,8 @@ jobs:
 
     - name: Functional tests
       env:
+        DB_NAME: functional
+        DB_USER: root
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
         DB_HOST: 127.0.0.1
         DB_PASS: password
@@ -108,6 +112,8 @@ jobs:
 
     - name: Intergation tests
       env:
+        DB_NAME: intagration
+        DB_USER: root
         DB_PORT: ${{ job.services.mysql.ports[3306] }}
         DB_HOST: 127.0.0.1
         DB_PASS: password
