@@ -17,7 +17,7 @@
     <php>
         <env name="APP_ENV" value="TEST"/>
         <env name="APP_DEBUG" value="true" force="true"/>
-        <env name="TEST_HOST" value="http://localhost:9001/" force="true"/>
+        <env name="TEST_HOST" value="http://localhost:9001/"/>
     </php>
 
 
