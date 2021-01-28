@@ -101,10 +101,6 @@ class DbTableTest extends TestCase
     public function testCreateFailWithItemExist()
     {
         $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessage(
-            "Can't insert item. " .
-            "Statement could not be executed (23000 - 1062 - Duplicate entry '1' for key 'PRIMARY')"
-        );
 
         $itemData = [
             'id' => 1,
