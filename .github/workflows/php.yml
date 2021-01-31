@@ -15,11 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Cache API composer
+      - name: Cache composer
         uses: actions/cache@v2
         with:
             path: /vendor
-            key: composer-${{ hashFiles('api/composer.lock') }}
+            key: composer-${{ hashFiles('./composer.lock') }}
 
       - name: Init project
         run: make init
