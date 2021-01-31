@@ -19,7 +19,7 @@ jobs:
         uses: actions/cache@v2
         with:
             path: /vendor
-            key: composer-${{ hashFiles('./composer.lock') }}
+            key: composer-${{ hashFiles('**/composer.lock) }}
 
       - name: Init project
         run: make init
