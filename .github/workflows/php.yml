@@ -7,117 +7,13 @@ on:
     branches: [ master ]
 
 jobs:
-  unit:
+  tests:
     runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:latest
-        env:
-            MYSQL_ALLOW_EMPTY_PASSWORD: yes
-            MYSQL_ROOT_PASSWORD: password
-        ports:
-            - 3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Setup PHP with PECL extension
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '7.2'
-        extensions: json, zip, mysqli, pdo_mysql
-        tools: composer:v1
+      - name: Init project
+        run: make init
 
-    - name: Validate composer.json and composer.lock
-      run: composer validate
-      
-    - name: Install dependencies
-      if: steps.composer-cache.outputs.cache-hit != 'true'
-      run: composer install --prefer-dist --no-progress --no-suggest
-
-    - name: Unit test
-      env:
-        DB_NAME: unit
-        DB_USER: root
-        DB_PORT: ${{ job.services.mysql.ports[3306] }}
-        DB_HOST: 127.0.0.1
-        DB_PASS: password
-      run: vendor/bin/phpunit --configuration phpunit.xml --testsuite unit
-  functional:
-    runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:latest
-        env:
-            MYSQL_ALLOW_EMPTY_PASSWORD: yes
-            MYSQL_ROOT_PASSWORD: password
-        ports:
-            - 3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Setup PHP with PECL extension
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '7.2'
-        extensions: json, zip, mysqli, pdo_mysql
-        tools: composer:v1
-
-    - name: Validate composer.json and composer.lock
-      run: composer validate
-      
-    - name: Install dependencies
-      if: steps.composer-cache.outputs.cache-hit != 'true'
-      run: composer install --prefer-dist --no-progress --no-suggest
-
-    - name: Functional tests
-      env:
-        DB_NAME: functional
-        DB_USER: root
-        DB_PORT: ${{ job.services.mysql.ports[3306] }}
-        DB_HOST: 127.0.0.1
-        DB_PASS: password
-      run: |
-        mysql --host=$DB_HOST --port=$DB_PORT -uroot -ppassword -e "alter user 'root'@'%' identified with mysql_native_password by 'password'";
-        mysql --host=$DB_HOST --port=$DB_PORT -uroot -ppassword -e "CREATE DATABASE IF NOT EXISTS functional;"
-        vendor/bin/phpunit --configuration phpunit.xml --testsuite functional
-  integration:
-    runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:latest
-        env:
-            MYSQL_ALLOW_EMPTY_PASSWORD: yes
-            MYSQL_ROOT_PASSWORD: password
-        ports:
-            - 3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Setup PHP with PECL extension
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '7.2'
-        extensions: json, zip, mysqli, pdo_mysql
-        tools: composer:v1
-
-    - name: Validate composer.json and composer.lock
-      run: composer validate
-      
-    - name: Install dependencies
-      if: steps.composer-cache.outputs.cache-hit != 'true'
-      run: composer install --prefer-dist --no-progress --no-suggest
-
-    - name: Intergation tests
-      env:
-        DB_NAME: intagration
-        DB_USER: root
-        DB_PORT: ${{ job.services.mysql.ports[3306] }}
-        DB_HOST: 127.0.0.1
-        DB_PASS: password
-      run: |
-        mysql --host=$DB_HOST --port=$DB_PORT -uroot -ppassword -e "alter user 'root'@'%' identified with mysql_native_password by 'password'";
-        mysql --host=$DB_HOST --port=$DB_PORT -uroot -ppassword -e "CREATE DATABASE IF NOT EXISTS intagration;"
-        php -S localhost:9000 -t public public/test.php & vendor/bin/phpunit --configuration phpunit.xml --testsuite intagration
+      - name: Run tests
+        run: make test
