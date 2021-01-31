@@ -10,6 +10,7 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     env:
+      # https://github.com/docker/compose/issues/7306
       COMPOSE_INTERACTIVE_NO_CLI: 1
     steps:
       - uses: actions/checkout@v2
