@@ -15,12 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Cache composer
-        uses: actions/cache@v2
-        with:
-            path: /vendor
-            key: composer-${{ hashFiles('**/composer.lock') }}
-
       - name: Init project
         run: make init
 
