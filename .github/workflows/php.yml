@@ -9,6 +9,8 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    env:
+      COMPOSE_INTERACTIVE_NO_CLI: 1
     steps:
       - uses: actions/checkout@v2
 
