@@ -20,7 +20,7 @@ docker-build:
 	docker-compose build
 
 composer-install:
-	docker-compose exec rollun-datastore-php-fpm composer install
+	docker-compose exec -T rollun-datastore-php-fpm composer install
 
 composer-test:
-	docker-compose exec rollun-datastore-php-fpm composer test
+	docker-compose exec -T rollun-datastore-php-fpm composer test
