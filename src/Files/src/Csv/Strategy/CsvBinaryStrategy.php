@@ -151,6 +151,13 @@ class CsvBinaryStrategy implements CsvStrategyInterface
      */
     protected function search(string $id, int $from = null, int $to = null): ?array
     {
+        $result = $this->binarySearch($id, $from, $to);
+        $this->resetUniqueIterations();
+        return $result;
+    }
+
+    protected function binarySearch(string $id, int $from = null, int $to = null): ?array
+    {
         // prepare from
         if ($from === null) {
             $from = 0;
@@ -215,13 +222,20 @@ class CsvBinaryStrategy implements CsvStrategyInterface
 
         // find in left part
         if ($id < $rowId) {
-            return $this->search($id, $from, $pos);
+            return $this->binarySearch($id, $from, $pos);
         }
 
         // find in right part
         if ($id > $rowId) {
-            return $this->search($id, $pos, $to);
+            return $this->binarySearch($id, $pos, $to);
         }
+
+        return null;
+    }
+
+    protected function resetUniqueIterations(): void
+    {
+        $this->uniqueIterations = [];
     }
 
     /**
