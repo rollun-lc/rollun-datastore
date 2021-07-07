@@ -5,6 +5,7 @@ namespace rollun\repository\Factory;
 
 
 use Interop\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use rollun\datastore\AbstractFactoryAbstract;
 use rollun\repository\Interfaces\FieldMapperInterface;
 use rollun\repository\Interfaces\ModelInterface;
@@ -65,7 +66,9 @@ class ModelRepositoryAbstractFactory extends AbstractFactoryAbstract
             throw new \Exception('Class ' . self::KEY_MODEL . ' must implement ' . ModelInterface::class);
         }
 
-        return new $requestedClassName($dataStore, $modelClass, $mapper ?? null);
+        $logger = $container->get(LoggerInterface::class);
+
+        return new $requestedClassName($dataStore, $modelClass, $mapper ?? null, $logger);
     }
 
     /**

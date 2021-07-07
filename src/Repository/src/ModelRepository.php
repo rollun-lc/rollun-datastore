@@ -3,7 +3,9 @@
 namespace rollun\repository;
 
 
+use Psr\Log\LoggerInterface;
 use rollun\datastore\DataStore\DataStoreAbstract;
+use rollun\dic\InsideConstruct;
 use rollun\repository\Interfaces\FieldMapperInterface;
 use rollun\repository\Interfaces\ModelRepositoryInterface;
 use rollun\repository\Interfaces\ModelInterface;
@@ -33,6 +35,11 @@ class ModelRepository implements ModelRepositoryInterface
     protected $mapper;
 
     /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * ModelRepository constructor.
      *
      * @param DataStoreAbstract $dataStore
@@ -42,11 +49,13 @@ class ModelRepository implements ModelRepositoryInterface
     public function __construct(
         DataStoreAbstract $dataStore,
         string $modelClass,
-        FieldMapperInterface $mapper = null
+        FieldMapperInterface $mapper = null,
+        LoggerInterface $logger
     ) {
         $this->dataStore = $dataStore;
         $this->modelClass = $modelClass;
         $this->mapper = $mapper;
+        $this->logger = $logger;
     }
 
     /**
@@ -59,6 +68,13 @@ class ModelRepository implements ModelRepositoryInterface
             'modelClass',
             'mapper',
         ];
+    }
+
+    public function __wakeup()
+    {
+        InsideConstruct::initWakeup([
+            'logger' => LoggerInterface::class,
+        ]);
     }
 
     /**
