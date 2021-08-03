@@ -13,6 +13,7 @@ use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
+use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Query;
 use Zend\Db\Adapter\Driver\ResultInterface;
 use Zend\Db\Adapter\ParameterContainer;
@@ -158,9 +159,12 @@ class DbTable extends DataStoreAbstract
         $sqlString = $sql->buildSqlString($delete);
 
         $adapter = $this->dbTable->getAdapter();
+
+        $selectQuery = clone $query;
+        $selectQuery->setSelect(new SelectNode([$this->getIdentifier()]));
         $shouldDeletedIds = array_map(function ($item) {
             return $item[$this->getIdentifier()];
-        }, $this->query($query));
+        }, $this->query($selectQuery));
 
         try {
             $statement = $adapter->getDriver()->createStatement($sqlString);
