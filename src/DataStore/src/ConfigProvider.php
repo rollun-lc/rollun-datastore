@@ -8,6 +8,8 @@ namespace rollun\datastore;
 
 use rollun\datastore\DataStore\Aspect\Factory\AspectAbstractFactory;
 use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilderAbstractFactory;
+use rollun\datastore\DataStore\DataStoreLogConfig;
+use rollun\datastore\DataStore\DataStoreLogConfigFactory;
 use rollun\datastore\DataStore\DataStorePluginManager;
 use rollun\datastore\DataStore\DataStorePluginManagerFactory;
 use rollun\datastore\DataStore\Factory\CacheableAbstractFactory;
@@ -60,6 +62,7 @@ class ConfigProvider
                 Determinator::class => DeterminatorFactory::class,
                 DataStoreApi::class => DataStoreApiFactory::class,
                 DataStorePluginManager::class => DataStorePluginManagerFactory::class,
+                DataStoreLogConfig::class => DataStoreLogConfigFactory::class,
 
                 'TableManagerMysql' => TableManagerMysqlFactory::class,
                 TableManagerMysql::class => TableManagerMysqlFactory::class,

@@ -8,6 +8,7 @@ namespace rollun\datastore\DataStore\Factory;
 
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStoreException;
+use rollun\datastore\DataStore\DataStoreLogConfig;
 use rollun\datastore\DataStore\DbTable;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -64,10 +65,18 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
         $serviceConfig = $config[self::KEY_DATASTORE][$requestedName];
         $requestedClassName = $serviceConfig[self::KEY_CLASS];
         $tableGateway = $this->getTableGateway($container, $serviceConfig, $requestedName);
+        $customLogConfig = $this->getCustomLogConfig($serviceConfig);
 
         $this::$KEY_IN_CREATE = 0;
 
-        return new $requestedClassName($tableGateway);
+        /** @var DbTable $instance */
+        $instance = new $requestedClassName($tableGateway);
+
+        if (!is_null($customLogConfig)) {
+            $instance->setLogConfig($customLogConfig);
+        }
+
+        return $instance;
     }
 
     /**
@@ -113,5 +122,18 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
         }
 
         return $tableGateway;
+    }
+
+    protected function getCustomLogConfig($serviceConfig)
+    {
+        if (!isset($serviceConfig[DataStoreLogConfig::KEY_LOG_CONFIG])
+            || !is_array($serviceConfig[DataStoreLogConfig::KEY_LOG_CONFIG])) {
+            return null;
+        }
+
+        $dataStoreLogConfig = new DataStoreLogConfig();
+        $dataStoreLogConfig->initFromConfig($serviceConfig[DataStoreLogConfig::KEY_LOG_CONFIG]);
+
+        return $dataStoreLogConfig;
     }
 }
