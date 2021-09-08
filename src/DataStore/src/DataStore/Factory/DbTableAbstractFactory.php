@@ -65,16 +65,13 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
         $serviceConfig = $config[self::KEY_DATASTORE][$requestedName];
         $requestedClassName = $serviceConfig[self::KEY_CLASS];
         $tableGateway = $this->getTableGateway($container, $serviceConfig, $requestedName);
-        $customLogConfig = $this->getCustomLogConfig($serviceConfig);
+        $dataStoreLogConfig = $this->getDataStoreLogConfig($config, $serviceConfig);
 
         $this::$KEY_IN_CREATE = 0;
 
         /** @var DbTable $instance */
         $instance = new $requestedClassName($tableGateway);
-
-        if (!is_null($customLogConfig)) {
-            $instance->setLogConfig($customLogConfig);
-        }
+        $instance->setLogConfig($dataStoreLogConfig);
 
         return $instance;
     }
@@ -124,16 +121,48 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
         return $tableGateway;
     }
 
-    protected function getCustomLogConfig($serviceConfig)
+    protected function getDataStoreLogConfig($globalConfig, $serviceConfig): DataStoreLogConfig
     {
-        if (!isset($serviceConfig[DataStoreLogConfig::KEY_LOG_CONFIG])
-            || !is_array($serviceConfig[DataStoreLogConfig::KEY_LOG_CONFIG])) {
-            return null;
+        $logConfig = $globalConfig[DataStoreLogConfig::class] ?? null;
+
+        if (isset($serviceConfig[DataStoreLogConfig::KEY_LOG_CONFIG])
+            && is_array($serviceConfig[DataStoreLogConfig::KEY_LOG_CONFIG])) {
+            $logConfig = $serviceConfig[DataStoreLogConfig::KEY_LOG_CONFIG];
         }
 
-        $dataStoreLogConfig = new DataStoreLogConfig();
-        $dataStoreLogConfig->initFromConfig($serviceConfig[DataStoreLogConfig::KEY_LOG_CONFIG]);
+        if (!is_array($logConfig)) {
+            return new DataStoreLogConfig();
+        }
 
-        return $dataStoreLogConfig;
+        return $this->createDataStoreLogConfig($logConfig);
+    }
+
+    protected function createDataStoreLogConfig($config): DataStoreLogConfig
+    {
+        if (empty($config[DataStoreLogConfig::OPERATIONS]) || !is_array($config[DataStoreLogConfig::OPERATIONS])) {
+            throw new \InvalidArgumentException("Config key '" . DataStoreLogConfig::OPERATIONS . "' is missing or is not array");
+        }
+
+        if (empty($config[DataStoreLogConfig::TYPES]) || !is_array($config[DataStoreLogConfig::TYPES])) {
+            throw new \InvalidArgumentException("Config key '" . DataStoreLogConfig::TYPES . "' is missing or is not array");
+        }
+
+        $operations = $config[DataStoreLogConfig::OPERATIONS];
+
+        foreach ($operations as $operation) {
+            if (!in_array($operation, DataStoreLogConfig::ALLOWED_OPERATIONS)) {
+                throw new \InvalidArgumentException("Operation '$operation' is not allowed");
+            }
+        }
+
+        $types = $config[DataStoreLogConfig::TYPES];
+
+        foreach ($types as $type) {
+            if (!in_array($type, DataStoreLogConfig::ALLOWED_TYPES)) {
+                throw new \InvalidArgumentException("Type '$type' is not allowed");
+            }
+        }
+
+        return new DataStoreLogConfig($operations, $types);
     }
 }

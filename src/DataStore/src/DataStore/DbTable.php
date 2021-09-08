@@ -57,12 +57,10 @@ class DbTable extends DataStoreAbstract
      */
     public function __construct(
         TableGateway $dbTable,
-        DataStoreLogConfig $logConfig = null,
         LoggerInterface $logger = null
     ) {
         $this->dbTable = $dbTable;
         InsideConstruct::init([
-            'logConfig' => DataStoreLogConfig::class,
             'logger' => LoggerInterface::class,
         ]);
     }

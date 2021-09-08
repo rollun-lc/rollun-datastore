@@ -62,7 +62,6 @@ class ConfigProvider
                 Determinator::class => DeterminatorFactory::class,
                 DataStoreApi::class => DataStoreApiFactory::class,
                 DataStorePluginManager::class => DataStorePluginManagerFactory::class,
-                DataStoreLogConfig::class => DataStoreLogConfigFactory::class,
 
                 'TableManagerMysql' => TableManagerMysqlFactory::class,
                 TableManagerMysql::class => TableManagerMysqlFactory::class,

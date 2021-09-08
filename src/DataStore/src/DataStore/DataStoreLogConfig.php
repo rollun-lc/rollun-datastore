@@ -35,8 +35,14 @@ class DataStoreLogConfig
         self::RESPONSE,
     ];
 
-    private $operations = [];
-    private $types = [];
+    private $operations;
+    private $types;
+
+    public function __construct(array $operations = [], array $types = [])
+    {
+        $this->operations = $operations;
+        $this->types = $types;
+    }
 
     public function needLog(string $operation, string $type): bool
     {
@@ -47,36 +53,6 @@ class DataStoreLogConfig
             || in_array($type, $this->types);
 
         return $needLogOperation && $needLogType;
-    }
-
-    public function initFromConfig(array $config)
-    {
-        if (empty($config[self::OPERATIONS]) || !is_array($config[self::OPERATIONS])) {
-            throw new \InvalidArgumentException("Config key '" . self::OPERATIONS . "' is missing or is not array");
-        }
-
-        if (empty($config[self::TYPES]) || !is_array($config[self::TYPES])) {
-            throw new \InvalidArgumentException("Config key '" . self::TYPES . "' is missing or is not array");
-        }
-
-        $operations = $config[self::OPERATIONS];
-
-        foreach ($operations as $operation) {
-            if (!in_array($operation, self::ALLOWED_OPERATIONS)) {
-                throw new \InvalidArgumentException("Operation '$operation' is not allowed");
-            }
-        }
-
-        $types = $config[self::TYPES];
-
-        foreach ($types as $type) {
-            if (!in_array($type, self::ALLOWED_TYPES)) {
-                throw new \InvalidArgumentException("Type '$type' is not allowed");
-            }
-        }
-
-        $this->operations = $operations;
-        $this->types = $types;
     }
 
 }
