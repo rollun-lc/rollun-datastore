@@ -31,6 +31,15 @@ use Zend\Db\TableGateway\TableGateway;
  */
 class DbTable extends DataStoreAbstract
 {
+    const LOG_METHOD = 'method';
+    const LOG_TABLE = 'table';
+    const LOG_TIME = 'time';
+    const LOG_REQUEST = 'request';
+    const LOG_RESPONSE = 'response';
+    const LOG_ROLLBACK = 'rollbackTransaction';
+    const LOG_SQL = 'sql';
+    const LOG_COUNT = 'count';
+
     /**
      * @var TableGateway
      */
@@ -86,15 +95,26 @@ class DbTable extends DataStoreAbstract
             trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
         }
 
+        $logContext = [
+            self::LOG_METHOD => __FUNCTION__,
+            self::LOG_TABLE => $this->dbTable->getTable(),
+            self::LOG_REQUEST => $itemData,
+        ];
+
         $adapter = $this->dbTable->getAdapter();
         $adapter->getDriver()->getConnection()->beginTransaction();
 
         try {
-            $insertedItem = $this->insertItem($itemData, $rewriteIfExist);
+            $insertedItem = $this->insertItem($itemData, $rewriteIfExist, $logContext);
             $adapter->getDriver()->getConnection()->commit();
         } catch (\Throwable $e) {
             $adapter->getDriver()->getConnection()->rollback();
+            $logContext[self::LOG_ROLLBACK] = true;
             throw new DataStoreException("[{$this->dbTable->getTable()}]Can't insert item. {$e->getMessage()}", 0, $e);
+        } finally {
+            if ($this->writeLogs) {
+                $this->logger->debug("Request to datastore", $logContext);
+            }
         }
 
         return $insertedItem;
@@ -103,32 +123,21 @@ class DbTable extends DataStoreAbstract
     /**
      * @param $itemData
      * @param bool $rewriteIfExist
+     * @param array $logContext
      * @return array|mixed|null
      */
-    protected function insertItem($itemData, $rewriteIfExist = false)
+    protected function insertItem($itemData, $rewriteIfExist = false, array &$logContext = [])
     {
         if ($rewriteIfExist && isset($itemData[$this->getIdentifier()])) {
             $this->delete($itemData[$this->getIdentifier()]);
-        }
-
-        if ($this->writeLogs) {
-            $this->logger->debug("Request to db table '{$this->dbTable->getTable()}'", [
-                'method' => __METHOD__,
-                'request' => $itemData,
-            ]);
         }
 
         $start = microtime(true);
         $response = $this->dbTable->insert($itemData);
         $end = microtime(true);
 
-        if ($this->writeLogs) {
-            $this->logger->debug("Response from db table '{$this->dbTable->getTable()}'", [
-                'time' => $this->getRequestTime($start, $end),
-                'method' => __METHOD__,
-                'response' => $response,
-            ]);
-        }
+        $logContext[self::LOG_TIME] = $this->getRequestTime($start, $end);
+        $logContext[self::LOG_RESPONSE] = $response;
 
         if (isset($itemData[$this->getIdentifier()])) {
             $insertedItem = $this->read($itemData[$this->getIdentifier()]);
@@ -154,15 +163,26 @@ class DbTable extends DataStoreAbstract
             throw new DataStoreException('Item must has primary key');
         }
 
+        $logContext = [
+            self::LOG_METHOD => __FUNCTION__,
+            self::LOG_TABLE => $this->dbTable->getTable(),
+            self::LOG_REQUEST => $itemData,
+        ];
+
         $adapter = $this->dbTable->getAdapter();
         $adapter->getDriver()->getConnection()->beginTransaction();
 
         try {
-            $result = $this->updateItem($itemData, $createIfAbsent);
+            $result = $this->updateItem($itemData, $createIfAbsent, $logContext);
             $adapter->getDriver()->getConnection()->commit();
         } catch (\Throwable $e) {
             $adapter->getDriver()->getConnection()->rollback();
+            $logContext[self::LOG_ROLLBACK] = true;
             throw new DataStoreException("[{$this->dbTable->getTable()}]Can't update item. {$e->getMessage()}", 0, $e);
+        } finally {
+            if ($this->writeLogs) {
+                $this->logger->debug("Request to datastore", $logContext);
+            }
         }
 
         return $result;
@@ -341,7 +361,7 @@ class DbTable extends DataStoreAbstract
      * @return array|mixed|null
      * @throws DataStoreException
      */
-    protected function updateItem($itemData, $createIfAbsent = false)
+    protected function updateItem($itemData, $createIfAbsent = false, &$logContext = [])
     {
         $identifier = $this->getIdentifier();
         $id = $itemData[$identifier];
@@ -350,13 +370,6 @@ class DbTable extends DataStoreAbstract
         // Is row with this index exist ?
         $result = $this->selectForUpdateWithIds([$id]);
         $isExist = $result->count();
-
-        if ($this->writeLogs) {
-            $this->logger->debug("Request to db table '{$this->dbTable->getTable()}'", [
-                'method' => __METHOD__,
-                'request' => $itemData,
-            ]);
-        }
 
         $start = microtime(true);
 
@@ -371,13 +384,8 @@ class DbTable extends DataStoreAbstract
 
         $end = microtime(true);
 
-        if ($this->writeLogs) {
-            $this->logger->debug("Response from db table '{$this->dbTable->getTable()}'", [
-                'time' => $this->getRequestTime($start, $end),
-                'method' => __METHOD__,
-                'response' => $response,
-            ]);
-        }
+        $logContext[self::LOG_TIME] = $this->getRequestTime($start, $end);
+        $logContext[self::LOG_RESPONSE] = $response;
 
         return $this->read($id);
     }
@@ -390,12 +398,11 @@ class DbTable extends DataStoreAbstract
         $adapter = $this->dbTable->getAdapter();
         $sqlString = $this->getSqlQueryBuilder()->buildSql($query);
 
-        if ($this->writeLogs) {
-            $this->logger->debug("Request to db table '{$this->dbTable->getTable()}'", [
-                'method' => __METHOD__,
-                'sql' => $sqlString,
-            ]);
-        }
+        $logContext = [
+            self::LOG_METHOD => __FUNCTION__,
+            self::LOG_TABLE => $this->dbTable->getTable(),
+            self::LOG_SQL => $sqlString,
+        ];
 
         try {
             $statement = $adapter->getDriver()->createStatement($sqlString);
@@ -403,6 +410,9 @@ class DbTable extends DataStoreAbstract
             $resultSet = $statement->execute();
             $end = microtime(true);
         } catch (\PDOException $exception) {
+            if ($this->writeLogs) {
+                $this->logger->debug("Request to datastore", $logContext);
+            }
             throw new DataStoreException(
                 "Error by execute '$sqlString' query to {$this->getDbTable()->getTable()}.",
                 500,
@@ -416,13 +426,12 @@ class DbTable extends DataStoreAbstract
             $result[] = $itemData;
         }
 
+        $logContext[self::LOG_TIME] = $this->getRequestTime($start, $end);
+        $logContext[self::LOG_RESPONSE] = array_slice($result, 0, 100);
+        $logContext[self::LOG_COUNT] = count($result);
+
         if ($this->writeLogs) {
-            $this->logger->debug("Response from db table '{$this->dbTable->getTable()}'", [
-                'time' => $this->getRequestTime($start, $end),
-                'method' => __METHOD__,
-                'response' => array_slice($result, 0, 100),
-                'count' => count($result),
-            ]);
+            $this->logger->debug("Request to datastore", $logContext);
         }
 
         return $result;
@@ -441,23 +450,23 @@ class DbTable extends DataStoreAbstract
             return $element;
         }
 
-        if ($this->writeLogs) {
-            $this->logger->debug("Request to db table '{$this->dbTable->getTable()}'", [
-                'method' => __METHOD__,
-                'request' => [$identifier => $id],
-            ]);
-        }
+        $request = [$identifier => $id];
+
+        $logContext = [
+            self::LOG_METHOD => __FUNCTION__,
+            self::LOG_TABLE => $this->dbTable->getTable(),
+            self::LOG_REQUEST => $request,
+        ];
 
         $start = microtime(true);
-        $response = $this->dbTable->delete([$identifier => $id]);
+        $response = $this->dbTable->delete($request);
         $end = microtime(true);
 
+        $logContext[self::LOG_TIME] = $this->getRequestTime($start, $end);
+        $logContext[self::LOG_RESPONSE] = $response;
+
         if ($this->writeLogs) {
-            $this->logger->debug("Response from db table '{$this->dbTable->getTable()}'", [
-                'time' => $this->getRequestTime($start, $end),
-                'method' => __METHOD__,
-                'response' => $response,
-            ]);
+            $this->logger->debug("Request to datastore", $logContext);
         }
 
         return $element;
@@ -473,12 +482,11 @@ class DbTable extends DataStoreAbstract
 
         $request = [$identifier => $id];
 
-        if ($this->writeLogs) {
-            $this->logger->debug("Request to db table '{$this->dbTable->getTable()}'", [
-                'method' => __METHOD__,
-                'request' => $request,
-            ]);
-        }
+        $logContext = [
+            self::LOG_METHOD => __FUNCTION__,
+            self::LOG_TABLE => $this->dbTable->getTable(),
+            self::LOG_REQUEST => $request,
+        ];
 
         $start = microtime(true);
         $rowSet = $this->dbTable->select($request);
@@ -491,12 +499,11 @@ class DbTable extends DataStoreAbstract
             $response = $row->getArrayCopy();
         }
 
+        $logContext[self::LOG_TIME] = $this->getRequestTime($start, $end);
+        $logContext[self::LOG_RESPONSE] = $response;
+
         if ($this->writeLogs) {
-            $this->logger->debug("Response from db table '{$this->dbTable->getTable()}'", [
-                'time' => $this->getRequestTime($start, $end),
-                'method' => __METHOD__,
-                'response' => $response
-            ]);
+            $this->logger->debug("Request to datastore", $logContext);
         }
 
         return $response;
