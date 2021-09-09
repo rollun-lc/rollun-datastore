@@ -14,9 +14,9 @@ class SerializedDbTable extends DbTable
 {
     protected $tableName;
 
-    public function __construct(TableGateway $dbTable)
+    public function __construct(TableGateway $dbTable, bool $writeLogs = false)
     {
-        parent::__construct($dbTable);
+        parent::__construct($dbTable, $writeLogs);
         $this->tableName = $this->dbTable->getTable();
     }
 

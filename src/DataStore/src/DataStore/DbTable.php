@@ -42,9 +42,9 @@ class DbTable extends DataStoreAbstract
     protected $sqlQueryBuilder;
 
     /**
-     * @var DataStoreLogConfig
+     * @var bool
      */
-    protected $logConfig;
+    protected $writeLogs;
 
     /**
      * @var LoggerInterface
@@ -57,9 +57,11 @@ class DbTable extends DataStoreAbstract
      */
     public function __construct(
         TableGateway $dbTable,
+        bool $writeLogs = false,
         LoggerInterface $logger = null
     ) {
         $this->dbTable = $dbTable;
+        $this->writeLogs = $writeLogs;
         InsideConstruct::init([
             'logger' => LoggerInterface::class,
         ]);
@@ -109,21 +111,21 @@ class DbTable extends DataStoreAbstract
             $this->delete($itemData[$this->getIdentifier()]);
         }
 
-        $start = microtime(true);
-        $response = $this->dbTable->insert($itemData);
-        $end = microtime(true);
-
-        if ($this->logConfig->needLog(DataStoreLogConfig::CREATE, DataStoreLogConfig::REQUEST)) {
+        if ($this->writeLogs) {
             $this->logger->debug("Request to db table '{$this->dbTable->getTable()}'", [
-                'time' => $this->getRequestTime($start, $end),
-                'operation' => DataStoreLogConfig::CREATE,
+                'method' => __METHOD__,
                 'request' => $itemData,
             ]);
         }
 
-        if ($this->logConfig->needLog(DataStoreLogConfig::CREATE, DataStoreLogConfig::RESPONSE)) {
+        $start = microtime(true);
+        $response = $this->dbTable->insert($itemData);
+        $end = microtime(true);
+
+        if ($this->writeLogs) {
             $this->logger->debug("Response from db table '{$this->dbTable->getTable()}'", [
-                'operation' => DataStoreLogConfig::CREATE,
+                'time' => $this->getRequestTime($start, $end),
+                'method' => __METHOD__,
                 'response' => $response,
             ]);
         }
@@ -349,6 +351,13 @@ class DbTable extends DataStoreAbstract
         $result = $this->selectForUpdateWithIds([$id]);
         $isExist = $result->count();
 
+        if ($this->writeLogs) {
+            $this->logger->debug("Request to db table '{$this->dbTable->getTable()}'", [
+                'method' => __METHOD__,
+                'request' => $itemData,
+            ]);
+        }
+
         $start = microtime(true);
 
         if (!$isExist && $createIfAbsent) {
@@ -362,17 +371,10 @@ class DbTable extends DataStoreAbstract
 
         $end = microtime(true);
 
-        if ($this->logConfig->needLog(DataStoreLogConfig::UPDATE, DataStoreLogConfig::REQUEST)) {
-            $this->logger->debug("Request to db table '{$this->dbTable->getTable()}'", [
-                'time' => $this->getRequestTime($start, $end),
-                'operation' => DataStoreLogConfig::UPDATE,
-                'request' => $itemData,
-            ]);
-        }
-
-        if ($this->logConfig->needLog(DataStoreLogConfig::UPDATE, DataStoreLogConfig::RESPONSE)) {
+        if ($this->writeLogs) {
             $this->logger->debug("Response from db table '{$this->dbTable->getTable()}'", [
-                'operation' => DataStoreLogConfig::UPDATE,
+                'time' => $this->getRequestTime($start, $end),
+                'method' => __METHOD__,
                 'response' => $response,
             ]);
         }
@@ -388,6 +390,13 @@ class DbTable extends DataStoreAbstract
         $adapter = $this->dbTable->getAdapter();
         $sqlString = $this->getSqlQueryBuilder()->buildSql($query);
 
+        if ($this->writeLogs) {
+            $this->logger->debug("Request to db table '{$this->dbTable->getTable()}'", [
+                'method' => __METHOD__,
+                'sql' => $sqlString,
+            ]);
+        }
+
         try {
             $statement = $adapter->getDriver()->createStatement($sqlString);
             $start = microtime(true);
@@ -401,24 +410,18 @@ class DbTable extends DataStoreAbstract
             );
         }
 
-        if ($this->logConfig->needLog(DataStoreLogConfig::READ, DataStoreLogConfig::REQUEST)) {
-            $this->logger->debug("Request to db table '{$this->dbTable->getTable()}'", [
-                'time' => $this->getRequestTime($start, $end),
-                'operation' => DataStoreLogConfig::READ,
-                'sql' => $sqlString,
-            ]);
-        }
-
         $result = [];
 
         foreach ($resultSet as $itemData) {
             $result[] = $itemData;
         }
 
-        if ($this->logConfig->needLog(DataStoreLogConfig::READ, DataStoreLogConfig::RESPONSE)) {
+        if ($this->writeLogs) {
             $this->logger->debug("Response from db table '{$this->dbTable->getTable()}'", [
-                'operation' => DataStoreLogConfig::READ,
+                'time' => $this->getRequestTime($start, $end),
+                'method' => __METHOD__,
                 'response' => array_slice($result, 0, 100),
+                'count' => count($result),
             ]);
         }
 
@@ -438,21 +441,21 @@ class DbTable extends DataStoreAbstract
             return $element;
         }
 
-        $start = microtime(true);
-        $response = $this->dbTable->delete([$identifier => $id]);
-        $end = microtime(true);
-
-        if ($this->logConfig->needLog(DataStoreLogConfig::DELETE, DataStoreLogConfig::REQUEST)) {
+        if ($this->writeLogs) {
             $this->logger->debug("Request to db table '{$this->dbTable->getTable()}'", [
-                'time' => $this->getRequestTime($start, $end),
-                'operation' => DataStoreLogConfig::DELETE,
+                'method' => __METHOD__,
                 'request' => [$identifier => $id],
             ]);
         }
 
-        if ($this->logConfig->needLog(DataStoreLogConfig::DELETE, DataStoreLogConfig::RESPONSE)) {
+        $start = microtime(true);
+        $response = $this->dbTable->delete([$identifier => $id]);
+        $end = microtime(true);
+
+        if ($this->writeLogs) {
             $this->logger->debug("Response from db table '{$this->dbTable->getTable()}'", [
-                'operation' => DataStoreLogConfig::DELETE,
+                'time' => $this->getRequestTime($start, $end),
+                'method' => __METHOD__,
                 'response' => $response,
             ]);
         }
@@ -468,32 +471,35 @@ class DbTable extends DataStoreAbstract
         $this->checkIdentifierType($id);
         $identifier = $this->getIdentifier();
 
+        $request = [$identifier => $id];
+
+        if ($this->writeLogs) {
+            $this->logger->debug("Request to db table '{$this->dbTable->getTable()}'", [
+                'method' => __METHOD__,
+                'request' => $request,
+            ]);
+        }
+
         $start = microtime(true);
-        $rowSet = $this->dbTable->select([$identifier => $id]);
+        $rowSet = $this->dbTable->select($request);
         $end = microtime(true);
 
-        if ($this->logConfig->needLog(DataStoreLogConfig::READ, DataStoreLogConfig::REQUEST)) {
-            $this->logger->debug("Request to db table '{$this->dbTable->getTable()}'", [
-                'time' => $this->getRequestTime($start, $end),
-                'operation' => DataStoreLogConfig::READ,
-                'request' => [$identifier => $id],
-            ]);
-        }
-
         $row = $rowSet->current();
-
-        if ($this->logConfig->needLog(DataStoreLogConfig::READ, DataStoreLogConfig::RESPONSE)) {
-            $this->logger->debug("Response from db table '{$this->dbTable->getTable()}'", [
-                'operation' => DataStoreLogConfig::READ,
-                'response' => $row->getArrayCopy()
-            ]);
-        }
+        $response = null;
 
         if (isset($row)) {
-            return $row->getArrayCopy();
+            $response = $row->getArrayCopy();
         }
 
-        return null;
+        if ($this->writeLogs) {
+            $this->logger->debug("Response from db table '{$this->dbTable->getTable()}'", [
+                'time' => $this->getRequestTime($start, $end),
+                'method' => __METHOD__,
+                'response' => $response
+            ]);
+        }
+
+        return $response;
     }
 
     /**
@@ -560,11 +566,6 @@ class DbTable extends DataStoreAbstract
     public function getDbTable()
     {
         return $this->dbTable;
-    }
-
-    public function setLogConfig(DataStoreLogConfig $logConfig)
-    {
-        $this->logConfig = $logConfig;
     }
 
     /**

@@ -8,7 +8,6 @@ namespace rollun\datastore\DataStore\Factory;
 
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStoreException;
-use rollun\datastore\DataStore\DataStoreLogConfig;
 use rollun\datastore\DataStore\DbTable;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -65,15 +64,18 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
         $serviceConfig = $config[self::KEY_DATASTORE][$requestedName];
         $requestedClassName = $serviceConfig[self::KEY_CLASS];
         $tableGateway = $this->getTableGateway($container, $serviceConfig, $requestedName);
-        $dataStoreLogConfig = $this->getDataStoreLogConfig($config, $serviceConfig);
+        $writeLogs = false;
+        if (isset($serviceConfig[DataStoreAbstractFactory::KEY_WRITE_LOGS])) {
+            $writeLogs = $serviceConfig[DataStoreAbstractFactory::KEY_WRITE_LOGS];
+        }
 
         $this::$KEY_IN_CREATE = 0;
 
-        /** @var DbTable $instance */
-        $instance = new $requestedClassName($tableGateway);
-        $instance->setLogConfig($dataStoreLogConfig);
+        if ($writeLogs) {
+            return new $requestedClassName($tableGateway, $writeLogs);
+        }
 
-        return $instance;
+        return new $requestedClassName($tableGateway);
     }
 
     /**
@@ -119,50 +121,5 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
         }
 
         return $tableGateway;
-    }
-
-    protected function getDataStoreLogConfig($globalConfig, $serviceConfig): DataStoreLogConfig
-    {
-        $logConfig = $globalConfig[DataStoreLogConfig::class] ?? null;
-
-        if (isset($serviceConfig[DataStoreLogConfig::KEY_LOG_CONFIG])
-            && is_array($serviceConfig[DataStoreLogConfig::KEY_LOG_CONFIG])) {
-            $logConfig = $serviceConfig[DataStoreLogConfig::KEY_LOG_CONFIG];
-        }
-
-        if (!is_array($logConfig)) {
-            return new DataStoreLogConfig();
-        }
-
-        return $this->createDataStoreLogConfig($logConfig);
-    }
-
-    protected function createDataStoreLogConfig($config): DataStoreLogConfig
-    {
-        if (empty($config[DataStoreLogConfig::OPERATIONS]) || !is_array($config[DataStoreLogConfig::OPERATIONS])) {
-            throw new \InvalidArgumentException("Config key '" . DataStoreLogConfig::OPERATIONS . "' is missing or is not array");
-        }
-
-        if (empty($config[DataStoreLogConfig::TYPES]) || !is_array($config[DataStoreLogConfig::TYPES])) {
-            throw new \InvalidArgumentException("Config key '" . DataStoreLogConfig::TYPES . "' is missing or is not array");
-        }
-
-        $operations = $config[DataStoreLogConfig::OPERATIONS];
-
-        foreach ($operations as $operation) {
-            if (!in_array($operation, DataStoreLogConfig::ALLOWED_OPERATIONS)) {
-                throw new \InvalidArgumentException("Operation '$operation' is not allowed");
-            }
-        }
-
-        $types = $config[DataStoreLogConfig::TYPES];
-
-        foreach ($types as $type) {
-            if (!in_array($type, DataStoreLogConfig::ALLOWED_TYPES)) {
-                throw new \InvalidArgumentException("Type '$type' is not allowed");
-            }
-        }
-
-        return new DataStoreLogConfig($operations, $types);
     }
 }
