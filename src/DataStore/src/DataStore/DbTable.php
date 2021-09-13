@@ -112,9 +112,7 @@ class DbTable extends DataStoreAbstract
             $logContext[self::LOG_ROLLBACK] = true;
             throw new DataStoreException("[{$this->dbTable->getTable()}]Can't insert item. {$e->getMessage()}", 0, $e);
         } finally {
-            if ($this->writeLogs) {
-                $this->logger->debug("Request to datastore", $logContext);
-            }
+            $this->writeLogsIfNeeded($logContext);
         }
 
         return $insertedItem;
@@ -180,9 +178,7 @@ class DbTable extends DataStoreAbstract
             $logContext[self::LOG_ROLLBACK] = true;
             throw new DataStoreException("[{$this->dbTable->getTable()}]Can't update item. {$e->getMessage()}", 0, $e);
         } finally {
-            if ($this->writeLogs) {
-                $this->logger->debug("Request to datastore", $logContext);
-            }
+            $this->writeLogsIfNeeded($logContext);
         }
 
         return $result;
@@ -410,14 +406,15 @@ class DbTable extends DataStoreAbstract
             $resultSet = $statement->execute();
             $end = microtime(true);
         } catch (\PDOException $exception) {
-            if ($this->writeLogs) {
-                $this->logger->debug("Request to datastore", $logContext);
-            }
+            $this->writeLogsIfNeeded($logContext);
             throw new DataStoreException(
                 "Error by execute '$sqlString' query to {$this->getDbTable()->getTable()}.",
                 500,
                 $exception
             );
+        } catch (\Exception $e) {
+            $this->writeLogsIfNeeded($logContext);
+            throw $e;
         }
 
         $result = [];
@@ -430,9 +427,7 @@ class DbTable extends DataStoreAbstract
         $logContext[self::LOG_RESPONSE] = array_slice($result, 0, 100);
         $logContext[self::LOG_COUNT] = count($result);
 
-        if ($this->writeLogs) {
-            $this->logger->debug("Request to datastore", $logContext);
-        }
+        $this->writeLogsIfNeeded($logContext);
 
         return $result;
     }
@@ -458,15 +453,17 @@ class DbTable extends DataStoreAbstract
             self::LOG_REQUEST => $request,
         ];
 
-        $start = microtime(true);
-        $response = $this->dbTable->delete($request);
-        $end = microtime(true);
+        try {
+            $start = microtime(true);
+            $response = $this->dbTable->delete($request);
+            $end = microtime(true);
 
-        $logContext[self::LOG_TIME] = $this->getRequestTime($start, $end);
-        $logContext[self::LOG_RESPONSE] = $response;
-
-        if ($this->writeLogs) {
-            $this->logger->debug("Request to datastore", $logContext);
+            $logContext[self::LOG_TIME] = $this->getRequestTime($start, $end);
+            $logContext[self::LOG_RESPONSE] = $response;
+        } catch (\Exception $e) {
+            throw $e;
+        } finally {
+            $this->writeLogsIfNeeded($logContext);
         }
 
         return $element;
@@ -488,22 +485,24 @@ class DbTable extends DataStoreAbstract
             self::LOG_REQUEST => $request,
         ];
 
-        $start = microtime(true);
-        $rowSet = $this->dbTable->select($request);
-        $end = microtime(true);
+        try {
+            $start = microtime(true);
+            $rowSet = $this->dbTable->select($request);
+            $end = microtime(true);
 
-        $row = $rowSet->current();
-        $response = null;
+            $row = $rowSet->current();
+            $response = null;
 
-        if (isset($row)) {
-            $response = $row->getArrayCopy();
-        }
+            if (isset($row)) {
+                $response = $row->getArrayCopy();
+            }
 
-        $logContext[self::LOG_TIME] = $this->getRequestTime($start, $end);
-        $logContext[self::LOG_RESPONSE] = $response;
-
-        if ($this->writeLogs) {
-            $this->logger->debug("Request to datastore", $logContext);
+            $logContext[self::LOG_TIME] = $this->getRequestTime($start, $end);
+            $logContext[self::LOG_RESPONSE] = $response;
+        } catch (\Exception $e) {
+            throw $e;
+        } finally {
+            $this->writeLogsIfNeeded($logContext);
         }
 
         return $response;
@@ -592,6 +591,13 @@ class DbTable extends DataStoreAbstract
         }
 
         return $keys;
+    }
+
+    protected function writeLogsIfNeeded(array $logContext = [])
+    {
+        if ($this->writeLogs) {
+            $this->logger->debug("Request to db table '{$this->dbTable->getTable()}'", $logContext);
+        }
     }
 
     /**
