@@ -10,6 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\LoggerInterface;
 use Zend\Diactoros\Response\JsonResponse;
 use Zend\Diactoros\Response\TextResponse;
 use Zend\Stratigility\Middleware\RequestHandlerMiddleware;
@@ -19,13 +20,21 @@ class DataStoreApi implements MiddlewareInterface
 {
     protected $middlewarePipe;
 
+    /** @var LoggerInterface|null */
+    protected $logger;
+
     /**
      * DataStoreApi constructor.
      * @param Determinator $determinator
      * @param RequestHandlerInterface|null $renderer
      */
-    public function __construct(Determinator $determinator, RequestHandlerInterface $renderer = null)
-    {
+    public function __construct(
+        Determinator $determinator,
+        RequestHandlerInterface $renderer = null,
+        LoggerInterface $logger = null
+    ) {
+        $this->logger = $logger;
+
         $this->middlewarePipe = new MiddlewarePipe();
 
         $this->middlewarePipe->pipe(new ResourceResolver());
@@ -46,14 +55,19 @@ class DataStoreApi implements MiddlewareInterface
         try {
             return $this->middlewarePipe->process($request, $handler);
         } catch (\Exception $e) {
-           $accept = $request->getHeader('Accept');
-           if(in_array('application/json', $accept)) {
+            if ($this->logger) {
+                $this->logger->error("Exception in Datastore middleware", [
+                    'exception' => $e,
+                ]);
+            }
+            $accept = $request->getHeader('Accept');
+            if(in_array('application/json', $accept)) {
                 return new JsonResponse([
                     'error' => $e->getMessage(),
-                ], 500);           
-           } else {
+                ], 500);
+            } else {
                 return new TextResponse($e->getMessage(), 500);
-           }
+            }
         }
     }
 }
