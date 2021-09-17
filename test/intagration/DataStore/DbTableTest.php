@@ -88,9 +88,6 @@ class DbTableTest extends BaseDataStoreTest
 
     public function createObject(): DataStoreAbstract
     {
-        $adapter = $this->getContainer()->get('db');
-        $sqlQueryBuilder = new SqlQueryBuilder($adapter, $this->tableName);
-
-        return new DbTable($this->tableGateway, $sqlQueryBuilder);
+        return new DbTable($this->tableGateway);
     }
 }

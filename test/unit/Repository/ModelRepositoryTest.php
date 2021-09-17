@@ -4,6 +4,7 @@ namespace rollun\test\unit\Repository;
 
 
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use rollun\datastore\DataStore\Memory;
 use rollun\repository\Interfaces\FieldMapperInterface;
 use rollun\repository\Interfaces\ModelInterface;
@@ -74,11 +75,19 @@ class ModelRepositoryTest extends TestCase
         };
     }
 
+    protected function createRepository($dataStore): ModelRepository
+    {
+        global $container;
+        $logger = $container->get(LoggerInterface::class);
+        $model = $this->createModelInterface();
+
+        return new ModelRepository($dataStore, get_class($model), null, $logger);
+    }
+
     public function testCreate()
     {
         $dataStore = new Memory();
-        $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, get_class($model));
+        $repository = $this->createRepository($dataStore);
 
         $item = $this->createModelInterface($this->getItem());;
         $repository->save($item);
@@ -89,8 +98,7 @@ class ModelRepositoryTest extends TestCase
     public function testUpdate()
     {
         $dataStore = new Memory();
-        $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, get_class($model));
+        $repository = $this->createRepository($dataStore);
 
         $item = $this->createModelInterface($this->getItem());
         //$old->setExists(true);
@@ -106,8 +114,7 @@ class ModelRepositoryTest extends TestCase
     {
         $dataStore = new Memory();
         $dataStore->create($this->getItem());
-        $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, get_class($model));
+        $repository = $this->createRepository($dataStore);
 
         $result = $repository->findById(1);
 
@@ -118,8 +125,7 @@ class ModelRepositoryTest extends TestCase
     {
         $dataStore = new Memory();
         $dataStore->create($this->getItem());
-        $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, get_class($model));
+        $repository = $this->createRepository($dataStore);
 
         $query = new Query();
         $query->setQuery(new EqNode('field', 'test'));
@@ -132,8 +138,7 @@ class ModelRepositoryTest extends TestCase
     {
         $dataStore = new Memory();
         $dataStore->create($this->getItem());
-        $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, get_class($model));
+        $repository = $this->createRepository($dataStore);
 
         $repository->removeById(1);
 
@@ -144,8 +149,7 @@ class ModelRepositoryTest extends TestCase
     {
         $dataStore = new Memory();
         $dataStore->create($this->getItem());
-        $model = new class() extends ModelAbstract {};
-        $repository = new ModelRepository($dataStore, get_class($model));
+        $repository = $this->createRepository($dataStore);
 
         $result = $repository->findById(1);
 
@@ -164,7 +168,9 @@ class ModelRepositoryTest extends TestCase
                 return ['id' => $data['id'], 'hello' => $data['field']];
             }
         };
-        $repository = new ModelRepository($dataStore, get_class($model), $mapper);
+        global $container;
+        $logger = $container->get(LoggerInterface::class);
+        $repository = new ModelRepository($dataStore, get_class($model), $mapper, $logger);
 
         $result = $repository->findById(1);
 
@@ -175,8 +181,7 @@ class ModelRepositoryTest extends TestCase
     {
         $dataStore = new Memory();
         $dataStore->create($this->getItem());
-        $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, get_class($model));
+        $repository = $this->createRepository($dataStore);
         $models = [
             $repository->findById(1),
             $this->createModelInterface(['id' => 2, 'field' => 'field2']),
@@ -196,8 +201,7 @@ class ModelRepositoryTest extends TestCase
         $dataStore->create(['id' => 1, 'field' => 'field1']);
         $dataStore->create(['id' => 2, 'field' => 'field2']);
 
-        $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, get_class($model));
+        $repository = $this->createRepository($dataStore);
 
         $models = $repository->find(new Query());
 
@@ -222,8 +226,7 @@ class ModelRepositoryTest extends TestCase
         $dataStore->create(['id' => 1, 'field' => 'field1']);
         $dataStore->create(['id' => 2, 'field' => 'field2']);
 
-        $model = $this->createModelInterface();
-        $repository = new ModelRepository($dataStore, get_class($model));
+        $repository = $this->createRepository($dataStore);
 
         $models = $repository->find(new Query());
 

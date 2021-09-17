@@ -14,9 +14,6 @@ class SerializedDbTableTest extends DbTableTest
 {
     public function createObject(): DataStoreAbstract
     {
-        $adapter = $this->container->get('db');
-        $sqlQueryBuilder = new SqlQueryBuilder($adapter, $this->tableName);
-
-        return new SerializedDbTable($this->tableGateway, $sqlQueryBuilder);
+        return new SerializedDbTable($this->tableGateway);
     }
 }
