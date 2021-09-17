@@ -12,8 +12,8 @@ use Psr\Log\LoggerInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\Rql\RqlQuery;
-use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\datastore\TableGateway\TableManagerMysql;
+use Xiag\Rql\Parser\Query;
 use Zend\Db\TableGateway\TableGateway;
 
 class DbTableTest extends TestCase
@@ -76,35 +76,15 @@ class DbTableTest extends TestCase
         $this->mysqlManager->deleteTable($this->tableName);
     }
 
-    public function createObject($writeLogs = false)
+    public function createObject($tableGateway = null, $writeLogs = false, $logger = null)
     {
-        return new DbTable($this->tableGateway, $writeLogs);
-    }
+        $tableGateway = $tableGateway ?: $this->tableGateway;
 
-    public function mockLogger(DbTable $dataStore)
-    {
-        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
+        if (!is_null($logger)) {
+            return new DbTable($tableGateway, $writeLogs, $logger);
+        }
 
-        $reflection = new \ReflectionClass($dataStore);
-        $property = $reflection->getProperty('logger');
-        $property->setAccessible(true);
-        $property->setValue($dataStore, $loggerMock);
-
-        return $loggerMock;
-    }
-
-    public function mockTableGateway(DbTable $dataStore)
-    {
-        $dbTableMock = $this->getMockBuilder(TableGateway::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $reflection = new \ReflectionClass($dataStore);
-        $property = $reflection->getProperty('dbTable');
-        $property->setAccessible(true);
-        $property->setValue($dataStore, $dbTableMock);
-
-        return $dbTableMock;
+        return new DbTable($tableGateway, $writeLogs);
     }
 
     public function testCreateSuccess()
@@ -309,17 +289,24 @@ class DbTableTest extends TestCase
         }
     }
 
-    public function testCreateWriteLog()
+    public function testWriteLog()
     {
-        $dataStore = $this->createObject(true);
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
 
-        $loggerMock = $this->mockLogger($dataStore);
+        $dataStore = $this->createObject(null, true, $loggerMock);
 
-        $loggerMock->expects($this->exactly(2))
+        // методы create, update, delete вызывают метод read, поэтому учитываем его логи тоже
+        $loggerMock->expects($this->atLeast(7))
             ->method('debug')
             ->withConsecutive(
                 [$this->isType('string'), $this->contains('read')],
-                [$this->isType('string'), $this->contains('create')]
+                [$this->isType('string'), $this->contains('create')],
+                [$this->isType('string'), $this->contains('read')],
+                [$this->isType('string'), $this->contains('update')],
+                [$this->isType('string'), $this->contains('query')],
+                [$this->isType('string'), $this->contains('read')],
+                [$this->isType('string'), $this->contains('read')],
+                [$this->isType('string'), $this->contains('delete')]
             );
 
         $dataStore->create([
@@ -327,14 +314,28 @@ class DbTableTest extends TestCase
             'name' => "name",
             'surname' => "surname",
         ]);
+
+        $dataStore->update([
+            'id' => 1,
+            'name' => "alter name",
+            'surname' => "surname",
+        ]);
+
+        $dataStore->query(new Query());
+
+        $dataStore->read(1);
+
+        $dataStore->delete(1);
     }
 
-    public function testCreateWriteLogWhenException()
+    public function testWriteLogWhenException()
     {
-        $dataStore = $this->createObject(true);
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
+        $dbTableMock = $this->getMockBuilder(TableGateway::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
-        $loggerMock = $this->mockLogger($dataStore);
-        $dbTableMock = $this->mockTableGateway($dataStore);
+        $dataStore = $this->createObject($dbTableMock, true, $loggerMock);
 
         $dbTableMock->method('getAdapter')
             ->willReturn($this->tableGateway->getAdapter());
@@ -345,19 +346,77 @@ class DbTableTest extends TestCase
         $dbTableMock->method('insert')
             ->willThrowException(new \Exception());
 
-        $loggerMock->expects($this->once())
+        $dbTableMock->method('update')
+            ->willThrowException(new \Exception());
+
+        $dbTableMock->method('select')
+            ->willThrowException(new \Exception());
+
+        $dbTableMock->method('delete')
+            ->willThrowException(new \Exception());
+
+        // метод delete вызывает метод read, поэтому учитываем его логи тоже
+        $loggerMock->expects($this->exactly(4))
             ->method('debug')
             ->withConsecutive(
-                [$this->isType('string'), $this->contains('create')]
+                [$this->isType('string'), $this->contains('create')],
+                [$this->isType('string'), $this->contains('update')],
+                [$this->isType('string'), $this->contains('read')],
+                [$this->isType('string'), $this->contains('read')],
+                [$this->isType('string'), $this->contains('delete')]
             );
 
-        $this->expectException(DataStoreException::class);
+        try {
+            $dataStore->create([
+                'id' => 1,
+                'name' => "name",
+                'surname' => "surname",
+            ]);
+        } catch (\Exception $e) {}
+
+        try {
+            $dataStore->update([
+                'id' => 1,
+                'name' => "alter name",
+                'surname' => "surname",
+            ]);
+        } catch (\Exception $e) {}
+
+        try {
+            $dataStore->read(1);
+        } catch (\Exception $e) {}
+
+        try {
+            $dataStore->delete(1);
+        } catch (\Exception $e) {}
+    }
+
+    public function testNotWriteLogsWhenDisabled()
+    {
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
+
+        $dataStore = $this->createObject(null, false, $loggerMock);
+
+        $loggerMock->expects($this->never())
+            ->method('debug');
 
         $dataStore->create([
             'id' => 1,
             'name' => "name",
             'surname' => "surname",
         ]);
+
+        $dataStore->update([
+            'id' => 1,
+            'name' => "alter name",
+            'surname' => "surname",
+        ]);
+
+        $dataStore->query(new Query());
+
+        $dataStore->read(1);
+
+        $dataStore->delete(1);
     }
 
     /**
