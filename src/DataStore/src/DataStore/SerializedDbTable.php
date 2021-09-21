@@ -6,6 +6,7 @@
 
 namespace rollun\datastore\DataStore;
 
+use Psr\Log\LoggerInterface;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\dic\InsideConstruct;
 use Zend\Db\TableGateway\TableGateway;
@@ -14,9 +15,9 @@ class SerializedDbTable extends DbTable
 {
     protected $tableName;
 
-    public function __construct(TableGateway $dbTable)
+    public function __construct(TableGateway $dbTable, bool $writeLogs = false)
     {
-        parent::__construct($dbTable);
+        parent::__construct($dbTable, $writeLogs);
         $this->tableName = $this->dbTable->getTable();
     }
 
@@ -25,7 +26,7 @@ class SerializedDbTable extends DbTable
      */
     public function __sleep()
     {
-        return ["tableName"];
+        return ["tableName", "writeLogs"];
     }
 
     /**
@@ -36,6 +37,7 @@ class SerializedDbTable extends DbTable
         try {
             InsideConstruct::initWakeup([
                 "dbTable" => $this->tableName,
+                "logger" => LoggerInterface::class,
             ]);
         } catch (\Throwable $e) {
             throw new DataStoreException("Can't deserialize itself. Reason: {$e->getMessage()}", 0, $e);

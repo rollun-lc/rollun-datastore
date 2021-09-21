@@ -7,6 +7,7 @@
 namespace rollun\datastore\Middleware\Factory;
 
 use Interop\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use rollun\datastore\Middleware\DataStoreApi;
 use rollun\datastore\Middleware\Determinator;
 use Zend\ServiceManager\Factory\FactoryInterface;
@@ -29,6 +30,8 @@ class DataStoreApiFactory implements FactoryInterface
     {
         $dataStoreDeterminator = $container->get(Determinator::class);
 
-        return new DataStoreApi($dataStoreDeterminator);
+        $logger = $container->get(LoggerInterface::class);
+
+        return new DataStoreApi($dataStoreDeterminator, null, $logger);
     }
 }

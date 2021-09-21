@@ -8,11 +8,12 @@ namespace rollun\test\functional\DataStore\DataStore;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\Rql\RqlQuery;
-use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\datastore\TableGateway\TableManagerMysql;
+use Xiag\Rql\Parser\Query;
 use Zend\Db\TableGateway\TableGateway;
 
 class DbTableTest extends TestCase
@@ -75,14 +76,15 @@ class DbTableTest extends TestCase
         $this->mysqlManager->deleteTable($this->tableName);
     }
 
-    public function createObject(SqlQueryBuilder $sqlQueryBuilder = null)
+    public function createObject($tableGateway = null, $writeLogs = false, $logger = null)
     {
-        $adapter = $this->container->get('db');
-        $sqlQueryBuilder = !is_null($sqlQueryBuilder)
-            ? $sqlQueryBuilder
-            : new SqlQueryBuilder($adapter, $this->tableName);
+        $tableGateway = $tableGateway ?: $this->tableGateway;
 
-        return new DbTable($this->tableGateway, $sqlQueryBuilder);
+        if (!is_null($logger)) {
+            return new DbTable($tableGateway, $writeLogs, $logger);
+        }
+
+        return new DbTable($tableGateway, $writeLogs);
     }
 
     public function testCreateSuccess()
@@ -285,6 +287,136 @@ class DbTableTest extends TestCase
             $this->assertEquals(array_merge($item, ['id' => $id]), $object->read($id));
 
         }
+    }
+
+    public function testWriteLog()
+    {
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
+
+        $dataStore = $this->createObject(null, true, $loggerMock);
+
+        // методы create, update, delete вызывают метод read, поэтому учитываем его логи тоже
+        $loggerMock->expects($this->atLeast(7))
+            ->method('debug')
+            ->withConsecutive(
+                [$this->isType('string'), $this->contains('read')],
+                [$this->isType('string'), $this->contains('create')],
+                [$this->isType('string'), $this->contains('read')],
+                [$this->isType('string'), $this->contains('update')],
+                [$this->isType('string'), $this->contains('query')],
+                [$this->isType('string'), $this->contains('read')],
+                [$this->isType('string'), $this->contains('read')],
+                [$this->isType('string'), $this->contains('delete')]
+            );
+
+        $dataStore->create([
+            'id' => 1,
+            'name' => "name",
+            'surname' => "surname",
+        ]);
+
+        $dataStore->update([
+            'id' => 1,
+            'name' => "alter name",
+            'surname' => "surname",
+        ]);
+
+        $dataStore->query(new Query());
+
+        $dataStore->read(1);
+
+        $dataStore->delete(1);
+    }
+
+    public function testWriteLogWhenException()
+    {
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
+        $dbTableMock = $this->getMockBuilder(TableGateway::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $dataStore = $this->createObject($dbTableMock, true, $loggerMock);
+
+        $dbTableMock->method('getAdapter')
+            ->willReturn($this->tableGateway->getAdapter());
+
+        $dbTableMock->method('getTable')
+            ->willReturn($this->tableGateway->getTable());
+
+        $dbTableMock->method('insert')
+            ->willThrowException(new \Exception());
+
+        $dbTableMock->method('update')
+            ->willThrowException(new \Exception());
+
+        $dbTableMock->method('select')
+            ->willThrowException(new \Exception());
+
+        $dbTableMock->method('delete')
+            ->willThrowException(new \Exception());
+
+        // метод delete вызывает метод read, поэтому учитываем его логи тоже
+        $loggerMock->expects($this->exactly(4))
+            ->method('debug')
+            ->withConsecutive(
+                [$this->isType('string'), $this->contains('create')],
+                [$this->isType('string'), $this->contains('update')],
+                [$this->isType('string'), $this->contains('read')],
+                [$this->isType('string'), $this->contains('read')],
+                [$this->isType('string'), $this->contains('delete')]
+            );
+
+        try {
+            $dataStore->create([
+                'id' => 1,
+                'name' => "name",
+                'surname' => "surname",
+            ]);
+        } catch (\Exception $e) {}
+
+        try {
+            $dataStore->update([
+                'id' => 1,
+                'name' => "alter name",
+                'surname' => "surname",
+            ]);
+        } catch (\Exception $e) {}
+
+        try {
+            $dataStore->read(1);
+        } catch (\Exception $e) {}
+
+        try {
+            $dataStore->delete(1);
+        } catch (\Exception $e) {}
+    }
+
+    public function testNotWriteLogsWhenDisabled()
+    {
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
+
+        $dataStore = $this->createObject(null, false, $loggerMock);
+
+        $loggerMock->expects($this->never())
+            ->method('debug');
+
+        $dataStore->create([
+            'id' => 1,
+            'name' => "name",
+            'surname' => "surname",
+        ]);
+
+        $dataStore->update([
+            'id' => 1,
+            'name' => "alter name",
+            'surname' => "surname",
+        ]);
+
+        $dataStore->query(new Query());
+
+        $dataStore->read(1);
+
+        $dataStore->delete(1);
     }
 
     /**

@@ -64,8 +64,16 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
         $serviceConfig = $config[self::KEY_DATASTORE][$requestedName];
         $requestedClassName = $serviceConfig[self::KEY_CLASS];
         $tableGateway = $this->getTableGateway($container, $serviceConfig, $requestedName);
+        $writeLogs = false;
+        if (isset($serviceConfig[DataStoreAbstractFactory::KEY_WRITE_LOGS])) {
+            $writeLogs = $serviceConfig[DataStoreAbstractFactory::KEY_WRITE_LOGS];
+        }
 
         $this::$KEY_IN_CREATE = 0;
+
+        if ($writeLogs) {
+            return new $requestedClassName($tableGateway, $writeLogs);
+        }
 
         return new $requestedClassName($tableGateway);
     }
