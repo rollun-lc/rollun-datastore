@@ -154,7 +154,7 @@ class ModelRepositoryTest extends TestCase
         $result = $repository->findById(1);
 
         $this->assertIsObject($result);
-        $this->assertInstanceOf(ModelAbstract::class, $result);
+        $this->assertInstanceOf(ModelInterface::class, $result);
     }
 
     public function testRepositoryWithMapper()

@@ -7,6 +7,7 @@
 namespace rollun\test\functional\DataStore\Middleware;
 
 use Exception;
+use Psr\Log\LoggerInterface;
 use TypeError;
 use Interop\Container\ContainerInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -53,13 +54,14 @@ class DataStoreApiTest extends BaseMiddlewareTest
      */
     protected function getContainer(): ContainerInterface
     {
-        if ($this->container !== null) {
-            return $this->container;
-        } else {
+        if (is_null($this->container)) {
             $this->container = require 'config/container.php';
-
-            return $this->container;
         }
+
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
+        $this->container->setService(LoggerInterface::class, $loggerMock);
+
+        return $this->container;
     }
 
     public function processObjectDataProvider()
