@@ -299,10 +299,10 @@ class DbTableTest extends TestCase
         $loggerMock->expects($this->atLeast(7))
             ->method('debug')
             ->withConsecutive(
-                [$this->isType('string'), $this->contains('read')],
-                [$this->isType('string'), $this->contains('create')],
+                [$this->isType('string'), $this->contains('insert')],
                 [$this->isType('string'), $this->contains('read')],
                 [$this->isType('string'), $this->contains('update')],
+                [$this->isType('string'), $this->contains('read')],
                 [$this->isType('string'), $this->contains('query')],
                 [$this->isType('string'), $this->contains('read')],
                 [$this->isType('string'), $this->contains('read')],
