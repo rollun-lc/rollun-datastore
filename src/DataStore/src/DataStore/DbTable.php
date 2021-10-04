@@ -58,7 +58,7 @@ class DbTable extends DataStoreAbstract
     /**
      * @var LoggerInterface
      */
-    protected $logger;
+    protected $loggerService;
 
     /**
      * DbTable constructor.
@@ -67,12 +67,12 @@ class DbTable extends DataStoreAbstract
     public function __construct(
         TableGateway $dbTable,
         bool $writeLogs = false,
-        LoggerInterface $logger = null
+        LoggerInterface $loggerService = null
     ) {
         $this->dbTable = $dbTable;
         $this->writeLogs = $writeLogs;
         InsideConstruct::init([
-            'logger' => LoggerInterface::class,
+            'loggerService' => LoggerInterface::class,
         ]);
     }
 
@@ -378,6 +378,9 @@ class DbTable extends DataStoreAbstract
             $loggedMethod = 'insert';
         } elseif ($isExist) {
             unset($itemData[$identifier]);
+            if (empty($itemData)) {
+                throw new DataStoreException("Can't update item with id = $id because there was only id in request without other fields");
+            }
             $response = $this->dbTable->update($itemData, [$identifier => $id]);
             $loggedMethod = 'update';
         } else {
@@ -622,7 +625,7 @@ class DbTable extends DataStoreAbstract
             $message = "Request to db table '{$this->dbTable->getTable()}'";
         }
 
-        $this->logger->debug($message, $logContext);
+        $this->loggerService->debug($message, $logContext);
     }
 
     /**

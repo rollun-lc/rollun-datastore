@@ -37,7 +37,7 @@ class SerializedDbTable extends DbTable
         try {
             InsideConstruct::initWakeup([
                 "dbTable" => $this->tableName,
-                "logger" => LoggerInterface::class,
+                "loggerService" => LoggerInterface::class,
             ]);
         } catch (\Throwable $e) {
             throw new DataStoreException("Can't deserialize itself. Reason: {$e->getMessage()}", 0, $e);
