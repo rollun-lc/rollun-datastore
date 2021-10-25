@@ -76,18 +76,14 @@ class Memory extends DataStoreAbstract
     /**
      * {@inheritdoc}
      */
-    public function create($itemData, $rewriteIfExist = false)
+    public function create($itemData)
     {
-        if ($rewriteIfExist) {
-            trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
-        }
-
         $this->checkOnExistingColumns($itemData);
         $identifier = $this->getIdentifier();
         $id = isset($itemData[$identifier]) ? $itemData[$identifier] : null;
 
         if ($id) {
-            if (isset($this->items[$id]) && !$rewriteIfExist) {
+            if (isset($this->items[$id])) {
                 throw new DataStoreException("Item with id '{$itemData[$identifier]}' already exist");
             }
 
@@ -106,12 +102,8 @@ class Memory extends DataStoreAbstract
     /**
      * {@inheritdoc}
      */
-    public function update($itemData, $createIfAbsent = false)
+    public function update($itemData)
     {
-        if ($createIfAbsent) {
-            trigger_error("Option 'createIfAbsent' is no more use", E_USER_DEPRECATED);
-        }
-
         $this->checkOnExistingColumns($itemData);
         $identifier = $this->getIdentifier();
 
@@ -129,11 +121,7 @@ class Memory extends DataStoreAbstract
 
             unset($itemData[$id]);
         } else {
-            if ($createIfAbsent) {
-                $this->items[$id] = $itemData;
-            } else {
-                throw new DataStoreException("Item doesn't exist with id = $id");
-            }
+            throw new DataStoreException("Item doesn't exist with id = $id");
         }
 
         return $this->items[$id];
@@ -154,17 +142,6 @@ class Memory extends DataStoreAbstract
         }
 
         return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function deleteAll()
-    {
-        $deletedItemsCount = count($this->items);
-        $this->items = [];
-
-        return $deletedItemsCount;
     }
 
     /**

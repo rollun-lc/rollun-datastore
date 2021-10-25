@@ -204,10 +204,9 @@ class HttpClient extends DataStoreAbstract
      *
      * @param string $method ('GET', 'HEAD', 'POST', 'PUT', 'DELETE')
      * @param string $uri
-     * @param bool $ifMatch
      * @return Client
      */
-    protected function initHttpClient(string $method, string $uri, $ifMatch = false)
+    protected function initHttpClient(string $method, string $uri)
     {
         $httpClient = clone $this->client;
         $httpClient->setUri($uri);
@@ -217,10 +216,6 @@ class HttpClient extends DataStoreAbstract
         $headers['Accept'] = 'application/json';
         $headers['X-Life-Cycle-Token'] = $this->lifeCycleToken->serialize();
         $headers['LifeCycleToken'] = $this->lifeCycleToken->serialize();
-
-        if ($ifMatch) {
-            $headers['If-Match'] = '*';
-        }
 
         $httpClient->setHeaders($headers);
 
@@ -282,13 +277,9 @@ class HttpClient extends DataStoreAbstract
     /**
      * {@inheritdoc}
      */
-    public function create($itemData, $rewriteIfExist = false)
+    public function create($itemData)
     {
-        if ($rewriteIfExist) {
-            trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
-        }
-
-        $client = $this->initHttpClient(Request::METHOD_POST, $this->url, $rewriteIfExist);
+        $client = $this->initHttpClient(Request::METHOD_POST, $this->url);
         $json = Serializer::jsonSerialize($itemData);
         $client->setRawBody($json);
         $response = $client->send();
@@ -344,12 +335,8 @@ class HttpClient extends DataStoreAbstract
     /**
      * {@inheritdoc}
      */
-    public function update($itemData, $createIfAbsent = false)
+    public function update($itemData)
     {
-        if ($createIfAbsent) {
-            trigger_error("Option 'createIfAbsent' is no more use.", E_USER_DEPRECATED);
-        }
-
         $identifier = $this->getIdentifier();
 
         if (!isset($itemData[$identifier])) {
@@ -361,7 +348,7 @@ class HttpClient extends DataStoreAbstract
         $uri = $this->createUri(null, $itemData[$identifier]);
         unset($itemData[$identifier]);
 
-        $client = $this->initHttpClient(Request::METHOD_PUT, $uri, $createIfAbsent);
+        $client = $this->initHttpClient(Request::METHOD_PUT, $uri);
         $client->setRawBody(Serializer::jsonSerialize($itemData));
         $response = $client->send();
 

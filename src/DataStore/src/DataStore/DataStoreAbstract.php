@@ -22,7 +22,7 @@ use Xiag\Rql\Parser\Query;
  * Class DataStoreAbstract
  * @package rollun\datastore\DataStore
  */
-abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterface
+abstract class DataStoreAbstract implements DataStoreInterface
 {
     /**
      * @var ConditionBuilderAbstract
@@ -377,7 +377,7 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
     /**
      * {@inheritdoc}
      */
-    abstract public function create($itemData, $rewriteIfExist = false);
+    abstract public function create($itemData);
 
     /**
      * {@inheritdoc}
@@ -405,7 +405,7 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
     /**
      * {@inheritdoc}
      */
-    abstract public function update($itemData, $createIfAbsent = false);
+    abstract public function update($itemData);
 
     /**
      * {@inheritdoc}

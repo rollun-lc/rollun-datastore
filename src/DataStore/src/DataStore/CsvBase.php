@@ -119,12 +119,8 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     /**
      * {@inheritdoc}
      */
-    public function create($itemData, $rewriteIfExist = false)
+    public function create($itemData)
     {
-        if ($rewriteIfExist) {
-            trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
-        }
-
         $identifier = $this->getIdentifier();
 
         switch (true) {
@@ -133,7 +129,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
                 $item = $this->createNewItem($itemData);
                 $item[$identifier] = $this->generatePrimaryKey();
                 break;
-            case (!$rewriteIfExist && !is_null($this->read($itemData[$identifier]))):
+            case (!is_null($this->read($itemData[$identifier]))):
                 throw new DataStoreException("Item is already exist with id = $itemData[$identifier]");
                 break;
             default:
@@ -152,12 +148,8 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     /**
      * {@inheritdoc}
      */
-    public function update($itemData, $createIfAbsent = false)
+    public function update($itemData)
     {
-        if ($createIfAbsent) {
-            trigger_error("Option 'createIfAbsent' is no more use.", E_USER_DEPRECATED);
-        }
-
         $identifier = $this->getIdentifier();
 
         if (!isset($itemData[$identifier])) {
@@ -168,13 +160,8 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
         $this->checkIdentifierType($id);
         $item = $this->read($id);
 
-        switch (true) {
-            case (is_null($item) && !$createIfAbsent):
-                throw new DataStoreException("Can't update item with id = $id: item does not exist.");
-            case (is_null($item) && $createIfAbsent):
-                // new item
-                $item = $this->createNewItem($itemData);
-                break;
+        if (is_null($item)) {
+            throw new DataStoreException("Can't update item with id = $id: item does not exist.");
         }
 
         foreach ($item as $key => $value) {
@@ -205,30 +192,6 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
 
         // Else do nothing
         return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * {@inheritdoc}
-     */
-    public function deleteAll()
-    {
-        // Count rows
-        $count = $this->count();
-        $tmpFile = tempnam("/tmp", uniqid() . '.tmp');
-        $tempHandler = fopen($tmpFile, 'w');
-
-        // Write the headings only and right away closes file
-        fputcsv($tempHandler, $this->columns, $this->csvDelimiter);
-        fclose($tempHandler);
-
-        // Changes the original file to a temporary one.
-        if (!rename($tmpFile, $this->filename)) {
-            throw new DataStoreException("Failed to write the results to a file.");
-        }
-
-        return $count;
     }
 
     /**

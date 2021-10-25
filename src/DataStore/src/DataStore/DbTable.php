@@ -88,18 +88,13 @@ class DbTable extends DataStoreAbstract
     /**
      * {@inheritdoc}
      */
-    public function create($itemData, $rewriteIfExist = false)
+    public function create($itemData)
     {
-        if ($rewriteIfExist) {
-            // 'rewriteIfExist' do not work with multiply insert
-            trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
-        }
-
         $adapter = $this->dbTable->getAdapter();
         $adapter->getDriver()->getConnection()->beginTransaction();
 
         try {
-            $insertedItem = $this->insertItem($itemData, $rewriteIfExist);
+            $insertedItem = $this->insertItem($itemData);
             $adapter->getDriver()->getConnection()->commit();
         } catch (\Throwable $e) {
             $adapter->getDriver()->getConnection()->rollback();
@@ -119,15 +114,10 @@ class DbTable extends DataStoreAbstract
 
     /**
      * @param $itemData
-     * @param bool $rewriteIfExist
      * @return array|mixed|null
      */
-    protected function insertItem($itemData, $rewriteIfExist = false)
+    protected function insertItem($itemData)
     {
-        if ($rewriteIfExist && isset($itemData[$this->getIdentifier()])) {
-            $this->delete($itemData[$this->getIdentifier()]);
-        }
-
         $start = microtime(true);
         $response = $this->dbTable->insert($itemData);
         $end = microtime(true);
@@ -156,12 +146,8 @@ class DbTable extends DataStoreAbstract
     /**
      * {@inheritdoc}
      */
-    public function update($itemData, $createIfAbsent = false)
+    public function update($itemData)
     {
-        if ($createIfAbsent) {
-            trigger_error("Option 'createIfAbsent' is no more use.", E_USER_DEPRECATED);
-        }
-
         if (!isset($itemData[$this->getIdentifier()])) {
             throw new DataStoreException('Item must has primary key');
         }
@@ -170,7 +156,7 @@ class DbTable extends DataStoreAbstract
         $adapter->getDriver()->getConnection()->beginTransaction();
 
         try {
-            $result = $this->updateItem($itemData, $createIfAbsent);
+            $result = $this->updateItem($itemData);
             $adapter->getDriver()->getConnection()->commit();
         } catch (\Throwable $e) {
             $adapter->getDriver()->getConnection()->rollback();
@@ -357,11 +343,10 @@ class DbTable extends DataStoreAbstract
 
     /**
      * @param $itemData
-     * @param bool $createIfAbsent
      * @return array|mixed|null
-     * @throws DataStoreException
+     * @throws DataStoreException|\Throwable
      */
-    protected function updateItem($itemData, $createIfAbsent = false)
+    protected function updateItem($itemData)
     {
         $identifier = $this->getIdentifier();
         $id = $itemData[$identifier];
@@ -373,13 +358,9 @@ class DbTable extends DataStoreAbstract
 
         $start = microtime(true);
 
-        if (!$isExist && $createIfAbsent) {
-            $response = $this->dbTable->insert($itemData);
-            $loggedMethod = 'insert';
-        } elseif ($isExist) {
+        if ($isExist) {
             unset($itemData[$identifier]);
             $response = $this->dbTable->update($itemData, [$identifier => $id]);
-            $loggedMethod = 'update';
         } else {
             throw new DataStoreException("[{$this->dbTable->getTable()}]Can't update item with id = $id");
         }
@@ -387,7 +368,7 @@ class DbTable extends DataStoreAbstract
         $end = microtime(true);
 
         $logContext = [
-            self::LOG_METHOD => $loggedMethod,
+            self::LOG_METHOD => 'update',
             self::LOG_TABLE => $this->dbTable->getTable(),
             self::LOG_REQUEST => $itemData,
             self::LOG_TIME => $this->getRequestTime($start, $end),
@@ -525,15 +506,6 @@ class DbTable extends DataStoreAbstract
         $this->writeLogsIfNeeded($logContext);
 
         return $response;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function deleteAll()
-    {
-        $where = '1=1';
-        return $this->dbTable->delete($where);
     }
 
     /**

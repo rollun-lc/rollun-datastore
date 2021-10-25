@@ -10,7 +10,7 @@ namespace rollun\datastore\DataStore\Interfaces;
  * Interface DateTimeInterface
  * @package rollun\datastore\DataStore\Interfaces
  */
-interface DateTimeInterface extends DataStoresInterface
+interface DateTimeInterface extends DataStoreInterface
 {
     public const FIELD_DATETIME = "datetime";
 

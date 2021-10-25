@@ -7,7 +7,6 @@
 namespace rollun\datastore\DataStore\Aspect;
 
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use Xiag\Rql\Parser\Query;
 
 /**
@@ -22,17 +21,17 @@ use Xiag\Rql\Parser\Query;
  * @see AspectAbstractFactory
  * @package rollun\datastore\DataStore\Aspect
  */
-class AspectAbstract implements DataStoresInterface, DataStoreInterface
+class AspectAbstract implements DataStoreInterface
 {
-    /** @var DataStoresInterface $dataStore */
+    /** @var DataStoreInterface $dataStore */
     protected $dataStore;
 
     /**
      * AspectDataStoreAbstract constructor.
      *
-     * @param DataStoresInterface $dataStore
+     * @param DataStoreInterface $dataStore
      */
-    public function __construct(DataStoresInterface $dataStore)
+    public function __construct(DataStoreInterface $dataStore)
     {
         $this->dataStore = $dataStore;
     }
@@ -77,10 +76,9 @@ class AspectAbstract implements DataStoresInterface, DataStoreInterface
      * By default does nothing
      *
      * @param $itemData
-     * @param bool|false $rewriteIfExist
      * @return array
      */
-    protected function preCreate($itemData, $rewriteIfExist = false)
+    protected function preCreate($itemData)
     {
         return $itemData;
     }
@@ -90,12 +88,12 @@ class AspectAbstract implements DataStoresInterface, DataStoreInterface
      *
      * {@inheritdoc}
      */
-    public function create($itemData, $rewriteIfExist = false)
+    public function create($itemData)
     {
-        $newData = $this->preCreate($itemData, $rewriteIfExist);
-        $result = $this->dataStore->create($newData, $rewriteIfExist);
+        $newData = $this->preCreate($itemData);
+        $result = $this->dataStore->create($newData);
 
-        return $this->postCreate($result, $newData, $rewriteIfExist);
+        return $this->postCreate($result, $newData);
     }
 
     /**
@@ -105,10 +103,9 @@ class AspectAbstract implements DataStoresInterface, DataStoreInterface
      *
      * @param $result
      * @param $itemData
-     * @param $rewriteIfExist
      * @return mixed
      */
-    protected function postCreate($result, $itemData, $rewriteIfExist)
+    protected function postCreate($result, $itemData)
     {
         return $result;
     }
@@ -119,10 +116,9 @@ class AspectAbstract implements DataStoresInterface, DataStoreInterface
      * By default does nothing
      *
      * @param $itemData
-     * @param bool|false $createIfAbsent
      * @return array
      */
-    protected function preUpdate($itemData, $createIfAbsent = false)
+    protected function preUpdate($itemData)
     {
         return $itemData;
     }
@@ -132,12 +128,12 @@ class AspectAbstract implements DataStoresInterface, DataStoreInterface
      *
      * {@inheritdoc}
      */
-    public function update($itemData, $createIfAbsent = false)
+    public function update($itemData)
     {
-        $newData = $this->preUpdate($itemData, $createIfAbsent);
-        $result = $this->dataStore->update($newData, $createIfAbsent);
+        $newData = $this->preUpdate($itemData);
+        $result = $this->dataStore->update($newData);
 
-        return $this->postUpdate($result, $newData, $createIfAbsent);
+        return $this->postUpdate($result, $newData);
     }
 
     /**
@@ -147,10 +143,9 @@ class AspectAbstract implements DataStoresInterface, DataStoreInterface
      *
      * @param mixed $result
      * @param $itemData
-     * @param $createIfAbsent
      * @return mixed
      */
-    protected function postUpdate($result, $itemData, $createIfAbsent)
+    protected function postUpdate($result, $itemData)
     {
         return $result;
     }
@@ -189,41 +184,6 @@ class AspectAbstract implements DataStoresInterface, DataStoreInterface
      * @return mixed
      */
     protected function postDelete($result, $id)
-    {
-        return $result;
-    }
-
-    /**
-     * The pre-aspect for "deleteAll".
-     *
-     * By default does nothing
-     */
-    protected function preDeleteAll()
-    {
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * {@inheritdoc}
-     */
-    public function deleteAll()
-    {
-        $this->preDeleteAll();
-        $result = $this->dataStore->deleteAll();
-
-        return $this->postDeleteAll($result);
-    }
-
-    /**
-     * The post-aspect for "deleteAll"
-     *
-     * By default does nothing
-     *
-     * @param mixed $result
-     * @return mixed
-     */
-    protected function postDeleteAll($result)
     {
         return $result;
     }
