@@ -15,7 +15,7 @@ use Xiag\Rql\Parser\Query;
  * All records in data store should have identifiers (field with unique value).
  * Expect that any record, that retrieved from data store has identifier.
  *
- * Interface DataStoresInterface
+ * Interface DataStoreInterface
  * @package rollun\datastore\DataStore\Interfaces
  */
 interface DataStoreInterface extends ReadInterface

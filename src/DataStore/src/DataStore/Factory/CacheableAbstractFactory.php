@@ -59,7 +59,7 @@ class CacheableAbstractFactory extends DataStoreAbstractFactory
      * @param ContainerInterface $container
      * @param string $requestedName
      * @param array|null $options
-     * @return Cacheable|\rollun\datastore\DataStore\Interfaces\DataStoresInterface
+     * @return Cacheable|\rollun\datastore\DataStore\Interfaces\DataStoreInterface
      * @throws DataStoreException
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)

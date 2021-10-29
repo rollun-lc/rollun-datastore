@@ -13,7 +13,7 @@ use Xiag\Rql\Parser\Query;
  * Class AspectAbstract
  *
  * This is wrapper for any type of datastore which allows to do 'pre' and 'post' actions
- * for each method of the DataStoresInterface.
+ * for each method of the DataStoreInterface.
  *
  * The class is NOT abstract. It is so named because in this view it does nothing and have no difference at work
  * with usual datastore any type.

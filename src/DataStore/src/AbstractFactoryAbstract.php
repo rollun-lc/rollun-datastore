@@ -6,7 +6,7 @@
 
 namespace rollun\datastore;
 
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Interop\Container\ContainerInterface;
@@ -58,7 +58,7 @@ abstract class AbstractFactoryAbstract implements AbstractFactoryInterface
      * @param  ContainerInterface $container
      * @param  string $requestedName
      * @param  array $options
-     * @return DataStoresInterface
+     * @return DataStoreInterface
      */
     abstract public function __invoke(ContainerInterface $container, $requestedName, array $options = null);
 

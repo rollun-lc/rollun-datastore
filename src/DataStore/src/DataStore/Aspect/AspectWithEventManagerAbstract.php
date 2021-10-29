@@ -8,7 +8,7 @@ namespace rollun\datastore\DataStore\Aspect;
 
 use rollun\datastore\DataStore\WithEventManagerInterface;
 use Xiag\Rql\Parser\Query;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use Zend\EventManager\EventManager;
 use Zend\EventManager\EventManagerInterface;
 
@@ -34,11 +34,11 @@ class AspectWithEventManagerAbstract extends AspectAbstract implements WithEvent
     /**
      * AspectWithEventManagerAbstract constructor.
      *
-     * @param DataStoresInterface        $dataStore
+     * @param DataStoreInterface        $dataStore
      * @param EventManagerInterface|null $eventManager
      * @param string|null                $dataStoreName
      */
-    public function __construct(DataStoresInterface $dataStore, EventManagerInterface $eventManager = null, string $dataStoreName = null)
+    public function __construct(DataStoreInterface $dataStore, EventManagerInterface $eventManager = null, string $dataStoreName = null)
     {
         parent::__construct($dataStore);
 
@@ -73,41 +73,41 @@ class AspectWithEventManagerAbstract extends AspectAbstract implements WithEvent
     /**
      * @inheritDoc
      */
-    protected function preCreate($itemData, $rewriteIfExist = false)
+    protected function preCreate($itemData)
     {
         $this->triggerEvent('onPreCreate', ['itemData' => $itemData]);
 
-        return parent::preCreate($itemData, $rewriteIfExist);
+        return parent::preCreate($itemData);
     }
 
     /**
      * @inheritDoc
      */
-    protected function postCreate($result, $itemData, $rewriteIfExist)
+    protected function postCreate($result, $itemData)
     {
         $this->triggerEvent('onPostCreate', ['itemData' => $itemData, 'result' => $result]);
 
-        return parent::postCreate($result, $itemData, $rewriteIfExist);
+        return parent::postCreate($result, $itemData);
     }
 
     /**
      * @inheritDoc
      */
-    protected function preUpdate($itemData, $createIfAbsent = false)
+    protected function preUpdate($itemData)
     {
         $this->triggerEvent('onPreUpdate', ['itemData' => $itemData]);
 
-        return parent::preUpdate($itemData, $createIfAbsent);
+        return parent::preUpdate($itemData);
     }
 
     /**
      * @inheritDoc
      */
-    protected function postUpdate($result, $itemData, $createIfAbsent)
+    protected function postUpdate($result, $itemData)
     {
         $this->triggerEvent('onPostUpdate', ['itemData' => $itemData, 'result' => $result]);
 
-        return parent::postUpdate($result, $itemData, $createIfAbsent);
+        return parent::postUpdate($result, $itemData);
     }
 
     /**
@@ -128,26 +128,6 @@ class AspectWithEventManagerAbstract extends AspectAbstract implements WithEvent
         $this->triggerEvent('onPostDelete', ['id' => $id, 'result' => $result]);
 
         return parent::postDelete($result, $id);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function preDeleteAll()
-    {
-        $this->triggerEvent('onPreDeleteAll');
-
-        parent::preDeleteAll();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function postDeleteAll($result)
-    {
-        $this->triggerEvent('onPostDeleteAll', ['result' => $result]);
-
-        return parent::postDeleteAll($result);
     }
 
     /**

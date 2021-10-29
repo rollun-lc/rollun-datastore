@@ -52,8 +52,6 @@ class AspectAbstractFactory extends DataStoreAbstractFactory
             'onPostUpdate',
             'onPreDelete',
             'onPostDelete',
-            'onPreDeleteAll',
-            'onPostDeleteAll',
             'onPreGetIdentifier',
             'onPostGetIdentifier',
             'onPreRead',

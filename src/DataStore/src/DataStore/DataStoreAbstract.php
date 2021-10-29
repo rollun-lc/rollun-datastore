@@ -8,7 +8,6 @@ namespace rollun\datastore\DataStore;
 
 use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Iterators\DataStoreIterator;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
@@ -462,27 +461,6 @@ abstract class DataStoreAbstract implements DataStoreInterface
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function deleteAll()
-    {
-        $keys = $this->getKeys();
-        $deletedItemsNumber = 0;
-
-        foreach ($keys as $id) {
-            $deletedItems = $this->delete($id);
-
-            if (is_null($deletedItems)) {
-                return null;
-            }
-
-            $deletedItemsNumber++;
-        }
-
-        return $deletedItemsNumber;
-    }
-
-    /**
      * Return array of keys or empty array
      *
      * @return array
@@ -516,13 +494,13 @@ abstract class DataStoreAbstract implements DataStoreInterface
             throw new DataStoreException("Identifier is required for 'rewrite' action");
         }
 
-        $rewriteIfExist = false;
-
         if ($this->has($record[$this->getIdentifier()])) {
-            $rewriteIfExist = true;
+            $result = $this->update($record);
+        } else {
+            $result = $this->create($record);
         }
 
-        return $this->create($record, $rewriteIfExist);
+        return $result;
     }
 
     /**

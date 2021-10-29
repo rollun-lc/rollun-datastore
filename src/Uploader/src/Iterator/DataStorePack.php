@@ -6,7 +6,7 @@
 
 namespace rollun\uploader\Iterator;
 
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use SeekableIterator;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\GtNode;
@@ -21,7 +21,7 @@ class DataStorePack implements SeekableIterator
     protected $limit;
 
     /**
-     * @var DataStoresInterface
+     * @var DataStoreInterface
      */
     protected $dataStore;
 
@@ -32,10 +32,10 @@ class DataStorePack implements SeekableIterator
 
     /**
      * DataStoreIterator constructor.
-     * @param DataStoresInterface $dataStore
+     * @param DataStoreInterface $dataStore
      * @param int $limit
      */
-    public function __construct(DataStoresInterface $dataStore, $limit = 100)
+    public function __construct(DataStoreInterface $dataStore, $limit = 100)
     {
         $this->dataStore = $dataStore;
         $this->limit = $limit;

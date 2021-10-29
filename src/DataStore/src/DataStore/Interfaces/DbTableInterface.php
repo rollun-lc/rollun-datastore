@@ -12,7 +12,7 @@ use Zend\Db\TableGateway\TableGateway;
  * Interface DbTableInterface
  * @package rollun\datastore\DataStore\Interfaces
  */
-interface DbTableInterface extends DataStoresInterface
+interface DbTableInterface extends DataStoreInterface
 {
     /**
      * @return TableGateway
