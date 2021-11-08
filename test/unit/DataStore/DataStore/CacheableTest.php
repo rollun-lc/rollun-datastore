@@ -11,13 +11,13 @@ use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\Cacheable;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataSource\DataSourceInterface;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Memory;
 use rollun\datastore\Rql\RqlQuery;
 
 class CacheableTest extends TestCase
 {
-    public function createObject(DataSourceInterface $dataSource, DataStoresInterface $cashStore = null)
+    public function createObject(DataSourceInterface $dataSource, DataStoreInterface $cashStore = null)
     {
         return new Cacheable($dataSource, $cashStore);
     }
@@ -29,8 +29,8 @@ class CacheableTest extends TestCase
         /** @var DataSourceInterface|MockObject $dataSource */
         $dataSource = $this->getMockBuilder(DataSourceInterface::class)->getMock();
 
-        /** @var DataStoresInterface|MockObject $cashStore */
-        $cashStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        /** @var DataStoreInterface|MockObject $cashStore */
+        $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
         $cashStore->expects($this->once())->method('query')->with($rqlQuery);
 
         $this->createObject($dataSource, $cashStore)->query($rqlQuery);
@@ -43,8 +43,8 @@ class CacheableTest extends TestCase
         /** @var DataSourceInterface|MockObject $dataSource */
         $dataSource = $this->getMockBuilder(DataSourceInterface::class)->getMock();
 
-        /** @var DataStoresInterface|MockObject $cashStore */
-        $cashStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        /** @var DataStoreInterface|MockObject $cashStore */
+        $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
         $cashStore->expects($this->once())->method('read')->with($id);
 
         $this->createObject($dataSource, $cashStore)->read($id);
@@ -55,8 +55,8 @@ class CacheableTest extends TestCase
         /** @var DataSourceInterface|MockObject $dataSource */
         $dataSource = $this->getMockBuilder(DataSourceInterface::class)->getMock();
 
-        /** @var DataStoresInterface|MockObject $cashStore */
-        $cashStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        /** @var DataStoreInterface|MockObject $cashStore */
+        $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
         $cashStore->expects($this->once())->method('getIterator');
 
         $this->createObject($dataSource, $cashStore)->getIterator();
@@ -67,8 +67,8 @@ class CacheableTest extends TestCase
         /** @var DataSourceInterface|MockObject $dataSource */
         $dataSource = $this->getMockBuilder(DataSourceInterface::class)->getMock();
 
-        /** @var DataStoresInterface|MockObject $cashStore */
-        $cashStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        /** @var DataStoreInterface|MockObject $cashStore */
+        $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
         $cashStore->expects($this->once())->method('getIdentifier');
 
         $this->createObject($dataSource, $cashStore)->getIdentifier();
@@ -81,8 +81,8 @@ class CacheableTest extends TestCase
         /** @var DataSourceInterface|MockObject $dataSource */
         $dataSource = $this->getMockBuilder(DataSourceInterface::class)->getMock();
 
-        /** @var DataStoresInterface|MockObject $cashStore */
-        $cashStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        /** @var DataStoreInterface|MockObject $cashStore */
+        $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
         $cashStore->expects($this->once())->method('has')->with($id);
 
         $this->createObject($dataSource, $cashStore)->has($id);
@@ -93,8 +93,8 @@ class CacheableTest extends TestCase
         /** @var DataSourceInterface|MockObject $dataSource */
         $dataSource = $this->getMockBuilder(DataSourceInterface::class)->getMock();
 
-        /** @var DataStoresInterface|MockObject $cashStore */
-        $cashStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        /** @var DataStoreInterface|MockObject $cashStore */
+        $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
         $cashStore->expects($this->once())->method('count');
 
         $this->createObject($dataSource, $cashStore)->count();
@@ -108,8 +108,8 @@ class CacheableTest extends TestCase
         ];
         $dataSource = new Foo();
 
-        /** @var DataStoresInterface|MockObject $cashStore */
-        $cashStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        /** @var DataStoreInterface|MockObject $cashStore */
+        $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
 
         $this->assertEquals($item, $this->createObject($dataSource, $cashStore)->create($item));
     }
@@ -123,8 +123,8 @@ class CacheableTest extends TestCase
         /** @var DataSourceInterface|MockObject $dataSource */
         $dataSource = new Boo();
 
-        /** @var DataStoresInterface|MockObject $cashStore */
-        $cashStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        /** @var DataStoreInterface|MockObject $cashStore */
+        $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
 
         $this->createObject($dataSource, $cashStore)->create($items);
     }
@@ -137,8 +137,8 @@ class CacheableTest extends TestCase
         $dataSource = $this->getMockBuilder(Foo::class)->getMock();
         $dataSource->expects($this->once())->method('update')->with($items, 1);
 
-        /** @var DataStoresInterface|MockObject $cashStore */
-        $cashStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        /** @var DataStoreInterface|MockObject $cashStore */
+        $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
 
         $this->createObject($dataSource, $cashStore)->update($items, 1);
     }
@@ -152,8 +152,8 @@ class CacheableTest extends TestCase
         /** @var DataSourceInterface|MockObject $dataSource */
         $dataSource = new Boo();
 
-        /** @var DataStoresInterface|MockObject $cashStore */
-        $cashStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        /** @var DataStoreInterface|MockObject $cashStore */
+        $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
 
         $this->createObject($dataSource, $cashStore)->update($items);
     }
@@ -165,8 +165,8 @@ class CacheableTest extends TestCase
         $dataSource = $this->getMockBuilder(Foo::class)->getMock();
         $dataSource->expects($this->once())->method('deleteAll');
 
-        /** @var DataStoresInterface|MockObject $cashStore */
-        $cashStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        /** @var DataStoreInterface|MockObject $cashStore */
+        $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
 
         $this->createObject($dataSource, $cashStore)->deleteAll();
     }
@@ -179,8 +179,8 @@ class CacheableTest extends TestCase
         /** @var DataSourceInterface|DataStoreException|MockObject $dataSource */
         $dataSource = new Boo();
 
-        /** @var DataStoresInterface|MockObject $cashStore */
-        $cashStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        /** @var DataStoreInterface|MockObject $cashStore */
+        $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
 
         $this->createObject($dataSource, $cashStore)->deleteAll();
     }
@@ -193,8 +193,8 @@ class CacheableTest extends TestCase
         $dataSource = $this->getMockBuilder(Foo::class)->getMock();
         $dataSource->expects($this->once())->method('delete')->with($id);
 
-        /** @var DataStoresInterface|MockObject $cashStore */
-        $cashStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        /** @var DataStoreInterface|MockObject $cashStore */
+        $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
 
         $this->createObject($dataSource, $cashStore)->delete($id);
     }
@@ -208,8 +208,8 @@ class CacheableTest extends TestCase
         /** @var DataSourceInterface|DataStoreException|MockObject $dataSource */
         $dataSource = new Boo();
 
-        /** @var DataStoresInterface|MockObject $cashStore */
-        $cashStore = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        /** @var DataStoreInterface|MockObject $cashStore */
+        $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
 
         $this->createObject($dataSource, $cashStore)->delete($id);
     }

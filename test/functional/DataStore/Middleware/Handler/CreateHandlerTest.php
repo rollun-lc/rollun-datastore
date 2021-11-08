@@ -9,14 +9,14 @@ namespace rollun\test\functional\DataStore\Middleware\Handler;
 use Psr\Http\Message\UriInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\DataStore\DataStoreException;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\Middleware\Handler\CreateHandler;
 use rollun\datastore\Rql\RqlQuery;
 use Zend\Diactoros\ServerRequest;
 
 class CreateHandlerTest extends BaseHandlerTest
 {
-    protected function createObject(DataStoresInterface $dataStore = null)
+    protected function createObject(DataStoreInterface $dataStore = null)
     {
         return new CreateHandler(is_null($dataStore) ? $this->createDataStoreEmptyMock() : $dataStore);
     }

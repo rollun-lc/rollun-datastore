@@ -12,7 +12,7 @@ use PHPUnit_Framework_MockObject_MockObject;
 use rollun\datastore\DataStore\Aspect\AspectTyped;
 use rollun\datastore\DataStore\BaseDto;
 use rollun\datastore\DataStore\Formatter\FormatterInterface;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Type\TypeInt;
 use rollun\datastore\DataStore\Type\TypeInterface;
 use rollun\datastore\DataStore\Type\TypeString;
@@ -30,8 +30,8 @@ class AspectTypedTest extends TestCase
         ];
         $dtoClassName = BaseDto::class;
 
-        /** @var PHPUnit_Framework_MockObject_MockObject|DataStoresInterface $dataStore */
-        $dataStore = $this->getMockBuilder(DataStoresInterface::class)
+        /** @var PHPUnit_Framework_MockObject_MockObject|DataStoreInterface $dataStore */
+        $dataStore = $this->getMockBuilder(DataStoreInterface::class)
             ->getMock();
 
         $object = new AspectTyped($dataStore, $scheme, $dtoClassName);
@@ -51,8 +51,8 @@ class AspectTypedTest extends TestCase
         ];
         $dtoClassName = BaseDto::class;
 
-        /** @var PHPUnit_Framework_MockObject_MockObject|DataStoresInterface $dataStore */
-        $dataStore = $this->getMockBuilder(DataStoresInterface::class)
+        /** @var PHPUnit_Framework_MockObject_MockObject|DataStoreInterface $dataStore */
+        $dataStore = $this->getMockBuilder(DataStoreInterface::class)
             ->getMock();
         new AspectTyped($dataStore, $scheme, $dtoClassName);
     }
@@ -68,8 +68,8 @@ class AspectTypedTest extends TestCase
         ];
         $dtoClassName = BaseDto::class;
 
-        /** @var PHPUnit_Framework_MockObject_MockObject|DataStoresInterface $dataStore */
-        $dataStore = $this->getMockBuilder(DataStoresInterface::class)
+        /** @var PHPUnit_Framework_MockObject_MockObject|DataStoreInterface $dataStore */
+        $dataStore = $this->getMockBuilder(DataStoreInterface::class)
             ->getMock();
         new AspectTyped($dataStore, $scheme, $dtoClassName);
     }
@@ -88,8 +88,8 @@ class AspectTypedTest extends TestCase
         {
         });
 
-        /** @var PHPUnit_Framework_MockObject_MockObject|DataStoresInterface $dataStore */
-        $dataStore = $this->getMockBuilder(DataStoresInterface::class)
+        /** @var PHPUnit_Framework_MockObject_MockObject|DataStoreInterface $dataStore */
+        $dataStore = $this->getMockBuilder(DataStoreInterface::class)
             ->getMock();
         new AspectTyped($dataStore, $scheme, $dtoClassName);
     }
@@ -107,8 +107,8 @@ class AspectTypedTest extends TestCase
             ],
         ];
 
-        /** @var PHPUnit_Framework_MockObject_MockObject|DataStoresInterface $dataStore */
-        $dataStore = $this->getMockBuilder(DataStoresInterface::class)
+        /** @var PHPUnit_Framework_MockObject_MockObject|DataStoreInterface $dataStore */
+        $dataStore = $this->getMockBuilder(DataStoreInterface::class)
             ->getMock();
 
         $dtoCreate = new UserDto(['id' => new TypeInt(1), 'name' => new TypeString('foo')]);
@@ -147,8 +147,8 @@ class AspectTypedTest extends TestCase
             ],
         ];
 
-        /** @var PHPUnit_Framework_MockObject_MockObject|DataStoresInterface $dataStore */
-        $dataStore = $this->getMockBuilder(DataStoresInterface::class)
+        /** @var PHPUnit_Framework_MockObject_MockObject|DataStoreInterface $dataStore */
+        $dataStore = $this->getMockBuilder(DataStoreInterface::class)
             ->getMock();
 
         $dataStore->method('query')
@@ -183,8 +183,8 @@ class AspectTypedTest extends TestCase
             ],
         ];
 
-        /** @var PHPUnit_Framework_MockObject_MockObject|DataStoresInterface $dataStore */
-        $dataStore = $this->getMockBuilder(DataStoresInterface::class)
+        /** @var PHPUnit_Framework_MockObject_MockObject|DataStoreInterface $dataStore */
+        $dataStore = $this->getMockBuilder(DataStoreInterface::class)
             ->getMock();
         $object = new AspectTyped($dataStore, $scheme, UserDto::class);
         $this->assertEquals($object->getScheme(), [

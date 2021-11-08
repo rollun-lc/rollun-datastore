@@ -8,7 +8,7 @@ namespace rollun\test\functional\DataStore\Middleware\Handler;
 
 use Interop\Http\ServerMiddleware\DelegateInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Interfaces\RefreshableInterface;
 use rollun\datastore\DataStore\Memory;
 use rollun\datastore\Middleware\Handler\RefreshHandler;
@@ -18,7 +18,7 @@ use Zend\Diactoros\ServerRequest;
 
 class RefreshHandlerTest extends BaseHandlerTest
 {
-    protected function createObject(DataStoresInterface $dataStore = null)
+    protected function createObject(DataStoreInterface $dataStore = null)
     {
         return new RefreshHandler(is_null($dataStore) ? $this->createDataStoreEmptyMock() : $dataStore);
     }
@@ -98,7 +98,7 @@ class RefreshHandlerTest extends BaseHandlerTest
     }
 }
 
-interface TestInterface extends DataStoresInterface, RefreshableInterface
+interface TestInterface extends DataStoreInterface, RefreshableInterface
 {
 
 }

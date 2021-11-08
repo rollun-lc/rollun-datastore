@@ -16,7 +16,7 @@ use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Http\Message\ResponseInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\DataStorePluginManager;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Interfaces\RefreshableInterface;
 use rollun\datastore\DataStore\Memory;
 use rollun\datastore\Middleware\DataStoreApi;
@@ -30,7 +30,7 @@ use Zend\Stratigility\MiddlewarePipe;
 class DataStoreApiTest extends BaseMiddlewareTest
 {
     /**
-     * @var DataStoresInterface
+     * @var DataStoreInterface
      */
     protected $dataStore;
 
@@ -199,8 +199,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
 
     public function testConstruct()
     {
-        /** @var DataStoresInterface| $dataStoreMock */
-        $dataStoreMock = $this->getMockBuilder(DataStoresInterface::class)
+        /** @var DataStoreInterface| $dataStoreMock */
+        $dataStoreMock = $this->getMockBuilder(DataStoreInterface::class)
             ->getMock();
 
         $dataStorePluginManagerMock = $this->getMockBuilder(DataStorePluginManager::class)

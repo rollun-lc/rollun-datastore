@@ -13,7 +13,7 @@ use rollun\datastore\DataStore\Aspect\AspectTyped;
 use rollun\datastore\DataStore\BaseDto;
 use rollun\datastore\DataStore\DataStorePluginManager;
 use rollun\datastore\DataStore\Formatter\IntFormatter;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Memory;
 use rollun\datastore\DataStore\Type\TypeInt;
 use rollun\datastore\DataStore\Type\TypeString;
@@ -39,8 +39,8 @@ class DeterminatorTest extends TestCase
         );
         $serviceName = 'dataStoreService';
 
-        /** @var DataStoresInterface $dataStoreMock */
-        $dataStoreMock = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        /** @var DataStoreInterface $dataStoreMock */
+        $dataStoreMock = $this->getMockBuilder(DataStoreInterface::class)->getMock();
 
         /** @var DataStorePluginManager|PHPUnit_Framework_MockObject_MockObject $dataStorePluginManagerMock  */
         $dataStorePluginManagerMock = $this->getMockBuilder(DataStorePluginManager::class)

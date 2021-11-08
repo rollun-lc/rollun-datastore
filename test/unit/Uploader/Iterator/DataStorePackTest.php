@@ -2,7 +2,7 @@
 
 namespace rollun\test\uploader\Uploader;
 
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Memory;
 use rollun\uploader\Iterator\DataStorePack as DataStorePackIterator;
 use PHPUnit\Framework\TestCase;
@@ -13,7 +13,7 @@ class DataStorePackTest extends TestCase
     /** @var DataStorePackIterator */
     protected $object;
 
-    /** @var DataStoresInterface */
+    /** @var DataStoreInterface */
     protected $dataStore;
 
     public function setUp()

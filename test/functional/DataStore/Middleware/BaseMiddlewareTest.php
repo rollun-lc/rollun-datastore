@@ -12,7 +12,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 
@@ -64,11 +64,11 @@ abstract class BaseMiddlewareTest extends TestCase
 
     /**
      * @param string $identifier
-     * @return \PHPUnit_Framework_MockObject_MockObject|DataStoresInterface
+     * @return \PHPUnit_Framework_MockObject_MockObject|DataStoreInterface
      */
     protected function createDataStoreEmptyMock($identifier = 'id')
     {
-        $mockObject = $this->getMockBuilder(DataStoresInterface::class)
+        $mockObject = $this->getMockBuilder(DataStoreInterface::class)
             ->getMock();
 
         $mockObject->expects($this->any())

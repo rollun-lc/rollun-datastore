@@ -7,7 +7,7 @@
 namespace rollun\test\functional\DataStore\Middleware;
 
 use PHPUnit\Framework\TestCase;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\Middleware\DataStoreRest;
 use rollun\datastore\Middleware\Handler;
 use SplQueue;
@@ -18,8 +18,8 @@ class DataStoreRestTest extends TestCase
 {
     public function testConstruct()
     {
-        /** @var DataStoresInterface| $dataStoreMock */
-        $dataStoreMock = $this->getMockBuilder(DataStoresInterface::class)->getMock();
+        /** @var DataStoreInterface| $dataStoreMock */
+        $dataStoreMock = $this->getMockBuilder(DataStoreInterface::class)->getMock();
 
         $middlewarePipe = new MiddlewarePipe();
         $middlewarePipe->pipe(new Handler\QueryHandler($dataStoreMock));
