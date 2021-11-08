@@ -207,7 +207,7 @@ class DbTableTest extends TestCase
         $this->create($itemData2);
 
         $object = $this->createObject();
-        $object->deleteAll();
+        $object->queriedDelete(new Query());
         $this->assertEquals($this->read($itemData1['id']), null);
         $this->assertEquals($this->read($itemData2['id']), null);
     }

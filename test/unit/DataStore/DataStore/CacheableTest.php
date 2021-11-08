@@ -117,7 +117,7 @@ class CacheableTest extends TestCase
     public function testCreateFail()
     {
         $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessage("Refreshable don't haw method create");
+        $this->expectExceptionMessage("Refreshable doesn't have method create");
         $items = [];
 
         /** @var DataSourceInterface|MockObject $dataSource */
@@ -135,18 +135,18 @@ class CacheableTest extends TestCase
 
         /** @var DataSourceInterface|MockObject $dataSource */
         $dataSource = $this->getMockBuilder(Foo::class)->getMock();
-        $dataSource->expects($this->once())->method('update')->with($items, 1);
+        $dataSource->expects($this->once())->method('update')->with($items);
 
         /** @var DataStoreInterface|MockObject $cashStore */
         $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
 
-        $this->createObject($dataSource, $cashStore)->update($items, 1);
+        $this->createObject($dataSource, $cashStore)->update($items);
     }
 
     public function testUpdateFail()
     {
         $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessage("Refreshable don't haw method update");
+        $this->expectExceptionMessage("Refreshable doesn't have method update");
         $items = [];
 
         /** @var DataSourceInterface|MockObject $dataSource */
@@ -156,33 +156,6 @@ class CacheableTest extends TestCase
         $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
 
         $this->createObject($dataSource, $cashStore)->update($items);
-    }
-
-    public function testDeleteAllSuccess()
-    {
-
-        /** @var DataSourceInterface|DataStoreException|MockObject $dataSource */
-        $dataSource = $this->getMockBuilder(Foo::class)->getMock();
-        $dataSource->expects($this->once())->method('deleteAll');
-
-        /** @var DataStoreInterface|MockObject $cashStore */
-        $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
-
-        $this->createObject($dataSource, $cashStore)->deleteAll();
-    }
-
-    public function testDeleteAllFail()
-    {
-        $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessage("Refreshable don't haw method deleteAll");
-
-        /** @var DataSourceInterface|DataStoreException|MockObject $dataSource */
-        $dataSource = new Boo();
-
-        /** @var DataStoreInterface|MockObject $cashStore */
-        $cashStore = $this->getMockBuilder(DataStoreInterface::class)->getMock();
-
-        $this->createObject($dataSource, $cashStore)->deleteAll();
     }
 
     public function testDeleteSuccess()
@@ -203,7 +176,7 @@ class CacheableTest extends TestCase
     {
         $id = 1;
         $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessage("Refreshable don't haw method delete");
+        $this->expectExceptionMessage("Refreshable doesn't have method delete");
 
         /** @var DataSourceInterface|DataStoreException|MockObject $dataSource */
         $dataSource = new Boo();

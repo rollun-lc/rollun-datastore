@@ -153,7 +153,7 @@ class HttpClientTest extends TestCase
 
         $object = $this->createObject($clientMock, $url);
 
-        $this->assertEquals($object->create($items, 1), $items);
+        $this->assertEquals($object->rewrite($items), $items);
     }
 
     public function testCreateFail()
@@ -180,7 +180,7 @@ class HttpClientTest extends TestCase
 
         $object = $this->createObject($clientMock, $url);
 
-        $object->create($items, 1);
+        $object->create($items);
     }
 
     public function testUpdateSuccess()
@@ -524,7 +524,7 @@ class HttpClientTest extends TestCase
 
         $object = $this->createObject($clientMock, $url);
 
-        $object->create($items, 1);
+        $object->create($items);
     }
 
     public function testExceptionWithRedirect()
@@ -581,7 +581,7 @@ class HttpClientTest extends TestCase
 
         $object = $this->createObject($clientMock, $url);
 
-        $object->create($items, 1);
+        $object->create($items);
     }
 
     public function testHeaderIdentifier()

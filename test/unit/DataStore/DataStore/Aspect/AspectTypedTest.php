@@ -122,11 +122,11 @@ class AspectTypedTest extends TestCase
             'name' => 'bar',
         ];
         $dataStore->method('create')
-            ->with($createItem, false)
+            ->with($createItem)
             ->willReturn($createItem);
 
         $dataStore->method('update')
-            ->with($updateItem, false)
+            ->with($updateItem)
             ->willReturn($updateItem);
 
         $object = new AspectTyped($dataStore, $scheme, UserDto::class);

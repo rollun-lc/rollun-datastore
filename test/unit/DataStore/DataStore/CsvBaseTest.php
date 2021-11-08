@@ -12,6 +12,7 @@ use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Iterators\CsvIterator;
 use rollun\datastore\Rql\RqlQuery;
 use Symfony\Component\Filesystem\LockHandler;
+use Xiag\Rql\Parser\Query;
 
 class CsvBaseTest extends TestCase
 {
@@ -71,7 +72,7 @@ class CsvBaseTest extends TestCase
         $this->assertEquals($item, $this->read($item['id']));
     }
 
-    public function testCreateFailItemExistAndWithOverwrite()
+    public function testCreateWithRewrite()
     {
         $item = [
             'id' => 1,
@@ -85,7 +86,7 @@ class CsvBaseTest extends TestCase
         ]);
 
         $object = $this->createObject();
-        $object->create($item, 1);
+        $object->rewrite($item);
         $this->assertEquals($item, $this->read($item['id']));
     }
 
@@ -247,19 +248,6 @@ class CsvBaseTest extends TestCase
         $this->assertEquals($item, $this->read($item['id']));
     }
 
-    public function testUpdateNotAllItems()
-    {
-        $item = [
-            'id' => 1,
-            'name' => 'name',
-            'surname' => 'surname',
-        ];
-
-        $object = $this->createObject();
-        $object->update($item, 1);
-        $this->assertEquals($item, $this->read($item['id']));
-    }
-
     public function testQueriedUpdateSuccess()
     {
         $object = $this->createObject();
@@ -368,7 +356,7 @@ class CsvBaseTest extends TestCase
         }
 
         $this->createObject()
-            ->deleteAll();
+            ->queriedDelete(new Query());
 
         foreach ($range as $id) {
             $this->assertEquals($this->read($id), []);
