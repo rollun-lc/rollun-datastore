@@ -8,7 +8,7 @@ namespace rollun\test\unit\DataStore\DataStore;
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\DataStoreException;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Traits\NoSupportCountTrait;
 use rollun\datastore\DataStore\Traits\NoSupportCreateTrait;
 use rollun\datastore\DataStore\Traits\NoSupportDeleteAllTrait;
@@ -20,12 +20,13 @@ use rollun\datastore\DataStore\Traits\NoSupportQueryTrait;
 use rollun\datastore\DataStore\Traits\NoSupportReadTrait;
 use rollun\datastore\DataStore\Traits\NoSupportUpdateTrait;
 use rollun\datastore\Rql\RqlQuery;
+use Xiag\Rql\Parser\Query;
 
 class NoSupportTraitTest extends TestCase
 {
     protected function createObject()
     {
-        return new class implements DataStoresInterface {
+        return new class implements DataStoreInterface {
             use NoSupportCreateTrait,
                 NoSupportDeleteAllTrait,
                 NoSupportGetIdentifier,
@@ -36,6 +37,31 @@ class NoSupportTraitTest extends TestCase
                 NoSupportReadTrait,
                 NoSupportUpdateTrait,
                 NoSupportCountTrait;
+
+            public function rewrite($record)
+            {
+                // TODO: Implement rewrite() method.
+            }
+
+            public function multiCreate($records)
+            {
+                // TODO: Implement multiCreate() method.
+            }
+
+            public function multiUpdate($records)
+            {
+                // TODO: Implement multiUpdate() method.
+            }
+
+            public function queriedUpdate($record, Query $query)
+            {
+                // TODO: Implement queriedUpdate() method.
+            }
+
+            public function queriedDelete(Query $query)
+            {
+                // TODO: Implement queriedDelete() method.
+            }
         };
     }
 

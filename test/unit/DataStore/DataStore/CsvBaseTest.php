@@ -244,7 +244,7 @@ class CsvBaseTest extends TestCase
 
         $item['name'] = 'name1';
         $object = $this->createObject();
-        $object->update($item, 1);
+        $object->update($item);
         $this->assertEquals($item, $this->read($item['id']));
     }
 

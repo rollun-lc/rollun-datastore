@@ -133,7 +133,7 @@ class HttpClientTest extends TestCase
         $this->assertEquals($object->create($items), $items);
     }
 
-    public function testCreateSuccessWithOverwrite()
+    public function testRewriteSuccess()
     {
         $items = ['id' => 1, 'name' => 'name',];
         $url = '';
@@ -164,7 +164,7 @@ class HttpClientTest extends TestCase
 
         $this->expectException(DataStoreException::class);
 
-        $clientMock = $this->createClientMock('POST', $url, [], 1);
+        $clientMock = $this->createClientMock('POST', $url, []);
         $clientMock->expects($this->once())
             ->method('setRawBody')
             ->with(Serializer::jsonSerialize($items));
@@ -216,7 +216,7 @@ class HttpClientTest extends TestCase
         $itemsWithId = array_merge($items, ['id' => 1]);
 
         $url = '';
-        $clientMock = $this->createClientMock('PUT', $url . '/1', [], 1);
+        $clientMock = $this->createClientMock('PUT', $url . '/1', []);
 
         $response = $this->createResponse($itemsWithId);
         $response->expects($this->once())
@@ -234,7 +234,7 @@ class HttpClientTest extends TestCase
         $object = $this->createObject($clientMock, $url);
         $object->setIdendifier('id');
 
-        $this->assertEquals($object->update($itemsWithId, 1), $itemsWithId);
+        $this->assertEquals($object->update($itemsWithId), $itemsWithId);
     }
 
     public function testUpdateFail()
@@ -245,7 +245,7 @@ class HttpClientTest extends TestCase
         $itemsWithId = array_merge($items, ['id' => 1]);
 
         $url = '';
-        $clientMock = $this->createClientMock('PUT', $url . '/1', [], 1);
+        $clientMock = $this->createClientMock('PUT', $url . '/1', []);
         $clientMock->expects($this->once())
             ->method('setRawBody')
             ->with(Serializer::jsonSerialize($items));
@@ -262,7 +262,7 @@ class HttpClientTest extends TestCase
         $object = $this->createObject($clientMock, $url);
         $object->setIdendifier('id');
 
-        $object->update($itemsWithId, 1);
+        $object->update($itemsWithId);
     }
 
     public function testReadSuccess()
@@ -500,7 +500,7 @@ class HttpClientTest extends TestCase
         $this->expectException(DataStoreException::class);
         $this->expectExceptionMessage("Can't create item {$method} {$url} ${status} {$reasonPhrase}");
 
-        $clientMock = $this->createClientMock($method, $url, [], 1);
+        $clientMock = $this->createClientMock($method, $url, []);
         $clientMock->expects($this->once())
             ->method('setRawBody')
             ->with(Serializer::jsonSerialize($items));
@@ -542,7 +542,7 @@ class HttpClientTest extends TestCase
             "Can't create item {$method} {$url} ${status} {$reasonPhrase} \"{$body}\" New location is '{$location}'"
         );
 
-        $clientMock = $this->createClientMock($method, $url, [], 1);
+        $clientMock = $this->createClientMock($method, $url, []);
         $clientMock->expects($this->once())
             ->method('setRawBody')
             ->with(Serializer::jsonSerialize($items));

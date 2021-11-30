@@ -93,7 +93,7 @@ class CreateHandlerTest extends BaseHandlerTest
         $this->assertFalse($object->canHandle($request));
     }
 
-    public function testProcessWithoutExistingPrimaryKeyAndRowExist()
+    public function testRewrite()
     {
         $item = [
             'id' => 1,
@@ -115,8 +115,8 @@ class CreateHandlerTest extends BaseHandlerTest
             ->willReturn($item);
 
         $dataStore->expects($this->once())
-            ->method('create')
-            ->with($item, true)
+            ->method('rewrite')
+            ->with($item)
             ->willReturn($item);
 
         $object = $this->createObject($dataStore);
@@ -152,7 +152,7 @@ class CreateHandlerTest extends BaseHandlerTest
         $object->process($request, $delegateMock);
     }
 
-    public function testProcessWithoutExistingPrimaryKeyAndRowDoesNotExist()
+    public function testCreate()
     {
         $item = [
             'id' => 1,
@@ -166,7 +166,6 @@ class CreateHandlerTest extends BaseHandlerTest
         $request = $request->withMethod('POST');
         $request = $request->withParsedBody($item);
         $request = $request->withAttribute('primaryKeyValue', $item['id']);
-        $request = $request->withAttribute('overwriteMode', true);
 
         $dataStore = $this->createDataStoreEmptyMock();
         $dataStore->expects($this->once())
