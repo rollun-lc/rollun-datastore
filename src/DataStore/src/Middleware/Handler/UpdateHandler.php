@@ -53,23 +53,14 @@ class UpdateHandler extends AbstractHandler
         $primaryKeyIdentifier = $this->dataStore->getIdentifier();
         $item = $request->getParsedBody();
         
-        if(!$primaryKeyValue && isset($item[$this->dataStore->getIdentifier()])) {
-            $primaryKeyValue = $item[$this->dataStore->getIdentifier()];
-        } else {
-            $item = array_merge([$primaryKeyIdentifier => $primaryKeyValue], $item);        
+        if ($primaryKeyValue && !isset($item[$primaryKeyIdentifier])) {
+            $item = array_merge([$primaryKeyIdentifier => $primaryKeyValue], $item);
         }
-        
-        $overwriteMode = $request->getAttribute('overwriteMode');
-        $isItemExist = !empty($this->dataStore->read($primaryKeyValue));
 
-        $newItem = $this->dataStore->update($item, $overwriteMode);
+        $newItem = $this->dataStore->update($item);
 
         $response = new Response();
         $response = $response->withBody($this->createStream($newItem));
-
-        if ($overwriteMode && !$isItemExist) {
-            $response = $response->withStatus(201);
-        }
 
         return $response;
     }

@@ -204,9 +204,10 @@ class HttpClient extends DataStoreAbstract
      *
      * @param string $method ('GET', 'HEAD', 'POST', 'PUT', 'DELETE')
      * @param string $uri
+     * @param bool $ifMatch
      * @return Client
      */
-    protected function initHttpClient(string $method, string $uri)
+    protected function initHttpClient(string $method, string $uri, $ifMatch = false)
     {
         $httpClient = clone $this->client;
         $httpClient->setUri($uri);
@@ -216,6 +217,10 @@ class HttpClient extends DataStoreAbstract
         $headers['Accept'] = 'application/json';
         $headers['X-Life-Cycle-Token'] = $this->lifeCycleToken->serialize();
         $headers['LifeCycleToken'] = $this->lifeCycleToken->serialize();
+
+        if ($ifMatch) {
+            $headers['If-Match'] = '*';
+        }
 
         $httpClient->setHeaders($headers);
 
@@ -381,6 +386,28 @@ class HttpClient extends DataStoreAbstract
         } else {
             $responseMessage = $this->createResponseMessage($uri, Request::METHOD_DELETE, $response);
             throw new DataStoreException("Can't delete item {$responseMessage}");
+        }
+
+        return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rewrite($record)
+    {
+        $client = $this->initHttpClient(Request::METHOD_POST, $this->url, true);
+        $json = Serializer::jsonSerialize($record);
+        $client->setRawBody($json);
+        $response = $client->send();
+
+        $this->checkResonseHeaderIdentifier($response);
+
+        if ($response->isSuccess()) {
+            $result = Serializer::jsonUnserialize($response->getBody());
+        } else {
+            $responseMessage = $this->createResponseMessage($this->url, Request::METHOD_POST, $response);
+            throw new DataStoreException("Can't rewrite item {$responseMessage}");
         }
 
         return $result;

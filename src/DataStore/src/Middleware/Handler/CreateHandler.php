@@ -72,7 +72,12 @@ class CreateHandler extends AbstractHandler
             $response = $response->withHeader('Location', $location);
         }
 
-        $newItem = $this->dataStore->create($row, $overwriteMode);
+        if ($overwriteMode) {
+            $newItem = $this->dataStore->rewrite($row);
+        } else {
+            $newItem = $this->dataStore->create($row);
+        }
+
         $response = $response->withBody($this->createStream($newItem));
 
         return $response;

@@ -494,13 +494,13 @@ abstract class DataStoreAbstract implements DataStoreInterface
             throw new DataStoreException("Identifier is required for 'rewrite' action");
         }
 
-        if ($this->has($record[$this->getIdentifier()])) {
-            $result = $this->update($record);
-        } else {
-            $result = $this->create($record);
+        $id = $record[$this->getIdentifier()];
+
+        if ($this->has($id)) {
+            $this->delete($id);
         }
 
-        return $result;
+        return $this->create($record);
     }
 
     /**

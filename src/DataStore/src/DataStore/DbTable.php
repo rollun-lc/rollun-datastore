@@ -90,14 +90,9 @@ class DbTable extends DataStoreAbstract
      */
     public function create($itemData)
     {
-        $adapter = $this->dbTable->getAdapter();
-        $adapter->getDriver()->getConnection()->beginTransaction();
-
         try {
             $insertedItem = $this->insertItem($itemData);
-            $adapter->getDriver()->getConnection()->commit();
         } catch (\Throwable $e) {
-            $adapter->getDriver()->getConnection()->rollback();
             $logContext = [
                 self::LOG_METHOD => __METHOD__,
                 self::LOG_TABLE => $this->dbTable->getTable(),
@@ -169,6 +164,30 @@ class DbTable extends DataStoreAbstract
             ];
             $this->writeLogsIfNeeded($logContext, "Request to db table '{$this->dbTable->getTable()}' failed");
             throw new DataStoreException("[{$this->dbTable->getTable()}]Can't update item. {$e->getMessage()}", 0, $e);
+        }
+
+        return $result;
+    }
+
+    public function rewrite($record)
+    {
+        $adapter = $this->dbTable->getAdapter();
+        $adapter->getDriver()->getConnection()->beginTransaction();
+
+        try {
+            $result = parent::rewrite($record);
+            $adapter->getDriver()->getConnection()->commit();
+        } catch (\Throwable $e) {
+            $adapter->getDriver()->getConnection()->rollback();
+            $logContext = [
+                self::LOG_METHOD => __METHOD__,
+                self::LOG_TABLE => $this->dbTable->getTable(),
+                self::LOG_REQUEST => $record,
+                self::LOG_ROLLBACK => true,
+                'exception' => $e,
+            ];
+            $this->writeLogsIfNeeded($logContext, "Request to db table '{$this->dbTable->getTable()}' failed");
+            throw new DataStoreException("[{$this->dbTable->getTable()}]Can't rewrite item. {$e->getMessage()}", 0, $e);
         }
 
         return $result;
