@@ -37,9 +37,9 @@ use Zend\Db\TableGateway\TableGateway;
  */
 class DbTableAbstractFactory extends DataStoreAbstractFactory
 {
-    const KEY_TABLE_NAME = 'tableName';
-    const KEY_TABLE_GATEWAY = 'tableGateway';
-    const KEY_DB_ADAPTER = 'dbAdapter';
+    public const KEY_TABLE_NAME = 'tableName';
+    public const KEY_TABLE_GATEWAY = 'tableGateway';
+    public const KEY_DB_ADAPTER = 'dbAdapter';
 
     public static $KEY_DATASTORE_CLASS = DbTable::class;
 
