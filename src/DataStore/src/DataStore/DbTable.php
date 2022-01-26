@@ -8,6 +8,7 @@ namespace rollun\datastore\DataStore;
 
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
@@ -67,13 +68,11 @@ class DbTable extends DataStoreAbstract
     public function __construct(
         TableGateway $dbTable,
         bool $writeLogs = false,
-        LoggerInterface $loggerService = null
+        ?LoggerInterface $loggerService = null
     ) {
         $this->dbTable = $dbTable;
         $this->writeLogs = $writeLogs;
-        InsideConstruct::init([
-            'loggerService' => LoggerInterface::class,
-        ]);
+        $this->loggerService = $loggerService ?? new NullLogger();
     }
 
     protected function getSqlQueryBuilder()
