@@ -8,6 +8,7 @@ namespace rollun\datastore\DataStore;
 
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
@@ -31,14 +32,14 @@ use Zend\Db\TableGateway\TableGateway;
  */
 class DbTable extends DataStoreAbstract
 {
-    const LOG_METHOD = 'method';
-    const LOG_TABLE = 'table';
-    const LOG_TIME = 'time';
-    const LOG_REQUEST = 'request';
-    const LOG_RESPONSE = 'response';
-    const LOG_ROLLBACK = 'rollbackTransaction';
-    const LOG_SQL = 'sql';
-    const LOG_COUNT = 'count';
+    public const LOG_METHOD = 'method';
+    public const LOG_TABLE = 'table';
+    public const LOG_TIME = 'time';
+    public const LOG_REQUEST = 'request';
+    public const LOG_RESPONSE = 'response';
+    public const LOG_ROLLBACK = 'rollbackTransaction';
+    public const LOG_SQL = 'sql';
+    public const LOG_COUNT = 'count';
 
     /**
      * @var TableGateway
@@ -67,13 +68,11 @@ class DbTable extends DataStoreAbstract
     public function __construct(
         TableGateway $dbTable,
         bool $writeLogs = false,
-        LoggerInterface $loggerService = null
+        ?LoggerInterface $loggerService = null
     ) {
         $this->dbTable = $dbTable;
         $this->writeLogs = $writeLogs;
-        InsideConstruct::init([
-            'loggerService' => LoggerInterface::class,
-        ]);
+        $this->loggerService = $loggerService ?? new NullLogger();
     }
 
     protected function getSqlQueryBuilder()
