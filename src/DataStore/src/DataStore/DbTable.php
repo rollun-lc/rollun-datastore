@@ -32,14 +32,14 @@ use Zend\Db\TableGateway\TableGateway;
  */
 class DbTable extends DataStoreAbstract
 {
-    const LOG_METHOD = 'method';
-    const LOG_TABLE = 'table';
-    const LOG_TIME = 'time';
-    const LOG_REQUEST = 'request';
-    const LOG_RESPONSE = 'response';
-    const LOG_ROLLBACK = 'rollbackTransaction';
-    const LOG_SQL = 'sql';
-    const LOG_COUNT = 'count';
+    public const LOG_METHOD = 'method';
+    public const LOG_TABLE = 'table';
+    public const LOG_TIME = 'time';
+    public const LOG_REQUEST = 'request';
+    public const LOG_RESPONSE = 'response';
+    public const LOG_ROLLBACK = 'rollbackTransaction';
+    public const LOG_SQL = 'sql';
+    public const LOG_COUNT = 'count';
 
     /**
      * @var TableGateway
