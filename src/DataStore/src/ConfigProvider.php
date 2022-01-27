@@ -27,7 +27,7 @@ use rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory;
 use rollun\datastore\TableGateway\Factory\TableManagerMysqlFactory;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\datastore\TableGateway\TableManagerMysql;
-use Zend\ServiceManager\Factory\InvokableFactory;
+use Laminas\ServiceManager\Factory\InvokableFactory;
 
 /**
  * The configuration provider for the App module

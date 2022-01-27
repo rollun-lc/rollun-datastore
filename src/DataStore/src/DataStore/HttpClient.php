@@ -11,11 +11,11 @@ use rollun\datastore\Rql\RqlParser;
 use rollun\dic\InsideConstruct;
 use rollun\logger\LifeCycleToken;
 use rollun\utils\Json\Serializer;
-use Xiag\Rql\Parser\Node\LimitNode;
-use Xiag\Rql\Parser\Query;
-use Zend\Http\Client;
-use Zend\Http\Request;
-use Zend\Http\Response;
+use Graviton\RqlParser\Node\LimitNode;
+use Graviton\RqlParser\Query;
+use Laminas\Http\Client;
+use Laminas\Http\Request;
+use Laminas\Http\Response;
 
 /**
  * Class HttpClient

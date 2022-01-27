@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\DataStore\Interfaces;
 
-use Zend\Db\TableGateway\TableGateway;
+use Laminas\Db\TableGateway\TableGateway;
 
 /**
  * Interface DbTableInterface

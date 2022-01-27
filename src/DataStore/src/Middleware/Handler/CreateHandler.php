@@ -9,7 +9,7 @@ namespace rollun\datastore\Middleware\Handler;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\DataStoreException;
-use Zend\Diactoros\Response;
+use Laminas\Diactoros\Response;
 
 /**
  * Class CreateHandler

@@ -6,7 +6,7 @@
 
 namespace rollun\datastore;
 
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 use Interop\Container\ContainerInterface;
 
 abstract class FactoryAbstract implements FactoryInterface

@@ -8,9 +8,9 @@ namespace rollun\datastore\TableGateway\Factory;
 
 use Interop\Container\ContainerInterface;
 use rollun\datastore\AbstractFactoryAbstract;
-use Zend\Db\Adapter\Adapter;
-use Zend\Db\Metadata\Metadata;
-use Zend\Db\TableGateway\TableGateway;
+use Laminas\Db\Adapter\Adapter;
+use Laminas\Db\Metadata\Metadata;
+use Laminas\Db\TableGateway\TableGateway;
 
 /**
  * Create and return an instance of the TableGateway
@@ -19,7 +19,7 @@ use Zend\Db\TableGateway\TableGateway;
  * The configuration can contain:
  * <code>
  *  'tableGateway' => [
- *      'sql' => 'Zend\Db\Sql\Sql', // optional
+ *      'sql' => 'Laminas\Db\Sql\Sql', // optional
  *      'adapter' => 'db' // optional,
  *  ],
  * </code>
@@ -99,7 +99,7 @@ class TableGatewayAbstractFactory extends AbstractFactoryAbstract
     {
         $config = $container->get('config')[self::KEY_TABLE_GATEWAY][$requestedName];
 
-        if (isset($config[self::KEY_SQL]) && is_a($config[self::KEY_SQL], 'Zend\Db\Sql\Sql', true)) {
+        if (isset($config[self::KEY_SQL]) && is_a($config[self::KEY_SQL], 'Laminas\Db\Sql\Sql', true)) {
             $sql = new $config[self::KEY_SQL]($this->db, $requestedName);
 
             return new TableGateway($requestedName, $this->db, null, null, $sql);

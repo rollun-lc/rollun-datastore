@@ -9,7 +9,7 @@ namespace rollun\datastore\DataStore\Factory;
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\DbTable;
-use Zend\Db\TableGateway\TableGateway;
+use Laminas\Db\TableGateway\TableGateway;
 
 /**
  * Create and return an instance of the DataStore which based on DbTable
@@ -109,7 +109,7 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
                 $this::$KEY_IN_CREATE = 0;
 
                 throw new DataStoreException(
-                    'Can\'t create Zend\Db\TableGateway\TableGateway for ' . $tableName
+                    'Can\'t create Laminas\Db\TableGateway\TableGateway for ' . $tableName
                 );
             }
         } else {

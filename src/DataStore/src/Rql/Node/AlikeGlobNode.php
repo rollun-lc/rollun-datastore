@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\Rql\Node;
 
-use Xiag\Rql\Parser\DataType\Glob;
+use Graviton\RqlParser\DataType\Glob;
 
 class AlikeGlobNode extends AlikeNode
 {

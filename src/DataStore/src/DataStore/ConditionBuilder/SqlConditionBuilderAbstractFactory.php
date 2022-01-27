@@ -8,7 +8,7 @@ namespace rollun\datastore\DataStore\ConditionBuilder;
 
 use Interop\Container\ContainerInterface;
 use InvalidArgumentException;
-use Zend\ServiceManager\Factory\AbstractFactoryInterface;
+use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
 
 /**
  * Create and return an instance of the SqlConditionBuilder

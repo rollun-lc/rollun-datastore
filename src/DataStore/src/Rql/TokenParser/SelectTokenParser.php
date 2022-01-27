@@ -6,11 +6,11 @@
 
 namespace rollun\datastore\Rql\TokenParser;
 
-use Xiag\Rql\Parser\AbstractNode;
-use Xiag\Rql\Parser\AbstractTokenParser;
-use Xiag\Rql\Parser\Exception\SyntaxErrorException;
-use Xiag\Rql\Parser\Token;
-use Xiag\Rql\Parser\TokenStream;
+use Graviton\RqlParser\AbstractNode;
+use Graviton\RqlParser\AbstractTokenParser;
+use Graviton\RqlParser\Exception\SyntaxErrorException;
+use Graviton\RqlParser\Token;
+use Graviton\RqlParser\TokenStream;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
 

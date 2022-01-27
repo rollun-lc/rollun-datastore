@@ -14,8 +14,8 @@ use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Interfaces\SchemableInterface;
 use rollun\datastore\DataStore\Type\TypePluginManager;
 use RuntimeException;
-use Xiag\Rql\Parser\Query;
-use Zend\ServiceManager\ServiceManager;
+use Graviton\RqlParser\Query;
+use Laminas\ServiceManager\ServiceManager;
 
 class AspectTyped extends AspectAbstract implements SchemableInterface
 {

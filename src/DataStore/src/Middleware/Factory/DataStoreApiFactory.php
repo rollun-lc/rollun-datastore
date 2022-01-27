@@ -10,7 +10,7 @@ use Interop\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use rollun\datastore\Middleware\DataStoreApi;
 use rollun\datastore\Middleware\Determinator;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 /**
  * Create DataStoreApi middleware

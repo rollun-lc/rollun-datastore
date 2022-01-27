@@ -11,11 +11,11 @@ use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\RqlQuery;
-use Xiag\Rql\Parser\Query;
-use Zend\Db\Adapter\AdapterInterface;
-use Zend\Db\Sql\Predicate\Expression;
-use Zend\Db\Sql\Select;
-use Zend\Db\Sql\Sql;
+use Graviton\RqlParser\Query;
+use Laminas\Db\Adapter\AdapterInterface;
+use Laminas\Db\Sql\Predicate\Expression;
+use Laminas\Db\Sql\Select;
+use Laminas\Db\Sql\Sql;
 
 class SqlQueryBuilder
 {

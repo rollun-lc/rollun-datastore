@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\Rql\Node;
 
-use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
+use Graviton\RqlParser\Node\Query\AbstractScalarOperatorNode;
 
 class ContainsNode extends AbstractScalarOperatorNode
 {

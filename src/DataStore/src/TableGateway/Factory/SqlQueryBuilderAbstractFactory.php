@@ -9,7 +9,7 @@ namespace rollun\datastore\TableGateway\Factory;
 use Interop\Container\ContainerInterface;
 use InvalidArgumentException;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
-use Zend\ServiceManager\Factory\AbstractFactoryInterface;
+use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
 
 /**
  * Create and return an instance of the SqlQueryBuilder

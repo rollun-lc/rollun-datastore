@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\DataStore\Type;
 
-use Zend\ServiceManager\AbstractPluginManager;
+use Laminas\ServiceManager\AbstractPluginManager;
 
 class TypePluginManager extends AbstractPluginManager
 {

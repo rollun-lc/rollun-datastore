@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\DataStore;
 
-use Xiag\Rql\Parser\Query;
+use Graviton\RqlParser\Query;
 use rollun\datastore\DataSource\DataSourceInterface;
 use rollun\datastore\DataStore\Interfaces\RefreshableInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;

@@ -9,7 +9,7 @@ namespace rollun\datastore\DataStore\Factory;
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\HttpClient;
-use Zend\Http\Client;
+use Laminas\Http\Client;
 
 /**
  * Create and return an instance of the DataStore which based on Http Client
@@ -25,7 +25,7 @@ use Zend\Http\Client;
  *          'options' => [
  *              'identifier' => 'custom_id_field',
  *              'timeout' => 30,
- *              'adapter' => 'Zend\Http\Client\Adapter\Socket',
+ *              'adapter' => 'Laminas\Http\Client\Adapter\Socket',
  *          ]
  *     ]
  * ]

@@ -13,10 +13,10 @@ use rollun\datastore\DataStore\Iterators\DataStoreIterator;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
 use rollun\datastore\Rql\RqlQuery;
-use Xiag\Rql\Parser\Node;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
-use Xiag\Rql\Parser\Node\SortNode;
-use Xiag\Rql\Parser\Query;
+use Graviton\RqlParser\Node;
+use Graviton\RqlParser\Node\Query\ScalarOperator\EqNode;
+use Graviton\RqlParser\Node\SortNode;
+use Graviton\RqlParser\Query;
 
 /**
  * Class DataStoreAbstract

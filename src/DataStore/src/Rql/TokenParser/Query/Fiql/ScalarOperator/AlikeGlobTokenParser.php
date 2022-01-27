@@ -7,7 +7,7 @@
 namespace rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator;
 
 use rollun\datastore\Rql\Node\AlikeGlobNode;
-use Xiag\Rql\Parser\TokenParser\Query\Fiql\AbstractScalarOperatorTokenParser;
+use Graviton\RqlParser\TokenParser\Query\Fiql\AbstractScalarOperatorTokenParser;
 
 class AlikeGlobTokenParser extends AbstractScalarOperatorTokenParser
 {

@@ -10,7 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\Interfaces\RefreshableInterface;
 use rollun\datastore\Middleware\RestException;
-use Zend\Diactoros\Response;
+use Laminas\Diactoros\Response;
 
 /**
  * Class RefreshHandler

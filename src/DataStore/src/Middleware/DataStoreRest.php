@@ -12,7 +12,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\Middleware\Handler;
-use Zend\Stratigility\MiddlewarePipe;
+use Laminas\Stratigility\MiddlewarePipe;
 
 /**
  * Create middleware pipe with 'REST method handlers'.

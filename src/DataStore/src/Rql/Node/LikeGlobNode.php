@@ -6,8 +6,8 @@
 
 namespace rollun\datastore\Rql\Node;
 
-use Xiag\Rql\Parser\DataType\Glob;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\LikeNode;
+use Graviton\RqlParser\DataType\Glob;
+use Graviton\RqlParser\Node\Query\ScalarOperator\LikeNode;
 
 class LikeGlobNode extends LikeNode
 {

@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\DataStore\Aspect;
 
-use Zend\EventManager\Event;
+use Laminas\EventManager\Event;
 
 /**
  * Class AbstractAspectListener

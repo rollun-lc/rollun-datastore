@@ -10,7 +10,7 @@ use rollun\datastore\DataSource\DataSourceInterface;
 use rollun\datastore\DataStore\Iterators\CsvIterator;
 use rollun\datastore\DataStore\ConditionBuilder\PhpConditionBuilder;
 use Symfony\Component\Filesystem\LockHandler;
-use Xiag\Rql\Parser\Query;
+use Graviton\RqlParser\Query;
 
 /**
  * Class CsvBase

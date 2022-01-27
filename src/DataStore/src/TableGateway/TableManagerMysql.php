@@ -9,19 +9,19 @@ namespace rollun\datastore\TableGateway;
 use InvalidArgumentException;
 use Exception;
 use RuntimeException;
-use Zend\Db\Adapter;
-use Zend\Db\Adapter\Driver\Mysqli\Mysqli;
-use Zend\Db\Adapter\Driver\Pdo\Pdo;
-use Zend\Db\Metadata\Object\ColumnObject;
-use Zend\Db\Metadata\Object\ConstraintObject;
-use Zend\Db\Metadata\Source;
-use Zend\Db\Metadata\Source\Factory;
-use Zend\Db\Sql;
-use Zend\Db\Sql\Ddl\AlterTable;
-use Zend\Db\Sql\Ddl\Column;
-use Zend\Db\Sql\Ddl\Column\ColumnInterface;
-use Zend\Db\Sql\Ddl\Constraint;
-use Zend\Db\Sql\Ddl\CreateTable;
+use Laminas\Db\Adapter;
+use Laminas\Db\Adapter\Driver\Mysqli\Mysqli;
+use Laminas\Db\Adapter\Driver\Pdo\Pdo;
+use Laminas\Db\Metadata\Object\ColumnObject;
+use Laminas\Db\Metadata\Object\ConstraintObject;
+use Laminas\Db\Metadata\Source;
+use Laminas\Db\Metadata\Source\Factory;
+use Laminas\Db\Sql;
+use Laminas\Db\Sql\Ddl\AlterTable;
+use Laminas\Db\Sql\Ddl\Column;
+use Laminas\Db\Sql\Ddl\Column\ColumnInterface;
+use Laminas\Db\Sql\Ddl\Constraint;
+use Laminas\Db\Sql\Ddl\CreateTable;
 
 /**
  * Creates, deletes and rewrites table and gets its info
@@ -400,7 +400,7 @@ class TableManagerMysql
      *
      * @param $tableName
      * @param $tableConfig
-     * @return Adapter\Driver\StatementInterface|\Zend\Db\ResultSet\ResultSet
+     * @return Adapter\Driver\StatementInterface|\Laminas\Db\ResultSet\ResultSet
      * @throws Exception
      */
     protected function create($tableName, $tableConfig = null)

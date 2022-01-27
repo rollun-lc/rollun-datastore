@@ -7,8 +7,8 @@
 namespace rollun\datastore;
 
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
-use Zend\ServiceManager\Factory\AbstractFactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
+use Laminas\ServiceManager\ServiceLocatorInterface;
 use Interop\Container\ContainerInterface;
 
 /**
@@ -40,8 +40,8 @@ abstract class AbstractFactoryAbstract implements AbstractFactoryInterface
      * For Service manager V3
      * Edit 'use' section if need:
      * Change:
-     * 'use Zend\ServiceManager\AbstractFactoryInterface;' for V2 to
-     * 'use Zend\ServiceManager\Factory\AbstractFactoryInterface;' for V3
+     * 'use Laminas\ServiceManager\AbstractFactoryInterface;' for V2 to
+     * 'use Laminas\ServiceManager\Factory\AbstractFactoryInterface;' for V3
      *
      * @param  ContainerInterface $container
      * @param  string $requestedName
@@ -52,8 +52,8 @@ abstract class AbstractFactoryAbstract implements AbstractFactoryInterface
     /**
      * Create and return an instance of the DataStore.
      *
-     * 'use Zend\ServiceManager\AbstractFactoryInterface;' for V2 to
-     * 'use Zend\ServiceManager\Factory\AbstractFactoryInterface;' for V3
+     * 'use Laminas\ServiceManager\AbstractFactoryInterface;' for V2 to
+     * 'use Laminas\ServiceManager\Factory\AbstractFactoryInterface;' for V3
      *
      * @param  ContainerInterface $container
      * @param  string $requestedName
@@ -68,8 +68,8 @@ abstract class AbstractFactoryAbstract implements AbstractFactoryInterface
      * For Service manager V2
      * Edit 'use' section if need:
      * Change:
-     * 'use Zend\ServiceManager\Factory\AbstractFactoryInterface;' for V3 to
-     * 'use Zend\ServiceManager\AbstractFactoryInterface;' for V2
+     * 'use Laminas\ServiceManager\Factory\AbstractFactoryInterface;' for V3 to
+     * 'use Laminas\ServiceManager\AbstractFactoryInterface;' for V2
      *
      * @param ServiceLocatorInterface $serviceLocator
      * @param $name
@@ -87,8 +87,8 @@ abstract class AbstractFactoryAbstract implements AbstractFactoryInterface
      * For Service manager V2
      * Edit 'use' section if need:
      * Change:
-     * 'use Zend\ServiceManager\Factory\AbstractFactoryInterface;' for V3 to
-     * 'use Zend\ServiceManager\AbstractFactoryInterface;' for V2
+     * 'use Laminas\ServiceManager\Factory\AbstractFactoryInterface;' for V3 to
+     * 'use Laminas\ServiceManager\AbstractFactoryInterface;' for V2
      *
      * @param ServiceLocatorInterface $serviceLocator
      * @param $name

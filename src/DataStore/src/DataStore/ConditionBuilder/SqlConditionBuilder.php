@@ -7,10 +7,10 @@
 namespace rollun\datastore\DataStore\ConditionBuilder;
 
 use rollun\datastore\Rql\Node\BinaryNode\BinaryOperatorNodeAbstract;
-use Xiag\Rql\Parser\DataType\Glob;
-use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
+use Graviton\RqlParser\DataType\Glob;
+use Graviton\RqlParser\Node\Query\AbstractScalarOperatorNode;
 use rollun\datastore\DataStore\DataStoreException;
-use Zend\Db\Adapter\AdapterInterface;
+use Laminas\Db\Adapter\AdapterInterface;
 
 /**
  * Class SqlConditionBuilder
@@ -115,6 +115,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
             );
         }
 
+        // TODO hardcode format
         $value = $node->getValue() instanceof \DateTime ? $node->getValue()
             ->format("Y-m-d") : $node->getValue();
 

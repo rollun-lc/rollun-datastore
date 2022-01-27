@@ -12,7 +12,7 @@ use rollun\datastore\DataStore\Aspect\AspectAbstract;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Factory\DataStoreAbstractFactory;
 use rollun\datastore\DataStore\WithEventManagerInterface;
-use Zend\EventManager\EventManager;
+use Laminas\EventManager\EventManager;
 
 /**
  * Create and return an instance of the DataStore which based on AspectAbstract

@@ -8,7 +8,7 @@ namespace rollun\datastore\DataSource\Factory;
 
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataSource\MemoryConfig;
-use Zend\ServiceManager\Factory\AbstractFactoryInterface;
+use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
 
 /**
  * Create instance of MemoryConfig

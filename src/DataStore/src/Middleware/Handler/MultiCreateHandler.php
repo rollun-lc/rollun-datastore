@@ -7,7 +7,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
-use Zend\Diactoros\Response;
+use Laminas\Diactoros\Response;
 
 /**
  * Class MultiCreateHandler

@@ -7,7 +7,7 @@
 namespace rollun\datastore\DataStore;
 
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
-use Zend\ServiceManager\AbstractPluginManager;
+use Laminas\ServiceManager\AbstractPluginManager;
 
 class DataStorePluginManager extends AbstractPluginManager
 {

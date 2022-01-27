@@ -10,10 +10,10 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
-use Xiag\Rql\Parser\Node\LimitNode;
-use Xiag\Rql\Parser\Node\SelectNode;
-use Xiag\Rql\Parser\Query;
-use Zend\Diactoros\Response;
+use Graviton\RqlParser\Node\LimitNode;
+use Graviton\RqlParser\Node\SelectNode;
+use Graviton\RqlParser\Query;
+use Laminas\Diactoros\Response;
 
 /**
  * Class QueryHandler

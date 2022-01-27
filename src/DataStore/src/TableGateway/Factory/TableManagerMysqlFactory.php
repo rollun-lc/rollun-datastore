@@ -17,7 +17,7 @@ use rollun\datastore\TableGateway\TableManagerMysql;
  * The configuration can contain:
  * <code>
  *  'tableGateway' => [
- *      'sql' => 'Zend\Db\Sql\Sql', // optional
+ *      'sql' => 'Laminas\Db\Sql\Sql', // optional
  *      'adapter' => 'db' // optional,
  *  ],
  * </code>

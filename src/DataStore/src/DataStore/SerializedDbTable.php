@@ -9,7 +9,7 @@ namespace rollun\datastore\DataStore;
 use Psr\Log\LoggerInterface;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\dic\InsideConstruct;
-use Zend\Db\TableGateway\TableGateway;
+use Laminas\Db\TableGateway\TableGateway;
 
 class SerializedDbTable extends DbTable
 {

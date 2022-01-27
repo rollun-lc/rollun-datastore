@@ -7,7 +7,7 @@
 namespace rollun\datastore\DataStore\Traits;
 
 use rollun\datastore\DataStore\DataStoreException;
-use Xiag\Rql\Parser\Query;
+use Graviton\RqlParser\Query;
 
 /**
  * Use this trait to disable 'query' method in datastore

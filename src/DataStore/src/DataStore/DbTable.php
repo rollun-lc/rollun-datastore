@@ -13,15 +13,15 @@ use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\dic\InsideConstruct;
-use Xiag\Rql\Parser\Node\LimitNode;
-use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
-use Xiag\Rql\Parser\Node\SelectNode;
-use Xiag\Rql\Parser\Query;
-use Zend\Db\Adapter\Driver\ResultInterface;
-use Zend\Db\Adapter\ParameterContainer;
-use Zend\Db\Sql\Select;
-use Zend\Db\Sql\Sql;
-use Zend\Db\TableGateway\TableGateway;
+use Graviton\RqlParser\Node\LimitNode;
+use Graviton\RqlParser\Node\Query\ArrayOperator\InNode;
+use Graviton\RqlParser\Node\SelectNode;
+use Graviton\RqlParser\Query;
+use Laminas\Db\Adapter\Driver\ResultInterface;
+use Laminas\Db\Adapter\ParameterContainer;
+use Laminas\Db\Sql\Select;
+use Laminas\Db\Sql\Sql;
+use Laminas\Db\TableGateway\TableGateway;
 
 /**
  * Datastore as db table
@@ -316,7 +316,7 @@ class DbTable extends DataStoreAbstract
 
     /**
      * @param array $identifiers
-     * @return \Zend\Db\Adapter\Driver\ResultInterface
+     * @return \Laminas\Db\Adapter\Driver\ResultInterface
      */
     private function selectForUpdateWithIds(array $identifiers)
     {
@@ -341,7 +341,7 @@ class DbTable extends DataStoreAbstract
 
     /**
      * @param Query $query
-     * @return \Zend\Db\Adapter\Driver\ResultInterface
+     * @return \Laminas\Db\Adapter\Driver\ResultInterface
      */
     private function selectForUpdateWithQuery(Query $query)
     {

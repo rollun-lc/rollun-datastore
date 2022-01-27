@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace rollun\datastore\DataStore;
 
-use Zend\EventManager\EventManagerInterface;
+use Laminas\EventManager\EventManagerInterface;
 
 /**
  * Class WithEventManagerInterface

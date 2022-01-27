@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\DataStore\Interfaces;
 
-use Xiag\Rql\Parser\Query;
+use Graviton\RqlParser\Query;
 
 /**
  * Read Interface for DataStores
@@ -68,16 +68,16 @@ interface ReadInterface extends \Countable, \IteratorAggregate
      *
      * Example:
      * <code>
-     *  $query = new \Xiag\Rql\Parser\Query();
-     *  $eqNode = new \Xiag\Rql\Parser\Node\ScalarOperator\EqNode(
+     *  $query = new \Graviton\RqlParser\Query();
+     *  $eqNode = new \Graviton\RqlParser\Node\ScalarOperator\EqNode(
      *      'fString', 'val2'
      *  );
      *  $query->setQuery($eqNode);
-     *  $sortNode = new \Xiag\Rql\Parser\Node\Node\SortNode(['id' => '1']);
+     *  $sortNode = new \Graviton\RqlParser\Node\Node\SortNode(['id' => '1']);
      *  $query->setSort($sortNode);
-     *  $selectNode = new \Xiag\Rql\Parser\Node\Node\SelectNode(['fFloat']);
+     *  $selectNode = new \Graviton\RqlParser\Node\Node\SelectNode(['fFloat']);
      *  $query->setSelect($selectNode);
-     *  $limitNode = new \Xiag\Rql\Parser\Node\Node\LimitNode(2, 1);
+     *  $limitNode = new \Graviton\RqlParser\Node\Node\LimitNode(2, 1);
      *  $query->setLimit($limitNode);
      *  $queryArray = $this->object->query($query);
      * </code>

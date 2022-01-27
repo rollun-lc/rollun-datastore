@@ -9,7 +9,7 @@ namespace rollun\datastore\Middleware\Factory;
 use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStorePluginManager;
 use rollun\datastore\Middleware\Determinator;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 /**
  * Create Determinator middleware

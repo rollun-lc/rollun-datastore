@@ -12,7 +12,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\DataStore\Aspect\AspectTyped;
 use rollun\datastore\DataStore\DataStorePluginManager;
-use Zend\Diactoros\Response\EmptyResponse;
+use Laminas\Diactoros\Response\EmptyResponse;
 
 /**
  * Class Determinator

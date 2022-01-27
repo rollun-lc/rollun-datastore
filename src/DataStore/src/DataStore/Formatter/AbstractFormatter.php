@@ -8,7 +8,7 @@ namespace rollun\datastore\DataStore\Formatter;
 
 use rollun\datastore\DataStore\Type\TypeInterface;
 use rollun\datastore\DataStore\Type\TypePluginManager;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\ServiceManager\ServiceManager;
 
 abstract class AbstractFormatter implements FormatterInterface
 {

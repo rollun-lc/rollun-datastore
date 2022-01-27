@@ -8,7 +8,7 @@ namespace rollun\datastore\DataStore\Type;
 
 use Interop\Container\ContainerInterface;
 use InvalidArgumentException;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class TypeFactory implements FactoryInterface
 {
