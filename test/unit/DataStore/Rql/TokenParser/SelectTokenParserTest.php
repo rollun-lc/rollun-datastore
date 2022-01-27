@@ -7,8 +7,8 @@ use PHPUnit_Framework_MockObject_MockObject;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
 use rollun\datastore\Rql\TokenParser\SelectTokenParser;
-use Xiag\Rql\Parser\Token;
-use Xiag\Rql\Parser\TokenStream;
+use Graviton\RqlParser\Parser\Token;
+use Graviton\RqlParser\Parser\TokenStream;
 
 class SelectTokenParserTest extends TestCase
 {

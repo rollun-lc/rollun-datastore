@@ -12,8 +12,8 @@ use rollun\datastore\DataStore\Interfaces\ReadInterface;
 use rollun\datastore\Middleware\Handler\QueryHandler;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\RqlQuery;
-use Xiag\Rql\Parser\Node\LimitNode;
-use Xiag\Rql\Parser\Node\SelectNode;
+use Graviton\RqlParser\Parser\Node\LimitNode;
+use Graviton\RqlParser\Parser\Node\SelectNode;
 use Zend\Diactoros\ServerRequest;
 
 class QueryHandlerTest extends BaseHandlerTest

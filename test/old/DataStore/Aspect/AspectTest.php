@@ -10,7 +10,7 @@ use rollun\test\old\DataStore\AbstractTest;
 
 class AspectTest extends AbstractTest
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->object = $this->container->get('testAspectAbstract');

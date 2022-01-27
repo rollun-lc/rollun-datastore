@@ -10,11 +10,11 @@ use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\DataStore\HttpClient;
 
 use rollun\datastore\TableGateway\TableManagerMysql;
-use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\GtNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\LtNode;
-use Xiag\Rql\Parser\Query;
+use Graviton\RqlParser\Parser\Node\Query\ArrayOperator\InNode;
+use Graviton\RqlParser\Parser\Node\Query\ScalarOperator\EqNode;
+use Graviton\RqlParser\Parser\Node\Query\ScalarOperator\GtNode;
+use Graviton\RqlParser\Parser\Node\Query\ScalarOperator\LtNode;
+use Graviton\RqlParser\Parser\Query;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Http\Client;
 
@@ -46,7 +46,7 @@ class QueryDateTimeTest extends TestCase
         ]
     ];
 
-    public function setUp()
+    protected function setUp(): void
     {
         global $container;
 
@@ -71,7 +71,7 @@ class QueryDateTimeTest extends TestCase
         }
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         $this->mysqlManager->deleteTable($this->tableName);
     }

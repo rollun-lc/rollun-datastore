@@ -26,7 +26,7 @@ class HttpClientTest extends TestCase
      */
     protected $container;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         global $container;
         $this->container = $container;

@@ -15,7 +15,7 @@ use Zend\Db\TableGateway\TableGateway;
 
 class MultiplyInsertDbTable extends DbTableTest
 {
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $adapter = $this->getContainer()->get('db');

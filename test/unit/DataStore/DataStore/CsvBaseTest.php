@@ -22,7 +22,7 @@ class CsvBaseTest extends TestCase
 
     protected $columns = ['id', 'name', 'surname'];
 
-    public function setUp()
+    protected function setUp(): void
     {
         $this->filename = tempnam(sys_get_temp_dir(), 'csv');
         $resource = fopen($this->filename, 'w+');
@@ -30,7 +30,7 @@ class CsvBaseTest extends TestCase
         fclose($resource);
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         unlink($this->filename);
     }

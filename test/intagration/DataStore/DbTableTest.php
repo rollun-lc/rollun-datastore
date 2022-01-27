@@ -67,7 +67,7 @@ class DbTableTest extends BaseDataStoreTest
         return $this->container;
     }
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $adapter = $this->getContainer()->get('db');
@@ -81,7 +81,7 @@ class DbTableTest extends BaseDataStoreTest
         $this->tableGateway = new TableGateway($this->tableName, $adapter);
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         $this->mysqlManager->deleteTable($this->tableName);
     }

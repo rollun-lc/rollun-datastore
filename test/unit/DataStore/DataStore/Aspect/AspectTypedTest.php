@@ -35,9 +35,21 @@ class AspectTypedTest extends TestCase
             ->getMock();
 
         $object = new AspectTyped($dataStore, $scheme, $dtoClassName);
-        $this->assertAttributeEquals($scheme, 'scheme', $object);
+        /*$this->assertAttributeEquals($scheme, 'scheme', $object);
         $this->assertAttributeEquals($dtoClassName, 'dtoClassName', $object);
-        $this->assertAttributeEquals($dataStore, 'dataStore', $object);
+        $this->assertAttributeEquals($dataStore, 'dataStore', $object);*/
+
+        $property = new \ReflectionProperty($object, 'scheme');
+        $property->setAccessible(true);
+        $this->assertEquals($scheme, $property->getValue($object));
+
+        $property = new \ReflectionProperty($object, 'dtoClassName');
+        $property->setAccessible(true);
+        $this->assertEquals($dtoClassName, $property->getValue($object));
+
+        $property = new \ReflectionProperty($object, 'dataStore');
+        $property->setAccessible(true);
+        $this->assertEquals($dataStore, $property->getValue($object));
     }
 
     public function testConstructFailSchemeWithInvalidType()

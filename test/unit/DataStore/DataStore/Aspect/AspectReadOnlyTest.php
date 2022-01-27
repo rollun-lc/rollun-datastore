@@ -6,12 +6,13 @@
 
 namespace rollun\test\unit\DataStore\DataStore\Aspect;
 
+use Graviton\RqlParser\Query;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\Aspect\AspectReadOnly;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
 use rollun\datastore\DataStore\Memory;
-use Xiag\Rql\Parser\Query;
+//use Graviton\RqlParser\Parser\Query;
 
 class AspectReadOnlyTest extends TestCase
 {

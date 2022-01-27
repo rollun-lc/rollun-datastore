@@ -23,8 +23,16 @@ class BaseDtoTest extends TestCase
             'name' => $name
         ]);
 
-        $this->assertAttributeEquals($id, 'id', $object);
-        $this->assertAttributeEquals($name, 'name', $object);
+        //$this->assertAttributeEquals($id, 'id', $object);
+        //$this->assertAttributeEquals($name, 'name', $object);
+
+        $property = new \ReflectionProperty($object, 'id');
+        $property->setAccessible(true);
+        $this->assertEquals($id, $property->getValue($object));
+
+        $property = new \ReflectionProperty($object, 'name');
+        $property->setAccessible(true);
+        $this->assertEquals($name, $property->getValue($object));
     }
 
     public function testCreateFromArrayFail()
@@ -37,8 +45,17 @@ class BaseDtoTest extends TestCase
             'boo' => $name
         ]);
 
-        $this->assertAttributeEquals($id, 'id', $object);
-        $this->assertAttributeEquals($name, 'name', $object);
+        //$this->assertAttributeEquals($id, 'id', $object);
+        //$this->assertAttributeEquals($name, 'name', $object);
+
+        $property = new \ReflectionProperty($object, 'id');
+        $property->setAccessible(true);
+        $this->assertEquals($id, $property->getValue($object));
+
+        $property = new \ReflectionProperty($object, 'name');
+        $property->setAccessible(true);
+        $this->assertEquals($name, $property->getValue($object));
+
     }
 }
 

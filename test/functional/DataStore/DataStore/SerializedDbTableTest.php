@@ -68,7 +68,7 @@ class SerializedDbTableTest extends TestCase
         return $this->container;
     }
 
-    public function setUp()
+    protected function setUp(): void
     {
         $adapter = clone $this->getContainer()->get('db');
         $this->mysqlManager = new TableManagerMysql($adapter);
@@ -80,7 +80,7 @@ class SerializedDbTableTest extends TestCase
         $this->mysqlManager->createTable($this->tableName, $this->tableConfig);
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         $this->mysqlManager->deleteTable($this->tableName);
         InsideConstruct::setContainer($this->container);

@@ -10,8 +10,8 @@ use rollun\repository\Interfaces\FieldMapperInterface;
 use rollun\repository\Interfaces\ModelInterface;
 use rollun\repository\ModelRepository;
 use rollun\repository\ModelAbstract;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
-use Xiag\Rql\Parser\Query;
+use Graviton\RqlParser\Parser\Node\Query\ScalarOperator\EqNode;
+use Graviton\RqlParser\Parser\Query;
 
 class ModelRepositoryTest extends TestCase
 {

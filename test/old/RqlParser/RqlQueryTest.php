@@ -7,10 +7,10 @@
 namespace rollun\test\old\RqlParser;
 
 use PHPUnit\Framework\TestCase;
-use Xiag\Rql\Parser\Node\LimitNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
-use Xiag\Rql\Parser\Node\SortNode;
-use Xiag\Rql\Parser\Query;
+use Graviton\RqlParser\Parser\Node\LimitNode;
+use Graviton\RqlParser\Parser\Node\Query\ScalarOperator\EqNode;
+use Graviton\RqlParser\Parser\Node\SortNode;
+use Graviton\RqlParser\Parser\Query;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
 use rollun\datastore\Rql\RqlQuery;
 

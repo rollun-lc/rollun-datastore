@@ -19,7 +19,7 @@ class CsvBaseTest extends BaseDataStoreTest
 
     protected $delimiter = ',';
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->filename = tempnam(sys_get_temp_dir(), 'csv');
@@ -28,7 +28,7 @@ class CsvBaseTest extends BaseDataStoreTest
         fclose($resource);
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         unlink($this->filename);
     }

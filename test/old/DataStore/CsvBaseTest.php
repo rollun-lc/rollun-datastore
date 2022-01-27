@@ -14,7 +14,7 @@ class CsvBaseTest extends AbstractTest
 
     protected $entity = 'testCsvBase';
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->filename = $this->config[$this->entity]['filename'];
@@ -28,7 +28,7 @@ class CsvBaseTest extends AbstractTest
         $this->object = $this->container->get($this->entity);
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         unlink($this->filename);
     }

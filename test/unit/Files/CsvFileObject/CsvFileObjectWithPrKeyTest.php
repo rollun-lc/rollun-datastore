@@ -12,7 +12,7 @@ class CsvFileObjectWithPrKeyTest extends FilesAbstractTest
     /**
      * @inheritDoc
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
         // delete tmp files and dirs
         (new FileManager())->deleteDirRecursively('data/test/unit/files/csvfileobject/csvfileobjectwithprkeytest/');

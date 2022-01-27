@@ -6,7 +6,7 @@ use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Memory;
 use rollun\uploader\Iterator\DataStorePack as DataStorePackIterator;
 use PHPUnit\Framework\TestCase;
-use Xiag\Rql\Parser\Query;
+use Graviton\RqlParser\Parser\Query;
 
 class DataStorePackTest extends TestCase
 {
@@ -16,7 +16,7 @@ class DataStorePackTest extends TestCase
     /** @var DataStoresInterface */
     protected $dataStore;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $this->dataStore = new Memory();
 

@@ -8,9 +8,9 @@ namespace rollun\test\old\DataStore;
 
 use rollun\datastore\DataStore\Memory;
 use rollun\installer\Command;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
-use Xiag\Rql\Parser\Node\SortNode;
-use Xiag\Rql\Parser\Query;
+use Graviton\RqlParser\Parser\Node\Query\ScalarOperator\EqNode;
+use Graviton\RqlParser\Parser\Node\SortNode;
+use Graviton\RqlParser\Parser\Query;
 
 class MemoryTest extends AbstractTest
 {
@@ -32,7 +32,7 @@ class MemoryTest extends AbstractTest
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->object = $this->container->get('testMemory');

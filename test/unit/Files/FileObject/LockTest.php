@@ -20,7 +20,7 @@ class LockTest extends FileObjectAbstractTest
      */
     protected $fileObject2;
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $fileObject = $this->getFileObject();
@@ -31,7 +31,7 @@ class LockTest extends FileObjectAbstractTest
         $this->fileObject2 = new FileObject($filename);
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         $this->fileObject1->unlock();
         $this->fileObject2->unlock();

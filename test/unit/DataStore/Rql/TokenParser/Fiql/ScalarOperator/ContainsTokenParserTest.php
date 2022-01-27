@@ -6,10 +6,10 @@ use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node\ContainsNode;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\ContainsTokenParser;
 use PHPUnit_Framework_MockObject_MockObject;
-use Xiag\Rql\Parser\ExpressionParser;
-use Xiag\Rql\Parser\Parser;
-use Xiag\Rql\Parser\Token;
-use Xiag\Rql\Parser\TokenStream;
+use Graviton\RqlParser\Parser\ExpressionParser;
+use Graviton\RqlParser\Parser\Parser;
+use Graviton\RqlParser\Parser\Token;
+use Graviton\RqlParser\Parser\TokenStream;
 
 class ContainsTokenParserTest extends TestCase
 {

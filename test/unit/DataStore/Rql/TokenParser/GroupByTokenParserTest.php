@@ -6,8 +6,8 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
 use rollun\datastore\Rql\Node\GroupbyNode;
 use rollun\datastore\Rql\TokenParser\GroupbyTokenParser;
-use Xiag\Rql\Parser\Token;
-use Xiag\Rql\Parser\TokenStream;
+use Graviton\RqlParser\Parser\Token;
+use Graviton\RqlParser\Parser\TokenStream;
 
 class GroupByTokenParserTest extends TestCase
 {

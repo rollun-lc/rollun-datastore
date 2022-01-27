@@ -8,7 +8,7 @@ namespace rollun\test\functional\DataStore\ConditionBuilder;
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
-use Xiag\Rql\Parser\DataType\Glob;
+use Graviton\RqlParser\Parser\DataType\Glob;
 
 abstract class ConditionBuilderTest extends TestCase
 {

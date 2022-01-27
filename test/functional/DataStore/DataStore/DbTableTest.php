@@ -13,7 +13,7 @@ use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\TableManagerMysql;
-use Xiag\Rql\Parser\Query;
+use Graviton\RqlParser\Parser\Query;
 use Zend\Db\TableGateway\TableGateway;
 
 class DbTableTest extends TestCase
@@ -56,7 +56,7 @@ class DbTableTest extends TestCase
        ],
     ];
 
-    public function setUp()
+    protected function setUp(): void
     {
         /** @var ContainerInterface $container */
         $this->container = include './config/container.php';
@@ -71,7 +71,7 @@ class DbTableTest extends TestCase
         $this->tableGateway = new TableGateway($this->tableName, $adapter);
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         $this->mysqlManager->deleteTable($this->tableName);
     }

@@ -9,7 +9,7 @@ namespace rollun\test\unit\Uploader;
 use rollun\datastore\DataStore\Memory;
 use rollun\uploader\Uploader;
 use PHPUnit\Framework\TestCase;
-use Xiag\Rql\Parser\Query;
+use Graviton\RqlParser\Parser\Query;
 
 class UploaderTest extends TestCase
 {
@@ -22,7 +22,7 @@ class UploaderTest extends TestCase
     /** @var Memory */
     protected $outMemDataStore;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $this->inMemDataStore = new Memory();
         $this->outMemDataStore = new Memory();

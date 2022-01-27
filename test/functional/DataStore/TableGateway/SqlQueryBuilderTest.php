@@ -19,21 +19,21 @@ use rollun\datastore\Rql\Node\GroupbyNode;
 use rollun\datastore\Rql\Node\LikeGlobNode;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
-use Xiag\Rql\Parser\Node\LimitNode;
-use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
-use Xiag\Rql\Parser\Node\Query\ArrayOperator\OutNode;
-use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;
-use Xiag\Rql\Parser\Node\Query\LogicOperator\NotNode;
-use Xiag\Rql\Parser\Node\Query\LogicOperator\OrNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\GeNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\GtNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\LeNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\LikeNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\LtNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\NeNode;
-use Xiag\Rql\Parser\Node\SelectNode;
-use Xiag\Rql\Parser\Node\SortNode;
+use Graviton\RqlParser\Parser\Node\LimitNode;
+use Graviton\RqlParser\Parser\Node\Query\ArrayOperator\InNode;
+use Graviton\RqlParser\Parser\Node\Query\ArrayOperator\OutNode;
+use Graviton\RqlParser\Parser\Node\Query\LogicOperator\AndNode;
+use Graviton\RqlParser\Parser\Node\Query\LogicOperator\NotNode;
+use Graviton\RqlParser\Parser\Node\Query\LogicOperator\OrNode;
+use Graviton\RqlParser\Parser\Node\Query\ScalarOperator\EqNode;
+use Graviton\RqlParser\Parser\Node\Query\ScalarOperator\GeNode;
+use Graviton\RqlParser\Parser\Node\Query\ScalarOperator\GtNode;
+use Graviton\RqlParser\Parser\Node\Query\ScalarOperator\LeNode;
+use Graviton\RqlParser\Parser\Node\Query\ScalarOperator\LikeNode;
+use Graviton\RqlParser\Parser\Node\Query\ScalarOperator\LtNode;
+use Graviton\RqlParser\Parser\Node\Query\ScalarOperator\NeNode;
+use Graviton\RqlParser\Parser\Node\SelectNode;
+use Graviton\RqlParser\Parser\Node\SortNode;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Adapter\Driver\ConnectionInterface;
 use Zend\Db\Adapter\Driver\DriverInterface;
@@ -48,7 +48,7 @@ class SqlQueryBuilderTest extends TestCase
      */
     protected $mockAdapter;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $mockResult = $this->getMockBuilder(ResultInterface::class)
             ->getMock();

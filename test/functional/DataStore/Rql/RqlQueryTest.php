@@ -9,10 +9,10 @@ namespace rollun\test\functional\DataStore\Rql;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
 use rollun\datastore\Rql\RqlQuery;
-use Xiag\Rql\Parser\Node\LimitNode;
-use Xiag\Rql\Parser\Node\SelectNode;
-use Xiag\Rql\Parser\Node\SortNode;
-use Xiag\Rql\Parser\Query;
+use Graviton\RqlParser\Parser\Node\LimitNode;
+use Graviton\RqlParser\Parser\Node\SelectNode;
+use Graviton\RqlParser\Parser\Node\SortNode;
+use Graviton\RqlParser\Parser\Query;
 
 class RqlQueryTest extends TestCase
 {

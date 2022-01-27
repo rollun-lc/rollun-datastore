@@ -23,7 +23,7 @@ class AutoIdGeneratorTraitTest extends TestCase
 
     protected $idCharSet = "QWERTYUIOPASDFGHJKLZXCVBNM0123456789";
 
-    public function setUp()
+    protected function setUp(): void
     {
         $idLength = $this->idLength;
         $idCharSet = $this->idCharSet;

@@ -12,7 +12,7 @@ abstract class FilesAbstractTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $fullFilename = $this->makeFullFileName();
         @unlink($fullFilename);

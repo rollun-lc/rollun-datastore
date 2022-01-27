@@ -53,7 +53,7 @@ class HttpClientTest extends BaseDataStoreTest
      *
      * @throws DataStoreException
      */
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -72,7 +72,7 @@ class HttpClientTest extends BaseDataStoreTest
         $this->mysqlManager->createTable($this->tableName, $this->tableConfig);
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         $this->mysqlManager->deleteTable($this->tableName);
     }
