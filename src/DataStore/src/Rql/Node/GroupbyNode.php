@@ -36,4 +36,9 @@ class GroupbyNode extends AbstractNode
     {
         return 'groupby';
     }
+
+    public function toRql()
+    {
+        // TODO: Implement toRql() method.
+    }
 }

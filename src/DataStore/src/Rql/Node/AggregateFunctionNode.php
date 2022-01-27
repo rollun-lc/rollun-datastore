@@ -53,4 +53,13 @@ class AggregateFunctionNode extends AbstractQueryNode
     {
         return sprintf("%s(%s)", $this->function, $this->field);
     }
+
+    /**
+     * @return string|void
+     * @todo
+     */
+    public function toRql()
+    {
+        // TODO: Implement toRql() method.
+    }
 }

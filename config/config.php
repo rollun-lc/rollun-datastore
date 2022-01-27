@@ -4,11 +4,15 @@
  * @license LICENSE.md New BSD License
  */
 
-use Symfony\Component\Dotenv\Dotenv;
+/*use Symfony\Component\Dotenv\Dotenv;
 use Zend\ConfigAggregator\ConfigAggregator;
-use Zend\ConfigAggregator\PhpFileProvider;
+use Zend\ConfigAggregator\PhpFileProvider;*/
 
 // Make environment variables stored in .env accessible via getenv(), $_ENV or $_SERVER.
+use Laminas\ConfigAggregator\ConfigAggregator;
+use Laminas\ConfigAggregator\PhpFileProvider;
+use Symfony\Component\Dotenv\Dotenv;
+
 if (is_file('.env')) {
     (new Dotenv())->load('.env');
 }
@@ -17,13 +21,21 @@ if (is_file('.env')) {
 $appEnv = getenv('APP_ENV');
 
 $aggregator = new ConfigAggregator([
-    \Zend\Cache\ConfigProvider::class,
+    /*\Zend\Cache\ConfigProvider::class,
     \Zend\Mail\ConfigProvider::class,
     \Zend\Expressive\ConfigProvider::class,
     \Zend\Expressive\Router\ConfigProvider::class,
     \Zend\HttpHandlerRunner\ConfigProvider::class,
     \Zend\Db\ConfigProvider::class,
-    \Zend\Validator\ConfigProvider::class,
+    \Zend\Validator\ConfigProvider::class,*/
+
+    \Mezzio\ConfigProvider::class,
+    \Mezzio\Router\ConfigProvider::class,
+    \Laminas\Cache\ConfigProvider::class,
+    \Laminas\Mail\ConfigProvider::class,
+    \Laminas\Db\ConfigProvider::class,
+    \Laminas\Validator\ConfigProvider::class,
+    \Laminas\HttpHandlerRunner\ConfigProvider::class,
 
     // Rollun config
     \rollun\uploader\ConfigProvider::class,

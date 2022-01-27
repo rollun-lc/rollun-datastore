@@ -27,7 +27,7 @@ class TypeChar extends TypeAbstract
         }
 
         try {
-            $value = strval($this->value);
+            $value = (string) $this->value;
 
             if (mb_strlen($value) != strlen($value)) {
                 throw new TypeException('Multibyte symbols could not be converted to char');
@@ -46,7 +46,7 @@ class TypeChar extends TypeAbstract
             }
 
             return $value;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             throw new TypeException($e->getMessage());
         }
     }

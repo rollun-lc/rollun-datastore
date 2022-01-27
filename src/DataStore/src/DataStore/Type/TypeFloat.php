@@ -23,8 +23,8 @@ class TypeFloat extends TypeAbstract
     public function toTypeValue()
     {
         try {
-            return floatval($this->value);
-        } catch (\Exception $e) {
+            return (float) $this->value;
+        } catch (\Throwable $e) {
             throw new TypeException($e->getMessage());
         }
     }

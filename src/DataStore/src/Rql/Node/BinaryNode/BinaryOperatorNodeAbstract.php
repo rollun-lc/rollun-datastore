@@ -14,4 +14,13 @@ abstract class BinaryOperatorNodeAbstract extends AbstractComparisonOperatorNode
     {
         $this->field = $field;
     }
+
+    /**
+     * @return string|void
+     * @todo
+     */
+    public function toRql()
+    {
+        // TODO: Implement toRql() method.
+    }
 }

@@ -349,12 +349,10 @@ class FileObject extends Base
     /**
      * @inheritDoc
      */
-    public function fputcsv($fields, $delimiter = ',', $enclosure = '"', $escape = '\\')
+    public function fputcsv($fields, $delimiter = ',', $enclosure = '"', $escape = '\\'): void
     {
         CsvRfcUtils::checkPutCsvEscape($escape);
-        $result = $this->fwrite(CsvRfcUtils::strPutCsv($fields, $delimiter, $enclosure));
-
-        return $result === 0 ? null : $result;
+        $this->fwrite(CsvRfcUtils::strPutCsv($fields, $delimiter, $enclosure));
     }
 
     /**
