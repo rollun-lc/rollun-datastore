@@ -29,8 +29,8 @@ interface DataStoreInterface extends ReadInterface
      *
      * P.S. We return created item, because we can have default value on application level.
      *
-     * @param array|\ArrayObject|BaseDto $record
-     * @return array|\ArrayObject|BaseDto
+     * @param array|\ArrayObject|BaseDto|object $record
+     * @return array|\ArrayObject|BaseDto|object
      */
     public function create($record);
 
@@ -42,7 +42,7 @@ interface DataStoreInterface extends ReadInterface
      *
      * P.S. Method expect list of records.
      *
-     * @param  array[]|\ArrayObject[]|BaseDto[] $records
+     * @param  array[]|\ArrayObject[]|BaseDto[]|object $records
      * @return array
      */
     public function multiCreate($records);
@@ -57,8 +57,8 @@ interface DataStoreInterface extends ReadInterface
      * P.S. We return updated item, because we can have default value on application level.
      * Of course, those fields that are not listed in the record should not be changed in data store.
      *
-     * @param array|\ArrayObject|BaseDto $record
-     * @return array|\ArrayObject|BaseDto
+     * @param array|\ArrayObject|BaseDto|object $record
+     * @return array|\ArrayObject|BaseDto|object
      */
     public function update($record);
 
@@ -68,7 +68,7 @@ interface DataStoreInterface extends ReadInterface
      * - identifiers are required, in other case it should throw exception;
      * - method should return list of updated records.
      *
-     * @param  array[]|\ArrayObject[]|BaseDto[] $records
+     * @param  array[]|\ArrayObject[]|BaseDto[]|object $records
      * @return array
      */
     public function multiUpdate($records);
@@ -79,7 +79,7 @@ interface DataStoreInterface extends ReadInterface
      * - it should return list of updated record
      * - if regular record is not exist or record can't be updated it should pass it and start update next one
      *
-     * @param array|\ArrayObject|BaseDto $record
+     * @param array|\ArrayObject|BaseDto|object $record
      * @param Query $query
      * @return array
      */
@@ -91,7 +91,7 @@ interface DataStoreInterface extends ReadInterface
      * - if record can't be rewrote, it should throw exception.
      * - it should return rewrote record
      *
-     * @param array|\ArrayObject|BaseDto $record
+     * @param array|\ArrayObject|BaseDto|object $record
      * @return array|\ArrayObject|BaseDto
      */
     public function rewrite($record);
@@ -101,7 +101,7 @@ interface DataStoreInterface extends ReadInterface
      * Method should return deleted record.
      *
      * @param int|string $id
-     * @return array|\ArrayObject|BaseDto
+     * @return array|\ArrayObject|BaseDto|object
      */
     public function delete($id);
 
