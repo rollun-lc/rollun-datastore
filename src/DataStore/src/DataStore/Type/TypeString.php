@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -27,6 +28,15 @@ class TypeString extends TypeAbstract
         }
 
         try {
+            if ($this->value === true) {
+                return 'true';
+            }
+            if ($this->value === false) {
+                return 'false';
+            }
+            if (is_array($this->value)) {
+                return json_encode($this->value);
+            }
             return strval($this->value);
         } catch (\Exception $e) {
             throw new TypeException($e->getMessage());
