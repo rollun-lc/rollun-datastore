@@ -15,8 +15,8 @@ class StringFormatterTest extends TestCase
             'Convert string' => [$str = uniqid(), $str],
             'Convert int' => [123, '123'],
             'Convert float' => [12.345, '12.345'],
-            'Convert bool false' => [false, 'false'],
-            'Convert bool true' => [true, 'true'],
+            'Convert bool false' => [false, ''],
+            'Convert bool true' => [true, '1'],
             'Convert associative array' => [['key' => 'value'], '{"key":"value"}'],
             'Convert list array' => [['str', 123, 1.23], '["str",123,1.23]']
         ];

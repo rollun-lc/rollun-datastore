@@ -28,12 +28,6 @@ class TypeString extends TypeAbstract
         }
 
         try {
-            if ($this->value === true) {
-                return 'true';
-            }
-            if ($this->value === false) {
-                return 'false';
-            }
             if (is_array($this->value)) {
                 return json_encode($this->value);
             }
