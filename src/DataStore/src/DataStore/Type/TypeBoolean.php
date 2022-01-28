@@ -23,6 +23,9 @@ class TypeBoolean extends TypeAbstract
     public function toTypeValue()
     {
         try {
+            if ($this->value === 'false') {
+                return false;
+            }
             return boolval($this->value);
         } catch (\Exception $e) {
             throw new TypeException($e->getMessage());
