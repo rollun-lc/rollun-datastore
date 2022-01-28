@@ -33,6 +33,6 @@ abstract class AbstractFormatter implements FormatterInterface
      */
     protected function getTypeCaster($type, $value)
     {
-        return $this->typePluginManager->get($type, $value);
+        return $this->typePluginManager->get($type, ['value' => $value]);
     }
 }
