@@ -4,7 +4,7 @@ namespace rollun\test\unit\DataStore\Rql\Node;
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node\AlikeGlobNode;
-use Graviton\RqlParser\Parser\DataType\Glob;
+use Xiag\Rql\Parser\DataType\Glob;
 
 class AlikeGlobNodeTest extends TestCase
 {

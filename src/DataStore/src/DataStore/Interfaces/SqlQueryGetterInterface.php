@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\DataStore\Interfaces;
 
-use Graviton\RqlParser\Query;
+use Xiag\Rql\Parser\Query;
 
 /**
  * Interface SqlQueryGetterInterface

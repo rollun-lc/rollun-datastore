@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\DataSource;
 
-use Graviton\RqlParser\Query;
+use Xiag\Rql\Parser\Query;
 use rollun\datastore\DataStore\DbTable;
 
 /**

@@ -11,7 +11,7 @@ use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\RqlQuery;
-use Graviton\RqlParser\Query;
+use Xiag\Rql\Parser\Query;
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Db\Sql\Predicate\Expression;
 use Laminas\Db\Sql\Select;

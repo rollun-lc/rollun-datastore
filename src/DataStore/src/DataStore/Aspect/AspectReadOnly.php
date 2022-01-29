@@ -11,7 +11,7 @@ use rollun\datastore\DataStore\Traits\NoSupportCreateTrait;
 use rollun\datastore\DataStore\Traits\NoSupportDeleteAllTrait;
 use rollun\datastore\DataStore\Traits\NoSupportDeleteTrait;
 use rollun\datastore\DataStore\Traits\NoSupportUpdateTrait;
-use Graviton\RqlParser\Query;
+use Xiag\Rql\Parser\Query;
 
 /**
  * Class AspectReadOnly

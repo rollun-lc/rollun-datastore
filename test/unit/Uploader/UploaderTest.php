@@ -9,7 +9,7 @@ namespace rollun\test\unit\Uploader;
 use rollun\datastore\DataStore\Memory;
 use rollun\uploader\Uploader;
 use PHPUnit\Framework\TestCase;
-use Graviton\RqlParser\Parser\Query;
+use Xiag\Rql\Parser\Query;
 
 class UploaderTest extends TestCase
 {

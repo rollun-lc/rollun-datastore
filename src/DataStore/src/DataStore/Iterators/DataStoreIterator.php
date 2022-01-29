@@ -7,9 +7,9 @@
 namespace rollun\datastore\DataStore\Iterators;
 
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
-use Graviton\RqlParser\Node\Query\ScalarOperator;
-use Graviton\RqlParser\Query;
-use Graviton\RqlParser\Node;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator;
+use Xiag\Rql\Parser\Query;
+use Xiag\Rql\Parser\Node;
 
 /**
  * Outer iterator for rollun\datastore\DataStore\Read\ReadInterface objects

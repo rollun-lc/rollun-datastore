@@ -11,12 +11,12 @@ use rollun\datastore\DataStore\Traits\NoSupportCreateTrait;
 use rollun\datastore\DataStore\Traits\NoSupportDeleteAllTrait;
 use rollun\datastore\DataStore\Traits\NoSupportDeleteTrait;
 use rollun\datastore\DataStore\Traits\NoSupportUpdateTrait;
-use Graviton\RqlParser\Node\AbstractQueryNode;
-use Graviton\RqlParser\Node\Query\AbstractComparisonOperatorNode;
-use Graviton\RqlParser\Node\Query\AbstractLogicOperatorNode;
-use Graviton\RqlParser\Node\SelectNode;
-use Graviton\RqlParser\Node\SortNode;
-use Graviton\RqlParser\Query;
+use Xiag\Rql\Parser\Node\AbstractQueryNode;
+use Xiag\Rql\Parser\Node\Query\AbstractComparisonOperatorNode;
+use Xiag\Rql\Parser\Node\Query\AbstractLogicOperatorNode;
+use Xiag\Rql\Parser\Node\SelectNode;
+use Xiag\Rql\Parser\Node\SortNode;
+use Xiag\Rql\Parser\Query;
 
 abstract class AbstractMapperAspect extends AspectAbstract
 {

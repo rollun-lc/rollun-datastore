@@ -11,7 +11,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\Middleware\JsonRenderer;
 use rollun\test\functional\DataStore\Middleware\BaseMiddlewareTest;
-use Zend\Diactoros\Response;
+use Laminas\Diactoros\Response;
 
 abstract class BaseHandlerTest extends BaseMiddlewareTest
 {

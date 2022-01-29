@@ -14,7 +14,7 @@ use Laminas\ConfigAggregator\PhpFileProvider;
 use Symfony\Component\Dotenv\Dotenv;
 
 if (is_file('.env')) {
-    (new Dotenv())->load('.env');
+    (new Dotenv())->usePutenv(true)->load('.env');
 }
 
 // Determine application environment ('dev' or 'prod').

@@ -9,8 +9,8 @@ use rollun\dic\InsideConstruct;
 use rollun\repository\Interfaces\FieldMapperInterface;
 use rollun\repository\Interfaces\ModelRepositoryInterface;
 use rollun\repository\Interfaces\ModelInterface;
-use Graviton\RqlParser\Node\Query\ArrayOperator\InNode;
-use Graviton\RqlParser\Query;
+use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
+use Xiag\Rql\Parser\Query;
 
 /**
  * Class ModelRepository

@@ -5,8 +5,8 @@ namespace rollun\datastore\Middleware\Handler;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Graviton\RqlParser\Node\LimitNode;
-use Graviton\RqlParser\Query;
+use Xiag\Rql\Parser\Node\LimitNode;
+use Xiag\Rql\Parser\Query;
 use Laminas\Diactoros\Response;
 use Laminas\Diactoros\Stream;
 

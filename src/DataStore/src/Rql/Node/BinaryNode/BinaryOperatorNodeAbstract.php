@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\Rql\Node\BinaryNode;
 
-use Graviton\RqlParser\Node\Query\AbstractComparisonOperatorNode;
+use Xiag\Rql\Parser\Node\Query\AbstractComparisonOperatorNode;
 
 abstract class BinaryOperatorNodeAbstract extends AbstractComparisonOperatorNode
 {

@@ -12,8 +12,8 @@ use rollun\datastore\DataStore\SerializedDbTable;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\datastore\TableGateway\TableManagerMysql;
 use rollun\dic\InsideConstruct;
-use Zend\Db\TableGateway\TableGateway;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\Db\TableGateway\TableGateway;
+use Laminas\ServiceManager\ServiceManager;
 
 class SerializedDbTableTest extends TestCase
 {

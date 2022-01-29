@@ -9,8 +9,8 @@ namespace rollun\test\functional\DataStore\Middleware;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\Middleware\JsonRenderer;
-use Zend\Diactoros\Response\JsonResponse;
-use Zend\Diactoros\ServerRequest;
+use Laminas\Diactoros\Response\JsonResponse;
+use Laminas\Diactoros\ServerRequest;
 
 class JsonRendererTest extends BaseMiddlewareTest
 {

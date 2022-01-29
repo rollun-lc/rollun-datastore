@@ -9,7 +9,7 @@ namespace rollun\test\old\DataStore;
 use rollun\datastore\DataSource\DbTableDataSource;
 use rollun\datastore\DataStore\Cacheable;
 use rollun\datastore\DataStore\DbTable;
-use Zend\Db\TableGateway\TableGateway;
+use Laminas\Db\TableGateway\TableGateway;
 
 class CacheableTest extends AbstractTest
 {

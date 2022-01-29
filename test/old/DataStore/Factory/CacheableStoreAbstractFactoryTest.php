@@ -7,7 +7,7 @@
 namespace rollun\test\old\DataStore\Factory;
 
 use PHPUnit\Framework\TestCase;
-use Zend\ServiceManager\Factory\AbstractFactoryInterface;
+use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
 
 class CacheableStoreAbstractFactoryTest extends TestCase
 {

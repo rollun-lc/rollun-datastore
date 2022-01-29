@@ -6,8 +6,8 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
 use rollun\datastore\Rql\Node\BinaryNode\IeNode;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\BinaryOperator\IeTokenParser;
-use Graviton\RqlParser\Parser\Token;
-use Graviton\RqlParser\Parser\TokenStream;
+use Xiag\Rql\Parser\Token;
+use Xiag\Rql\Parser\TokenStream;
 
 class IeTokenParserTest extends TestCase
 {

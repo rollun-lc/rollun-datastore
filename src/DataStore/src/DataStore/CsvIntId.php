@@ -7,6 +7,7 @@
 namespace rollun\datastore\DataStore;
 
 use Symfony\Component\Filesystem\LockHandler;
+use Symfony\Component\Lock\LockInterface;
 
 /**
  * Class CsvIntId
@@ -17,7 +18,7 @@ class CsvIntId extends CsvBase
     /**
      * {@inheritdoc}
      */
-    public function __construct($filename, $delimiter, LockHandler $lockHandler)
+    public function __construct($filename, $delimiter, LockInterface $lockHandler)
     {
         parent::__construct($filename, $delimiter, $lockHandler);
 

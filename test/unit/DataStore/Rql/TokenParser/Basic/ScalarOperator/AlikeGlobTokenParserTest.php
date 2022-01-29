@@ -6,10 +6,10 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
 use rollun\datastore\Rql\Node\AlikeGlobNode;
 use rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator\AlikeGlobTokenParser;
-use Graviton\RqlParser\Parser\ExpressionParser;
-use Graviton\RqlParser\Parser\Parser;
-use Graviton\RqlParser\Parser\Token;
-use Graviton\RqlParser\Parser\TokenStream;
+use Xiag\Rql\Parser\ExpressionParser;
+use Xiag\Rql\Parser\Parser;
+use Xiag\Rql\Parser\Token;
+use Xiag\Rql\Parser\TokenStream;
 
 class AlikeGlobTokenParserTest extends TestCase
 {

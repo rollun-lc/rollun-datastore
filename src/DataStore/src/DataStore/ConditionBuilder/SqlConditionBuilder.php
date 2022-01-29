@@ -7,8 +7,8 @@
 namespace rollun\datastore\DataStore\ConditionBuilder;
 
 use rollun\datastore\Rql\Node\BinaryNode\BinaryOperatorNodeAbstract;
-use Graviton\RqlParser\DataType\Glob;
-use Graviton\RqlParser\Node\Query\AbstractScalarOperatorNode;
+use Xiag\Rql\Parser\DataType\Glob;
+use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
 use rollun\datastore\DataStore\DataStoreException;
 use Laminas\Db\Adapter\AdapterInterface;
 

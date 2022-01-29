@@ -37,8 +37,7 @@ class TypeStringTest extends TestCase
     public function testToTypeValueFailWithObject()
     {
         $this->expectException(TypeException::class);
-        $this->createObject(new class {
-        })->toTypeValue();
+        $this->createObject(new class {})->toTypeValue();
     }
 
     public function testToTypeValueFailWithCallable()

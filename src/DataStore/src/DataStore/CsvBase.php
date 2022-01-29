@@ -9,8 +9,9 @@ namespace rollun\datastore\DataStore;
 use rollun\datastore\DataSource\DataSourceInterface;
 use rollun\datastore\DataStore\Iterators\CsvIterator;
 use rollun\datastore\DataStore\ConditionBuilder\PhpConditionBuilder;
-use Symfony\Component\Filesystem\LockHandler;
-use Graviton\RqlParser\Query;
+//use Symfony\Component\Filesystem\LockHandler;
+use Symfony\Component\Lock\LockInterface;
+use Xiag\Rql\Parser\Query;
 
 /**
  * Class CsvBase
@@ -44,10 +45,10 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      *
      * @param string $filename
      * @param string $delimiter - csv field delimiter
-     * @param LockHandler $lockHandler
+     * @param LockInterface $lockHandler
      * @throws \rollun\datastore\DataStore\DataStoreException
      */
-    public function __construct($filename, $delimiter, LockHandler $lockHandler)
+    public function __construct($filename, $delimiter, LockInterface $lockHandler)
     {
         // At first checks existing file as it is
         // If doesn't exist converts to full name in the temporary folder
@@ -314,7 +315,8 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      */
     protected function lockFile($nbTries = 0)
     {
-        if (!$this->lockHandler->lock()) {
+        //if (!$this->lockHandler->lock()) {
+        if (!$this->lockHandler->acquire()) {
             if ($nbTries >= static::MAX_LOCK_TRIES) {
                 throw new DataStoreException(
                     sprintf("Reach max retry (%s) for locking queue file {$this->filename}", static::MAX_LOCK_TRIES)

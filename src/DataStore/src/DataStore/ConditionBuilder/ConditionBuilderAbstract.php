@@ -7,11 +7,11 @@
 namespace rollun\datastore\DataStore\ConditionBuilder;
 
 use rollun\datastore\Rql\Node\BinaryNode\BinaryOperatorNodeAbstract;
-use Graviton\RqlParser\DataType\Glob;
-use Graviton\RqlParser\Node\AbstractQueryNode;
-use Graviton\RqlParser\Node\Query\AbstractArrayOperatorNode;
-use Graviton\RqlParser\Node\Query\AbstractLogicOperatorNode;
-use Graviton\RqlParser\Node\Query\AbstractScalarOperatorNode;
+use Xiag\Rql\Parser\DataType\Glob;
+use Xiag\Rql\Parser\Node\AbstractQueryNode;
+use Xiag\Rql\Parser\Node\Query\AbstractArrayOperatorNode;
+use Xiag\Rql\Parser\Node\Query\AbstractLogicOperatorNode;
+use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
 use rollun\datastore\DataStore\DataStoreException;
 
 /**
@@ -165,7 +165,7 @@ abstract class ConditionBuilderAbstract
     /**
      * Return value from Glob
      *
-     * I have no idea why, but Graviton\RqlParser\DataType\Glob
+     * I have no idea why, but Xiag\Rql\Parser\DataType\Glob
      * have not method getValue(). We fix it/
      *
      * @see Glob

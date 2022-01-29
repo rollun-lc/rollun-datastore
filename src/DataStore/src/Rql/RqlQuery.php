@@ -7,7 +7,7 @@
 namespace rollun\datastore\Rql;
 
 use rollun\datastore\Rql\Node\GroupbyNode;
-use Graviton\RqlParser\Query;
+use Xiag\Rql\Parser\Query;
 
 class RqlQuery extends Query
 {

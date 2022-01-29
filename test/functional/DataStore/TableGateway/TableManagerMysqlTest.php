@@ -1,6 +1,6 @@
 <?php
 
-namespace rollun\test\functional\DataStore\Middleware\Handler;
+namespace rollun\test\functional\DataStore\TableGateway;
 
 use Interop\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
@@ -103,17 +103,17 @@ class TableManagerMysqlTest extends TestCase
         $tableInfo = [
             'testTable1' => "{$this->spaces(4)}With columns:".PHP_EOL."{$this->spaces(8)}id -> int".PHP_EOL
                 ."{$this->spaces(8)}name -> varchar".PHP_EOL.PHP_EOL."{$this->spaces(4)}With constraints:".PHP_EOL
-                ."{$this->spaces(8)}_zf_testTable1_PRIMARY -> PRIMARY KEY".PHP_EOL."{$this->spaces(12)}column: id"
-                .PHP_EOL."{$this->spaces(8)}_zf_testTable1_UniqueKey_testTable1_name -> UNIQUE".PHP_EOL
+                ."{$this->spaces(8)}_laminas_testTable1_PRIMARY -> PRIMARY KEY".PHP_EOL."{$this->spaces(12)}column: id"
+                .PHP_EOL."{$this->spaces(8)}_laminas_testTable1_UniqueKey_testTable1_name -> UNIQUE".PHP_EOL
                 ."{$this->spaces(12)}column: name".PHP_EOL,
             'testTable2' => "{$this->spaces(4)}With columns:".PHP_EOL."{$this->spaces(8)}id -> int".PHP_EOL
                 ."{$this->spaces(8)}name -> varchar".PHP_EOL.PHP_EOL."{$this->spaces(4)}With constraints:".PHP_EOL
-                ."{$this->spaces(8)}_zf_testTable2_PRIMARY -> PRIMARY KEY".PHP_EOL."{$this->spaces(12)}column: id"
+                ."{$this->spaces(8)}_laminas_testTable2_PRIMARY -> PRIMARY KEY".PHP_EOL."{$this->spaces(12)}column: id"
                 .PHP_EOL."{$this->spaces(8)}ForeignKey_testTable2_id -> FOREIGN KEY".PHP_EOL
                 ."{$this->spaces(12)}column: id => testTable1.id".PHP_EOL."{$this->spaces(12)}OnDeleteRule: CASCADE"
                 .PHP_EOL."{$this->spaces(12)}OnUpdateRule: NO ACTION".PHP_EOL,
             'testTable3' => "{$this->spaces(4)}With columns:".PHP_EOL."{$this->spaces(8)}id -> varchar".PHP_EOL.PHP_EOL
-                ."{$this->spaces(4)}With constraints:".PHP_EOL."{$this->spaces(8)}_zf_testTable3_PRIMARY -> PRIMARY KEY"
+                ."{$this->spaces(4)}With constraints:".PHP_EOL."{$this->spaces(8)}_laminas_testTable3_PRIMARY -> PRIMARY KEY"
                 .PHP_EOL."{$this->spaces(12)}column: id".PHP_EOL,
         ];
 
@@ -157,10 +157,12 @@ class TableManagerMysqlTest extends TestCase
             'testTable3',
         ];
 
-        $object = $this->createObject();
+        $object = $this->createObject([
+            TableManagerMysql::KEY_AUTOCREATE_TABLES => $this->tableScheme,
+        ]);
 
         foreach ($tables as $table) {
-            $object->createTable($table, $this->tableScheme[$table]);
+            //$object->createTable($table, $this->tableScheme[$table]);
             $this->assertEquals($this->getTableInfo($table), $object->getTableInfoStr($table));
         }
 

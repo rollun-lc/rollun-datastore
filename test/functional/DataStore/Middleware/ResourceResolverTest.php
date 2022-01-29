@@ -8,8 +8,8 @@ namespace rollun\test\functional\DataStore\Middleware;
 
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\Middleware\ResourceResolver;
-use Zend\Diactoros\ServerRequest;
-use Zend\Diactoros\Uri;
+use Laminas\Diactoros\ServerRequest;
+use Laminas\Diactoros\Uri;
 
 class ResourceResolverTest extends BaseMiddlewareTest
 {

@@ -11,8 +11,8 @@ use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\Middleware\DataStoreRest;
 use rollun\datastore\Middleware\Handler;
 use SplQueue;
-use Zend\Stratigility\MiddlewarePipe;
-use Zend\Stratigility\Route;
+use Laminas\Stratigility\MiddlewarePipe;
+use Laminas\Stratigility\Route;
 
 class DataStoreRestTest extends TestCase
 {
@@ -30,6 +30,10 @@ class DataStoreRestTest extends TestCase
         $middlewarePipe->pipe(new Handler\DeleteHandler($dataStoreMock));
         $middlewarePipe->pipe(new Handler\ErrorHandler());
 
-        $this->assertAttributeEquals($middlewarePipe, 'middlewarePipe', new DataStoreRest($dataStoreMock));
+        //$this->assertAttributeEquals($middlewarePipe, 'middlewarePipe', new DataStoreRest($dataStoreMock));
+        $object = new DataStoreRest($dataStoreMock);
+        $reflection = new \ReflectionProperty($object, 'middlewarePipe');
+        $reflection->setAccessible(true);
+        $this->assertEquals($middlewarePipe, $reflection->getValue($object));
     }
 }

@@ -12,7 +12,7 @@ use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\Middleware\Handler\CreateHandler;
 use rollun\datastore\Rql\RqlQuery;
-use Zend\Diactoros\ServerRequest;
+use Laminas\Diactoros\ServerRequest;
 
 class CreateHandlerTest extends BaseHandlerTest
 {

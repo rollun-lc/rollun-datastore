@@ -14,10 +14,10 @@ use rollun\datastore\DataStore\HttpClient;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\logger\LifeCycleToken;
 use rollun\utils\Json\Serializer;
-use Zend\Http\Client;
-use Zend\Http\Header\HeaderInterface;
-use Zend\Http\Headers;
-use Zend\Http\Response;
+use Laminas\Http\Client;
+use Laminas\Http\Header\HeaderInterface;
+use Laminas\Http\Headers;
+use Laminas\Http\Response;
 
 class HttpClientTest extends TestCase
 {

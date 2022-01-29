@@ -6,8 +6,8 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
 use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
 use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqfTokenParser;
-use Graviton\RqlParser\Parser\Token;
-use Graviton\RqlParser\Parser\TokenStream;
+use Xiag\Rql\Parser\Token;
+use Xiag\Rql\Parser\TokenStream;
 
 class EqfTokenParserTest extends TestCase
 {

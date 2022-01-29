@@ -8,7 +8,7 @@ namespace rollun\datastore\DataStore\Aspect;
 
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
-use Graviton\RqlParser\Query;
+use Xiag\Rql\Parser\Query;
 
 /**
  * Class AspectAbstract

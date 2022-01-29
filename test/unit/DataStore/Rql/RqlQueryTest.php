@@ -6,9 +6,9 @@ use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
 use rollun\datastore\Rql\Node\GroupbyNode;
 use rollun\datastore\Rql\RqlQuery;
-use Graviton\RqlParser\Parser\Node\LimitNode;
-use Graviton\RqlParser\Parser\Node\SelectNode;
-use Graviton\RqlParser\Parser\Node\SortNode;
+use Xiag\Rql\Parser\Node\LimitNode;
+use Xiag\Rql\Parser\Node\SelectNode;
+use Xiag\Rql\Parser\Node\SortNode;
 
 class RqlQueryTest extends TestCase
 {
@@ -17,7 +17,10 @@ class RqlQueryTest extends TestCase
         $groupByNode = new GroupbyNode([]);
         $object = new RqlQuery();
         $object->setGroupBy($groupByNode);
-        $this->assertAttributeEquals($groupByNode, 'groupBy', $object);
+        //$this->assertAttributeEquals($groupByNode, 'groupBy', $object);
+        $reflection = new \ReflectionProperty($object, 'groupBy');
+        $reflection->setAccessible(true);
+        $this->assertEquals($groupByNode, $reflection->getValue($object));
     }
 
     public function testConstructWithRqlQuery()

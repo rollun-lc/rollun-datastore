@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\Rql\Node;
 
-use Graviton\RqlParser\Node\SelectNode as StdSelectNode;
+use Xiag\Rql\Parser\Node\SelectNode as StdSelectNode;
 
 class AggregateSelectNode extends StdSelectNode
 {

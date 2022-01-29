@@ -6,6 +6,7 @@
 
 namespace rollun\test\functional\DataStore\DataStore;
 
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
@@ -13,8 +14,8 @@ use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\TableManagerMysql;
-use Graviton\RqlParser\Parser\Query;
-use Zend\Db\TableGateway\TableGateway;
+use Xiag\Rql\Parser\Query;
+use Laminas\Db\TableGateway\TableGateway;
 
 class DbTableTest extends TestCase
 {
@@ -299,14 +300,14 @@ class DbTableTest extends TestCase
         $loggerMock->expects($this->atLeast(7))
             ->method('debug')
             ->withConsecutive(
-                [$this->isType('string'), $this->contains('insert')],
-                [$this->isType('string'), $this->contains('read')],
-                [$this->isType('string'), $this->contains('update')],
-                [$this->isType('string'), $this->contains('read')],
-                [$this->isType('string'), $this->contains('query')],
-                [$this->isType('string'), $this->contains('read')],
-                [$this->isType('string'), $this->contains('read')],
-                [$this->isType('string'), $this->contains('delete')]
+                [$this->isType('string'), Assert::containsEqual('insert')],
+                [$this->isType('string'), Assert::containsEqual('read')],
+                [$this->isType('string'), Assert::containsEqual('update')],
+                [$this->isType('string'), Assert::containsEqual('read')],
+                [$this->isType('string'), Assert::containsEqual('query')],
+                [$this->isType('string'), Assert::containsEqual('read')],
+                [$this->isType('string'), Assert::containsEqual('read')],
+                [$this->isType('string'), Assert::containsEqual('delete')]
             );
 
         $dataStore->create([
@@ -359,11 +360,11 @@ class DbTableTest extends TestCase
         $loggerMock->expects($this->exactly(4))
             ->method('debug')
             ->withConsecutive(
-                [$this->isType('string'), $this->contains('create')],
-                [$this->isType('string'), $this->contains('update')],
-                [$this->isType('string'), $this->contains('read')],
-                [$this->isType('string'), $this->contains('read')],
-                [$this->isType('string'), $this->contains('delete')]
+                [$this->isType('string'), Assert::containsEqual('create')],
+                [$this->isType('string'), Assert::containsEqual('update')],
+                [$this->isType('string'), Assert::containsEqual('read')],
+                [$this->isType('string'), Assert::containsEqual('read')],
+                [$this->isType('string'), Assert::containsEqual('delete')]
             );
 
         try {

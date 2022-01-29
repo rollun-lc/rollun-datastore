@@ -21,11 +21,11 @@ use rollun\datastore\DataStore\Interfaces\RefreshableInterface;
 use rollun\datastore\DataStore\Memory;
 use rollun\datastore\Middleware\DataStoreApi;
 use rollun\datastore\Middleware;
-use Zend\Diactoros\Response\JsonResponse;
-use Zend\Diactoros\ServerRequest;
-use Zend\Diactoros\Stream;
-use Zend\Diactoros\Uri;
-use Zend\Stratigility\MiddlewarePipe;
+use Laminas\Diactoros\Response\JsonResponse;
+use Laminas\Diactoros\ServerRequest;
+use Laminas\Diactoros\Stream;
+use Laminas\Diactoros\Uri;
+use Laminas\Stratigility\MiddlewarePipe;
 
 class DataStoreApiTest extends BaseMiddlewareTest
 {
@@ -219,7 +219,10 @@ class DataStoreApiTest extends BaseMiddlewareTest
         $middlewarePipe->pipe(new Middleware\JsonRenderer());
 
         $objects = new DataStoreApi($dataStoreDeterminator);
-        $this->assertAttributeEquals($middlewarePipe, 'middlewarePipe', $objects);
+        //$this->assertAttributeEquals($middlewarePipe, 'middlewarePipe', $objects);
+        $reflection = new \ReflectionProperty($objects, 'middlewarePipe');
+        $reflection->setAccessible(true);
+        $this->assertEquals($middlewarePipe, $reflection->getValue($objects));
     }
 
     protected function processSuccessCreateAndItemDoesNotExist()

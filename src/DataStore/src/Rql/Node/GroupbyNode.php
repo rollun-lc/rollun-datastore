@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\Rql\Node;
 
-use Graviton\RqlParser\AbstractNode;
+use Xiag\Rql\Parser\AbstractNode;
 
 class GroupbyNode extends AbstractNode
 {

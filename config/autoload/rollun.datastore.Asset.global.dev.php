@@ -80,7 +80,7 @@ return [
             'class'     => \rollun\datastore\DataStore\Aspect\AspectWithEventManagerAbstract::class,
             'dataStore' => 'testDataStore1',
             'listeners' => [
-                'onPostUpdate' => [function (\Zend\EventManager\Event $event) {
+                'onPostUpdate' => [function (\Laminas\EventManager\Event $event) {
                     file_put_contents('test_on_post_create.json', json_encode($event->getParam('result')));
                 }],
             ]

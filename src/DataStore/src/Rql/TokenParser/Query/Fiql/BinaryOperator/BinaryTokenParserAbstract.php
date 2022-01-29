@@ -6,9 +6,9 @@
 
 namespace rollun\datastore\Rql\TokenParser\Query\Fiql\BinaryOperator;
 
-use Graviton\RqlParser\Token;
-use Graviton\RqlParser\TokenParser\Query\AbstractFiqlTokenParser;
-use Graviton\RqlParser\TokenStream;
+use Xiag\Rql\Parser\Token;
+use Xiag\Rql\Parser\TokenParser\Query\AbstractFiqlTokenParser;
+use Xiag\Rql\Parser\TokenStream;
 
 abstract class BinaryTokenParserAbstract extends AbstractFiqlTokenParser
 {

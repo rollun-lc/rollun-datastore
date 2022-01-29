@@ -8,7 +8,7 @@ namespace rollun\test\functional\DataStore\ConditionBuilder;
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
-use Graviton\RqlParser\Parser\DataType\Glob;
+use Xiag\Rql\Parser\DataType\Glob;
 
 abstract class ConditionBuilderTest extends TestCase
 {
@@ -52,8 +52,7 @@ abstract class ConditionBuilderTest extends TestCase
      */
     public function testInvoke($rootQueryNode, $out)
     {
-        $condition = $this->createObject()
-            ->__invoke($rootQueryNode);
+        $condition = $this->createObject()->__invoke($rootQueryNode);
         $this->assertEquals($out, $condition);
     }
 }

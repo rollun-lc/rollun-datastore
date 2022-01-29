@@ -27,8 +27,8 @@ class TypeString extends TypeAbstract
         }
 
         try {
-            return strval($this->value);
-        } catch (\Exception $e) {
+            return (string) $this->value;
+        } catch (\Throwable $e) {
             throw new TypeException($e->getMessage());
         }
     }

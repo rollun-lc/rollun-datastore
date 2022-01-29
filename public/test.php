@@ -5,13 +5,13 @@
  */
 
 use rollun\datastore\Middleware\DataStoreApi;
-use Zend\Diactoros\ServerRequestFactory;
-use Zend\HttpHandlerRunner\Emitter\SapiEmitter;
-use Zend\HttpHandlerRunner\RequestHandlerRunner;
-use Zend\Stratigility\Middleware\ErrorResponseGenerator;
-use Zend\Diactoros\Response;
-use Zend\Diactoros\ServerRequest;
-use Zend\Stratigility\MiddlewarePipe;
+use Laminas\Diactoros\ServerRequestFactory;
+use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
+use Laminas\HttpHandlerRunner\RequestHandlerRunner;
+use Laminas\Stratigility\Middleware\ErrorResponseGenerator;
+use Laminas\Diactoros\Response;
+use Laminas\Diactoros\ServerRequest;
+use Laminas\Stratigility\MiddlewarePipe;
 
 error_reporting(E_ALL ^ E_USER_DEPRECATED);
 
@@ -33,7 +33,7 @@ $request = ServerRequestFactory::fromGlobals(
 );
 
 
-/** @var \Zend\ServiceManager\ServiceManager $container */
+/** @var \Laminas\ServiceManager\ServiceManager $container */
 $container = require 'config/container.php';
 \rollun\dic\InsideConstruct::setContainer($container);
 

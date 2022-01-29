@@ -8,7 +8,7 @@ namespace rollun\test\old\DataStore;
 
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
-use Zend\Db\TableGateway\TableGateway;
+use Laminas\Db\TableGateway\TableGateway;
 
 class DbTableMultiInsertTest extends DbTableTest
 {

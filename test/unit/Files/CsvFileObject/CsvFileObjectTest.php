@@ -15,14 +15,14 @@ class CsvFileObjectTest extends FilesAbstractTest
         parent::setUp();
 
         // set error handler
-        set_error_handler(
+        /*set_error_handler(
             function ($errno, $errstr) {
                 if (0 === error_reporting()) {
                     return false;
                 }
                 throw new \Exception($errstr, 500);
             }
-        );
+        );*/
     }
 
     /**

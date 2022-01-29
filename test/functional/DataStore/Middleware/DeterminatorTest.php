@@ -22,8 +22,8 @@ use rollun\datastore\Middleware\ResourceResolver;
 use rollun\datastore\Middleware\RestException;
 use rollun\test\unit\DataStore\DataStore\Aspect\StringFormatter;
 use TypeError;
-use Zend\Diactoros\Response;
-use Zend\Diactoros\ServerRequest;
+use Laminas\Diactoros\Response;
+use Laminas\Diactoros\ServerRequest;
 
 class DeterminatorTest extends TestCase
 {

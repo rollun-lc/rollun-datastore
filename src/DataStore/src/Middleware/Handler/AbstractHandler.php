@@ -11,7 +11,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\Middleware\DataStoreAbstract;
 use rollun\datastore\Middleware\JsonRenderer;
-use Graviton\RqlParser\Query;
+use Xiag\Rql\Parser\Query;
 use Laminas\Diactoros\Stream;
 
 abstract class AbstractHandler extends DataStoreAbstract

@@ -10,6 +10,8 @@ use Interop\Container\ContainerInterface;
 use rollun\datastore\DataStore\CsvBase;
 use Symfony\Component\Filesystem\LockHandler;
 use rollun\datastore\DataStore\DataStoreException;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\Store\FlockStore;
 
 /**
  * Create and return an instance of the array in CsvBase
@@ -63,7 +65,9 @@ class CsvAbstractFactory extends DataStoreAbstractFactory
 
         $filename = $serviceConfig[self::KEY_FILENAME];
         $delimiter = isset($serviceConfig[self::KEY_DELIMITER]) ? $serviceConfig[self::KEY_DELIMITER] : null;
-        $lockHandler = new LockHandler($filename);
+        //$lockHandler = new LockHandler($filename);
+        $lockFactory = new LockFactory(new FlockStore($filename));
+        $lockHandler = $lockFactory->createLock('csv-data-store');
 
         $this::$KEY_IN_CREATE = 0;
 

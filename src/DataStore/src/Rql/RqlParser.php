@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\Rql;
 
-use Graviton\RqlParser\SubLexerChain;
+use Xiag\Rql\Parser\SubLexerChain;
 use rollun\datastore\Rql\TokenParser\GroupbyTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqfTokenParser as BasicEqfTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqnTokenParser as BasicEqnTokenParser;
@@ -24,13 +24,13 @@ use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\MatchTokenParser 
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\ContainsTokenParser as FiqlContainsTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\LikeGlobTokenParser as FiqlLikeGlobTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\AlikeGlobTokenParser as FiqlAlikeGlobTokenParser;
-use Graviton\RqlParser\ExpressionParser;
-use Graviton\RqlParser\Lexer;
-use Graviton\RqlParser\Node\SortNode;
-use Graviton\RqlParser\Query;
-use Graviton\RqlParser\TokenParser;
-use Graviton\RqlParser\TokenParserGroup;
-use Graviton\RqlParser\TypeCaster;
+use Xiag\Rql\Parser\ExpressionParser;
+use Xiag\Rql\Parser\Lexer;
+use Xiag\Rql\Parser\Node\SortNode;
+use Xiag\Rql\Parser\Query;
+use Xiag\Rql\Parser\TokenParser;
+use Xiag\Rql\Parser\TokenParserGroup;
+use Xiag\Rql\Parser\TypeCaster;
 use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
 use rollun\datastore\DataStore\ConditionBuilder\RqlConditionBuilder;
 use rollun\datastore\DataStore\DataStoreAbstract;
@@ -120,8 +120,8 @@ class RqlParser
     public function decode($rqlQueryString)
     {
         $rqlQueryString = RqlParser::prepareStringRql($rqlQueryString);
-        //$queryTokenParser = new TokenParserGroup();
-        /*$queryTokenParser->addTokenParser(new TokenParser\Query\GroupTokenParser($queryTokenParser))
+        $queryTokenParser = new TokenParserGroup();
+        $queryTokenParser->addTokenParser(new TokenParser\Query\GroupTokenParser($queryTokenParser))
             ->addTokenParser(new TokenParser\Query\Basic\LogicOperator\AndTokenParser($queryTokenParser))
             ->addTokenParser(new TokenParser\Query\Basic\LogicOperator\OrTokenParser($queryTokenParser))
             ->addTokenParser(new TokenParser\Query\Basic\LogicOperator\NotTokenParser($queryTokenParser))
@@ -156,45 +156,7 @@ class RqlParser
             ->addTokenParser(new FiqlEqtTokenParser())
             ->addTokenParser(new FiqlEqnTokenParser())
             ->addTokenParser(new FiqlEqfTokenParser())
-            ->addTokenParser(new FiqlIeTokenParser());*/
-        $queryTokenParser = new SubLexerChain();
-        $queryTokenParser
-            ->addSubLexer(new TokenParser\Query\GroupTokenParser($queryTokenParser))
-            ->addSubLexer(new TokenParser\Query\Basic\LogicOperator\AndTokenParser($queryTokenParser))
-            ->addSubLexer(new TokenParser\Query\Basic\LogicOperator\OrTokenParser($queryTokenParser))
-            ->addSubLexer(new TokenParser\Query\Basic\LogicOperator\NotTokenParser($queryTokenParser))
-            ->addSubLexer(new TokenParser\Query\Basic\ArrayOperator\InTokenParser())
-            ->addSubLexer(new TokenParser\Query\Basic\ArrayOperator\OutTokenParser())
-            ->addSubLexer(new TokenParser\Query\Basic\ScalarOperator\EqTokenParser())
-            ->addSubLexer(new TokenParser\Query\Basic\ScalarOperator\NeTokenParser())
-            ->addSubLexer(new TokenParser\Query\Basic\ScalarOperator\LtTokenParser())
-            ->addSubLexer(new TokenParser\Query\Basic\ScalarOperator\GtTokenParser())
-            ->addSubLexer(new TokenParser\Query\Basic\ScalarOperator\LeTokenParser())
-            ->addSubLexer(new TokenParser\Query\Basic\ScalarOperator\GeTokenParser())
-            ->addSubLexer(new BasicLikeGlobTokenParser())
-            ->addSubLexer(new BasicAlikeGlobTokenParser())
-            ->addSubLexer(new BasicContainsTokenParser())
-            ->addSubLexer(new BasicEqtTokenParser())
-            ->addSubLexer(new BasicEqnTokenParser())
-            ->addSubLexer(new BasicEqfTokenParser())
-            ->addSubLexer(new BasicIeTokenParser())
-            ->addSubLexer(new BasicMatchTokenParser())
-            ->addSubLexer(new TokenParser\Query\Fiql\ArrayOperator\InTokenParser())
-            ->addSubLexer(new TokenParser\Query\Fiql\ArrayOperator\OutTokenParser())
-            ->addSubLexer(new TokenParser\Query\Fiql\ScalarOperator\EqTokenParser())
-            ->addSubLexer(new TokenParser\Query\Fiql\ScalarOperator\NeTokenParser())
-            ->addSubLexer(new TokenParser\Query\Fiql\ScalarOperator\LtTokenParser())
-            ->addSubLexer(new TokenParser\Query\Fiql\ScalarOperator\GtTokenParser())
-            ->addSubLexer(new TokenParser\Query\Fiql\ScalarOperator\LeTokenParser())
-            ->addSubLexer(new TokenParser\Query\Fiql\ScalarOperator\GeTokenParser())
-            ->addSubLexer(new FiqlLikeGlobTokenParser())
-            ->addSubLexer(new FiqlAlikeGlobTokenParser())
-            ->addSubLexer(new FiqlMatchTokenParser())
-            ->addSubLexer(new FiqlContainsTokenParser())
-            ->addSubLexer(new FiqlEqtTokenParser())
-            ->addSubLexer(new FiqlEqnTokenParser())
-            ->addSubLexer(new FiqlEqfTokenParser())
-            ->addSubLexer(new FiqlIeTokenParser());
+            ->addTokenParser(new FiqlIeTokenParser());
 
         $parser = (new QueryParser(
             (new ExpressionParser())->registerTypeCaster('string', new TypeCaster\StringTypeCaster())

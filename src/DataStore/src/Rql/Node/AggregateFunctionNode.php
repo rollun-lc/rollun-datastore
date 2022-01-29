@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\Rql\Node;
 
-use Graviton\RqlParser\Node\AbstractQueryNode;
+use Xiag\Rql\Parser\Node\AbstractQueryNode;
 
 class AggregateFunctionNode extends AbstractQueryNode
 {

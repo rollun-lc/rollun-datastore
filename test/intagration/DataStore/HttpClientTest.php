@@ -7,11 +7,12 @@
 namespace rollun\test\intagration\DataStore;
 
 use Interop\Container\ContainerInterface;
+use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\HttpClient;
 use rollun\datastore\TableGateway\TableManagerMysql;
-use Zend\Http\Client;
+use Laminas\Http\Client;
 
 class HttpClientTest extends BaseDataStoreTest
 {

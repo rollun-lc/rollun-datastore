@@ -6,7 +6,7 @@ namespace rollun\test\functional\DataStore\Middleware\Handler;
 use rollun\datastore\DataStore\Memory;
 use rollun\datastore\Middleware\Handler\MultiCreateHandler;
 use rollun\datastore\Rql\RqlQuery;
-use Zend\Diactoros\ServerRequest;
+use Laminas\Diactoros\ServerRequest;
 
 /**
  * Class MultiCreateHandlerTest

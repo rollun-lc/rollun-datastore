@@ -2,12 +2,13 @@
 
 namespace rollun\test\unit\DataStore\Rql\TokenParser\Fiql\BinaryOperator;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
 use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\BinaryOperator\EqfTokenParser;
-use Graviton\RqlParser\Parser\Token;
-use Graviton\RqlParser\Parser\TokenStream;
+use Xiag\Rql\Parser\Token;
+use Xiag\Rql\Parser\TokenStream;
 
 class EqfTokenParserTest extends TestCase
 {
@@ -21,7 +22,7 @@ class EqfTokenParserTest extends TestCase
         $field = 'a';
         $position = 0;
 
-        /** @var TokenStream|PHPUnit_Framework_MockObject_MockObject $tokenStream */
+        /** @var TokenStream|MockObject $tokenStream */
         $tokenStream = $this->getMockBuilder(TokenStream::class)
             ->disableOriginalConstructor()
             ->setMethods(['expect', 'nextIf'])
@@ -48,7 +49,7 @@ class EqfTokenParserTest extends TestCase
     }
 
     /**
-     * @param PHPUnit_Framework_MockObject_MockObject $tokenStream
+     * @param MockObject $tokenStream
      * @param $type
      * @param $position
      */

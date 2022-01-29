@@ -211,7 +211,7 @@ class CsvFileObject implements \IteratorAggregate
     protected function prepareFieldsBeforeAdd(array $dataArray): array
     {
         foreach ($dataArray as $key => $value) {
-            $dataArray[$key] = str_replace("\r\n", "\n", $dataArray[$key]);
+            $dataArray[$key] = str_replace("\r\n", "\n", (string) $dataArray[$key]);
         }
 
         return $dataArray;

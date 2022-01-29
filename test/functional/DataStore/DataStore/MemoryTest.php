@@ -9,8 +9,8 @@ use rollun\datastore\DataStore\Memory;
 use rollun\datastore\Rql\Node\AlikeNode;
 use rollun\datastore\Rql\Node\ContainsNode;
 use rollun\datastore\Rql\Node\LikeGlobNode;
-use Graviton\RqlParser\Parser\Node\Query\ScalarOperator\LikeNode;
-use Graviton\RqlParser\Parser\Query;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\LikeNode;
+use Xiag\Rql\Parser\Query;
 
 class MemoryTest extends TestCase
 {

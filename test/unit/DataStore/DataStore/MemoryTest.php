@@ -112,11 +112,18 @@ class MemoryTest extends TestCase
             'id' => 1,
             'name' => 'name2'
         ]);
-        $this->assertAttributeEquals([1 => [
+        /*$this->assertAttributeEquals([1 => [
             'id' => 1,
             'name' => 'name2',
             'surname' => 'surname1',
-        ]], 'items', $object);
+        ]], 'items', $object);*/
+        $reflection = new \ReflectionProperty($object, 'items');
+        $reflection->setAccessible(true);
+        $this->assertEquals([1 => [
+            'id' => 1,
+            'name' => 'name2',
+            'surname' => 'surname1',
+        ]], $reflection->getValue($object));
     }
 
     public function testUpdateFailWithItemHasNotPrimaryKey()
@@ -149,7 +156,10 @@ class MemoryTest extends TestCase
             'surname' => 'surname1',
         ];
         $object->create($itemData1);
-        $this->assertAttributeEquals([1 => $itemData1], 'items', $object);
+        //$this->assertAttributeEquals([1 => $itemData1], 'items', $object);
+        $reflection = new \ReflectionProperty($object, 'items');
+        $reflection->setAccessible(true);
+        $this->assertEquals([1 => $itemData1], $reflection->getValue($object));
 
         $itemData2 = [
             'id' => 1,
@@ -157,7 +167,10 @@ class MemoryTest extends TestCase
             'surname' => 'surname2',
         ];
         $object->update($itemData2);
-        $this->assertAttributeEquals([1 => $itemData2], 'items', $object);
+        //$this->assertAttributeEquals([1 => $itemData2], 'items', $object);
+        $reflection = new \ReflectionProperty($object, 'items');
+        $reflection->setAccessible(true);
+        $this->assertEquals([1 => $itemData2], $reflection->getValue($object));
     }
 
     public function testMultiUpdateSuccess()
@@ -188,7 +201,10 @@ class MemoryTest extends TestCase
         }
 
         $object->multiUpdate($items);
-        $this->assertAttributeEquals($items, 'items', $object);
+        //$this->assertAttributeEquals($items, 'items', $object);
+        $reflection = new \ReflectionProperty($object, 'items');
+        $reflection->setAccessible(true);
+        $this->assertEquals($items, $reflection->getValue($object));
     }
 
     public function testQueriedUpdate()
@@ -286,7 +302,10 @@ class MemoryTest extends TestCase
         }
 
         $object->multiCreate($items);
-        $this->assertAttributeEquals($items, 'items', $object);
+        //$this->assertAttributeEquals($items, 'items', $object);
+        $reflection = new \ReflectionProperty($object, 'items');
+        $reflection->setAccessible(true);
+        $this->assertEquals($items, $reflection->getValue($object));
     }
 
     public function testMultiRewriteSuccess()
@@ -303,7 +322,10 @@ class MemoryTest extends TestCase
         }
 
         $object->multiRewrite($items);
-        $this->assertAttributeEquals($items, 'items', $object);
+        //$this->assertAttributeEquals($items, 'items', $object);
+        $reflection = new \ReflectionProperty($object, 'items');
+        $reflection->setAccessible(true);
+        $this->assertEquals($items, $reflection->getValue($object));
 
         $items = [];
 
@@ -315,7 +337,10 @@ class MemoryTest extends TestCase
         }
 
         $object->multiRewrite($items);
-        $this->assertAttributeEquals($items, 'items', $object);
+        //$this->assertAttributeEquals($items, 'items', $object);
+        $reflection = new \ReflectionProperty($object, 'items');
+        $reflection->setAccessible(true);
+        $this->assertEquals($items, $reflection->getValue($object));
     }
 
     public function testRewriteSuccess()
@@ -373,7 +398,10 @@ class MemoryTest extends TestCase
             ]
         );
         $object->delete(1);
-        $this->assertAttributeEquals([], 'items', $object);
+        //$this->assertAttributeEquals([], 'items', $object);
+        $reflection = new \ReflectionProperty($object, 'items');
+        $reflection->setAccessible(true);
+        $this->assertEquals([], $reflection->getValue($object));
     }
 
     public function testDeleteAll()
@@ -396,7 +424,10 @@ class MemoryTest extends TestCase
             ]
         );
         $object->deleteAll();
-        $this->assertAttributeEquals([], 'items', $object);
+        //$this->assertAttributeEquals([], 'items', $object);
+        $reflection = new \ReflectionProperty($object, 'items');
+        $reflection->setAccessible(true);
+        $this->assertEquals([], $reflection->getValue($object));
     }
 
     public function testCount()

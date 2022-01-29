@@ -24,7 +24,10 @@ class IeNodeTestTest extends TestCase
         $field = 'fieldName1';
         $object = $this->createObject('fieldName2');
         $object->setField($field);
-        $this->assertAttributeEquals($field, 'field', $object);
+        //$this->assertAttributeEquals($field, 'field', $object);
+        $reflection = new \ReflectionProperty($object, 'field');
+        $reflection->setAccessible(true);
+        $this->assertEquals($field, $reflection->getValue($object));
     }
 
     /**

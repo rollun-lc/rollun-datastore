@@ -7,7 +7,7 @@
 namespace rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator;
 
 use rollun\datastore\Rql\Node\ContainsNode;
-use Graviton\RqlParser\TokenParser\Query\Fiql\AbstractScalarOperatorTokenParser;
+use Xiag\Rql\Parser\TokenParser\Query\Fiql\AbstractScalarOperatorTokenParser;
 
 class MatchTokenParser extends AbstractScalarOperatorTokenParser
 {

@@ -13,10 +13,10 @@ use rollun\datastore\DataStore\Iterators\DataStoreIterator;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
 use rollun\datastore\Rql\RqlQuery;
-use Graviton\RqlParser\Node;
-use Graviton\RqlParser\Node\Query\ScalarOperator\EqNode;
-use Graviton\RqlParser\Node\SortNode;
-use Graviton\RqlParser\Query;
+use Xiag\Rql\Parser\Node;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
+use Xiag\Rql\Parser\Node\SortNode;
+use Xiag\Rql\Parser\Query;
 
 /**
  * Class DataStoreAbstract
@@ -165,7 +165,10 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
         $whereFunctionBody = PHP_EOL . '$result = ' . PHP_EOL . rtrim($condition, PHP_EOL) . ';' . PHP_EOL
             . 'return $result;';
 
-        $whereFunction = create_function('$item', $whereFunctionBody);
+        //$whereFunction = create_function('$item', $whereFunctionBody);
+        $whereFunction = function ($item) use ($whereFunctionBody) {
+            return eval($whereFunctionBody);
+        };
         $suitableItemsNumber = 0;
         $result = [];
 
@@ -214,7 +217,10 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
         }
 
         $sortFunctionBody = $nextCompareLevel . 'return 0;';
-        $sortFunction = create_function('$a,$b', $sortFunctionBody);
+        //$sortFunction = create_function('$a,$b', $sortFunctionBody);
+        $sortFunction = function ($a, $b) use ($sortFunctionBody) {
+            return eval($sortFunctionBody);
+        };
         usort($data, $sortFunction);
 
         return $data;
@@ -299,7 +305,7 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
                             break;
                         case 'max':
                             $firstItem = array_pop($data);
-                            $max = $firstItem[$fieldNode->getField()];
+                            $max = $firstItem[$fieldNode->getField()] ?? null;
 
                             foreach ($data as $item) {
                                 $max = $max < $item[$fieldNode->getField()] ? $item[$fieldNode->getField()] : $max;
@@ -310,7 +316,7 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
                             break;
                         case 'min':
                             $firstItem = array_pop($data);
-                            $min = $firstItem[$fieldNode->getField()];
+                            $min = $firstItem[$fieldNode->getField()] ?? null;
 
                             foreach ($data as $item) {
                                 $min = $min > $item[$fieldNode->getField()] ? $item[$fieldNode->getField()] : $min;

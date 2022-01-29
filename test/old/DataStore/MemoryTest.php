@@ -8,9 +8,9 @@ namespace rollun\test\old\DataStore;
 
 use rollun\datastore\DataStore\Memory;
 use rollun\installer\Command;
-use Graviton\RqlParser\Parser\Node\Query\ScalarOperator\EqNode;
-use Graviton\RqlParser\Parser\Node\SortNode;
-use Graviton\RqlParser\Parser\Query;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
+use Xiag\Rql\Parser\Node\SortNode;
+use Xiag\Rql\Parser\Query;
 
 class MemoryTest extends AbstractTest
 {

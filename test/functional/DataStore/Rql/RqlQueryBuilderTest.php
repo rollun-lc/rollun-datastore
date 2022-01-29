@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\Rql\RqlQueryBuilder;
-use Graviton\RqlParser\Parser\Node\Query\LogicOperator\AndNode;
+use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;
 
 class RqlQueryBuilderTest extends TestCase
 {
