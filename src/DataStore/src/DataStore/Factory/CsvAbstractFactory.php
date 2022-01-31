@@ -66,7 +66,7 @@ class CsvAbstractFactory extends DataStoreAbstractFactory
         $filename = $serviceConfig[self::KEY_FILENAME];
         $delimiter = isset($serviceConfig[self::KEY_DELIMITER]) ? $serviceConfig[self::KEY_DELIMITER] : null;
         //$lockHandler = new LockHandler($filename);
-        $lockFactory = new LockFactory(new FlockStore($filename));
+        $lockFactory = new LockFactory(new FlockStore());
         $lockHandler = $lockFactory->createLock('csv-data-store');
 
         $this::$KEY_IN_CREATE = 0;
