@@ -7,7 +7,7 @@ namespace rollun\datastore\DataStore\Scheme;
 use InvalidArgumentException;
 use rollun\datastore\DataStore\Type\TypeInterface;
 use rollun\datastore\DataStore\Type\TypePluginManager;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\ServiceManager\ServiceManager;
 
 class PluginManagerTypeFactory implements TypeFactory
 {

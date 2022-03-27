@@ -37,7 +37,7 @@ class AspectSchemaTest extends TestCase
      */
     private $queryAdapterMock;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->dataStoreMock = null;
