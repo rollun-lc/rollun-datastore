@@ -8,6 +8,7 @@ namespace rollun\test\functional\DataStore\DataStore;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use rollun\datastore\DataStore\SerializedDbTable;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\datastore\TableGateway\TableManagerMysql;
@@ -95,7 +96,7 @@ class SerializedDbTableTest extends TestCase
         $container->setService($this->tableName, $tableGateway);
         InsideConstruct::setContainer($container);
 
-        $this->object = new SerializedDbTable($tableGateway);
+        $this->object = $this->makeSerializedDbTable($tableGateway);
         $this->assertEquals($this->object, unserialize(serialize($this->object)));
     }
 
@@ -103,5 +104,10 @@ class SerializedDbTableTest extends TestCase
     {
         $this->object = $this->getContainer()->get('dbDataStoreSerialized');
         $this->assertEquals($this->object, unserialize(serialize($this->object)));
+    }
+
+    private function makeSerializedDbTable(TableGateway $tableGateway)
+    {
+        return new SerializedDbTable($tableGateway, false, $this->getContainer()->get(LoggerInterface::class));
     }
 }

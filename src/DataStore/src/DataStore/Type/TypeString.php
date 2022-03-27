@@ -27,6 +27,9 @@ class TypeString extends TypeAbstract
         }
 
         try {
+            if (is_array($this->value)) {
+                return json_encode($this->value);
+            }
             return (string) $this->value;
         } catch (\Throwable $e) {
             throw new TypeException($e->getMessage());

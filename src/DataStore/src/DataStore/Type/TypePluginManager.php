@@ -18,6 +18,8 @@ class TypePluginManager extends AbstractPluginManager
         TypeChar::class => TypeFactory::class,
         TypeString::class => TypeFactory::class,
         TypeBoolean::class => TypeFactory::class,
+        TypeJson::class => TypeFactory::class,
+        TypeDateTimeImmutable::class => TypeFactory::class
     ];
 
     protected $aliases = [
@@ -29,5 +31,7 @@ class TypePluginManager extends AbstractPluginManager
         'double' => TypeFloat::class,
         'string' => TypeString::class,
         'char' => TypeChar::class,
+        'json' => TypeJson::class,
+        'date-time-immutable' => TypeDateTimeImmutable::class
     ];
 }
