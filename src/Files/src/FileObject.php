@@ -141,6 +141,11 @@ class FileObject extends Base
         $flags = $this->clearFlags();
         $this->seek(PHP_INT_MAX);
         $key = $this->key();
+
+        if ($this->getFileSize() && $key === 0) {
+            $key = $this->countLines();
+        }
+
         $this->fseekWithCheck(-1, SEEK_END);
         $lastChar = $this->fread(1);
         $shift = $lastChar === "\n" ? 0 : 1;
@@ -148,6 +153,26 @@ class FileObject extends Base
         $this->restoreFlags($flags);
 
         return $stringsCount;
+    }
+
+    /**
+     * Fix bug in php v8.0
+     * @return int
+     * @todo
+     */
+    public function countLines()
+    {
+        $this->seek(0);
+
+        while (!$this->eof()) {
+            $this->fgetcsv();
+        }
+
+        if ($this->getFlags() & self::SKIP_EMPTY) {
+            return $this->key() - 1;
+        }
+
+        return $this->key();
     }
 
     /**

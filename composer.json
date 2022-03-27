@@ -1,7 +1,7 @@
 {
   "name": "rollun-com/rollun-datastore",
   "description": "Datastore",
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "license": "proprietary",
   "type": "library",
   "authors": [
@@ -20,20 +20,20 @@
     "ext-json": "*",
     "xiag/rql-parser": "^v1.0.0",
     "symfony/filesystem": "^6.0",
-    "rollun-com/rollun-utils": "dev-laminas",
-    "rollun-com/rollun-logger": "dev-laminas",
-    "rollun-com/rollun-installer": "dev-laminas",
-    "laminas/laminas-http": "2.16.x-dev",
-    "laminas/laminas-servicemanager": "3.11.x-dev",
-    "laminas/laminas-db": "2.14.x-dev",
-    "laminas/laminas-diactoros": "2.9.x-dev",
-    "laminas/laminas-stratigility": "3.6.x-dev",
-    "ajgl/csv-rfc": "0.5.x-dev",
-    "symfony/lock": "6.1.x-dev"
+    "rollun-com/rollun-utils": "^7.0.0",
+    "rollun-com/rollun-logger": "^7.0.1",
+    "rollun-com/rollun-installer": "^5.0.0",
+    "laminas/laminas-http": "^2.15.1",
+    "laminas/laminas-servicemanager": "^3.10",
+    "laminas/laminas-db": "^2.13.4",
+    "laminas/laminas-diactoros": "^2.8.0",
+    "laminas/laminas-stratigility": "^3.5.0",
+    "ajgl/csv-rfc": "^0.4.0",
+    "symfony/lock": "v6.0.5"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5.10",
-    "symfony/dotenv": "6.1.x-dev",
+    "symfony/dotenv": "^6.0.3",
     "laminas/laminas-config-aggregator": "^1.7",
     "mezzio/mezzio": "^3.9"
   },
@@ -68,14 +68,6 @@
     "server": "php -S 0.0.0.0:8000 -t public public/index.php"
   },
   "repositories": [
-    {
-      "type": "github",
-      "url": "git@github.com:rollun-com/rollun-utils.git"
-    },
-    {
-      "type": "github",
-      "url": "git@github.com:rollun-com/rollun-installer.git"
-    },
     {
       "type": "github",
       "url": "git@github.com:rollun-com/rollun-dic.git"

@@ -22,11 +22,4 @@
         <env name="APP_ENV" value="TEST"/>
         <env name="APP_DEBUG" value="true" force="true"/>
     </php>
-
-
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">src</directory>
-        </whitelist>
-    </filter>
 </phpunit>
