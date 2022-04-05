@@ -7,7 +7,7 @@
 namespace rollun\test\old\DataStore;
 
 use PHPUnit\Framework\TestCase;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Memory;
 use rollun\datastore\DataStore\Traits\AutoIdGeneratorTrait;
 use rollun\utils\IdGenerator;
@@ -15,7 +15,7 @@ use rollun\utils\IdGenerator;
 class AutoIdGeneratorTraitTest extends TestCase
 {
     /**
-     * @var DataStoresInterface with AutoIdGeneratorTrait
+     * @var DataStoreInterface with AutoIdGeneratorTrait
      */
     protected $object;
 

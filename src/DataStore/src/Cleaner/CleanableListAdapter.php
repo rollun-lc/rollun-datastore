@@ -8,17 +8,17 @@ namespace rollun\datastore\Cleaner;
 
 use Exception;
 use rollun\utils\Cleaner\CleanableList\CleanableListInterface;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStoreCleanerException;
 
 class CleanableListAdapter implements \IteratorAggregate, CleanableListInterface
 {
     /**
-     * @var DataStoresInterface
+     * @var DataStoreInterface
      */
     protected $datastore;
 
-    public function __construct(DataStoresInterface $datastore)
+    public function __construct(DataStoreInterface $datastore)
     {
         $this->datastore = $datastore;
     }

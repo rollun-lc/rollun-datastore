@@ -8,7 +8,6 @@ namespace rollun\datastore\DataStore;
 
 use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Iterators\DataStoreIterator;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
@@ -22,7 +21,7 @@ use Xiag\Rql\Parser\Query;
  * Class DataStoreAbstract
  * @package rollun\datastore\DataStore
  */
-abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterface
+abstract class DataStoreAbstract implements DataStoreInterface
 {
     /**
      * @var ConditionBuilderAbstract
@@ -377,7 +376,7 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
     /**
      * {@inheritdoc}
      */
-    abstract public function create($itemData, $rewriteIfExist = false);
+    abstract public function create($itemData);
 
     /**
      * {@inheritdoc}
@@ -405,7 +404,7 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
     /**
      * {@inheritdoc}
      */
-    abstract public function update($itemData, $createIfAbsent = false);
+    abstract public function update($itemData);
 
     /**
      * {@inheritdoc}
@@ -462,27 +461,6 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function deleteAll()
-    {
-        $keys = $this->getKeys();
-        $deletedItemsNumber = 0;
-
-        foreach ($keys as $id) {
-            $deletedItems = $this->delete($id);
-
-            if (is_null($deletedItems)) {
-                return null;
-            }
-
-            $deletedItemsNumber++;
-        }
-
-        return $deletedItemsNumber;
-    }
-
-    /**
      * Return array of keys or empty array
      *
      * @return array
@@ -516,13 +494,13 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
             throw new DataStoreException("Identifier is required for 'rewrite' action");
         }
 
-        $rewriteIfExist = false;
+        $id = $record[$this->getIdentifier()];
 
-        if ($this->has($record[$this->getIdentifier()])) {
-            $rewriteIfExist = true;
+        if ($this->has($id)) {
+            $this->delete($id);
         }
 
-        return $this->create($record, $rewriteIfExist);
+        return $this->create($record);
     }
 
     /**

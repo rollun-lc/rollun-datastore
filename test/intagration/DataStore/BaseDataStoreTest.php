@@ -20,6 +20,7 @@ use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\GeNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\LeNode;
 use Xiag\Rql\Parser\Node\SelectNode;
+use Xiag\Rql\Parser\Query;
 
 abstract class BaseDataStoreTest extends TestCase
 {
@@ -156,7 +157,7 @@ abstract class BaseDataStoreTest extends TestCase
         ];
 
         $object->create($item1);
-        $object->create($item2, 1);
+        $object->rewrite($item2);
         $this->assertEquals($item2, $object->read(1));
     }
 
@@ -172,19 +173,6 @@ abstract class BaseDataStoreTest extends TestCase
         ];
 
         $object->update($item);
-    }
-
-    public function testUpdateWithCreate()
-    {
-        $object = $this->createObject();
-
-        $item = [
-            $object->getIdentifier() => $this->identifierToType(1),
-            'name' => 'name',
-            'surname' => 'surname',
-        ];
-
-        $this->assertEquals($item, $object->update($item, 1));
     }
 
     public function testQueryCombineWhereClauseSuccess()
@@ -523,7 +511,7 @@ abstract class BaseDataStoreTest extends TestCase
             ->delete(1));
     }
 
-    public function testCountSuccess()
+    public function testDeleteAll()
     {
         $object = $this->createObject();
         $count = 5;
@@ -538,7 +526,7 @@ abstract class BaseDataStoreTest extends TestCase
 
         $this->assertTrue($object instanceof \Countable);
         $this->assertEquals($object->count(), $count);
-        $object->deleteAll();
+        $object->queriedDelete(new Query());
         $this->assertEquals($object->count(), 0);
     }
 

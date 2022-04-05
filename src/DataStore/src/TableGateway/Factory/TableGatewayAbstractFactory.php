@@ -93,7 +93,7 @@ class TableGatewayAbstractFactory extends AbstractFactoryAbstract
      * @param ContainerInterface $container
      * @param string $requestedName
      * @param array|null $options
-     * @return \rollun\datastore\DataStore\Interfaces\DataStoresInterface|TableGateway
+     * @return \rollun\datastore\DataStore\Interfaces\DataStoreInterface|TableGateway
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {

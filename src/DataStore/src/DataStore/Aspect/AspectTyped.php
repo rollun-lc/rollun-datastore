@@ -10,7 +10,7 @@ use InvalidArgumentException;
 use rollun\datastore\DataStore\BaseDto;
 use rollun\datastore\DataStore\Formatter\FormatterInterface;
 use rollun\datastore\DataStore\Formatter\FormatterPluginManager;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Interfaces\SchemableInterface;
 use rollun\datastore\DataStore\Type\TypePluginManager;
 use RuntimeException;
@@ -41,14 +41,14 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
 
     /**
      * AspectTyped constructor.
-     * @param DataStoresInterface $dataStore
+     * @param DataStoreInterface $dataStore
      * @param array $scheme
      * @param string $dtoClassName
      * @param TypePluginManager|null $typePluginManager
      * @param FormatterPluginManager|null $formatterPluginManager
      */
     public function __construct(
-        DataStoresInterface $dataStore,
+        DataStoreInterface $dataStore,
         array $scheme,
         string $dtoClassName,
         TypePluginManager $typePluginManager = null,
@@ -89,7 +89,7 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
     /**
      * {@inheritdoc}
      */
-    protected function preUpdate($itemData, $createIfAbsent = false)
+    protected function preUpdate($itemData)
     {
         if ($itemData instanceof BaseDto) {
             $itemData = $this->dtoToArray($itemData);
@@ -101,7 +101,7 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
     /**
      * {@inheritdoc}
      */
-    protected function postUpdate($result, $itemData, $rewriteIfExist)
+    protected function postUpdate($result, $itemData)
     {
         if (is_array($result)) {
             return $this->arrayToDto($result);
@@ -113,7 +113,7 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
     /**
      * {@inheritdoc}
      */
-    protected function preCreate($itemData, $rewriteIfExist = false)
+    protected function preCreate($itemData)
     {
         if ($itemData instanceof BaseDto) {
             $itemData = $this->dtoToArray($itemData);
@@ -125,7 +125,7 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
     /**
      * {@inheritdoc}
      */
-    protected function postCreate($result, $itemData, $rewriteIfExist)
+    protected function postCreate($result, $itemData)
     {
         if (is_array($result)) {
             return $this->arrayToDto($result);

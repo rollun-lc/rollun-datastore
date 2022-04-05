@@ -9,14 +9,14 @@ namespace rollun\test\functional\DataStore\Middleware\Handler;
 use Psr\Http\Message\UriInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\DataStore\DataStoreException;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\Middleware\Handler\CreateHandler;
 use rollun\datastore\Rql\RqlQuery;
 use Zend\Diactoros\ServerRequest;
 
 class CreateHandlerTest extends BaseHandlerTest
 {
-    protected function createObject(DataStoresInterface $dataStore = null)
+    protected function createObject(DataStoreInterface $dataStore = null)
     {
         return new CreateHandler(is_null($dataStore) ? $this->createDataStoreEmptyMock() : $dataStore);
     }
@@ -93,7 +93,7 @@ class CreateHandlerTest extends BaseHandlerTest
         $this->assertFalse($object->canHandle($request));
     }
 
-    public function testProcessWithoutExistingPrimaryKeyAndRowExist()
+    public function testRewrite()
     {
         $item = [
             'id' => 1,
@@ -115,8 +115,8 @@ class CreateHandlerTest extends BaseHandlerTest
             ->willReturn($item);
 
         $dataStore->expects($this->once())
-            ->method('create')
-            ->with($item, true)
+            ->method('rewrite')
+            ->with($item)
             ->willReturn($item);
 
         $object = $this->createObject($dataStore);
@@ -152,7 +152,7 @@ class CreateHandlerTest extends BaseHandlerTest
         $object->process($request, $delegateMock);
     }
 
-    public function testProcessWithoutExistingPrimaryKeyAndRowDoesNotExist()
+    public function testCreate()
     {
         $item = [
             'id' => 1,
@@ -166,7 +166,6 @@ class CreateHandlerTest extends BaseHandlerTest
         $request = $request->withMethod('POST');
         $request = $request->withParsedBody($item);
         $request = $request->withAttribute('primaryKeyValue', $item['id']);
-        $request = $request->withAttribute('overwriteMode', true);
 
         $dataStore = $this->createDataStoreEmptyMock();
         $dataStore->expects($this->once())

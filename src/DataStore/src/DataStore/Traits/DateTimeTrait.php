@@ -19,33 +19,31 @@ trait DateTimeTrait
 
     /**
      * @param $itemData
-     * @param bool $rewriteIfExist
      * @return mixed
      * @throws \Exception
      */
-    public function insertItem($itemData, $rewriteIfExist = false)
+    public function insertItem($itemData)
     {
         if (empty($itemData[DateTimeInterface::FIELD_CREATED_AT])) {
             $date = new \DateTime('now', new \DateTimeZone('UTC'));
             $itemData[DateTimeInterface::FIELD_CREATED_AT] = $date->format($this->dateTimeFormat);
         }
 
-        return parent::insertItem($itemData, $rewriteIfExist);
+        return parent::insertItem($itemData);
     }
 
     /**
      * @param $itemData
-     * @param bool $createIfAbsent
      * @return mixed
      * @throws \Exception
      */
-    public function updateItem($itemData, $createIfAbsent = false)
+    public function updateItem($itemData)
     {
         if (empty($itemData[DateTimeInterface::FIELD_UPDATED_AT])) {
             $date = new \DateTime('now', new \DateTimeZone('UTC'));
             $itemData[DateTimeInterface::FIELD_UPDATED_AT] = $date->format($this->dateTimeFormat);
         }
 
-        return parent::updateItem($itemData, $createIfAbsent);
+        return parent::updateItem($itemData);
     }
 }

@@ -282,13 +282,9 @@ class HttpClient extends DataStoreAbstract
     /**
      * {@inheritdoc}
      */
-    public function create($itemData, $rewriteIfExist = false)
+    public function create($itemData)
     {
-        if ($rewriteIfExist) {
-            trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
-        }
-
-        $client = $this->initHttpClient(Request::METHOD_POST, $this->url, $rewriteIfExist);
+        $client = $this->initHttpClient(Request::METHOD_POST, $this->url);
         $json = Serializer::jsonSerialize($itemData);
         $client->setRawBody($json);
         $response = $client->send();
@@ -344,12 +340,8 @@ class HttpClient extends DataStoreAbstract
     /**
      * {@inheritdoc}
      */
-    public function update($itemData, $createIfAbsent = false)
+    public function update($itemData)
     {
-        if ($createIfAbsent) {
-            trigger_error("Option 'createIfAbsent' is no more use.", E_USER_DEPRECATED);
-        }
-
         $identifier = $this->getIdentifier();
 
         if (!isset($itemData[$identifier])) {
@@ -361,7 +353,7 @@ class HttpClient extends DataStoreAbstract
         $uri = $this->createUri(null, $itemData[$identifier]);
         unset($itemData[$identifier]);
 
-        $client = $this->initHttpClient(Request::METHOD_PUT, $uri, $createIfAbsent);
+        $client = $this->initHttpClient(Request::METHOD_PUT, $uri);
         $client->setRawBody(Serializer::jsonSerialize($itemData));
         $response = $client->send();
 
@@ -394,6 +386,28 @@ class HttpClient extends DataStoreAbstract
         } else {
             $responseMessage = $this->createResponseMessage($uri, Request::METHOD_DELETE, $response);
             throw new DataStoreException("Can't delete item {$responseMessage}");
+        }
+
+        return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rewrite($record)
+    {
+        $client = $this->initHttpClient(Request::METHOD_POST, $this->url, true);
+        $json = Serializer::jsonSerialize($record);
+        $client->setRawBody($json);
+        $response = $client->send();
+
+        $this->checkResonseHeaderIdentifier($response);
+
+        if ($response->isSuccess()) {
+            $result = Serializer::jsonUnserialize($response->getBody());
+        } else {
+            $responseMessage = $this->createResponseMessage($this->url, Request::METHOD_POST, $response);
+            throw new DataStoreException("Can't rewrite item {$responseMessage}");
         }
 
         return $result;

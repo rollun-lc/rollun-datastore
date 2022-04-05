@@ -8,7 +8,6 @@ namespace rollun\datastore\DataStore\Aspect;
 
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Traits\NoSupportCreateTrait;
-use rollun\datastore\DataStore\Traits\NoSupportDeleteAllTrait;
 use rollun\datastore\DataStore\Traits\NoSupportDeleteTrait;
 use rollun\datastore\DataStore\Traits\NoSupportUpdateTrait;
 use Xiag\Rql\Parser\Node\AbstractQueryNode;
@@ -22,7 +21,6 @@ abstract class AbstractMapperAspect extends AspectAbstract
 {
     use NoSupportUpdateTrait;
     use NoSupportCreateTrait;
-    use NoSupportDeleteAllTrait;
     use NoSupportDeleteTrait;
 
     /**

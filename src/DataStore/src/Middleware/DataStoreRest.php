@@ -10,7 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\Middleware\Handler;
 use Zend\Stratigility\MiddlewarePipe;
 
@@ -26,15 +26,15 @@ class DataStoreRest implements MiddlewareInterface
     protected $middlewarePipe;
 
     /**
-     * @var DataStoresInterface
+     * @var DataStoreInterface
      */
     private $dataStore;
 
     /**
      * DataStoreRest constructor.
-     * @param DataStoresInterface $dataStore
+     * @param DataStoreInterface $dataStore
      */
-    public function __construct(DataStoresInterface $dataStore)
+    public function __construct(DataStoreInterface $dataStore)
     {
         $this->middlewarePipe = new MiddlewarePipe();
         $this->dataStore = $dataStore;

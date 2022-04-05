@@ -40,7 +40,7 @@ class ModelRepositoryAbstractFactory extends AbstractFactoryAbstract
      * @param string $requestedName
      * @param array|null $options
      *
-     * @return mixed|\rollun\datastore\DataStore\Interfaces\DataStoresInterface
+     * @return mixed|\rollun\datastore\DataStore\Interfaces\DataStoreInterface
      *
      * @throws \Exception
      */

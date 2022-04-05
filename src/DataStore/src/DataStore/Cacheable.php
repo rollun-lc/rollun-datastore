@@ -9,17 +9,17 @@ namespace rollun\datastore\DataStore;
 use Xiag\Rql\Parser\Query;
 use rollun\datastore\DataSource\DataSourceInterface;
 use rollun\datastore\DataStore\Interfaces\RefreshableInterface;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 
-class Cacheable implements DataStoresInterface, RefreshableInterface
+class Cacheable implements DataStoreInterface, RefreshableInterface
 {
-    /** @var  DataStoresInterface */
+    /** @var  DataStoreInterface */
     protected $cashStore;
 
     /** @var  DataSourceInterface */
     protected $dataSource;
 
-    public function __construct(DataSourceInterface $dataSource, DataStoresInterface $cashStore = null)
+    public function __construct(DataSourceInterface $dataSource, DataStoreInterface $cashStore = null)
     {
         $this->dataSource = $dataSource;
 
@@ -87,12 +87,12 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
 
     public function refresh()
     {
-        $this->cashStore->deleteAll();
+        $this->cashStore->queriedDelete(new Query());
         $all = $this->dataSource->getAll();
 
         if ($all instanceof \Traversable or is_array($all)) {
             foreach ($all as $item) {
-                $this->cashStore->create($item, true);
+                $this->cashStore->rewrite($item);
             }
         } else {
             throw new DataStoreException("Not return data by DataSource");
@@ -120,27 +120,21 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
      * You can get item "id" for created item us result this function.
      *
      * If  $item["id"] !== null, item set with that id.
-     * If item with same id already exist - method will throw exception,
-     * but if $rewriteIfExist = true item will be rewrites.<br>
+     * If item with same id already exist - method will throw exception<br>
      *
      * If $item["id"] is not set or $item["id"]===null,
      * item will be insert with autoincrement PrimaryKey.<br>
      *
      * @param array $itemData associated array with or without PrimaryKey
-     * @param bool $rewriteIfExist
      * @return int|null|string "id" for created item or null if item wasn't created
      * @throws DataStoreException
      */
-    public function create($itemData, $rewriteIfExist = false)
+    public function create($itemData)
     {
-        if ($rewriteIfExist) {
-            trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
-        }
-
         if (method_exists($this->dataSource, "create")) {
-            return $this->dataSource->create($itemData, $rewriteIfExist);
+            return $this->dataSource->create($itemData);
         } else {
-            throw new DataStoreException("Refreshable don't haw method create");
+            throw new DataStoreException("Refreshable doesn't have method create");
         }
     }
 
@@ -153,25 +147,19 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
      * <br>
      * If $item["id"] isn't set - method will throw exception.<br>
      * <br>
-     * If item with PrimaryKey == $item["id"] is absent - method  will throw exception,<br>
-     * but if $createIfAbsent = true item will be created and method return inserted item<br>
+     * If item with PrimaryKey == $item["id"] is absent - method  will throw exception<br>
      * <br>
      *
      * @param array $itemData associated array with PrimaryKey
-     * @param bool $createIfAbsent
      * @return array updated item or inserted item
      * @throws DataStoreException
      */
-    public function update($itemData, $createIfAbsent = false)
+    public function update($itemData)
     {
-        if ($createIfAbsent) {
-            trigger_error("Option 'createIfAbsent' is no more use.", E_USER_DEPRECATED);
-        }
-
         if (method_exists($this->dataSource, "update")) {
-            return $this->dataSource->update($itemData, $createIfAbsent);
+            return $this->dataSource->update($itemData);
         } else {
-            throw new DataStoreException("Refreshable don't haw method update");
+            throw new DataStoreException("Refreshable doesn't have method update");
         }
     }
 
@@ -187,21 +175,7 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
         if (method_exists($this->dataSource, "delete")) {
             return $this->dataSource->delete($id);
         } else {
-            throw new DataStoreException("Refreshable don't haw method delete");
-        }
-    }
-
-    /**
-     * Delete all Items.
-     * @return int number of deleted items or null if object doesn't support it
-     * @throws DataStoreException
-     */
-    public function deleteAll()
-    {
-        if (method_exists($this->dataSource, "deleteAll")) {
-            return $this->dataSource->deleteAll();
-        } else {
-            throw new DataStoreException("Refreshable don't haw method deleteAll");
+            throw new DataStoreException("Refreshable doesn't have method delete");
         }
     }
 
@@ -217,7 +191,52 @@ class Cacheable implements DataStoresInterface, RefreshableInterface
         if (method_exists($this->dataSource, "delete")) {
             return $this->dataSource->delete($id);
         } else {
-            throw new DataStoreException("Refreshable don't haw method delete");
+            throw new DataStoreException("Refreshable doesn't have method delete");
+        }
+    }
+
+    public function multiCreate($records)
+    {
+        if (method_exists($this->dataSource, "multiCreate")) {
+            return $this->dataSource->multiCreate($records);
+        } else {
+            throw new DataStoreException("Refreshable doesn't have method multiCreate");
+        }
+    }
+
+    public function multiUpdate($records)
+    {
+        if (method_exists($this->dataSource, "multiUpdate")) {
+            return $this->dataSource->multiUpdate($records);
+        } else {
+            throw new DataStoreException("Refreshable doesn't have method multiUpdate");
+        }
+    }
+
+    public function queriedUpdate($record, Query $query)
+    {
+        if (method_exists($this->dataSource, "queriedUpdate")) {
+            return $this->dataSource->queriedUpdate($record, $query);
+        } else {
+            throw new DataStoreException("Refreshable doesn't have method queriedUpdate");
+        }
+    }
+
+    public function rewrite($record)
+    {
+        if (method_exists($this->dataSource, "rewrite")) {
+            return $this->dataSource->rewrite($record);
+        } else {
+            throw new DataStoreException("Refreshable doesn't have method rewrite");
+        }
+    }
+
+    public function queriedDelete(Query $query)
+    {
+        if (method_exists($this->dataSource, "queriedDelete")) {
+            return $this->dataSource->queriedDelete($query);
+        } else {
+            throw new DataStoreException("Refreshable doesn't have method queriedDelete");
         }
     }
 }

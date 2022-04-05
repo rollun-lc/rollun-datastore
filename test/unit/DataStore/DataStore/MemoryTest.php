@@ -12,6 +12,7 @@ use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Memory;
 use rollun\datastore\Rql\RqlParser;
 use rollun\datastore\Rql\RqlQuery;
+use Xiag\Rql\Parser\Query;
 
 class MemoryTest extends TestCase
 {
@@ -395,7 +396,7 @@ class MemoryTest extends TestCase
                 ]
             ]
         );
-        $object->deleteAll();
+        $object->queriedDelete(new Query());
         $this->assertAttributeEquals([], 'items', $object);
     }
 

@@ -6,10 +6,10 @@
 
 namespace rollun\datastore\DataStore;
 
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use Zend\ServiceManager\AbstractPluginManager;
 
 class DataStorePluginManager extends AbstractPluginManager
 {
-    protected $instanceOf = DataStoresInterface::class;
+    protected $instanceOf = DataStoreInterface::class;
 }

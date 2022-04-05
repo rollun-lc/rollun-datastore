@@ -18,10 +18,9 @@ trait NoSupportUpdateTrait
 {
     /**
      * @param $itemData
-     * @param bool $createIfAbsent
      * @throws DataStoreException
      */
-    public function update($itemData, $createIfAbsent = false)
+    public function update($itemData)
     {
         trigger_error(NoSupportUpdateTrait::class . ' trait is deprecated', E_USER_DEPRECATED);
 

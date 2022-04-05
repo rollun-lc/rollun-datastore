@@ -18,10 +18,9 @@ trait NoSupportCreateTrait
 {
     /**
      * @param $itemData
-     * @param bool $rewriteIfExist
      * @throws DataStoreException
      */
-    public function create($itemData, $rewriteIfExist = false)
+    public function create($itemData)
     {
         trigger_error(NoSupportCreateTrait::class . ' trait is deprecated', E_USER_DEPRECATED);
 

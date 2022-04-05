@@ -6,14 +6,14 @@
 
 namespace rollun\test\functional\DataStore\Middleware\Handler;
 
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\Middleware\Handler\UpdateHandler;
 use rollun\datastore\Rql\RqlQuery;
 use Zend\Diactoros\ServerRequest;
 
 class UpdateHandlerTest extends BaseHandlerTest
 {
-    protected function createObject(DataStoresInterface $dataStore = null)
+    protected function createObject(DataStoreInterface $dataStore = null)
     {
         return new UpdateHandler(is_null($dataStore) ? $this->createDataStoreEmptyMock() : $dataStore);
     }
@@ -93,23 +93,7 @@ class UpdateHandlerTest extends BaseHandlerTest
         $this->assertFalse($object->canHandle($request));
     }
 
-    public function attributeDataProvider()
-    {
-        return [
-            [200, true, true],
-            [201, true, false],
-            [200, false, true],
-            [200, false, false],
-        ];
-    }
-
-    /**
-     * @dataProvider attributeDataProvider
-     * @param $status
-     * @param $overwriteMode
-     * @param $readReturn
-     */
-    public function testProcess($status, $overwriteMode, $readReturn)
+    public function testProcess()
     {
         $item = [
             'id' => 1,
@@ -119,16 +103,11 @@ class UpdateHandlerTest extends BaseHandlerTest
         $request = new ServerRequest();
         $request = $request->withMethod('PUT');
         $request = $request->withAttribute('primaryKeyValue', $item['id']);
-        $request = $request->withAttribute('overwriteMode', $overwriteMode);
         $request = $request->withParsedBody($item);
 
-        $response = $this->createResponse($status, [], $item);
+        $response = $this->createResponse(200, [], $item);
 
         $dataStore = $this->createDataStoreEmptyMock();
-        $dataStore->expects($this->once())
-            ->method('read')
-            ->with($item['id'])
-            ->willReturn($readReturn);
 
         $dataStore->expects($this->once())
             ->method('update')

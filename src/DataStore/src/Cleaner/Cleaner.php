@@ -8,7 +8,7 @@ namespace rollun\datastore\Cleaner;
 
 use rollun\utils\Cleaner\CleaningValidator\CleaningValidatorInterface;
 use rollun\utils\Cleaner\Cleaner as BaseCleaner;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 
 /**
  * Class Cleaner
@@ -16,7 +16,7 @@ use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
  */
 class Cleaner extends BaseCleaner
 {
-    public function __construct(DataStoresInterface $datastore, CleaningValidatorInterface $cleaningValidator)
+    public function __construct(DataStoreInterface $datastore, CleaningValidatorInterface $cleaningValidator)
     {
         $cleanableList = new CleanableListAdapter($datastore);
         parent::__construct($cleanableList, $cleaningValidator);

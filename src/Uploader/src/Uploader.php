@@ -6,7 +6,7 @@
 
 namespace rollun\uploader;
 
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use SeekableIterator;
 use Traversable;
 
@@ -22,7 +22,7 @@ class Uploader
     protected $sourceDataIteratorAggregator;
 
     /**
-     * @var DataStoresInterface
+     * @var DataStoreInterface
      */
     protected $destinationDataStore;
 
@@ -34,11 +34,11 @@ class Uploader
     /**
      * Uploader constructor.
      * @param Traversable $sourceDataIteratorAggregator
-     * @param DataStoresInterface $destinationDataStore
+     * @param DataStoreInterface $destinationDataStore
      */
     public function __construct(
         Traversable $sourceDataIteratorAggregator,
-        DataStoresInterface $destinationDataStore
+        DataStoreInterface $destinationDataStore
     ) {
         $this->sourceDataIteratorAggregator = $sourceDataIteratorAggregator;
         $this->destinationDataStore = $destinationDataStore;
@@ -52,7 +52,7 @@ class Uploader
 
         foreach ($this->sourceDataIteratorAggregator as $key => $value) {
             $this->key = $key;
-            $this->destinationDataStore->create($value, true);
+            $this->destinationDataStore->rewrite($value);
         }
     }
 

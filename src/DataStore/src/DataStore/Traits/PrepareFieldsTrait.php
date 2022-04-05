@@ -19,11 +19,11 @@ trait PrepareFieldsTrait
      *
      * @throws \Throwable
      */
-    public function createData($itemData, $rewriteIfExist = false)
+    public function createData($itemData)
     {
         $itemData = $this->prepareData($itemData);
-        return $this->callAttempts(function() use ($itemData, $rewriteIfExist) {
-            return $this->create($itemData, $rewriteIfExist);
+        return $this->callAttempts(function() use ($itemData) {
+            return $this->create($itemData);
         });
     }
 
@@ -48,17 +48,16 @@ trait PrepareFieldsTrait
      * Пытается сделать это определенное количество раз, если с первого раза не получается
      *
      * @param $itemData
-     * @param bool $createIfAbsent
      *
      * @return array
      *
      * @throws \Throwable
      */
-    public function updateData($itemData, $createIfAbsent = false)
+    public function updateData($itemData)
     {
         $itemData = $this->prepareData($itemData);
-        return $this->callAttempts(function() use ($itemData, $createIfAbsent){
-            return $this->update($itemData, $createIfAbsent);
+        return $this->callAttempts(function() use ($itemData){
+            return $this->update($itemData);
         });
     }
 

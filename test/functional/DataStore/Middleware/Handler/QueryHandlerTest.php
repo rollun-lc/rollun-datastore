@@ -7,7 +7,7 @@
 namespace rollun\test\functional\DataStore\Middleware\Handler;
 
 use PHPUnit_Framework_MockObject_MockObject;
-use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
 use rollun\datastore\Middleware\Handler\QueryHandler;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
@@ -18,7 +18,7 @@ use Zend\Diactoros\ServerRequest;
 
 class QueryHandlerTest extends BaseHandlerTest
 {
-    protected function createObject(DataStoresInterface $dataStore = null)
+    protected function createObject(DataStoreInterface $dataStore = null)
     {
         return new QueryHandler(is_null($dataStore) ? $this->createDataStoreEmptyMock() : $dataStore);
     }
@@ -158,11 +158,11 @@ class QueryHandlerTest extends BaseHandlerTest
 
     /**
      * @param RqlQuery $rqlQuery
-     * @param DataStoresInterface|PHPUnit_Framework_MockObject_MockObject $dataStore
+     * @param DataStoreInterface|PHPUnit_Framework_MockObject_MockObject $dataStore
      * @param $items
      * @return string
      */
-    protected function getContentRange(RqlQuery $rqlQuery, DataStoresInterface $dataStore, $items)
+    protected function getContentRange(RqlQuery $rqlQuery, DataStoreInterface $dataStore, $items)
     {
         $limitNode = $rqlQuery->getLimit();
         $aggregateCount = [['count(id)' => 5]];
