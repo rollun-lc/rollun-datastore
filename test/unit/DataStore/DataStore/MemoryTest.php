@@ -20,12 +20,9 @@ class MemoryTest extends TestCase
         return new Memory($columns);
     }
 
-    /**
-     * @return array
-     */
-    public function getQueryDataProvider(): array
+    protected function getTestData()
     {
-        $data = [
+        return [
             [
                 'id'    => 1,
                 'name'  => 'name 1',
@@ -52,6 +49,14 @@ class MemoryTest extends TestCase
                 'price' => 10,
             ]
         ];
+    }
+
+    /**
+     * @return array
+     */
+    public function getQueryDataProvider(): array
+    {
+        $data = $this->getTestData();
 
         return [
             [$data, 'select(max(price))', '[{"max(price)":2250}]'],
@@ -419,7 +424,7 @@ class MemoryTest extends TestCase
                 ],
                 2 => [
                     'id' => 2,
-                    'name' => 'name1'
+                    'name' => 'name2'
                 ]
             ]
         );
@@ -445,7 +450,7 @@ class MemoryTest extends TestCase
                 ],
                 2 => [
                     'id' => 2,
-                    'name' => 'name1'
+                    'name' => 'name2'
                 ]
             ]
         );
