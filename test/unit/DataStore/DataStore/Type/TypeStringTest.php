@@ -32,6 +32,7 @@ class TypeStringTest extends TestCase
         $this->assertSame('1', $this->createObject(true)->toTypeValue());
         $this->assertSame('', $this->createObject(false)->toTypeValue());
         $this->assertSame('', $this->createObject(null)->toTypeValue());
+        $this->assertSame('[]', $this->createObject([])->toTypeValue());
     }
 
     public function testToTypeValueFailWithObject()
@@ -46,12 +47,6 @@ class TypeStringTest extends TestCase
         $this->expectException(TypeException::class);
         $this->createObject(function () {
         })->toTypeValue();
-    }
-
-    public function testToTypeValueFailWithArray()
-    {
-        $this->expectException(TypeException::class);
-        $this->createObject([])->toTypeValue();
     }
 
     public function testToTypeValueFailWithResource()

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -7,9 +8,11 @@
 namespace rollun\datastore\DataStore\Factory;
 
 use Interop\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\DbTable;
 use Zend\Db\TableGateway\TableGateway;
+use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 
 /**
  * Create and return an instance of the DataStore which based on DbTable
@@ -37,9 +40,9 @@ use Zend\Db\TableGateway\TableGateway;
  */
 class DbTableAbstractFactory extends DataStoreAbstractFactory
 {
-    const KEY_TABLE_NAME = 'tableName';
-    const KEY_TABLE_GATEWAY = 'tableGateway';
-    const KEY_DB_ADAPTER = 'dbAdapter';
+    public const KEY_TABLE_NAME = 'tableName';
+    public const KEY_TABLE_GATEWAY = 'tableGateway';
+    public const KEY_DB_ADAPTER = 'dbAdapter';
 
     public static $KEY_DATASTORE_CLASS = DbTable::class;
 
@@ -64,18 +67,17 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
         $serviceConfig = $config[self::KEY_DATASTORE][$requestedName];
         $requestedClassName = $serviceConfig[self::KEY_CLASS];
         $tableGateway = $this->getTableGateway($container, $serviceConfig, $requestedName);
-        $writeLogs = false;
-        if (isset($serviceConfig[DataStoreAbstractFactory::KEY_WRITE_LOGS])) {
-            $writeLogs = $serviceConfig[DataStoreAbstractFactory::KEY_WRITE_LOGS];
+        $writeLogs = $serviceConfig[DataStoreAbstractFactory::KEY_WRITE_LOGS] ?? false;
+
+        if (!is_bool($writeLogs)) {
+            throw new ServiceNotCreatedException(
+                "$requestedName datastore config error: " . self::KEY_WRITE_LOGS . ' should be bool value.'
+            );
         }
 
         $this::$KEY_IN_CREATE = 0;
 
-        if ($writeLogs) {
-            return new $requestedClassName($tableGateway, $writeLogs);
-        }
-
-        return new $requestedClassName($tableGateway);
+        return new $requestedClassName($tableGateway, $writeLogs, $container->get(LoggerInterface::class));
     }
 
     /**
