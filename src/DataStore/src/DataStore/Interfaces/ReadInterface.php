@@ -88,7 +88,7 @@ interface ReadInterface extends \Countable, \IteratorAggregate
      * http://ru.php.net/manual/ru/function.usort.php
      *
      * @param Query $query
-     * @return array[] fo items or [] if not any
+     * @return array[] of items or [] if not any
      */
     public function query(Query $query);
 }
