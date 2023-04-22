@@ -41,6 +41,9 @@ class JsonRenderer implements MiddlewareInterface
             $headers = $response->getHeaders();
         }
 
+        if (!mb_check_encoding($data, 'UTF-8')) {
+            $data = mb_convert_encoding($data, 'UTF-8', 'UTF-8');
+        }
         $response = new JsonResponse($data, $status);
 
         foreach ($headers as $header => $value) {
