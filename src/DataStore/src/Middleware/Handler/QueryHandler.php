@@ -45,6 +45,9 @@ class QueryHandler extends AbstractHandler
         /** @var Query $rqlQuery */
         $rqlQuery = $request->getAttribute('rqlQueryObject');
         $items = $this->dataStore->query($rqlQuery);
+        if (!mb_check_encoding($items, 'UTF-8')) {
+            $items = mb_convert_encoding($items, 'UTF-8', 'UTF-8');
+        }
 
         $response = new Response();
         $response = $response->withBody($this->createStream($items));
