@@ -42,7 +42,7 @@ interface DataStoreInterface extends ReadInterface
      *
      * P.S. Method expect list of records.
      *
-     * @param  array[]|\ArrayObject[]|BaseDto[]|object $records
+     * @param  array[]|\ArrayObject[]|object $records
      * @return array
      */
     public function multiCreate($records);
