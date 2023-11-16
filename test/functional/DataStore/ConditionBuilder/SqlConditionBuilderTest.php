@@ -94,7 +94,7 @@ class SqlConditionBuilderTest extends ConditionBuilderTest
                     ]))
                     ->getQuery()
                     ->getQuery(),
-                "((`a`='b') AND (`c`<'d') AND ((`g`<5) OR (`g`>2)) AND ( NOT ((`h`<>3)) ))",
+                "((`a`='b') AND (`c`<'d') AND ((`g`<5) OR (`g`>2)) AND ( ((`h`<>3)) ) IS NOT TRUE)",
             ],
             [
                 (new QueryBuilder())->addQuery(new AndNode([
@@ -110,7 +110,7 @@ class SqlConditionBuilderTest extends ConditionBuilderTest
                     ]))
                     ->getQuery()
                     ->getQuery(),
-                "((`a`='') AND (`c`<'d') AND ((`g`<5) OR (`g`>2)) AND ( NOT ((`h`<>3)) ))",
+                "((`a`='') AND (`c`<'d') AND ((`g`<5) OR (`g`>2)) AND ( ((`h`<>3)) ) IS NOT TRUE)",
             ],
             [
                 (new QueryBuilder())->addQuery(new AndNode([

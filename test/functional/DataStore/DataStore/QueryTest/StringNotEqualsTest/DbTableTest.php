@@ -20,12 +20,6 @@ class DbTableTest extends BaseTest
      */
     private $mysqlManager;
 
-    public function testGetNullValue(): void
-    {
-        $this->markTestSkipped('Db table does not pass this test.');
-        parent::testGetNullValue();
-    }
-
 
     protected function getDataStore(): DataStoreInterface
     {
