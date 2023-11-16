@@ -2,9 +2,9 @@
 
 namespace rollun\test\functional;
 
+use Laminas\ServiceManager\ServiceManager;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 use rollun\dic\InsideConstruct;
-use Zend\ServiceManager\ServiceManager;
 
 /**
  * У Функциональных тестов APP_ENV = 'test' согласно phpunit.xml

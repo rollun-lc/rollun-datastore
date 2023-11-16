@@ -2,17 +2,11 @@
 
 namespace rollun\test\functional\DataStore\DataStore\QueryTest\StringNotEqualsTest;
 
-use rollun\datastore\DataStore\CsvBase;
-use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
-use rollun\datastore\TableGateway\TableManagerMysql;
 use rollun\test\functional\FunctionalTestCase;
-use Symfony\Component\Filesystem\LockHandler;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\NotNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Query;
-use Zend\Db\Adapter\Adapter;
-use Zend\Db\TableGateway\TableGateway;
 
 abstract class BaseTest extends FunctionalTestCase
 {

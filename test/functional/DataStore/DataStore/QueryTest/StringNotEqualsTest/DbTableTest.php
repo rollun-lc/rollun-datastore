@@ -2,12 +2,11 @@
 
 namespace rollun\test\functional\DataStore\DataStore\QueryTest\StringNotEqualsTest;
 
-use rollun\datastore\DataStore\CsvBase;
+use Laminas\Db\Adapter\Adapter;
+use Laminas\Db\TableGateway\TableGateway;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\TableGateway\TableManagerMysql;
-use Zend\Db\Adapter\Adapter;
-use Zend\Db\TableGateway\TableGateway;
 
 class DbTableTest extends BaseTest
 {
@@ -36,7 +35,7 @@ class DbTableTest extends BaseTest
         return $this->dbTable;
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         parent::tearDown();
         $this->getMysqlManager()->deleteTable(self::TABLE_NAME);
