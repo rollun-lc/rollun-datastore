@@ -67,16 +67,6 @@
     "code-beautiful": "phpcbf .",
     "server": "php -S 0.0.0.0:8000 -t public public/index.php"
   },
-  "repositories": [
-    {
-      "type": "github",
-      "url": "git@github.com:rollun-com/rollun-dic.git"
-    },
-    {
-      "type": "github",
-      "url": "git@github.com:rollun-com/rollun-logger.git"
-    }
-  ],
   "config": {
     "allow-plugins": {
       "rollun-com/rollun-installer": true
