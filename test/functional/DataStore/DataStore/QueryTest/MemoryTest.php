@@ -1,6 +1,6 @@
 <?php
 
-namespace rollun\test\functional\DataStore\DataStore\QueryTest\StringNotEqualsTest;
+namespace rollun\test\functional\DataStore\DataStore\QueryTest;
 
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Memory;
