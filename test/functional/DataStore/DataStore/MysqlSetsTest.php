@@ -23,8 +23,8 @@ class MysqlSetsTest extends FunctionalTestCase
 
     public function queryDataProvider(): array
     {
-        // Column of 'SET' type may return values in different orders (like sometimes 'tire,liquid' and sometimes
-        // 'liquid,tire') so we compare result only by id field.
+        // Column of 'SET' type may sort values in different orders: record with value 'liquid,tire' can
+        // be created with the value 'liquid,tire', so we compare result only by id field.
         return [
             'Equals in wrong order' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'liquid,screw,tire'], // record
