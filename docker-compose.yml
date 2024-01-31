@@ -13,7 +13,9 @@ services:
       - rollun-datastore-php-fpm
 
   rollun-datastore-php-fpm:
-    image: maxrollundev/php-fpm-dev-8.0
+    build:
+      context: docker/
+      dockerfile: php-fpm/Dockerfile
     volumes:
       - ./:/var/www/app
     environment:
