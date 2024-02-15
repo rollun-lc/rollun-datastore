@@ -185,6 +185,38 @@ $csvBase->create([
 var_dump($csvBase->read(1)); // ['id' => '1', 'name' => 'foo']
 ```
 
+```php
+<?php
+
+use rollun\datastore\DataStore\CsvBase;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\Store\FlockStore;
+
+error_reporting(E_ALL ^ E_USER_DEPRECATED ^ E_DEPRECATED);
+
+chdir(dirname(__DIR__));
+require 'vendor/autoload.php';
+
+$filename = tempnam(sys_get_temp_dir(), 'csv');
+
+// Add header row
+$file = fopen($filename, 'w');
+fputcsv($file, ['id', 'name']);
+fclose($file);
+
+// Create datastore
+$lockFactory = new LockFactory(new FlockStore());
+$csvBase = new CsvBase($filename, ',', $lockFactory->createLock($filename));
+
+// Create record
+$csvBase->create([
+    'id' => '1',
+    'value' => 'name'
+]);
+
+var_dump($csvBase->read(1)); // ['id' => '1', 'name' => 'foo']
+```
+
 ##### 3. `HttpClient`
 
 Для работы с HttpClient нужен [Zend\Http\Client](https://framework.zend.com/manual/2.4/en/modules/zend.http.client.html)
