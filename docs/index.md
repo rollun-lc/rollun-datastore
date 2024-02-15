@@ -168,24 +168,6 @@ var_dump($dbTable->read(1)); // ['id' => '1', 'name' => 'foo']
 Пример:
 
 ```php
-<?php 
-
-use rollun\datastore\DataStore\CsvBase;
-use Symfony\Component\Filesystem\LockHandler;
-
-$filename = tempnam(sys_get_temp_dir(), 'csv');
-$lockHandler = new LockHandler($filename);
-
-$csvBase = new CsvBase($filename, ',', $lockHandler);
-$csvBase->create([
-    'id' => 1,
-    'name' => 'foo'
-]);
-
-var_dump($csvBase->read(1)); // ['id' => '1', 'name' => 'foo']
-```
-
-```php
 <?php
 
 use rollun\datastore\DataStore\CsvBase;
