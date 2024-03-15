@@ -158,7 +158,7 @@ class SqlQueryBuilderTest extends TestCase
 
         $select = "SELECT `table`.* FROM `table` ";
         // TODO: it is misbehavior
-        $where = "WHERE ( NOT ((`a` IN ('b','c')) error (`a` NOT IN ('b','c'))) )";
+        $where = "WHERE ( ((`a` IN ('b','c')) error (`a` NOT IN ('b','c'))) ) IS NOT TRUE";
 
         $this->assertEquals($select.$where, $object->buildSql($rqlQuery));
     }
@@ -249,7 +249,7 @@ class SqlQueryBuilderTest extends TestCase
         $rqlQuery->setGroupBy(new GroupbyNode(['a', 'b']));
 
         $select = "SELECT `table`.* FROM `table` ";
-        $where = "WHERE ((`a` LIKE BINARY 'b') AND ((`a` IS FALSE) OR ( NOT ((`a`>'b')) ))) ";
+        $where = "WHERE ((`a` LIKE BINARY 'b') AND ((`a` IS FALSE) OR ( ((`a`>'b')) ) IS NOT TRUE)) ";
         $groupBy = "GROUP BY `a`, `b` ";
         $sort = "ORDER BY `a` ASC ";
         $limit = "LIMIT 5";

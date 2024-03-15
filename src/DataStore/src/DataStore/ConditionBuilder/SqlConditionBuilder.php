@@ -22,7 +22,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         'LogicOperator' => [
             'and' => ['before' => '(', 'between' => ' AND ', 'after' => ')'],
             'or' => ['before' => '(', 'between' => ' OR ', 'after' => ')'],
-            'not' => ['before' => '( NOT (', 'between' => ' error ', 'after' => ') )'],
+            'not' => ['before' => '( (', 'between' => ' error ', 'after' => ') ) IS NOT TRUE'],
         ],
         'ArrayOperator' => [
             'in' => ['before' => '(', 'between' => ' IN (', 'delimiter' => ',', 'after' => '))'],
