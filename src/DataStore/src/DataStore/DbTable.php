@@ -621,6 +621,8 @@ class DbTable extends DataStoreAbstract
             $message = "Request to db table '{$this->dbTable->getTable()}'";
         }
 
+        $logContext["trace"] = debug_backtrace();
+
         $this->loggerService->debug($message, $logContext);
     }
 
