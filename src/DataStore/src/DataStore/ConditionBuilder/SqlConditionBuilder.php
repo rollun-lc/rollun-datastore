@@ -6,6 +6,9 @@
 
 namespace rollun\datastore\DataStore\ConditionBuilder;
 
+use Laminas\Db\Adapter\Exception\RuntimeException;
+use rollun\datastore\DataStore\ConnectionException;
+use rollun\datastore\DataStore\LaminasDbExceptionDetector;
 use rollun\datastore\Rql\Node\BinaryNode\BinaryOperatorNodeAbstract;
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
@@ -81,7 +84,14 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
             return $fieldValue;
         }
 
-        return $this->db->platform->quoteValue($fieldValue);
+        try {
+            return $this->db->platform->quoteValue($fieldValue);
+        } catch (RuntimeException $e) {
+            if (LaminasDbExceptionDetector::isConnectionException($e)) {
+                throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
+            }
+            throw $e;
+        }
     }
 
     /**

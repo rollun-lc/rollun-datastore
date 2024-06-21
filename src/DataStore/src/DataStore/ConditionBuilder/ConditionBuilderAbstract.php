@@ -6,6 +6,7 @@
 
 namespace rollun\datastore\DataStore\ConditionBuilder;
 
+use rollun\datastore\DataStore\ConnectionException;
 use rollun\datastore\Rql\Node\BinaryNode\BinaryOperatorNodeAbstract;
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node\AbstractQueryNode;
@@ -45,6 +46,7 @@ abstract class ConditionBuilderAbstract
      *
      * @param AbstractQueryNode $rootQueryNode
      * @return string
+     * @throws ConnectionException|DataStoreException
      */
     public function __invoke(AbstractQueryNode $rootQueryNode = null)
     {

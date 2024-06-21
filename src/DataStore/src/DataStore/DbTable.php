@@ -7,6 +7,7 @@
 namespace rollun\datastore\DataStore;
 
 use InvalidArgumentException;
+use Laminas\Db\Adapter\Exception\RuntimeException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
@@ -86,6 +87,7 @@ class DbTable extends DataStoreAbstract
 
     /**
      * {@inheritdoc}
+     * @throws ConnectionException|DataStoreException
      */
     public function create($itemData, $rewriteIfExist = false)
     {
@@ -95,7 +97,7 @@ class DbTable extends DataStoreAbstract
         }
 
         $adapter = $this->dbTable->getAdapter();
-        $adapter->getDriver()->getConnection()->beginTransaction();
+        $this->beginTransaction();
 
         try {
             $insertedItem = $this->insertItem($itemData, $rewriteIfExist);
@@ -154,6 +156,7 @@ class DbTable extends DataStoreAbstract
 
     /**
      * {@inheritdoc}
+     * @throws ConnectionException|DataStoreException
      */
     public function update($itemData, $createIfAbsent = false)
     {
@@ -166,7 +169,7 @@ class DbTable extends DataStoreAbstract
         }
 
         $adapter = $this->dbTable->getAdapter();
-        $adapter->getDriver()->getConnection()->beginTransaction();
+        $this->beginTransaction();
 
         try {
             $result = $this->updateItem($itemData, $createIfAbsent);
@@ -474,6 +477,9 @@ class DbTable extends DataStoreAbstract
         } catch (\Throwable $e) {
             $logContext['exception'] = $e;
             $this->writeLogsIfNeeded($logContext, "Request to db table '{$this->dbTable->getTable()}' failed");
+            if (LaminasDbExceptionDetector::isConnectionException($e)) {
+                throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
+            }
             throw $e;
         }
 
@@ -508,6 +514,9 @@ class DbTable extends DataStoreAbstract
         } catch (\Throwable $e) {
             $logContext['exception'] = $e;
             $this->writeLogsIfNeeded($logContext, "Request to db table '{$this->dbTable->getTable()}' failed");
+            if (LaminasDbExceptionDetector::isConnectionException($e)) {
+                throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
+            }
             throw $e;
         }
 
@@ -532,7 +541,14 @@ class DbTable extends DataStoreAbstract
     public function deleteAll()
     {
         $where = '1=1';
-        return $this->dbTable->delete($where);
+        try {
+            return $this->dbTable->delete($where);
+        } catch (RuntimeException $e) {
+            if (LaminasDbExceptionDetector::isConnectionException($e)) {
+                throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
+            }
+            throw new DataStoreException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
@@ -544,7 +560,14 @@ class DbTable extends DataStoreAbstract
 
         $sql = 'SELECT COUNT(*) AS count FROM ' . $adapter->getPlatform()->quoteIdentifier($this->dbTable->getTable());
 
-        $statement = $adapter->getDriver()->createStatement($sql);
+        try {
+            $statement = $adapter->getDriver()->createStatement($sql);
+        } catch (RuntimeException $e) {
+            if (LaminasDbExceptionDetector::isConnectionException($e)) {
+                throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
+            }
+            throw new DataStoreException($e->getMessage(), $e->getCode(), $e);
+        }
         $result = $statement->execute();
 
         return $result->current()['count'];
@@ -558,7 +581,14 @@ class DbTable extends DataStoreAbstract
     public function multiCreate($itemsData)
     {
         $multiInsertTableGw = $this->createMultiInsertTableGw();
-        $multiInsertTableGw->getAdapter()->getDriver()->getConnection()->beginTransaction();
+        try {
+            $multiInsertTableGw->getAdapter()->getDriver()->getConnection()->beginTransaction();
+        } catch (RuntimeException $e) {
+            if (LaminasDbExceptionDetector::isConnectionException($e)) {
+                throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
+            }
+            throw $e;
+        }
         $getIdCallable = function ($item) {
             return $item[$this->getIdentifier()];
         };
@@ -645,5 +675,20 @@ class DbTable extends DataStoreAbstract
     private function getRequestTime(float $start, float $end): float
     {
         return round($end - $start, 3);
+    }
+
+    /**
+     * @throws ConnectionException
+     */
+    private function beginTransaction(): void
+    {
+        try {
+            $this->dbTable->getAdapter()->getDriver()->getConnection()->beginTransaction();
+        } catch (RuntimeException $e) {
+            if (LaminasDbExceptionDetector::isConnectionException($e)) {
+                throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
+            }
+            throw $e;
+        }
     }
 }
