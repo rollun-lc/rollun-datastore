@@ -405,9 +405,9 @@ class TableManagerMysql
      */
     protected function create($tableName, $tableConfig = null)
     {
-        $tableConfig = is_null($tableConfig) ? $tableConfig = $tableName : $tableConfig;
+        $tableConfig = is_null($tableConfig) ? $tableName : $tableConfig;
         $createTable = $this->createCreateTable($tableName, $this->getTableConfig($tableConfig));
-        $sql = $this->getCreateTableSql($createTable, $tableName);
+        $sql = $this->getCreateTableSql($createTable);
 
         return $this->db->query($sql, Adapter\Adapter::QUERY_MODE_EXECUTE);
     }
@@ -452,7 +452,7 @@ class TableManagerMysql
         return $createTable;
     }
 
-    protected function getCreateTableSql(CreateTable $createTable, string $tableName): string
+    protected function getCreateTableSql(CreateTable $createTable): string
     {
         $createTableDecorator = new Sql\Platform\Mysql\Ddl\CreateTableDecorator();
         $mySqlPlatformDbAdapter = new Adapter\Platform\Mysql();
@@ -463,11 +463,7 @@ class TableManagerMysql
         $sqlCreateTable = $createTableDecorator->setSubject($createTable)
             ->getSqlString($mySqlPlatformDbAdapter);
 
-        $mySqlPlatformSql = new Sql\Platform\Mysql\Mysql();
-        $sql = new Sql\Sql($this->db, null, $mySqlPlatformSql);
-        $sqlAlterTable = $sql->buildSqlString(new AlterTable($tableName));
-
-        return "{$sqlCreateTable};" . PHP_EOL . "{$sqlAlterTable};";
+        return "$sqlCreateTable;" . PHP_EOL;
     }
 
     /**
