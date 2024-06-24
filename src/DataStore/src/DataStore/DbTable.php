@@ -431,6 +431,12 @@ class DbTable extends DataStoreAbstract
         } catch (\Throwable $e) {
             $logContext['exception'] = $e;
             $this->writeLogsIfNeeded($logContext, "Request to db table '{$this->dbTable->getTable()}' failed");
+            if (LaminasDbExceptionDetector::isConnectionException($e)) {
+                throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
+            }
+            if (LaminasDbExceptionDetector::isOperationTimedOutException($e)) {
+                throw new OperationTimedOutException($e->getMessage(), $e->getCode(), $e);
+            }
             throw $e;
         }
 
@@ -480,6 +486,9 @@ class DbTable extends DataStoreAbstract
             if (LaminasDbExceptionDetector::isConnectionException($e)) {
                 throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
             }
+            if (LaminasDbExceptionDetector::isOperationTimedOutException($e)) {
+                throw new OperationTimedOutException($e->getMessage(), $e->getCode(), $e);
+            }
             throw $e;
         }
 
@@ -517,6 +526,9 @@ class DbTable extends DataStoreAbstract
             if (LaminasDbExceptionDetector::isConnectionException($e)) {
                 throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
             }
+            if (LaminasDbExceptionDetector::isOperationTimedOutException($e)) {
+                throw new OperationTimedOutException($e->getMessage(), $e->getCode(), $e);
+            }
             throw $e;
         }
 
@@ -547,6 +559,9 @@ class DbTable extends DataStoreAbstract
             if (LaminasDbExceptionDetector::isConnectionException($e)) {
                 throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
             }
+            if (LaminasDbExceptionDetector::isOperationTimedOutException($e)) {
+                throw new OperationTimedOutException($e->getMessage(), $e->getCode(), $e);
+            }
             throw new DataStoreException($e->getMessage(), $e->getCode(), $e);
         }
     }
@@ -565,6 +580,9 @@ class DbTable extends DataStoreAbstract
         } catch (RuntimeException $e) {
             if (LaminasDbExceptionDetector::isConnectionException($e)) {
                 throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
+            }
+            if (LaminasDbExceptionDetector::isOperationTimedOutException($e)) {
+                throw new OperationTimedOutException($e->getMessage(), $e->getCode(), $e);
             }
             throw new DataStoreException($e->getMessage(), $e->getCode(), $e);
         }
@@ -687,6 +705,9 @@ class DbTable extends DataStoreAbstract
         } catch (RuntimeException $e) {
             if (LaminasDbExceptionDetector::isConnectionException($e)) {
                 throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
+            }
+            if (LaminasDbExceptionDetector::isOperationTimedOutException($e)) {
+                throw new OperationTimedOutException($e->getMessage(), $e->getCode(), $e);
             }
             throw $e;
         }

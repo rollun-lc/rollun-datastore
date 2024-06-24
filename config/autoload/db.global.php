@@ -36,6 +36,20 @@ return [
                 'hostname' => getenv('DB_HOST'),
                 'port' => getenv('DB_PORT') ?: 3306,
             ],
+            'db.mysqli.timeout-1-sec' => [
+                'driver' => 'Mysqli',
+                'database' => getenv('DB_NAME'),
+                'username' => getenv('DB_USER'),
+                'password' => getenv('DB_PASS'),
+                'hostname' => getenv('DB_HOST'),
+                'port' => getenv('DB_PORT') ?: 3306,
+                'options' => [
+                    'buffer_results' => true,
+                ],
+                'driver_options' => [
+                    MYSQLI_OPT_READ_TIMEOUT => 1
+                ],
+            ],
         ]
     ],
 ];
