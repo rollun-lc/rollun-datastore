@@ -7,7 +7,7 @@ use rollun\datastore\DataStore\DbTable;
 
 class DbTablePdoDriverDataStoreTest extends BaseTest
 {
-    protected function getDbTableDataStore(): DbTable
+    protected function getDataStore(): DbTable
     {
         return new DbTable(
             new TableGateway(
