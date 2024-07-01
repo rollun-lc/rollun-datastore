@@ -7,6 +7,7 @@
 namespace rollun\datastore\TableGateway;
 
 use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
+use rollun\datastore\DataStore\ConnectionException;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
@@ -154,6 +155,8 @@ class SqlQueryBuilder
             $selectSql = $sql->select($this->tableName);
 
             // Create select with where conditions
+            // Can throw connection exception, because it does sql string escaping which require connection to
+            // get table charset
             $selectSql->where($this->sqlConditionBuilder->__invoke($query->getQuery()));
 
             // Set order
@@ -177,6 +180,9 @@ class SqlQueryBuilder
 
             return $sql;
         } catch (\Throwable $throwable) {
+            if ($throwable instanceof ConnectionException) {
+                throw $throwable;
+            }
             throw new DataStoreException("Can't build sql from rql query", 0, $throwable);
         }
     }

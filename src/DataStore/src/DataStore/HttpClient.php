@@ -147,7 +147,7 @@ class HttpClient extends DataStoreAbstract
         $query->setLimit(new LimitNode(1));
         $uri = $this->createUri($query);
         $client = $this->initHttpClient(Request::METHOD_GET, $uri);
-        $response = $client->send();
+        $response = self::sendByClient($client);
 
         $this->checkResonseHeaderIdentifier($response);
     }
@@ -166,7 +166,7 @@ class HttpClient extends DataStoreAbstract
     protected function sendHead()
     {
         $client = $this->initHttpClient(Request::METHOD_HEAD, "{$this->url}?limit(1)");
-        $response = $client->send();
+        $response = self::sendByClient($client);
 
         if ($response->isSuccess()) {
 
@@ -185,7 +185,7 @@ class HttpClient extends DataStoreAbstract
         $this->checkIdentifierType($id);
         $uri = $this->createUri(null, $id);
         $client = $this->initHttpClient(Request::METHOD_GET, $uri);
-        $response = $client->send();
+        $response = self::sendByClient($client);
 
         $this->checkResonseHeaderIdentifier($response);
 
@@ -265,7 +265,7 @@ class HttpClient extends DataStoreAbstract
     {
         $uri = $this->createUri($query);
         $client = $this->initHttpClient(Request::METHOD_GET, $uri);
-        $response = $client->send();
+        $response = self::sendByClient($client);
 
         $this->checkResonseHeaderIdentifier($response);
 
@@ -291,7 +291,7 @@ class HttpClient extends DataStoreAbstract
         $client = $this->initHttpClient(Request::METHOD_POST, $this->url, $rewriteIfExist);
         $json = Serializer::jsonSerialize($itemData);
         $client->setRawBody($json);
-        $response = $client->send();
+        $response = self::sendByClient($client);
 
         $this->checkResonseHeaderIdentifier($response);
 
@@ -321,7 +321,7 @@ class HttpClient extends DataStoreAbstract
         if ($head && isset($head['X_MULTI_CREATE'])) {
             $client = $this->initHttpClient(Request::METHOD_POST, $this->url);
             $client->setRawBody(Serializer::jsonSerialize($records));
-            $response = $client->send();
+            $response = self::sendByClient($client);
             if ($response->isSuccess()) {
                 $result = Serializer::jsonUnserialize($response->getBody());
             } else {
@@ -333,7 +333,7 @@ class HttpClient extends DataStoreAbstract
             $result = [];
             foreach ($records as $record) {
                 $client->setRawBody(Serializer::jsonSerialize($record));
-                $response = $client->send();
+                $response = self::sendByClient($client);
                 $result[] = Serializer::jsonUnserialize($response->getBody());
             }
         }
@@ -363,7 +363,7 @@ class HttpClient extends DataStoreAbstract
 
         $client = $this->initHttpClient(Request::METHOD_PUT, $uri, $createIfAbsent);
         $client->setRawBody(Serializer::jsonSerialize($itemData));
-        $response = $client->send();
+        $response = self::sendByClient($client);
 
         $this->checkResonseHeaderIdentifier($response);
 
@@ -385,7 +385,7 @@ class HttpClient extends DataStoreAbstract
         $this->checkIdentifierType($id);
         $uri = $this->createUri(null, $id);
         $client = $this->initHttpClient(Request::METHOD_DELETE, $uri);
-        $response = $client->send();
+        $response = self::sendByClient($client);
 
         $this->checkResonseHeaderIdentifier($response);
 
@@ -422,5 +422,29 @@ class HttpClient extends DataStoreAbstract
         }
 
         return trim(implode(' ', $messages));
+    }
+
+    private static function sendByClient(Client $client): Response
+    {
+        try {
+            $response = $client->send();
+        } catch (Client\Adapter\Exception\TimeoutException $e) {
+            throw new OperationTimedOutException($e->getMessage(), $e->getCode(), $e);
+        } catch (Client\Adapter\Exception\RuntimeException $e) {
+            // Exception from Laminas\Http\Client\Adapter\Curl::connect
+            if (str_starts_with($e->getMessage(), 'Unable to Connect to ')) {
+                throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
+            }
+            throw new DataStoreException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        if ($response->isServerError()) {
+            throw new DataStoreServerException(
+                "{$client->getMethod()} to {$client->getUri()->toString()}" .
+                " failed with {$response->getStatusCode()} code: " .
+                $response->getReasonPhrase() . '. Body: ' . $response->getBody()
+            );
+        }
+        return $response;
     }
 }
