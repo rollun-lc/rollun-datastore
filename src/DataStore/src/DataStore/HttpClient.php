@@ -427,7 +427,7 @@ class HttpClient extends DataStoreAbstract
     private static function sendByClient(Client $client): Response
     {
         try {
-            return $client->send();
+            $response = $client->send();
         } catch (Client\Adapter\Exception\TimeoutException $e) {
             throw new OperationTimedOutException($e->getMessage(), $e->getCode(), $e);
         } catch (Client\Adapter\Exception\RuntimeException $e) {
@@ -437,5 +437,14 @@ class HttpClient extends DataStoreAbstract
             }
             throw new DataStoreException($e->getMessage(), $e->getCode(), $e);
         }
+
+        if ($response->isServerError()) {
+            throw new DataStoreServerException(
+                "{$client->getMethod()} to {$client->getUri()->toString()}" .
+                " failed with {$response->getStatusCode()} code: " .
+                $response->getReasonPhrase() . '. Body: ' . $response->getBody()
+            );
+        }
+        return $response;
     }
 }
