@@ -104,6 +104,8 @@ class DbTable extends DataStoreAbstract
             $adapter->getDriver()->getConnection()->commit();
         } catch (\Throwable $e) {
             $adapter->getDriver()->getConnection()->rollback();
+            // https://github.com/laminas/laminas-db/issues/56
+            $adapter->getDriver()->getConnection()->disconnect();
             $logContext = [
                 self::LOG_METHOD => __METHOD__,
                 self::LOG_TABLE => $this->dbTable->getTable(),
@@ -176,6 +178,8 @@ class DbTable extends DataStoreAbstract
             $adapter->getDriver()->getConnection()->commit();
         } catch (\Throwable $e) {
             $adapter->getDriver()->getConnection()->rollback();
+            // https://github.com/laminas/laminas-db/issues/56
+            $adapter->getDriver()->getConnection()->disconnect();
             $logContext = [
                 self::LOG_METHOD => __METHOD__,
                 self::LOG_TABLE => $this->dbTable->getTable(),
@@ -228,6 +232,8 @@ class DbTable extends DataStoreAbstract
             $statement = $adapter->getDriver()->createStatement($sqlString);
             $result = $statement->execute();
         } catch (\Throwable $e) {
+            // https://github.com/laminas/laminas-db/issues/56
+            $adapter->getDriver()->getConnection()->disconnect();
             throw new DataStoreException("[{$this->dbTable->getTable()}]Can't delete records using query", 0, $e);
         }
 
@@ -431,6 +437,8 @@ class DbTable extends DataStoreAbstract
         } catch (\Throwable $e) {
             $logContext['exception'] = $e;
             $this->writeLogsIfNeeded($logContext, "Request to db table '{$this->dbTable->getTable()}' failed");
+            // https://github.com/laminas/laminas-db/issues/56
+            $adapter->getDriver()->getConnection()->disconnect();
             if (LaminasDbExceptionDetector::isConnectionException($e)) {
                 throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
             }
@@ -483,6 +491,8 @@ class DbTable extends DataStoreAbstract
         } catch (\Throwable $e) {
             $logContext['exception'] = $e;
             $this->writeLogsIfNeeded($logContext, "Request to db table '{$this->dbTable->getTable()}' failed");
+            // https://github.com/laminas/laminas-db/issues/56
+            $this->dbTable->getAdapter()->getDriver()->getConnection()->disconnect();
             if (LaminasDbExceptionDetector::isConnectionException($e)) {
                 throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
             }
@@ -523,6 +533,8 @@ class DbTable extends DataStoreAbstract
         } catch (\Throwable $e) {
             $logContext['exception'] = $e;
             $this->writeLogsIfNeeded($logContext, "Request to db table '{$this->dbTable->getTable()}' failed");
+            // https://github.com/laminas/laminas-db/issues/56
+            $this->dbTable->getAdapter()->getDriver()->getConnection()->disconnect();
             if (LaminasDbExceptionDetector::isConnectionException($e)) {
                 throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
             }
@@ -556,6 +568,8 @@ class DbTable extends DataStoreAbstract
         try {
             return $this->dbTable->delete($where);
         } catch (RuntimeException $e) {
+            // https://github.com/laminas/laminas-db/issues/56
+            $this->dbTable->getAdapter()->getDriver()->getConnection()->disconnect();
             if (LaminasDbExceptionDetector::isConnectionException($e)) {
                 throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
             }
@@ -578,6 +592,8 @@ class DbTable extends DataStoreAbstract
         try {
             $statement = $adapter->getDriver()->createStatement($sql);
         } catch (RuntimeException $e) {
+            // https://github.com/laminas/laminas-db/issues/56
+            $adapter->getDriver()->getConnection()->disconnect();
             if (LaminasDbExceptionDetector::isConnectionException($e)) {
                 throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
             }
@@ -621,6 +637,8 @@ class DbTable extends DataStoreAbstract
             $multiInsertTableGw->getAdapter()->getDriver()->getConnection()->commit();
         } catch (\Throwable $throwable) {
             $multiInsertTableGw->getAdapter()->getDriver()->getConnection()->rollback();
+            // https://github.com/laminas/laminas-db/issues/56
+            $multiInsertTableGw->getAdapter()->getDriver()->getConnection()->disconnect();
 
             throw new DataStoreException(
                 "Exception by multi create to table {$this->dbTable->table}. Details: {$throwable->getMessage()}",
@@ -703,6 +721,8 @@ class DbTable extends DataStoreAbstract
         try {
             $this->dbTable->getAdapter()->getDriver()->getConnection()->beginTransaction();
         } catch (RuntimeException $e) {
+            // https://github.com/laminas/laminas-db/issues/56
+            $this->dbTable->getAdapter()->getDriver()->getConnection()->disconnect();
             if (LaminasDbExceptionDetector::isConnectionException($e)) {
                 throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
             }
