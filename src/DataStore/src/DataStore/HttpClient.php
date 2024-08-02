@@ -432,7 +432,7 @@ class HttpClient extends DataStoreAbstract
             throw new OperationTimedOutException($e->getMessage(), $e->getCode(), $e);
         } catch (Client\Adapter\Exception\RuntimeException $e) {
             // Exception from Laminas\Http\Client\Adapter\Curl::connect
-            if (str_starts_with($e->getMessage(), 'Unable to Connect to ')) {
+            if (str_starts_with(mb_strtolower($e->getMessage()), 'unable to connect to ')) {
                 throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
             }
             throw new DataStoreException($e->getMessage(), $e->getCode(), $e);
