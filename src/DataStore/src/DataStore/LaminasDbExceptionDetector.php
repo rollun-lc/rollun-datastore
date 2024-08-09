@@ -2,13 +2,23 @@
 
 namespace rollun\datastore\DataStore;
 
+use Laminas\Db\Adapter\Exception\InvalidQueryException;
 use Laminas\Db\Adapter\Exception\RuntimeException;
 use Throwable;
 
 class LaminasDbExceptionDetector
 {
+    private const MYSQL_SERVER_HAS_GONE_AWAY = 'MySQL server has gone away';
+
     public static function isConnectionException(Throwable $e): bool
     {
+        // When connection is lost during preparing SQL in Laminas\Db\Adapter\Driver\Mysqli\Statement::prepare()
+        if ($e instanceof InvalidQueryException && $e->getPrevious()) {
+            if (str_starts_with($e->getPrevious()->getMessage(), self::MYSQL_SERVER_HAS_GONE_AWAY)) {
+                return true;
+            }
+        }
+
         if (!$e instanceof RuntimeException) {
             return false;
         }
@@ -30,7 +40,7 @@ class LaminasDbExceptionDetector
         }
         if (
             // Exception message from a Mysqli driver: Laminas\Db\Adapter\Driver\Mysqli\Statement
-            str_starts_with($e->getMessage(), 'MySQL server has gone away')
+            str_starts_with($e->getMessage(), self::MYSQL_SERVER_HAS_GONE_AWAY)
         ) {
             return true;
         }
