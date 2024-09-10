@@ -80,7 +80,7 @@ class RqlConditionBuilder extends ConditionBuilderAbstract
             $constQuestion = 'questionhjc7vjHg6jd8mv8hcy75GFt0c67cnbv74FegxtEDJkcucG64frblmkb';
             $regexRelEncoded = self::encodeString($regexRqlDecoded);
             $regexRqlPrepared = strtr($regexRelEncoded, [$constStar => '*', $constQuestion => '?']);
-            $value = empty($regexRqlPrepared) ? "empty" : 'string:' . $regexRqlPrepared;
+            $value = strlen($regexRqlPrepared) === 0 ? "empty" : 'string:' . $regexRqlPrepared;
 
             return $value;
         }

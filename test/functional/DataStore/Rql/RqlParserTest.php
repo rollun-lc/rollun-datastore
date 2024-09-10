@@ -107,6 +107,24 @@ class RqlParserTest extends TestCase
         $this->assertEquals("&limit(20)", $rqlString);
     }
 
+    public function rqlEncodeZeroDataProvider(): array
+    {
+        return [
+            'Equals' => ['eq(id,string:0)'],
+            'Contains' => ['contains(id,string:0)']
+        ];
+    }
+
+    /**
+     * @dataProvider rqlEncodeZeroDataProvider
+     */
+    public function testRqlEncodeZero(string $expectedRqlString)
+    {
+        $queryObject = RqlParser::rqlDecode($expectedRqlString);
+        $rqlString = RqlParser::rqlEncode($queryObject);
+        $this->assertEquals($expectedRqlString, $rqlString);
+    }
+
     public function testRqlEncodeStringNodeEq()
     {
         $queryObject = RqlParser::rqlDecode("eq(a,string:01)");
