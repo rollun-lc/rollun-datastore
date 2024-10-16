@@ -39,11 +39,9 @@ class CsvBaseTest extends TestCase
 
     protected function createObject($delimiter = ',')
     {
-        //$lockHandler = new LockHandler($this->filename);
         $lockFactory = new LockFactory(new FlockStore());
-        $lockHandler = $lockFactory->createLock($this->filename);
 
-        return new CsvBase($this->filename, $delimiter, $lockHandler);
+        return new CsvBase($this->filename, $delimiter, $lockFactory);
     }
 
     public function testCreateSuccess()
@@ -331,6 +329,22 @@ class CsvBaseTest extends TestCase
         $object = $this->createObject();
         $this->assertEquals($object->read($items['id']), $this->read($items['id']));
     }
+//
+//    public function testMultipleRead(): void
+//    {
+//        $items = [
+//            'id' => 1,
+//            'name' => 'name',
+//            'surname' => 'surname',
+//        ];
+//
+//        $this->create($items);
+//
+//        $firstDataStore = $this->createObject();
+//        $secondDataStore = $this->createObject();
+//        $this->assertEquals($firstDataStore->read($items['id']), $this->read($items['id']));
+//        $this->assertEquals($secondDataStore->read($items['id']), $this->read($items['id']));
+//    }
 
     public function testReadSuccessWithItemNotExist()
     {

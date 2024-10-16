@@ -37,10 +37,8 @@ class CsvBaseTest extends BaseDataStoreTest
 
     protected function createObject(): DataStoreAbstract
     {
-        //$lockHandler = new LockHandler($this->filename);
         $lockFactory = new LockFactory(new FlockStore());
-        $lockHandler = $lockFactory->createLock($this->filename);
 
-        return new CsvBase($this->filename, $this->delimiter, $lockHandler);
+        return new CsvBase($this->filename, $this->delimiter, $lockFactory);
     }
 }

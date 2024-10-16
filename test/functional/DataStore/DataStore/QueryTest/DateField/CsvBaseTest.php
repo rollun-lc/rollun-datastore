@@ -43,6 +43,6 @@ class CsvBaseTest extends BaseTest
         fclose($file);
 
         $lockFactory = new LockFactory(new FlockStore());
-        return new CsvBase($path, ',', $lockFactory->createLock($path));
+        return new CsvBase($path, ',', $lockFactory);
     }
 }

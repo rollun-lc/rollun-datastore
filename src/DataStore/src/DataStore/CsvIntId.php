@@ -6,8 +6,7 @@
 
 namespace rollun\datastore\DataStore;
 
-use Symfony\Component\Filesystem\LockHandler;
-use Symfony\Component\Lock\LockInterface;
+use Symfony\Component\Lock\LockFactory;
 
 /**
  * Class CsvIntId
@@ -18,9 +17,9 @@ class CsvIntId extends CsvBase
     /**
      * {@inheritdoc}
      */
-    public function __construct($filename, $delimiter, LockInterface $lockHandler)
+    public function __construct($filename, $delimiter, LockFactory $lockFactory)
     {
-        parent::__construct($filename, $delimiter, $lockHandler);
+        parent::__construct($filename, $delimiter, $lockFactory);
 
         if (!$this->checkIntegrityData()) {
             throw new DataStoreException('The source file contains wrong data');
@@ -30,7 +29,7 @@ class CsvIntId extends CsvBase
     /**
      * {@inheritdoc}
      */
-    protected function flush($item, $delete = false)
+    protected function flush($item, bool $delete = false): void
     {
         // Create and open temporary file for writing
         $tmpFile = tempnam(sys_get_temp_dir(), uniqid() . '.tmp');
@@ -89,7 +88,7 @@ class CsvIntId extends CsvBase
      */
     protected function generatePrimaryKey()
     {
-        $this->openFile(1);
+        $this->openFileForReading(1);
         $id = null;
 
         while (!feof($this->fileHandler)) {
