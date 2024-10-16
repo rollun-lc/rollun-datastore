@@ -8,19 +8,12 @@ namespace rollun\test\unit\DataStore\DataStore;
 
 use rollun\datastore\DataStore\CsvIntId;
 use rollun\datastore\DataStore\DataStoreException;
-//use Symfony\Component\Filesystem\LockHandler;
-use Symfony\Component\Lock\LockFactory;
-use Symfony\Component\Lock\Store\FlockStore;
 
 class CsvIntIdTest extends CsvBaseTest
 {
     protected function createObject($delimiter = ',')
     {
-        //$lockHandler = new LockHandler($this->filename);
-        $lockFactory = new LockFactory(new FlockStore());
-        $lockHandler = $lockFactory->createLock($this->filename);
-
-        return new CsvIntId($this->filename, $delimiter, $lockHandler);
+        return new CsvIntId($this->filename, $delimiter);
     }
 
     public function testCreateSuccess()

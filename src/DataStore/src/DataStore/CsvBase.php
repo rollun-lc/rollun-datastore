@@ -6,11 +6,12 @@
 
 namespace rollun\datastore\DataStore;
 
+use Exception;
 use Iterator;
 use rollun\datastore\DataSource\DataSourceInterface;
 use rollun\datastore\DataStore\Iterators\CsvIterator;
 use rollun\datastore\DataStore\ConditionBuilder\PhpConditionBuilder;
-use Symfony\Component\Lock\LockInterface;
+use SplFileObject;
 use Xiag\Rql\Parser\Query;
 
 /**
@@ -29,10 +30,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      */
     protected array $columns;
 
-    /**
-     * @var resource
-     */
-    protected $fileHandler;
+    protected ?SplFileObject $file = null;
 
     /**
      * Csv constructor. If file with this name doesn't exist attempts find it in document root directory
@@ -41,9 +39,9 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      */
     public function __construct(
         protected string $filename,
-        ?string $csvDelimiter,
-        protected LockInterface $lockHandler
-    ) {
+        ?string $csvDelimiter
+    )
+    {
         // At first checks existing file as it is
         // If it doesn't exist converts to full name in the temporary folder
         if (!is_file($filename)) {
@@ -65,6 +63,17 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
         $this->conditionBuilder = new PhpConditionBuilder();
     }
 
+    /**
+     * Sets the column headings
+     * @throws DataStoreException
+     */
+    public function getHeaders(): void
+    {
+        $this->enableReadMode();
+        $this->columns = $this->file->fgetcsv($this->csvDelimiter);
+        $this->releaseLocks();
+    }
+
     public function getFilename(): string
     {
         return $this->filename;
@@ -72,27 +81,16 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DataStoreException
      */
-    public function read($id = null)
+    public function read($id = null): ?array
     {
-        $this->openFile();
+        $this->enableReadMode();
 
-        // In the CSV-format first row always containts the column headings
-        // That's why first row is passed during the file opening
-        // And then it reads the file until end of file won't found or won't found the indentifier
-        $row = null;
+        $row = $this->findInFile($id);
 
-        while (!feof($this->fileHandler)) {
-            $row = $this->getTrueRow(
-                fgetcsv($this->fileHandler, null, $this->csvDelimiter)
-            );
-
-            if ($row && $row[$this->getIdentifier()] == $id) {
-                break;
-            }
-        }
-
-        $this->closeFile();
+        $this->releaseLocks();
 
         return $row;
     }
@@ -109,12 +107,15 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
 
     /**
      * {@inheritdoc}
+     * @throws DataStoreException
      */
     public function create($itemData, $rewriteIfExist = false)
     {
         if ($rewriteIfExist) {
             trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
         }
+
+        $this->enableWritingMode();
 
         $identifier = $this->getIdentifier();
 
@@ -124,7 +125,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
                 $item = $this->createNewItem($itemData);
                 $item[$identifier] = $this->generatePrimaryKey();
                 break;
-            case (!$rewriteIfExist && !is_null($this->read($itemData[$identifier]))):
+            case (!$rewriteIfExist && !is_null($this->findInFile($itemData[$identifier]))):
                 throw new DataStoreException("Item is already exist with id = $itemData[$identifier]");
             default:
                 // updates an existing item
@@ -136,11 +137,14 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
 
         $this->flush($item);
 
+        $this->releaseLocks();
+
         return $item;
     }
 
     /**
      * {@inheritdoc}
+     * @throws DataStoreException
      */
     public function update($itemData, $createIfAbsent = false)
     {
@@ -154,9 +158,11 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
             throw new DataStoreException('Item must have primary key');
         }
 
+        $this->enableWritingMode();
+
         $id = $itemData[$identifier];
         $this->checkIdentifierType($id);
-        $item = $this->read($id);
+        $item = $this->findInFile($id);
 
         switch (true) {
             case (is_null($item) && !$createIfAbsent):
@@ -180,9 +186,12 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
 
     /**
      * {@inheritdoc}
+     * @throws DataStoreException
      */
     public function delete($id)
     {
+        $this->enableWritingMode();
+
         $this->checkIdentifierType($id);
         // If item with specified id was found flushs file without it
         $item = $this->read($id);
@@ -193,17 +202,20 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
             return $item;
         }
 
+        $this->releaseLocks();
+
         // Else do nothing
         return null;
     }
 
     /**
      * {@inheritdoc}
-     *
-     * {@inheritdoc}
+     * @throws DataStoreException
      */
     public function deleteAll()
     {
+        $this->enableWritingMode();
+
         // Count rows
         $count = $this->count();
         $tmpFile = tempnam("/tmp", uniqid() . '.tmp');
@@ -218,6 +230,12 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
             throw new DataStoreException("Failed to write the results to a file.");
         }
 
+        $this->releaseLocks();
+
+        // After we rename file, SplFileObject still refers to old file, so we clear it
+        unset($this->file);
+        $this->file = null;
+
         return $count;
     }
 
@@ -225,10 +243,10 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      * Flushes all changes to temporary file which then will change the original one
      *
      * @param $item
-     * @param bool|false $delete
+     * @param bool $delete
      * @throws DataStoreException
      */
-    protected function flush($item, $delete = false)
+    protected function flush($item, bool $delete = false): void
     {
         // Create and open temporary file for writing
         $tmpFile = tempnam(sys_get_temp_dir(), uniqid() . '.tmp');
@@ -240,7 +258,15 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
         $identifier = $this->getIdentifier();
         $inserted = false;
 
-        foreach ($this as $index => $row) {
+        foreach ($this->file as $index => $row) {
+            // First row is headers.
+            // If file has newline at the end than last line will be false (if no SplFileObject::READ_AHEAD flag).
+            if ($index === 0 || $row === false) {
+                continue;
+            }
+
+            $row = $this->getTrueRow($row);
+
             // Check an identifier; if equals and it doesn't need to delete - inserts new item
             if ($item[$identifier] == $row[$identifier]) {
                 if (!$delete) {
@@ -261,7 +287,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
 
         fclose($tempHandler);
 
-        // Copies the original file to a temporary one.
+        // Copies the temporary file to original.
         if (!copy($tmpFile, $this->filename)) {
             unlink($tmpFile);
             throw new DataStoreException("Failed to write the results to a file.");
@@ -271,53 +297,87 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     }
 
     /**
-     * Opens file for reading.
+     * Read mode allows any parallel process to read from file, but locks file for writing.
      *
-     * @param bool $seekFirstDataRow - the first row in csv-file contains the column headings; this parameter says,
-     *     if it is need to pass it (row) after the opening the file.
      * @throws DataStoreException
      */
-    protected function openFile($seekFirstDataRow = true)
+    public function enableReadMode(): void
     {
-        $this->lockFile();
-
         try {
-            $this->fileHandler = fopen($this->filename, 'r');
-            if ($seekFirstDataRow) {
-                fgets($this->fileHandler);
-            }
-        } catch (\Exception $e) {
-            throw new DataStoreException(
-                "Failed to open file. The specified file does not exist or one is closed for reading."
-            );
-        } finally {
-            $this->lockHandler->release();
+            // SHARED LOCK aka reader lock - any number of processes MAY HAVE A SHARED LOCK simultaneously.
+            $this->lockWithRetries(LOCK_SH);
+        } catch (DataStoreException $e) {
+            throw new DataStoreException('Cannot lock file for writing: ' . $e->getMessage(), 0, $e);
         }
     }
 
     /**
-     * Locks the file
+     * Write mode locks file for both writing and reading.
      *
-     * @param int $nbTries - count of tries of locking queue
-     * @return bool
      * @throws DataStoreException
      */
-    protected function lockFile($nbTries = 0)
+    public function enableWritingMode(): void
     {
-        //if (!$this->lockHandler->lock()) {
-        if (!$this->lockHandler->acquire()) {
-            if ($nbTries >= static::MAX_LOCK_TRIES) {
-                throw new DataStoreException(
-                    sprintf("Reach max retry (%s) for locking queue file {$this->filename}", static::MAX_LOCK_TRIES)
-                );
-            }
+        try {
+            // EXCLUSIVE LOCK. Only a single process may possess an exclusive lock to a given file at a time.
+            $this->lockWithRetries(LOCK_EX);
+        } catch (DataStoreException $e) {
+            throw new DataStoreException('Cannot lock file for writing: ' . $e->getMessage(), 0, $e);
+        }
+    }
 
-            usleep(10);
-
-            return $this->lockFile($nbTries + 1);
+    /**
+     * @throws DataStoreException
+     */
+    protected function getFile(): SplFileObject
+    {
+        if ($this->file !== null) {
+            return $this->file;
         }
 
-        return true;
+        try {
+            $this->file = new SplFileObject($this->filename, 'r');
+        } catch (Exception $e) {
+            throw new DataStoreException(
+                "Failed to open file. The specified file does not exist or one is closed for reading.",
+                0,
+                $e
+            );
+        }
+
+
+        // A blank line in a CSV file will be returned as an array comprising a single null field unless using
+        // SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE, in which case empty lines are skipped.
+        $this->file->setFlags(SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE | SplFileObject::READ_CSV);
+
+        return $this->file;
+    }
+
+    /**
+     * @param int $microsecondsBetweenRetries delay in microseconds between retries
+     * @throws DataStoreException
+     */
+    protected function lockWithRetries(
+        int $operation, int $maxTries = 40, int $microsecondsBetweenRetries = 50
+    ): void
+    {
+        $file = $this->getFile();
+        $tries = 0;
+
+        while (!$file->flock($operation | LOCK_NB, $wouldBlock)) {
+            if (!$wouldBlock) {
+                throw new DataStoreException('Cannot lock file: EWOULDBLOCK errno condition.');
+            }
+
+            if ($tries++ > $maxTries) {
+                throw new DataStoreException(sprintf(
+                    "Reach max retry (%s) for locking queue file {$file->getFilename()}",
+                    static::MAX_LOCK_TRIES
+                ));
+            }
+
+            usleep($microsecondsBetweenRetries);
+        }
     }
 
     /**
@@ -337,24 +397,37 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     }
 
     /**
-     * Closes file
-     */
-    public function closeFile()
-    {
-        fclose($this->fileHandler);
-        $this->lockHandler->release();
-    }
-
-    /**
-     * Sets the column headings
      * @throws DataStoreException
      */
-    public function getHeaders(): void
+    protected function releaseLocks(): void
     {
-        // Don't pass the first row!!
-        $this->openFile(0);
-        $this->columns = fgetcsv($this->fileHandler, null, $this->csvDelimiter);
-        $this->closeFile();
+        $result = $this->file?->flock(LOCK_UN);
+        if ($result === false) {
+            throw new DataStoreException("Cannot unblock file '{$this->filename}'.");
+        }
+    }
+
+    protected function findInFile(?string $id): ?array
+    {
+        $this->file->rewind();
+        $this->skipColumnHeaders($this->file);
+
+        // In the CSV-format first row always containts the column headings
+        // That's why first row is passed during the file opening
+        // And then it reads the file until end of file won't found or won't found the indentifier
+        $row = null;
+
+        while (!$this->file->eof()) {
+            $row = $this->file->fgetcsv($this->csvDelimiter);
+
+            $row = $this->getTrueRow($row);
+
+            if ($row && $row[$this->getIdentifier()] == $id) {
+                break;
+            }
+        }
+
+        return $row;
     }
 
     /**
@@ -379,14 +452,24 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
 
     /**
      * {@inheritdoc}
+     * @throws DataStoreException
      */
-    public function count()
+    public function count(): int
     {
-        $count = 0;
+        $this->enableReadMode();
 
-        foreach ($this as $item) {
+        // Not zero because first row is headers
+        $count = -1;
+
+        foreach ($this->file as $row) {
+            // If file has newline at the end than last line will be false (if no SplFileObject::READ_AHEAD flag).
+            if ($row === false) {
+                continue;
+            }
             $count++;
         }
+
+        $this->releaseLocks();
 
         return $count;
     }
@@ -473,5 +556,13 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     public function getCsvDelimiter()
     {
         return $this->csvDelimiter;
+    }
+
+    /**
+     * The first row in csv-file contains the column headings, and these methods skips it
+     */
+    protected static function skipColumnHeaders(SplFileObject $file): void
+    {
+        $file->fgets();
     }
 }

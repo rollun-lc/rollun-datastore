@@ -4,8 +4,6 @@ namespace rollun\test\functional\DataStore\DataStore\QueryTest\StringNotEqualsTe
 
 use rollun\datastore\DataStore\CsvBase;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
-use Symfony\Component\Lock\LockFactory;
-use Symfony\Component\Lock\Store\FlockStore;
 
 class CsvBaseTest extends BaseTest
 {
@@ -42,7 +40,6 @@ class CsvBaseTest extends BaseTest
         fputcsv($file, [self::ID_NAME, self::FIELD_NAME]);
         fclose($file);
 
-        $lockFactory = new LockFactory(new FlockStore());
-        return new CsvBase($path, ',', $lockFactory->createLock($path));
+        return new CsvBase($path, ',');
     }
 }

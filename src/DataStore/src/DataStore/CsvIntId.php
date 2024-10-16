@@ -6,9 +6,6 @@
 
 namespace rollun\datastore\DataStore;
 
-use Symfony\Component\Filesystem\LockHandler;
-use Symfony\Component\Lock\LockInterface;
-
 /**
  * Class CsvIntId
  * @package rollun\datastore\DataStore
@@ -18,9 +15,9 @@ class CsvIntId extends CsvBase
     /**
      * {@inheritdoc}
      */
-    public function __construct($filename, $delimiter, LockInterface $lockHandler)
+    public function __construct($filename, $delimiter)
     {
-        parent::__construct($filename, $delimiter, $lockHandler);
+        parent::__construct($filename, $delimiter);
 
         if (!$this->checkIntegrityData()) {
             throw new DataStoreException('The source file contains wrong data');
@@ -30,7 +27,7 @@ class CsvIntId extends CsvBase
     /**
      * {@inheritdoc}
      */
-    protected function flush($item, $delete = false)
+    protected function flush($item, bool $delete = false): void
     {
         // Create and open temporary file for writing
         $tmpFile = tempnam(sys_get_temp_dir(), uniqid() . '.tmp');
@@ -42,7 +39,15 @@ class CsvIntId extends CsvBase
         $inserted = false;
         $prevId = -1;
 
-        foreach ($this as $index => $row) {
+        foreach ($this->file as $index => $row) {
+            // First row is headers.
+            // If file has newline at the end than last line will be false (if no SplFileObject::READ_AHEAD flag).
+            if ($index === 0 || $row === false) {
+                continue;
+            }
+
+            $row = $this->getTrueRow($row);
+
             // Check an identifier; if equals and it doesn't need to delete - inserts new item
             if ($item[$identifier] == $row[$identifier]) {
                 if (!$delete) {
@@ -89,13 +94,11 @@ class CsvIntId extends CsvBase
      */
     protected function generatePrimaryKey()
     {
-        $this->openFile(1);
+        $this->getFile(1);
         $id = null;
 
-        while (!feof($this->fileHandler)) {
-            $row = $this->getTrueRow(
-                fgetcsv($this->fileHandler, null, $this->csvDelimiter)
-            );
+        while (!$this->file->eof()) {
+            $row = $this->getTrueRow($this->file->fgetcsv($this->csvDelimiter));
 
             if ($row) {
                 $id = $row[$this->getIdentifier()];

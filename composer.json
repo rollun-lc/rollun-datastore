@@ -28,8 +28,7 @@
     "laminas/laminas-db": "^2.13.4",
     "laminas/laminas-diactoros": "^2.8.0",
     "laminas/laminas-stratigility": "^3.5.0",
-    "ajgl/csv-rfc": "^0.4.0",
-    "symfony/lock": "v6.0.5"
+    "ajgl/csv-rfc": "^0.4.0"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5.10",

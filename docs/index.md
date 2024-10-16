@@ -163,7 +163,7 @@ var_dump($dbTable->read(1)); // ['id' => '1', 'name' => 'foo']
 ##### 2. `CsvBase`
 
 Для работы з CsvBase нужно указать путь к существующему файлу (или имя файла, который находиться в временной системной
-папке), разделитель и [LockHandler](https://symfony.com/doc/3.3/components/filesystem/lock_handler.html).
+папке) и разделитель.
 
 Пример:
 
@@ -171,8 +171,6 @@ var_dump($dbTable->read(1)); // ['id' => '1', 'name' => 'foo']
 <?php
 
 use rollun\datastore\DataStore\CsvBase;
-use Symfony\Component\Lock\LockFactory;
-use Symfony\Component\Lock\Store\FlockStore;
 
 error_reporting(E_ALL ^ E_USER_DEPRECATED ^ E_DEPRECATED);
 
@@ -187,8 +185,7 @@ fputcsv($file, ['id', 'name']);
 fclose($file);
 
 // Create datastore
-$lockFactory = new LockFactory(new FlockStore());
-$csvBase = new CsvBase($filename, ',', $lockFactory->createLock($filename));
+$csvBase = new CsvBase($filename, ',');
 
 // Create record
 $csvBase->create([

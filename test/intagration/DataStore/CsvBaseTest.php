@@ -8,9 +8,6 @@ namespace rollun\test\intagration\DataStore;
 
 use rollun\datastore\DataStore\CsvBase;
 use rollun\datastore\DataStore\DataStoreAbstract;
-//use Symfony\Component\Filesystem\LockHandler;
-use Symfony\Component\Lock\LockFactory;
-use Symfony\Component\Lock\Store\FlockStore;
 
 class CsvBaseTest extends BaseDataStoreTest
 {
@@ -37,10 +34,6 @@ class CsvBaseTest extends BaseDataStoreTest
 
     protected function createObject(): DataStoreAbstract
     {
-        //$lockHandler = new LockHandler($this->filename);
-        $lockFactory = new LockFactory(new FlockStore());
-        $lockHandler = $lockFactory->createLock($this->filename);
-
-        return new CsvBase($this->filename, $this->delimiter, $lockHandler);
+        return new CsvBase($this->filename, $this->delimiter);
     }
 }

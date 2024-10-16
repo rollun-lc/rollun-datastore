@@ -537,9 +537,9 @@ abstract class BaseDataStoreTest extends TestCase
         }
 
         $this->assertTrue($object instanceof \Countable);
-        $this->assertEquals($object->count(), $count);
+        $this->assertEquals($count, $object->count());
         $object->deleteAll();
-        $this->assertEquals($object->count(), 0);
+        $this->assertEquals(0, $object->count());
     }
 
     public function testIterableSuccess()

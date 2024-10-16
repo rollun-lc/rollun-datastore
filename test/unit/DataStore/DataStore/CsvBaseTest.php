@@ -11,9 +11,6 @@ use rollun\datastore\DataStore\CsvBase;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Iterators\CsvIterator;
 use rollun\datastore\Rql\RqlQuery;
-//use Symfony\Component\Filesystem\LockHandler;
-use Symfony\Component\Lock\LockFactory;
-use Symfony\Component\Lock\Store\FlockStore;
 
 class CsvBaseTest extends TestCase
 {
@@ -39,11 +36,7 @@ class CsvBaseTest extends TestCase
 
     protected function createObject($delimiter = ',')
     {
-        //$lockHandler = new LockHandler($this->filename);
-        $lockFactory = new LockFactory(new FlockStore());
-        $lockHandler = $lockFactory->createLock($this->filename);
-
-        return new CsvBase($this->filename, $delimiter, $lockHandler);
+        return new CsvBase($this->filename, $delimiter);
     }
 
     public function testCreateSuccess()
@@ -331,6 +324,22 @@ class CsvBaseTest extends TestCase
         $object = $this->createObject();
         $this->assertEquals($object->read($items['id']), $this->read($items['id']));
     }
+//
+//    public function testMultipleRead(): void
+//    {
+//        $items = [
+//            'id' => 1,
+//            'name' => 'name',
+//            'surname' => 'surname',
+//        ];
+//
+//        $this->create($items);
+//
+//        $firstDataStore = $this->createObject();
+//        $secondDataStore = $this->createObject();
+//        $this->assertEquals($firstDataStore->read($items['id']), $this->read($items['id']));
+//        $this->assertEquals($secondDataStore->read($items['id']), $this->read($items['id']));
+//    }
 
     public function testReadSuccessWithItemNotExist()
     {
