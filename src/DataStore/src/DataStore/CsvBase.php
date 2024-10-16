@@ -6,10 +6,10 @@
 
 namespace rollun\datastore\DataStore;
 
+use Iterator;
 use rollun\datastore\DataSource\DataSourceInterface;
 use rollun\datastore\DataStore\Iterators\CsvIterator;
 use rollun\datastore\DataStore\ConditionBuilder\PhpConditionBuilder;
-//use Symfony\Component\Filesystem\LockHandler;
 use Symfony\Component\Lock\LockInterface;
 use Xiag\Rql\Parser\Query;
 
@@ -19,42 +19,34 @@ use Xiag\Rql\Parser\Query;
  */
 class CsvBase extends DataStoreAbstract implements DataSourceInterface
 {
-    /**
-     * Max size of the file in bytes
-     */
-    const MAX_FILE_SIZE_FOR_CACHE = 8388608;
-    const MAX_LOCK_TRIES = 30;
-    const DEFAULT_DELIMETER = ';';
+    protected const MAX_FILE_SIZE_FOR_CACHE = 8388608;
+    protected const MAX_LOCK_TRIES = 30;
+    protected const DEFAULT_DELIMITER = ';';
 
-    protected $fileHandler;
-
-    protected $filename;
-
-    protected $lockHandler;
-
+    protected string $csvDelimiter;
     /**
      * Column headings
-     * @var mixed array
      */
-    protected $columns;
+    protected array $columns;
 
-    protected $csvDelimiter = self::DEFAULT_DELIMETER;
+    /**
+     * @var resource
+     */
+    protected $fileHandler;
 
     /**
      * Csv constructor. If file with this name doesn't exist attempts find it in document root directory
      *
-     * @param string $filename
-     * @param string $delimiter - csv field delimiter
-     * @param LockInterface $lockHandler
-     * @throws \rollun\datastore\DataStore\DataStoreException
+     * @throws DataStoreException
      */
-    public function __construct($filename, $delimiter, LockInterface $lockHandler)
-    {
+    public function __construct(
+        protected string $filename,
+        ?string $csvDelimiter,
+        protected LockInterface $lockHandler
+    ) {
         // At first checks existing file as it is
-        // If doesn't exist converts to full name in the temporary folder
-        if (is_file($filename)) {
-            $this->filename = $filename;
-        } else {
+        // If it doesn't exist converts to full name in the temporary folder
+        if (!is_file($filename)) {
             $this->filename = realpath(
                 sys_get_temp_dir() . DIRECTORY_SEPARATOR . trim($filename, DIRECTORY_SEPARATOR)
             );
@@ -64,11 +56,8 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
             }
         }
 
-        $this->lockHandler = $lockHandler;
 
-        if (!is_null($delimiter)) {
-            $this->csvDelimiter = $delimiter;
-        }
+        $this->csvDelimiter = $csvDelimiter !== null ? $csvDelimiter : self::DEFAULT_DELIMITER;
 
         // Sets the column headings
         $this->getHeaders();
@@ -76,7 +65,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
         $this->conditionBuilder = new PhpConditionBuilder();
     }
 
-    public function getFilename()
+    public function getFilename(): string
     {
         return $this->filename;
     }
@@ -87,6 +76,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     public function read($id = null)
     {
         $this->openFile();
+
         // In the CSV-format first row always containts the column headings
         // That's why first row is passed during the file opening
         // And then it reads the file until end of file won't found or won't found the indentifier
@@ -110,7 +100,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     /**
      * {@inheritdoc}
      */
-    public function getIterator()
+    public function getIterator(): Iterator
     {
         trigger_error("Datastore is no more iterable", E_USER_DEPRECATED);
 
@@ -136,7 +126,6 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
                 break;
             case (!$rewriteIfExist && !is_null($this->read($itemData[$identifier]))):
                 throw new DataStoreException("Item is already exist with id = $itemData[$identifier]");
-                break;
             default:
                 // updates an existing item
                 $id = $itemData[$identifier];
@@ -237,7 +226,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      *
      * @param $item
      * @param bool|false $delete
-     * @throws \rollun\datastore\DataStore\DataStoreException
+     * @throws DataStoreException
      */
     protected function flush($item, $delete = false)
     {
@@ -286,7 +275,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      *
      * @param bool $seekFirstDataRow - the first row in csv-file contains the column headings; this parameter says,
      *     if it is need to pass it (row) after the opening the file.
-     * @throws \rollun\datastore\DataStore\DataStoreException
+     * @throws DataStoreException
      */
     protected function openFile($seekFirstDataRow = true)
     {
@@ -311,7 +300,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      *
      * @param int $nbTries - count of tries of locking queue
      * @return bool
-     * @throws \rollun\datastore\DataStore\DataStoreException
+     * @throws DataStoreException
      */
     protected function lockFile($nbTries = 0)
     {
@@ -358,9 +347,9 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
 
     /**
      * Sets the column headings
-     * @throws \rollun\datastore\DataStore\DataStoreException
+     * @throws DataStoreException
      */
-    public function getHeaders()
+    public function getHeaders(): void
     {
         // Don't pass the first row!!
         $this->openFile(0);
