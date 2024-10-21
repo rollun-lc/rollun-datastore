@@ -307,7 +307,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
             // SHARED LOCK aka reader lock - any number of processes MAY HAVE A SHARED LOCK simultaneously.
             $this->lockWithRetries(LOCK_SH);
         } catch (DataStoreException $e) {
-            throw new DataStoreException('Cannot lock file for writing: ' . $e->getMessage(), 0, $e);
+            throw new DataStoreException('Cannot lock file for reading: ' . $e->getMessage(), 0, $e);
         }
     }
 

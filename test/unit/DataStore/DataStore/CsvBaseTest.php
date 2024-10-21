@@ -11,19 +11,27 @@ use rollun\datastore\DataStore\CsvBase;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Iterators\CsvIterator;
 use rollun\datastore\Rql\RqlQuery;
+use RuntimeException;
+use function rollun\test\isProcessRunning;
+use function rollun\test\killProcess;
+use function rollun\test\runScriptInBackground;
 
 class CsvBaseTest extends TestCase
 {
+    protected string $filename;
     /**
-     * @var string
+     * @var string[]
      */
-    protected $filename;
-
-    protected $columns = ['id', 'name', 'surname'];
+    protected array $columns = ['id', 'name', 'surname'];
 
     protected function setUp(): void
     {
-        $this->filename = tempnam(sys_get_temp_dir(), 'csv');
+        $filename = tempnam(sys_get_temp_dir(), 'csv');
+        if ($filename === false) {
+            throw new RuntimeException('Cannot create temorary file.');
+        }
+        $this->filename = $filename;
+
         $resource = fopen($this->filename, 'w+');
         fputcsv($resource, $this->columns);
         fclose($resource);
@@ -34,7 +42,7 @@ class CsvBaseTest extends TestCase
         unlink($this->filename);
     }
 
-    protected function createObject($delimiter = ',')
+    protected function createDataStore($delimiter = ','): CsvBase
     {
         return new CsvBase($this->filename, $delimiter);
     }
@@ -47,7 +55,7 @@ class CsvBaseTest extends TestCase
             'surname' => 'surname',
         ];
 
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $object->create($item);
         $this->assertEquals($item, $object->read($item['id']));
     }
@@ -63,7 +71,7 @@ class CsvBaseTest extends TestCase
         ];
         $this->create($item);
 
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $object->create($item);
         $this->assertEquals($item, $this->read($item['id']));
     }
@@ -81,7 +89,7 @@ class CsvBaseTest extends TestCase
             'surname' => 'surname1',
         ]);
 
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $object->create($item, 1);
         $this->assertEquals($item, $this->read($item['id']));
     }
@@ -92,7 +100,7 @@ class CsvBaseTest extends TestCase
             'id' => 1,
         ];
 
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $object->create($item);
         $this->assertEquals(array_merge($item, ['name' => '', 'surname' => '']), $this->read($item['id']));
     }
@@ -107,7 +115,7 @@ class CsvBaseTest extends TestCase
             'foo' => 'boo',
         ];
 
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $object->create($item);
         unset($item['foo']);
         $this->assertEquals($item, $this->read($item['id']));
@@ -115,7 +123,7 @@ class CsvBaseTest extends TestCase
 
     public function testMultiCreateSuccess()
     {
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $items = [];
 
         foreach (range(1, 5) as $id) {
@@ -135,7 +143,7 @@ class CsvBaseTest extends TestCase
 
     public function testRewriteSuccess()
     {
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $item = [
             $object->getIdentifier() => 1,
             'name' => "name1",
@@ -156,7 +164,7 @@ class CsvBaseTest extends TestCase
 
     public function testMultiRewriteSuccess()
     {
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $items = [];
         $range = range(1, 5);
 
@@ -204,7 +212,7 @@ class CsvBaseTest extends TestCase
             'surname' => 'surname1',
         ]);
 
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $object->update($item);
         $this->assertEquals($item, $this->read($item['id']));
     }
@@ -220,7 +228,7 @@ class CsvBaseTest extends TestCase
             'surname' => 'surname',
         ];
 
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $object->update($item);
         $this->assertEquals($item, $this->read($item['id']));
     }
@@ -239,7 +247,7 @@ class CsvBaseTest extends TestCase
         ]);
 
         $item['name'] = 'name1';
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $object->update($item, 1);
         $this->assertEquals($item, $this->read($item['id']));
     }
@@ -252,14 +260,14 @@ class CsvBaseTest extends TestCase
             'surname' => 'surname',
         ];
 
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $object->update($item, 1);
         $this->assertEquals($item, $this->read($item['id']));
     }
 
     public function testQueriedUpdateSuccess()
     {
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $items = [];
 
         foreach (range(1, 5) as $id) {
@@ -289,7 +297,7 @@ class CsvBaseTest extends TestCase
 
     public function testQueriedDeleteSuccess()
     {
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $items = [];
 
         foreach (range(1, 5) as $id) {
@@ -321,29 +329,218 @@ class CsvBaseTest extends TestCase
 
         $this->create($items);
 
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $this->assertEquals($object->read($items['id']), $this->read($items['id']));
     }
-//
-//    public function testMultipleRead(): void
-//    {
-//        $items = [
-//            'id' => 1,
-//            'name' => 'name',
-//            'surname' => 'surname',
-//        ];
-//
-//        $this->create($items);
-//
-//        $firstDataStore = $this->createObject();
-//        $secondDataStore = $this->createObject();
-//        $this->assertEquals($firstDataStore->read($items['id']), $this->read($items['id']));
-//        $this->assertEquals($secondDataStore->read($items['id']), $this->read($items['id']));
-//    }
+
+    public function testMultipleRead(): void
+    {
+        $this->create($item = [
+            'id' => 1,
+            'name' => 'name',
+            'surname' => 'surname',
+        ]);
+
+        $pid = $this->enableReadingModeInAnotherProcess();
+
+        try {
+            $record = $this->createDataStore()->read(1);
+        } finally {
+            killProcess($pid);
+        }
+
+        self::assertEquals($item, $record);
+    }
+
+    public function testCannotReadWhileWriting(): void
+    {
+        $this->create($item = [
+            'id' => 1,
+            'name' => 'name',
+            'surname' => 'surname',
+        ]);
+
+        $dataStore = $this->createDataStore();
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessageMatches('/^Cannot lock file for reading/');
+
+        $pid = $this->enableWritingModeInAnotherProcess();
+
+        try {
+            $record = $dataStore->read(1);
+        } finally {
+            killProcess($pid);
+        }
+
+        self::assertEquals($item, $record);
+    }
+
+    public function testCannotCreateWhileReading(): void
+    {
+        $this->create([
+            'id' => 1,
+            'name' => 'name',
+            'surname' => 'surname',
+        ]);
+
+        $dataStore = $this->createDataStore();
+
+        $pid = $this->enableReadingModeInAnotherProcess();
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessageMatches('/^Cannot lock file for writing/');
+
+        try {
+            $dataStore->create(['id' => 2, 'name' => 'foo', 'surname' => 'bar']);
+        } finally {
+            killProcess($pid);
+        }
+    }
+
+    public function testCannotCreateWhileWriting(): void
+    {
+        $this->create([
+            'id' => 1,
+            'name' => 'name',
+            'surname' => 'surname',
+        ]);
+
+        $dataStore = $this->createDataStore();
+
+        $pid = $this->enableWritingModeInAnotherProcess();
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessageMatches('/^Cannot lock file for writing/');
+
+        try {
+            $dataStore->create(['id' => 2, 'name' => 'foo', 'surname' => 'bar']);
+        } finally {
+            killProcess($pid);
+        }
+    }
+
+    public function testCannotUpdateWhileReading(): void
+    {
+        $this->create([
+            'id' => 1,
+            'name' => 'name',
+            'surname' => 'surname',
+        ]);
+
+        $dataStore = $this->createDataStore();
+
+        $pid = $this->enableReadingModeInAnotherProcess();
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessageMatches('/^Cannot lock file for writing/');
+
+        try {
+            $dataStore->update(['id' => 1, 'name' => 'foo', 'surname' => 'bar']);
+        } finally {
+            killProcess($pid);
+        }
+    }
+
+    public function testCannotDeleteWhileReading(): void
+    {
+        $this->create([
+            'id' => 1,
+            'name' => 'name',
+            'surname' => 'surname',
+        ]);
+
+        $dataStore = $this->createDataStore();
+
+        $pid = $this->enableReadingModeInAnotherProcess();
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessageMatches('/^Cannot lock file for writing/');
+
+        try {
+            $dataStore->deleteAll();
+        } finally {
+            killProcess($pid);
+        }
+    }
+
+    private function enableReadingModeInAnotherProcess(): int
+    {
+        $readScript = <<<PHP
+<?php
+
+namespace rollun\\test\unit\DataStore\DataStore;
+
+use rollun\datastore\DataStore\CsvBase;
+
+require __DIR__ . '/../../../../vendor/autoload.php';
+
+try {
+    \$dataStore = new CsvBase(filename: \$argv[1], csvDelimiter: ',');
+    file_put_contents(__DIR__ . '/status.txt', 'datastore created');
+    \$dataStore->enableReadMode();
+    file_put_contents(__DIR__ . '/status.txt', 'read mode enabled');
+    sleep(60);
+} catch (\Throwable \$e) {
+    file_put_contents(__DIR__ . '/status.txt', \$e->getMessage());
+}
+PHP;
+
+        return $this->runInAnotherProcess($readScript, 'read mode enabled');
+    }
+
+    private function enableWritingModeInAnotherProcess(): int
+    {
+        $readScript = <<<PHP
+<?php
+
+namespace rollun\\test\unit\DataStore\DataStore;
+
+use rollun\datastore\DataStore\CsvBase;
+
+require __DIR__ . '/../../../../vendor/autoload.php';
+
+try {
+    \$dataStore = new CsvBase(filename: \$argv[1], csvDelimiter: ',');
+    file_put_contents(__DIR__ . '/status.txt', 'datastore created');
+    \$dataStore->enableWritingMode();
+    file_put_contents(__DIR__ . '/status.txt', 'writing mode enabled');
+    sleep(60);
+} catch (\Throwable \$e) {
+    file_put_contents(__DIR__ . '/status.txt', \$e->getMessage());
+}
+PHP;
+
+        return $this->runInAnotherProcess($readScript, 'writing mode enabled');
+    }
+
+    private function runInAnotherProcess(string $script, string $expectedStatus): int
+    {
+        file_put_contents(__DIR__ . '/status.txt', 'preparing to run script');
+
+        $scriptPath = __DIR__ . '/php_bg_script.php';
+        file_put_contents($scriptPath, $script);
+
+        $pid = runScriptInBackground($scriptPath, $this->filename);
+
+        sleep(2);
+        unlink($scriptPath);
+
+        if (isProcessRunning($pid) === false
+            || file_get_contents(__DIR__ . '/status.txt') !== $expectedStatus
+        ) {
+            throw new RuntimeException(
+                'Cannot enable read mode in parallel process. Status '
+                . file_get_contents(__DIR__ . '/status.txt')
+            );
+        }
+
+        return $pid;
+    }
 
     public function testReadSuccessWithItemNotExist()
     {
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $this->assertEquals($object->read(1), null);
     }
 
@@ -357,14 +554,14 @@ class CsvBaseTest extends TestCase
 
         $this->create($items);
 
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $this->assertEquals($object->delete($items['id']), $items);
         $this->assertEquals($this->read($items['id']), []);
     }
 
     public function testDeleteSuccessWithItemNotExist()
     {
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $this->assertEquals($object->delete(1), null);
     }
 
@@ -380,7 +577,7 @@ class CsvBaseTest extends TestCase
             ]);
         }
 
-        $this->createObject()
+        $this->createDataStore()
             ->deleteAll();
 
         foreach ($range as $id) {
@@ -400,19 +597,19 @@ class CsvBaseTest extends TestCase
             ]);
         }
 
-        $this->assertEquals($this->createObject()
+        $this->assertEquals($this->createDataStore()
             ->count(), count($range));
     }
 
     public function testGetIdentifier()
     {
-        $this->assertEquals('id', $this->createObject()
+        $this->assertEquals('id', $this->createDataStore()
             ->getIdentifier());
     }
 
     public function testGetIteratorSuccess()
     {
-        $this->assertTrue($this->createObject()
+        $this->assertTrue($this->createDataStore()
                 ->getIterator() instanceof CsvIterator);
     }
 
@@ -424,7 +621,7 @@ class CsvBaseTest extends TestCase
             'surname' => "surname",
         ];
 
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $object->create($items);
         $this->assertSame($items, $object->delete(1));
 
@@ -483,7 +680,7 @@ class CsvBaseTest extends TestCase
         return $result;
     }
 
-    protected function create($items, $delimiter = ',')
+    protected function create($items, $delimiter = ','): void
     {
         if (($handle = fopen($this->filename, 'a')) !== false) {
             flock($handle, LOCK_SH | LOCK_EX);

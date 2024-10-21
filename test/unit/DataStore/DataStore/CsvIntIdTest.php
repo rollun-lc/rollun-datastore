@@ -11,7 +11,7 @@ use rollun\datastore\DataStore\DataStoreException;
 
 class CsvIntIdTest extends CsvBaseTest
 {
-    protected function createObject($delimiter = ',')
+    protected function createDataStore($delimiter = ','): CsvIntId
     {
         return new CsvIntId($this->filename, $delimiter);
     }
@@ -24,7 +24,7 @@ class CsvIntIdTest extends CsvBaseTest
             'surname' => 'surname',
         ];
 
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $object->create($item);
         $this->assertSame($item, $object->read($item['id']));
     }
@@ -37,7 +37,7 @@ class CsvIntIdTest extends CsvBaseTest
             'surname' => "surname",
         ];
 
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $object->create($items);
         $this->assertSame($items, $object->delete(1));
     }
@@ -52,7 +52,7 @@ class CsvIntIdTest extends CsvBaseTest
             'surname' => "surname",
         ];
 
-        $object = $this->createObject();
+        $object = $this->createDataStore();
         $object->create($items);
         $this->assertSame($items, $object->delete(1));
     }
