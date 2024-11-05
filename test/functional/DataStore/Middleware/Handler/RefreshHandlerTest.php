@@ -6,7 +6,6 @@
 
 namespace rollun\test\functional\DataStore\Middleware\Handler;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Interfaces\RefreshableInterface;

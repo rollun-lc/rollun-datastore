@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\DataStore\ConditionBuilder;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use InvalidArgumentException;
 use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
 

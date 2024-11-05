@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\TableGateway\Factory;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use rollun\datastore\AbstractFactoryAbstract;
 use Laminas\Db\Adapter\Adapter;
 use Laminas\Db\Metadata\Metadata;

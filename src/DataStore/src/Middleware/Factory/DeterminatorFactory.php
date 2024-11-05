@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\Middleware\Factory;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStorePluginManager;
 use rollun\datastore\Middleware\Determinator;
 use Laminas\ServiceManager\Factory\FactoryInterface;

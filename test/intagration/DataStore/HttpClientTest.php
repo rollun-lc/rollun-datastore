@@ -6,7 +6,7 @@
 
 namespace rollun\test\intagration\DataStore;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\DataStoreException;

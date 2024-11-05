@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\TableGateway\Factory;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use rollun\datastore\FactoryAbstract;
 use rollun\datastore\TableGateway\TableManagerMysql;
 

@@ -6,7 +6,7 @@
 
 namespace rollun\test\old\TableGateway\Factory;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory;
 use Laminas\Db\Adapter\Adapter;

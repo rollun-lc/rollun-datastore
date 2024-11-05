@@ -6,8 +6,8 @@
 
 namespace rollun\datastore\DataStore;
 
-use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * Concrete DataStorePluginManager factory

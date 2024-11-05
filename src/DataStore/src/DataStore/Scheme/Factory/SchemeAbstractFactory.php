@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace rollun\datastore\DataStore\Scheme\Factory;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use rollun\datastore\DataStore\Scheme\Scheme;
 use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
 

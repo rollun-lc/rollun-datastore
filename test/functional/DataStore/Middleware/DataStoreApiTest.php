@@ -9,7 +9,7 @@ namespace rollun\test\functional\DataStore\Middleware;
 use Exception;
 use Psr\Log\LoggerInterface;
 use TypeError;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use PHPUnit_Framework_MockObject_MockObject;

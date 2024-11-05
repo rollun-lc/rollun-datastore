@@ -6,10 +6,10 @@
 
 namespace rollun\datastore;
 
+use Psr\Container\ContainerInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
 use Laminas\ServiceManager\ServiceLocatorInterface;
-use Interop\Container\ContainerInterface;
 
 /**
  * Create and return an instance of the DataStore which based on DbTable

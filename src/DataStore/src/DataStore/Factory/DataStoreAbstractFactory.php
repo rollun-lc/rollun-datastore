@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\DataStore\Factory;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use rollun\datastore\AbstractFactoryAbstract;
 use rollun\datastore\DataStore\DataStoreAbstract;
 

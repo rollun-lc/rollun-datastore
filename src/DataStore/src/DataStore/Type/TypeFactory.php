@@ -6,9 +6,9 @@
 
 namespace rollun\datastore\DataStore\Type;
 
-use Interop\Container\ContainerInterface;
 use InvalidArgumentException;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 class TypeFactory implements FactoryInterface
 {

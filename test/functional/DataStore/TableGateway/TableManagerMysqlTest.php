@@ -2,7 +2,7 @@
 
 namespace rollun\test\functional\DataStore\TableGateway;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\TableGateway\TableManagerMysql;
 

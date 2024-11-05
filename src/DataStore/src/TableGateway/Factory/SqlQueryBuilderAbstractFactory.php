@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\TableGateway\Factory;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use InvalidArgumentException;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use Laminas\ServiceManager\Factory\AbstractFactoryInterface;

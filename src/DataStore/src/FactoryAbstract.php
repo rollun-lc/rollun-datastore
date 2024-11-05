@@ -7,7 +7,7 @@
 namespace rollun\datastore;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 
 abstract class FactoryAbstract implements FactoryInterface
 {

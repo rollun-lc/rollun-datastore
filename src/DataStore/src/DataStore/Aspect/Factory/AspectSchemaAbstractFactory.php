@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace rollun\datastore\DataStore\Aspect\Factory;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use rollun\datastore\DataStore\Aspect\AspectSchema;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Entity\EntityFactory;

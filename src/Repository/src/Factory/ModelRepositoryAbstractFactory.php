@@ -4,7 +4,7 @@
 namespace rollun\repository\Factory;
 
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use rollun\datastore\AbstractFactoryAbstract;
 use rollun\repository\Interfaces\FieldMapperInterface;

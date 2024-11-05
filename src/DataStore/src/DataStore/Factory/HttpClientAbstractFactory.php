@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\DataStore\Factory;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\HttpClient;
 use Laminas\Http\Client;

@@ -6,7 +6,7 @@
 
 namespace rollun\test\intagration\DataStore;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\TableGateway\SqlQueryBuilder;

@@ -6,7 +6,7 @@
 
 namespace rollun\test\functional\DataStore\Middleware;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
 use rollun\datastore\DataStore\DataStorePluginManager;

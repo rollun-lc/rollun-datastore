@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\DataStore\Aspect\Factory;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use rollun\datastore\DataStore\Aspect\AbstractAspectListener;
 use rollun\datastore\DataStore\Aspect\AspectAbstract;
 use rollun\datastore\DataStore\DataStoreException;

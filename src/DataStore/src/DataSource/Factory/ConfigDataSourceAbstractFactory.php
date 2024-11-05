@@ -6,7 +6,7 @@
 
 namespace rollun\datastore\DataSource\Factory;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use rollun\datastore\DataSource\MemoryConfig;
 use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
 

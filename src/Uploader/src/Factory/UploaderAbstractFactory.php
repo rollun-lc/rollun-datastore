@@ -6,8 +6,8 @@
 
 namespace rollun\uploader\Factory;
 
-use Interop\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use rollun\uploader\Uploader;
 use Laminas\ServiceManager\Factory\AbstractFactoryInterface;

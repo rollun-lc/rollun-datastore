@@ -6,7 +6,7 @@
 
 namespace rollun\test\old\DataStore\Factory;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore;
 use Laminas\Db\Adapter\Adapter;
