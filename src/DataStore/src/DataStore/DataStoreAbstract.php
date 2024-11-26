@@ -618,4 +618,14 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
 
         return new DataStoreIterator($this);
     }
+
+    protected function wasCalledFrom(string $class, string $methodName): bool
+    {
+        $backtrace = debug_backtrace();
+
+        // Проверяем, есть ли предыдущий вызов с нужным методом
+        return isset($backtrace[2]['function'])
+            && $backtrace[2]['function'] === $methodName
+            && $backtrace[2]['class'] === $class;
+    }
 }

@@ -284,7 +284,10 @@ class HttpClient extends DataStoreAbstract
      */
     public function create($itemData, $rewriteIfExist = false)
     {
-        if ($rewriteIfExist) {
+        if (!$this->wasCalledFrom(DataStoreAbstract::class, 'rewrite')
+            && !$this->wasCalledFrom(DataStoreAbstract::class, 'rewriteMultiple')
+            && $rewriteIfExist
+        ) {
             trigger_error("Option 'rewriteIfExist' is no more use", E_USER_DEPRECATED);
         }
 
