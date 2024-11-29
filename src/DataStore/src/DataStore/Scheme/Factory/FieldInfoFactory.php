@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace rollun\datastore\DataStore\Scheme\Factory;
 
+use Laminas\ServiceManager\ServiceManager;
 use Psr\Container\ContainerInterface;
 use rollun\datastore\DataStore\Formatter\FormatterInterface;
 use rollun\datastore\DataStore\Formatter\NullFormatter;
@@ -43,7 +44,7 @@ class FieldInfoFactory
 
     private function resolveTypeFactory(array $fieldInfo): TypeFactory
     {
-        return new PluginManagerTypeFactory($fieldInfo[self::TYPE], new TypePluginManager());
+        return new PluginManagerTypeFactory($fieldInfo[self::TYPE], new TypePluginManager(new ServiceManager()));
     }
 
     private function resolveFormatter(array $fieldInfo): FormatterInterface
