@@ -15,5 +15,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Init project
-        run: docker compose up
+      - name: Docker compose up
+        run: docker compose up -d
+
+      - name: Composer install
+        run: docker compose exec -T rollun-datastore-php-fpm composer install
+
+      - name: Wait db to be ready
+        run: docker compose exec rollun-datastore-php-fpm wait-for-it rollun-datastore-mysql:3306 -t 30
+
+      - name: Run tests
+        run: docker compose exec -T rollun-datastore-php-fpm composer test
