@@ -16,7 +16,7 @@ use function rollun\test\isProcessRunning;
 use function rollun\test\killProcess;
 use function rollun\test\runScriptInBackground;
 
-class CsvBaseTest extends TestCase
+abstract class CsvBaseTestCase extends TestCase
 {
     protected string $filename;
     /**
@@ -33,7 +33,7 @@ class CsvBaseTest extends TestCase
         $this->filename = $filename;
 
         $resource = fopen($this->filename, 'w+');
-        fputcsv($resource, $this->columns);
+        fputcsv($resource, $this->columns, $this->getDelimiter());
         fclose($resource);
     }
 
@@ -42,9 +42,9 @@ class CsvBaseTest extends TestCase
         unlink($this->filename);
     }
 
-    protected function createDataStore($delimiter = ','): CsvBase
+    protected function createDataStore(): CsvBase
     {
-        return new CsvBase($this->filename, $delimiter);
+        return new CsvBase($this->filename, $this->getDelimiter());
     }
 
     public function testCreateSuccess()
@@ -634,8 +634,9 @@ PHP;
         $this->assertNotSame($items, $object->delete(1));
     }
 
-    protected function read($id, $delimiter = ',')
+    protected function read($id)
     {
+        $delimiter = $this->getDelimiter();
         $result = [];
 
         if (($handle = fopen($this->filename, 'r')) !== false) {
@@ -656,15 +657,15 @@ PHP;
         return $result;
     }
 
-    protected function getAll($delimiter = ',')
+    protected function getAll()
     {
         $result = [];
 
         if (($handle = fopen($this->filename, 'r')) !== false) {
-            $columns = fgetcsv($handle, 1000, $delimiter);
+            $columns = fgetcsv($handle, 1000, $this->getDelimiter());
             flock($handle, LOCK_SH | LOCK_EX);
 
-            while (($data = fgetcsv($handle, 1000, $delimiter)) !== false) {
+            while (($data = fgetcsv($handle, 1000, $this->getDelimiter())) !== false) {
                 for ($i = 0; $i < count($columns); $i++) {
                     $item[$columns[$i]] = $data[$i];
                 }
@@ -680,12 +681,14 @@ PHP;
         return $result;
     }
 
-    protected function create($items, $delimiter = ','): void
+    protected function create($items): void
     {
         if (($handle = fopen($this->filename, 'a')) !== false) {
             flock($handle, LOCK_SH | LOCK_EX);
-            fputcsv($handle, $items, $delimiter);
+            fputcsv($handle, $items, $this->getDelimiter());
             fclose($handle);
         }
     }
+
+    abstract protected function getDelimiter(): string;
 }

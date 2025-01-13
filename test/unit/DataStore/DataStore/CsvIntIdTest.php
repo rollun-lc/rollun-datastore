@@ -9,11 +9,11 @@ namespace rollun\test\unit\DataStore\DataStore;
 use rollun\datastore\DataStore\CsvIntId;
 use rollun\datastore\DataStore\DataStoreException;
 
-class CsvIntIdTest extends CsvBaseTest
+class CsvIntIdTest extends CsvBaseTestCase
 {
-    protected function createDataStore($delimiter = ','): CsvIntId
+    protected function createDataStore(): CsvIntId
     {
-        return new CsvIntId($this->filename, $delimiter);
+        return new CsvIntId($this->filename, $this->getDelimiter());
     }
 
     public function testCreateSuccess()
@@ -55,5 +55,10 @@ class CsvIntIdTest extends CsvBaseTest
         $object = $this->createDataStore();
         $object->create($items);
         $this->assertSame($items, $object->delete(1));
+    }
+
+    protected function getDelimiter(): string
+    {
+        return ',';
     }
 }

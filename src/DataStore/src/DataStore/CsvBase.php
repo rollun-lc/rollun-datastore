@@ -352,6 +352,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
         // A blank line in a CSV file will be returned as an array comprising a single null field unless using
         // SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE, in which case empty lines are skipped.
         $this->file->setFlags(SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE | SplFileObject::READ_CSV);
+        $this->file->setCsvControl($this->csvDelimiter, escape: '');
 
         return $this->file;
     }
