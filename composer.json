@@ -14,12 +14,6 @@
       "email": "it.proffesor02@gmail.com"
     }
   ],
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "git@github.com:rollun-lc/rollun-files.git"
-    }
-  ],
   "require": {
     "php": "^8.0",
     "ext-pdo": "*",
@@ -29,7 +23,6 @@
     "rollun-com/rollun-utils": "^7.0|^8.0",
     "rollun-com/rollun-logger": "^7.0.1",
     "rollun-com/rollun-installer": "^5.0.0",
-    "rollun-com/rollun-files": "dev-master",
     "laminas/laminas-http": "^2.15.1",
     "laminas/laminas-servicemanager": "^3.10",
     "laminas/laminas-db": "^2.13.4",
