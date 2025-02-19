@@ -36,7 +36,7 @@ class FileManager
      */
     public function joinPath(...$arguments): string
     {
-        trigger_error(FileManager::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileManager::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $paths = [];
         foreach ($arguments as $arg) {
@@ -55,7 +55,7 @@ class FileManager
      */
     public function createDir(string $dirname): void
     {
-        trigger_error(FileManager::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileManager::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         if (!(file_exists($dirname) && is_dir($dirname))) {
             try {
@@ -80,7 +80,7 @@ class FileManager
      */
     public function deleteDirRecursively(string $dirname): bool
     {
-        trigger_error(FileManager::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileManager::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         if (!realpath($dirname)) {
             throw new RuntimeException('Wrong dir name: ' . $dirname);
@@ -119,7 +119,7 @@ class FileManager
      */
     public function openFile(string $fullFilename, string $mode = 'r')
     {
-        trigger_error(FileManager::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileManager::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $count = 0;
         while (!$stream = fopen($fullFilename, $mode)) {
@@ -148,7 +148,7 @@ class FileManager
      */
     public function createAndOpenFile(string $fullFilename, bool $rewriteIfExist = false)
     {
-        trigger_error(FileManager::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileManager::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $dirname = dirname($fullFilename);
         $this->createDir($dirname);
@@ -177,7 +177,7 @@ class FileManager
      */
     public function closeStream($stream): void
     {
-        trigger_error(FileManager::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileManager::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         flock($stream, LOCK_UN);
         fclose($stream);
@@ -191,7 +191,7 @@ class FileManager
      */
     public function deleteFile(string $fullFilename): bool
     {
-        trigger_error(FileManager::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileManager::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         if (!realpath($fullFilename)) {
             throw new RuntimeException('Wrong file name: ' . $fullFilename);
@@ -216,7 +216,7 @@ class FileManager
      */
     protected function lockEx($stream, $fullFilename = ''): void
     {
-        trigger_error(FileManager::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileManager::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $count = 0;
         while (!flock($stream, LOCK_EX | LOCK_NB, $wouldblock)) {

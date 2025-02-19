@@ -57,7 +57,7 @@ class FileObject extends Base
      */
     public function __construct($filename, $open_mode = 'c+', $use_include_path = false, $context = null)
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         parent::__construct($filename, $open_mode, $use_include_path, $context);
 
@@ -70,7 +70,7 @@ class FileObject extends Base
      */
     public function __destruct()
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $this->unlock();
     }
@@ -82,7 +82,7 @@ class FileObject extends Base
      */
     public function setMaxBufferSize(int $maxBufferSize): void
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $this->maxBufferSize = $maxBufferSize;
     }
@@ -92,7 +92,7 @@ class FileObject extends Base
      */
     public function getMaxBufferSize(): int
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         return $this->maxBufferSize;
     }
@@ -108,7 +108,7 @@ class FileObject extends Base
      */
     public function lock(int $lockMode, int $maxLockTries = null, int $lockTriesTimeout = null): bool
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $maxTries = $maxLockTries ?? $this->maxLockTries;
         $triesTimeout = $lockTriesTimeout ?? $this->lockTriesTimeout;
@@ -136,7 +136,7 @@ class FileObject extends Base
      */
     public function unlock(): bool
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         return $this->flock(LOCK_UN);
     }
@@ -146,7 +146,7 @@ class FileObject extends Base
      */
     public function getStringsCount(): int
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         if ($this->getFileSize() === 0) {
             return 0;
@@ -176,7 +176,7 @@ class FileObject extends Base
      */
     public function countLines()
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $this->seek(0);
 
@@ -199,7 +199,7 @@ class FileObject extends Base
      */
     public function deleteString(int $linePos): void
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $maxLinePos = $this->getStringsCount() - 1;
         if ($linePos > $maxLinePos) {
@@ -230,7 +230,7 @@ class FileObject extends Base
      */
     public function fseekWithCheck(int $offset, int $whence = SEEK_SET): int
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         if ($this->fseek($offset, $whence) == -1) {
             throw new RuntimeException("Can not fseek to $offset =  . $offset \n in file: \n" . $this->getRealPath());
@@ -249,7 +249,7 @@ class FileObject extends Base
      */
     public function fwriteWithCheck(string $string, int $length = null): int
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $lengthForWrite = is_null($length) ? strlen($string) : $length;
         if ($lengthForWrite > strlen($string)) {
@@ -268,7 +268,7 @@ class FileObject extends Base
      */
     public function getFileSize(): ?int
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $position = $this->ftell();
         $this->fseekWithCheck(0, SEEK_END);
@@ -287,7 +287,7 @@ class FileObject extends Base
      */
     public function insertString(string $insertedString, int $beforeLinePos = null): void
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $insertedString = rtrim($insertedString, "\r\n") . "\n";
 
@@ -335,7 +335,7 @@ class FileObject extends Base
      */
     public function rewriteString(string $newString, int $inLinePos): void
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $maxLinePos = $this->getStringsCount() - 1;
         if ($inLinePos > $maxLinePos) {
@@ -370,7 +370,7 @@ class FileObject extends Base
      */
     public function truncateWithCheck(int $newFileSize, string $placeholderChar = ' '): ?int
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $flags = $this->clearFlags();
         $changes = $this->changeFileSize($newFileSize, $placeholderChar);
@@ -389,7 +389,7 @@ class FileObject extends Base
      */
     public function moveSubStr(int $charPosFrom, int $newCharPos): void
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         if ($charPosFrom === $newCharPos) {
             return;
@@ -408,7 +408,7 @@ class FileObject extends Base
      */
     public function fputcsv($fields, $delimiter = ',', $enclosure = '"', $escape = '\\'): void
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         CsvRfcUtils::checkPutCsvEscape($escape);
         $this->fwrite(CsvRfcUtils::strPutCsv($fields, $delimiter, $enclosure));
@@ -419,7 +419,7 @@ class FileObject extends Base
      */
     protected function clearFlags(): int
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $flagsForRestore = $this->getFlags();
         $this->setFlags($flagsForRestore & \SplFileObject::READ_CSV);
@@ -434,7 +434,7 @@ class FileObject extends Base
      */
     protected function restoreFlags(int $flagsForRestore): void
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $this->setFlags($flagsForRestore);
     }
@@ -447,7 +447,7 @@ class FileObject extends Base
      */
     protected function moveForward(int $charPosFrom, int $newCharPos): void
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $fileSize = $this->getFileSize();
         $this->changeFileSize($fileSize + $newCharPos - $charPosFrom);
@@ -474,7 +474,7 @@ class FileObject extends Base
      */
     protected function moveBackward(int $charPosFrom, int $newCharPos): void
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $fileSize = $this->getFileSize();
         $this->fseekWithCheck($charPosFrom);
@@ -501,7 +501,7 @@ class FileObject extends Base
      */
     protected function changeFileSize(int $newFileSize, string $placeholderChar = ' ', int $oldFileSize = null): int
     {
-        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(FileObject::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         $fileSize = $this->getFileSize();
         if ($newFileSize === $fileSize) {

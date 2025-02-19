@@ -40,7 +40,7 @@ class CsvFileObjectWithPrKey extends CsvFileObject
         string $strategyClass = CsvBinaryStrategy::class,
         string $identifier = 'id'
     ) {
-        trigger_error(CsvFileObjectWithPrKey::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(CsvFileObjectWithPrKey::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         parent::__construct($filename, $delimiter, $enclosure, $escape);
 
@@ -66,7 +66,7 @@ class CsvFileObjectWithPrKey extends CsvFileObject
      */
     public function getRowById(string $id): ?array
     {
-        trigger_error(CsvFileObjectWithPrKey::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(CsvFileObjectWithPrKey::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         return $this->strategy->getRowById($id);
     }
@@ -76,7 +76,7 @@ class CsvFileObjectWithPrKey extends CsvFileObject
      */
     public function addRow(array $row): int
     {
-        trigger_error(CsvFileObjectWithPrKey::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(CsvFileObjectWithPrKey::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         return $this->strategy->addRow($row);
     }
@@ -86,7 +86,7 @@ class CsvFileObjectWithPrKey extends CsvFileObject
      */
     public function setRow(array $row): int
     {
-        trigger_error(CsvFileObjectWithPrKey::class . ' is deprecated', E_USER_DEPRECATED);
+        trigger_error(CsvFileObjectWithPrKey::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
 
         return $this->strategy->setRow($row);
     }
