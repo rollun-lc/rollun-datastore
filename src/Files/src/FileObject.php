@@ -14,6 +14,8 @@ use RuntimeException;
  * @author  Andrey Zaboychenko
  * @author  Roman Ratsun <r.ratsun.rollun@gmail.com>
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ *
+ * @deprecated Module moved to library rollun-files
  */
 class FileObject extends Base
 {
