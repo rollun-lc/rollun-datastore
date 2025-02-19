@@ -43,6 +43,8 @@ class CsvBinaryStrategy implements CsvStrategyInterface
      */
     public function __construct(CsvFileObjectWithPrKey $fileObjectWithPrKey, int $idColumn)
     {
+        trigger_error(CsvBinaryStrategy::class . ' is deprecated', E_USER_DEPRECATED);
+
         $this->fileObjectWithPrKey = $fileObjectWithPrKey;
         $this->idColumn = $idColumn;
     }
@@ -52,6 +54,8 @@ class CsvBinaryStrategy implements CsvStrategyInterface
      */
     public function getRowById(string $id): ?array
     {
+        trigger_error(CsvBinaryStrategy::class . ' is deprecated', E_USER_DEPRECATED);
+
         $this->getFileObject()->lock(LOCK_EX);
         $result = $this->search($id);
         $this->getFileObject()->unlock();
@@ -64,6 +68,8 @@ class CsvBinaryStrategy implements CsvStrategyInterface
      */
     public function addRow(array $row): int
     {
+        trigger_error(CsvBinaryStrategy::class . ' is deprecated', E_USER_DEPRECATED);
+
         $this->getFileObject()->lock(LOCK_EX);
 
         // find file row
@@ -108,6 +114,8 @@ class CsvBinaryStrategy implements CsvStrategyInterface
      */
     public function setRow(array $row): int
     {
+        trigger_error(CsvBinaryStrategy::class . ' is deprecated', E_USER_DEPRECATED);
+
         $this->getFileObject()->lock(LOCK_EX);
 
         // find file row
@@ -151,6 +159,8 @@ class CsvBinaryStrategy implements CsvStrategyInterface
      */
     protected function search(string $id, int $from = null, int $to = null): ?array
     {
+        trigger_error(CsvBinaryStrategy::class . ' is deprecated', E_USER_DEPRECATED);
+
         $result = $this->binarySearch($id, $from, $to);
         $this->resetUniqueIterations();
         return $result;
@@ -158,6 +168,8 @@ class CsvBinaryStrategy implements CsvStrategyInterface
 
     protected function binarySearch(string $id, int $from = null, int $to = null): ?array
     {
+        trigger_error(CsvBinaryStrategy::class . ' is deprecated', E_USER_DEPRECATED);
+
         // prepare from
         if ($from === null) {
             $from = 0;
@@ -235,6 +247,8 @@ class CsvBinaryStrategy implements CsvStrategyInterface
 
     protected function resetUniqueIterations(): void
     {
+        trigger_error(CsvBinaryStrategy::class . ' is deprecated', E_USER_DEPRECATED);
+
         $this->uniqueIterations = [];
     }
 
@@ -243,6 +257,8 @@ class CsvBinaryStrategy implements CsvStrategyInterface
      */
     protected function getFileObject(): RollunFileObject
     {
+        trigger_error(CsvBinaryStrategy::class . ' is deprecated', E_USER_DEPRECATED);
+
         return $this->fileObjectWithPrKey->getFileObject();
     }
 
@@ -253,6 +269,8 @@ class CsvBinaryStrategy implements CsvStrategyInterface
      */
     protected function getId(array $row): ?string
     {
+        trigger_error(CsvBinaryStrategy::class . ' is deprecated', E_USER_DEPRECATED);
+
         if (!isset($row[$this->idColumn])) {
             return null;
         }

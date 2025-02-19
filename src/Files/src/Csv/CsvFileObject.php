@@ -58,6 +58,8 @@ class CsvFileObject implements \IteratorAggregate
      */
     public static function createNewCsvFile(string $filename, array $columnsNames, $delimiter = ',', $enclosure = '"', $escape = '\\')
     {
+        trigger_error(CsvFileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         if (is_readable($filename)) {
             throw new InvalidArgumentException("There is readable file: $filename");
         }
@@ -77,6 +79,8 @@ class CsvFileObject implements \IteratorAggregate
      */
     public function __construct(string $filename, string $delimiter = ',', string $enclosure = '"', string $escape = '\\')
     {
+        trigger_error(CsvFileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         if (!is_readable($filename)) {
             throw new InvalidArgumentException("There is not readable file: $filename");
         }
@@ -101,6 +105,8 @@ class CsvFileObject implements \IteratorAggregate
      */
     protected function setControl(string $delimiter = ',', string $enclosure = '"', string $escape = '\\'): void
     {
+        trigger_error(CsvFileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $this->fileObject->setCsvControl($delimiter, $enclosure, $escape);
     }
 
@@ -111,6 +117,8 @@ class CsvFileObject implements \IteratorAggregate
      */
     public function getNumberOfLines(): int
     {
+        trigger_error(CsvFileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $this->fileObject->seek(PHP_INT_MAX);
 
         return $this->fileObject->key();
@@ -121,6 +129,8 @@ class CsvFileObject implements \IteratorAggregate
      */
     public function getFileObject(): BaseFileObject
     {
+        trigger_error(CsvFileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         return $this->fileObject;
     }
 
@@ -130,6 +140,8 @@ class CsvFileObject implements \IteratorAggregate
      */
     public function getColumns(): array
     {
+        trigger_error(CsvFileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         if (is_null($this->columns)) {
             $this->fileObject->lock(LOCK_SH);
             $this->fileObject->rewind();
@@ -149,6 +161,8 @@ class CsvFileObject implements \IteratorAggregate
      */
     public function hasData(): bool
     {
+        trigger_error(CsvFileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $stringsCount = $this->fileObject->getStringsCount();
 
         return $stringsCount > 1;
@@ -162,6 +176,8 @@ class CsvFileObject implements \IteratorAggregate
      */
     public function getRow(int $zeroBasedStringNumber): array
     {
+        trigger_error(CsvFileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $this->fileObject->lock(LOCK_SH);
         $stringsCount = $this->fileObject->getStringsCount();
         if ($stringsCount - 2 < $zeroBasedStringNumber) {
@@ -186,6 +202,8 @@ class CsvFileObject implements \IteratorAggregate
      */
     public function addRow(array $dataArray): int
     {
+        trigger_error(CsvFileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $dataArray = $this->prepareFieldsBeforeAdd($dataArray);
         $this->fileObject->lock(LOCK_SH);
         $length = $this->fileObject->fputcsv($dataArray, $this->delimiter, $this->enclosure, $this->escape);
@@ -210,6 +228,8 @@ class CsvFileObject implements \IteratorAggregate
      */
     protected function prepareFieldsBeforeAdd(array $dataArray): array
     {
+        trigger_error(CsvFileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         foreach ($dataArray as $key => $value) {
             $dataArray[$key] = str_replace("\r\n", "\n", (string) $dataArray[$key]);
         }
@@ -222,6 +242,8 @@ class CsvFileObject implements \IteratorAggregate
      */
     public function deleteAllRows(): void
     {
+        trigger_error(CsvFileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $this->fileObject->lock(LOCK_SH);
         $this->fileObject->rewind();
         $this->fileObject->current();
@@ -235,6 +257,8 @@ class CsvFileObject implements \IteratorAggregate
      */
     public function getIterator()
     {
+        trigger_error(CsvFileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $this->fileObject->lock(LOCK_SH);
         $this->fileObject->rewind();
         $fileObject = $this->fileObject;
@@ -259,6 +283,8 @@ class CsvFileObject implements \IteratorAggregate
      */
     public function getDelimiter(): string
     {
+        trigger_error(CsvFileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         return $this->delimiter;
     }
 
@@ -267,6 +293,8 @@ class CsvFileObject implements \IteratorAggregate
      */
     public function getEnclosure(): string
     {
+        trigger_error(CsvFileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         return $this->enclosure;
     }
 
@@ -275,6 +303,8 @@ class CsvFileObject implements \IteratorAggregate
      */
     public function getEscape(): string
     {
+        trigger_error(CsvFileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         return $this->escape;
     }
 }

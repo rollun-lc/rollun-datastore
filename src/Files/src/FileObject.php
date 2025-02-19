@@ -57,6 +57,8 @@ class FileObject extends Base
      */
     public function __construct($filename, $open_mode = 'c+', $use_include_path = false, $context = null)
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         parent::__construct($filename, $open_mode, $use_include_path, $context);
 
         // \SplFileObject::DROP_NEW_LINE | \SplFileObject::READ_AHEAD |\SplFileObject::SKIP_EMPTY | \SplFileObject::READ_CSV
@@ -68,6 +70,8 @@ class FileObject extends Base
      */
     public function __destruct()
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $this->unlock();
     }
 
@@ -78,6 +82,8 @@ class FileObject extends Base
      */
     public function setMaxBufferSize(int $maxBufferSize): void
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $this->maxBufferSize = $maxBufferSize;
     }
 
@@ -86,6 +92,8 @@ class FileObject extends Base
      */
     public function getMaxBufferSize(): int
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         return $this->maxBufferSize;
     }
 
@@ -100,6 +108,8 @@ class FileObject extends Base
      */
     public function lock(int $lockMode, int $maxLockTries = null, int $lockTriesTimeout = null): bool
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $maxTries = $maxLockTries ?? $this->maxLockTries;
         $triesTimeout = $lockTriesTimeout ?? $this->lockTriesTimeout;
 
@@ -126,6 +136,8 @@ class FileObject extends Base
      */
     public function unlock(): bool
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         return $this->flock(LOCK_UN);
     }
 
@@ -134,6 +146,8 @@ class FileObject extends Base
      */
     public function getStringsCount(): int
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         if ($this->getFileSize() === 0) {
             return 0;
         }
@@ -162,6 +176,8 @@ class FileObject extends Base
      */
     public function countLines()
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $this->seek(0);
 
         while (!$this->eof()) {
@@ -183,6 +199,8 @@ class FileObject extends Base
      */
     public function deleteString(int $linePos): void
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $maxLinePos = $this->getStringsCount() - 1;
         if ($linePos > $maxLinePos) {
             throw new InvalidArgumentException("Can not delete  \$linePos = $linePos . Max linePos is $maxLinePos in file: \n" . $this->getRealPath());
@@ -212,6 +230,8 @@ class FileObject extends Base
      */
     public function fseekWithCheck(int $offset, int $whence = SEEK_SET): int
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         if ($this->fseek($offset, $whence) == -1) {
             throw new RuntimeException("Can not fseek to $offset =  . $offset \n in file: \n" . $this->getRealPath());
         }
@@ -229,6 +249,8 @@ class FileObject extends Base
      */
     public function fwriteWithCheck(string $string, int $length = null): int
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $lengthForWrite = is_null($length) ? strlen($string) : $length;
         if ($lengthForWrite > strlen($string)) {
             throw new InvalidArgumentException("\$length = $length bigger then = strlen('$string') in file: \n" . $this->getRealPath());
@@ -246,6 +268,8 @@ class FileObject extends Base
      */
     public function getFileSize(): ?int
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $position = $this->ftell();
         $this->fseekWithCheck(0, SEEK_END);
         $fileSize = $this->ftell();
@@ -263,6 +287,8 @@ class FileObject extends Base
      */
     public function insertString(string $insertedString, int $beforeLinePos = null): void
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $insertedString = rtrim($insertedString, "\r\n") . "\n";
 
         if ($this->getStringsCount() === 0 && (is_null($beforeLinePos) || $beforeLinePos === 0)) {
@@ -309,6 +335,8 @@ class FileObject extends Base
      */
     public function rewriteString(string $newString, int $inLinePos): void
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $maxLinePos = $this->getStringsCount() - 1;
         if ($inLinePos > $maxLinePos) {
             throw new InvalidArgumentException("Can not rewrite \$inLinePos = {$inLinePos}. Max linePos is $maxLinePos in file: \n" . $this->getRealPath());
@@ -342,6 +370,8 @@ class FileObject extends Base
      */
     public function truncateWithCheck(int $newFileSize, string $placeholderChar = ' '): ?int
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $flags = $this->clearFlags();
         $changes = $this->changeFileSize($newFileSize, $placeholderChar);
         $this->restoreFlags($flags);
@@ -359,6 +389,8 @@ class FileObject extends Base
      */
     public function moveSubStr(int $charPosFrom, int $newCharPos): void
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         if ($charPosFrom === $newCharPos) {
             return;
         }
@@ -376,6 +408,8 @@ class FileObject extends Base
      */
     public function fputcsv($fields, $delimiter = ',', $enclosure = '"', $escape = '\\'): void
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         CsvRfcUtils::checkPutCsvEscape($escape);
         $this->fwrite(CsvRfcUtils::strPutCsv($fields, $delimiter, $enclosure));
     }
@@ -385,6 +419,8 @@ class FileObject extends Base
      */
     protected function clearFlags(): int
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $flagsForRestore = $this->getFlags();
         $this->setFlags($flagsForRestore & \SplFileObject::READ_CSV);
 
@@ -398,6 +434,8 @@ class FileObject extends Base
      */
     protected function restoreFlags(int $flagsForRestore): void
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $this->setFlags($flagsForRestore);
     }
 
@@ -409,6 +447,8 @@ class FileObject extends Base
      */
     protected function moveForward(int $charPosFrom, int $newCharPos): void
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $fileSize = $this->getFileSize();
         $this->changeFileSize($fileSize + $newCharPos - $charPosFrom);
         $bufferSize = ($charPosFrom + $this->getMaxBufferSize()) > $fileSize ? $fileSize - $charPosFrom : $this->getMaxBufferSize();
@@ -434,6 +474,8 @@ class FileObject extends Base
      */
     protected function moveBackward(int $charPosFrom, int $newCharPos): void
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $fileSize = $this->getFileSize();
         $this->fseekWithCheck($charPosFrom);
         while ($charPosFrom < $fileSize) {
@@ -459,6 +501,8 @@ class FileObject extends Base
      */
     protected function changeFileSize(int $newFileSize, string $placeholderChar = ' ', int $oldFileSize = null): int
     {
+        trigger_error(FileObject::class . ' is deprecated', E_USER_DEPRECATED);
+
         $fileSize = $this->getFileSize();
         if ($newFileSize === $fileSize) {
             return 0;
