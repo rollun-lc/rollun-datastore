@@ -10,6 +10,8 @@ use rollun\files\Csv\CsvFileObjectWithPrKey;
  *
  * @author  Roman Ratsun <r.ratsun.rollun@gmail.com>
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ *
+ * @deprecated Module moved to library rollun-files
  */
 interface CsvStrategyInterface
 {

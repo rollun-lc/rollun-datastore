@@ -16,6 +16,8 @@ use InvalidArgumentException;
  *
  * @author  Roman Ratsun <r.ratsun.rollun@gmail.com>
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ *
+ * @deprecated Module moved to library rollun-files
  */
 class CsvFileObjectWithPrKey extends CsvFileObject
 {
@@ -40,6 +42,8 @@ class CsvFileObjectWithPrKey extends CsvFileObject
         string $strategyClass = CsvBinaryStrategy::class,
         string $identifier = 'id'
     ) {
+        trigger_error(CsvFileObjectWithPrKey::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
+
         parent::__construct($filename, $delimiter, $enclosure, $escape);
 
         if (!class_exists($strategyClass)) {
@@ -64,6 +68,8 @@ class CsvFileObjectWithPrKey extends CsvFileObject
      */
     public function getRowById(string $id): ?array
     {
+        trigger_error(CsvFileObjectWithPrKey::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
+
         return $this->strategy->getRowById($id);
     }
 
@@ -72,6 +78,8 @@ class CsvFileObjectWithPrKey extends CsvFileObject
      */
     public function addRow(array $row): int
     {
+        trigger_error(CsvFileObjectWithPrKey::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
+
         return $this->strategy->addRow($row);
     }
 
@@ -80,6 +88,8 @@ class CsvFileObjectWithPrKey extends CsvFileObject
      */
     public function setRow(array $row): int
     {
+        trigger_error(CsvFileObjectWithPrKey::class . ' is deprecated. Module moved to library rollun-files', E_USER_DEPRECATED);
+
         return $this->strategy->setRow($row);
     }
 }
