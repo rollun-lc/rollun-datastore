@@ -110,7 +110,6 @@ class CsvIterator implements \Iterator
         }
 
         $this->splFileObject->next();
-        $this->splFileObject->current();
     }
 
     /**
