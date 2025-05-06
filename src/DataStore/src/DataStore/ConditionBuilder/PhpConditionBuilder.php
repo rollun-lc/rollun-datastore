@@ -77,12 +77,12 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
                 $fieldValue = (bool)$fieldValue ? true : false;
 
                 return $fieldValue;
+            case is_string($fieldValue):
+                return "'" . addslashes($fieldValue) . "'";
             case is_numeric($fieldValue):
                 return $fieldValue;
             case is_null($fieldValue):
                 return 'null';
-            case is_string($fieldValue):
-                return "'" . addslashes($fieldValue) . "'";
             default:
                 throw new DataStoreException('Type ' . gettype($fieldValue) . ' is not supported');
         }
