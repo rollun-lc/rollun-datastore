@@ -22,7 +22,6 @@
     "symfony/filesystem": "^6.0",
     "rollun-com/rollun-utils": "^7.0|^8.0",
     "rollun-com/rollun-logger": "^7.0.1",
-    "rollun-com/rollun-installer": "^5.0.0",
     "laminas/laminas-http": "^2.15.1",
     "laminas/laminas-servicemanager": "^3.10",
     "laminas/laminas-db": "^2.13.4",
@@ -39,7 +38,6 @@
   "autoload": {
     "psr-4": {
       "rollun\\datastore\\": "src/DataStore/src",
-      "rollun\\files\\": "src/Files/src",
       "rollun\\uploader\\": "src/Uploader/src",
       "rollun\\repository\\": "src/Repository/src"
     }
@@ -68,10 +66,5 @@
     "code-sniffer": "phpcs .",
     "code-beautiful": "phpcbf .",
     "server": "php -S 0.0.0.0:8000 -t public public/index.php"
-  },
-  "config": {
-    "allow-plugins": {
-      "rollun-com/rollun-installer": true
-    }
   }
 }
