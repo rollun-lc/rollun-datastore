@@ -1,5 +1,5 @@
 <?php
-$servername = "rollun-datastore-mysql";
+$servername = "mysql";
 $username = "app";
 $password = "secret";
 
