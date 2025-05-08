@@ -663,47 +663,6 @@ $adapter = new Adapter($dbConfig);
 $tableManager = new TableManagerMysql($adapter, $tablesConfigs);
 ```
 
-
-### Cleaner 
-
-`Cleaner` предоставляет гибкий способ удаление данных, которые прошли 'валидацию на удаление' с хранилища. Для этого
-нужно реализовать единственный метод `isValid()` интерфейса `CleaningValidatorInterface`.
-
-Пример:
-
-```php
-<?php
-
-use rollun\datastore\DataStore\Memory;
-use rollun\datastore\Cleaner\Cleaner;
-use rollun\utils\Cleaner\CleaningValidator\CleaningValidatorInterface;
-use rollun\datastore\Rql\RqlQuery;
-
-$dataStore = new Memory(['id', 'name']);
-
-foreach (range(1, 3) as $id) {
-    $dataStore->create([
-        'id' => $id,
-        'name' => "foo{$id}",
-    ]);
-}
-
-$cleaningValidator = new class implements CleaningValidatorInterface
-{
-    public function isValid($value){
-        return $value['id'] > 1 && $value['name'] !== 'foo3';
-    }
-};
-
-$cleaner = new Cleaner($dataStore, $cleaningValidator);
-$cleaner->cleanList();
-
-var_dump($dataStore->count()); // 1
-var_dump($dataStore->query(new RqlQuery())); // [['id' => '2', 'name' => 'foo2']]
-
-```
-
-
 ### Uploader
 
 Для загрузки данных в хранилище с итератора можно использовать `Uploader`. Так же если этот итератор
