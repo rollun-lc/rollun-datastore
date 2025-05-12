@@ -1,10 +1,10 @@
-name: PHP Composer
+name: Test PHP 8.0
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, 11.x  ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, 11.x  ]
 
 jobs:
   tests:
@@ -15,8 +15,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Init project
-        run: make init
-
       - name: Run tests
-        run: make test
+        run: make init-8.0 test-8.0
