@@ -35,7 +35,14 @@ class LaminasDbExceptionDetector
 
     public static function isOperationTimedOutException(Throwable $e): bool
     {
-        if (!$e instanceof RuntimeException) {
+        // Раніше mysqli при помилках, по замовчуванню, повертав варнінг. Цей варнінг оброблювався
+        // Laminas драйвером для Mysqli і перетворювався в Laminas\Db\Adapter\Exception\RuntimeException.
+        // В php8.1 змінили поведінку mysqli по замовчуванню і замість варнінгів відразу кидаються ексепшени.
+        // (MySQLi's default error mode is changed from MYSQLI_REPORT_OFF to MYSQLI_REPORT_ERROR|MYSQLI_REPORT_STRICT)
+        // Ці ексепшени не ловляться Laminas драйвером і долітають сюди в чистому вигляді. Тому потрібно
+        // їх також перевіряти.
+        // @see https://php.watch/versions/8.1/mysqli-error-mode
+        if (!$e instanceof RuntimeException && !$e instanceof \mysqli_sql_exception) {
             return false;
         }
         if (
