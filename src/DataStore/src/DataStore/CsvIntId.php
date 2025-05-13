@@ -94,7 +94,7 @@ class CsvIntId extends CsvBase
      */
     protected function generatePrimaryKey()
     {
-        $this->getFile(1);
+        $this->getFile();
         $id = null;
 
         while (!$this->file->eof()) {
