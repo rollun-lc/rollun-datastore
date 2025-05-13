@@ -101,7 +101,7 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
         } elseif (isset($serviceConfig[self::KEY_TABLE_NAME])) {
             $tableName = $serviceConfig[self::KEY_TABLE_NAME];
 
-            $dbServiceName = isset($serviceConfig[self::KEY_DB_ADAPTER]) ? $serviceConfig[self::KEY_DB_ADAPTER] : 'db';
+            $dbServiceName = $serviceConfig[self::KEY_DB_ADAPTER] ?? 'db';
             $db = $container->has($dbServiceName) ? $container->get($dbServiceName) : null;
 
             if (null !== $db) {

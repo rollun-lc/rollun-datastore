@@ -317,7 +317,7 @@ class RqlParser
                     $node = preg_replace_callback(
                         ['/\\\\([\w\W])/', '/\\@/', '/\\$/'],
                         function (array $matches) {
-                            $value = isset($matches[1]) ? $matches[1] : $matches[0];
+                            $value = $matches[1] ?? $matches[0];
 
                             return RqlConditionBuilder::encodeString($value);
                         },

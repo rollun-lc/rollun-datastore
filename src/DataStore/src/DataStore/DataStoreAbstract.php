@@ -333,7 +333,7 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
                         $sum = 0;
 
                         foreach ($data as $item) {
-                            $sum += isset($item[$fieldNode->getField()]) ? $item[$fieldNode->getField()] : 0;
+                            $sum += $item[$fieldNode->getField()] ?? 0;
                         }
 
                         $compareArray[$fieldNode->__toString()] = [$sum];
@@ -343,7 +343,7 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
                         $count = 0;
 
                         foreach ($data as $item) {
-                            $sum += isset($item[$fieldNode->getField()]) ? $item[$fieldNode->getField()] : 0;
+                            $sum += $item[$fieldNode->getField()] ?? 0;
                             $count += isset($item[$fieldNode->getField()]) ? 1 : 0;
                         }
 

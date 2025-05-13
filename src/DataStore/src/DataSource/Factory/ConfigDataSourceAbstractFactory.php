@@ -32,7 +32,7 @@ class ConfigDataSourceAbstractFactory implements AbstractFactoryInterface
     {
         $config = $container->get('config');
         $serviceConfig = $config[self::KEY_DATASOURCE][$requestedName];
-        $confName = isset($serviceConfig[static::KEY_CONFIG]) ? $serviceConfig[static::KEY_CONFIG] : $requestedName;
+        $confName = $serviceConfig[static::KEY_CONFIG] ?? $requestedName;
         $data = $config[$confName];
 
         return new MemoryConfig($data);

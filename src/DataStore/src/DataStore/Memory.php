@@ -87,7 +87,7 @@ class Memory extends DataStoreAbstract
 
         $this->checkOnExistingColumns($itemData);
         $identifier = $this->getIdentifier();
-        $id = isset($itemData[$identifier]) ? $itemData[$identifier] : null;
+        $id = $itemData[$identifier] ?? null;
 
         if ($id) {
             if (isset($this->items[$id]) && !$rewriteIfExist) {

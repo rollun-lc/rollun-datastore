@@ -49,8 +49,7 @@ class CreateHandler extends AbstractHandler
         $primaryKeyIdentifier = $this->dataStore->getIdentifier();
         $isRowExist = false;
 
-        $primaryKeyValue = isset($row[$primaryKeyIdentifier]) ?
-            $row[$primaryKeyIdentifier] : $request->getAttribute('primaryKeyValue');
+        $primaryKeyValue = $row[$primaryKeyIdentifier] ?? $request->getAttribute('primaryKeyValue');
         if ($primaryKeyValue) {
             $row = array_merge([$primaryKeyIdentifier => $primaryKeyValue], $row);
         }

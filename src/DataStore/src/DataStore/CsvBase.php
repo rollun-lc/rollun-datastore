@@ -55,7 +55,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
         }
 
 
-        $this->csvDelimiter = $csvDelimiter !== null ? $csvDelimiter : self::DEFAULT_DELIMITER;
+        $this->csvDelimiter = $csvDelimiter ?? self::DEFAULT_DELIMITER;
 
         // Sets the column headings
         $this->getHeaders();
@@ -414,7 +414,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     protected function findInFile(?string $id): ?array
     {
         $this->file->rewind();
-        $this->skipColumnHeaders($this->file);
+        static::skipColumnHeaders($this->file);
 
         // In the CSV-format first row always containts the column headings
         // That's why first row is passed during the file opening

@@ -17,7 +17,7 @@ class BooleanFormatterTest extends TestCase
             'Convert empty string' => ['', false],
             'Convert not empty string' => ['something', true],
             'Convert zero int' => [0, false],
-            'Convert non-zero int' => [rand(1, 100), true],
+            'Convert non-zero int' => [random_int(1, 100), true],
             'Convert zero float' => [0, false],
             'Convert non-zero float' => [0.01, true],
         ];

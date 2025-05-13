@@ -128,7 +128,7 @@ class RequestDecoder implements MiddlewareInterface
     protected function parseRequestBody(ServerRequestInterface $request)
     {
         $contentTypeArray = $request->getHeader('Content-Type');
-        $contentType = isset($contentTypeArray[0]) ? $contentTypeArray[0] : 'text/html';
+        $contentType = $contentTypeArray[0] ?? 'text/html';
 
         if (str_contains($contentType, 'json')) {
             $body = !empty($request->getBody()->__toString())

@@ -62,7 +62,7 @@ class ResourceResolver implements MiddlewareInterface
             $pattern = "/{$basePath}\/([\w\~\-\_]+)([\/]([-%_A-Za-z0-9]+))?\/?$/";
             preg_match($pattern, $path, $matches);
 
-            $resourceName = isset($matches[1]) ? $matches[1] : null;
+            $resourceName = $matches[1] ?? null;
             $request = $request->withAttribute(self::RESOURCE_NAME, $resourceName);
 
             $id = isset($matches[3]) ? $this->decodeString($matches[3]) : null;

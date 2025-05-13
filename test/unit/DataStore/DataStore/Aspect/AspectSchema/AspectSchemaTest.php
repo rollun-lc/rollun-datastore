@@ -233,7 +233,7 @@ class AspectSchemaTest extends TestCase
 
     private function getRandomInt(): int
     {
-        return rand();
+        return random_int(0, mt_getrandmax());
     }
 
     private function getRandomFloat(): float
@@ -248,6 +248,6 @@ class AspectSchemaTest extends TestCase
 
     private function getRandomBool(): bool
     {
-        return (bool)rand(0, 1);
+        return (bool)random_int(0, 1);
     }
 }

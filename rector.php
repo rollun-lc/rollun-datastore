@@ -14,7 +14,7 @@ return RectorConfig::configure()
     ->withSkip([
         __DIR__ . '/test/old/*',
     ])
-    ->withPhpSets(php55: true)
+    ->withPhpSets(php70: true)
     ->withTypeCoverageLevel(0)
     ->withDeadCodeLevel(0)
     ->withCodeQualityLevel(0);
