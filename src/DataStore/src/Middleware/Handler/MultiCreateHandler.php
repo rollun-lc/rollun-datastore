@@ -75,7 +75,7 @@ class MultiCreateHandler extends AbstractHandler
             foreach ($rows as $row) {
                 try {
                     $result[] = $this->dataStore->create($row);
-                } catch (DataStoreException $exception) {
+                } catch (DataStoreException) {
                     //Ignore result...
                 }
             }

@@ -58,20 +58,15 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
     protected $db;
 
     /**
-     * @var string
-     */
-    protected $tableName;
-
-    /**
      *
      * @param AdapterInterface $dbAdapter
      * @param $tableName
+     * @param string $tableName
      */
-    public function __construct(AdapterInterface $dbAdapter, $tableName)
+    public function __construct(AdapterInterface $dbAdapter, protected $tableName)
     {
         $this->db = $dbAdapter;
         $this->emptyCondition = $this->prepareFieldValue(1) . ' = ' . $this->prepareFieldValue(1);
-        $this->tableName = $tableName;
     }
 
     /**

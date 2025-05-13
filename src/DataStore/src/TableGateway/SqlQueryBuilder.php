@@ -21,16 +21,6 @@ use Laminas\Db\Sql\Sql;
 class SqlQueryBuilder
 {
     /**
-     * @var AdapterInterface
-     */
-    private $adapter;
-
-    /**
-     * @var string
-     */
-    private $tableName;
-
-    /**
      * @var SqlConditionBuilder
      */
     protected $sqlConditionBuilder;
@@ -40,12 +30,10 @@ class SqlQueryBuilder
      * @param AdapterInterface $adapter
      * @param $tableName
      * @param SqlConditionBuilder|null $sqlConditionBuilder
+     * @param string $tableName
      */
-    public function __construct(AdapterInterface $adapter, $tableName, SqlConditionBuilder $sqlConditionBuilder = null)
+    public function __construct(private AdapterInterface $adapter, private $tableName, SqlConditionBuilder $sqlConditionBuilder = null)
     {
-        $this->adapter = $adapter;
-        $this->tableName = $tableName;
-
         if ($this->sqlConditionBuilder === null) {
             $this->sqlConditionBuilder = new SqlConditionBuilder($this->adapter, $this->tableName);
         } else {

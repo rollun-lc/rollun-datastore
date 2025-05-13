@@ -66,18 +66,13 @@ abstract class ConditionBuilderAbstract
      */
     public function makeAbstractQueryOperator(AbstractQueryNode $queryNode)
     {
-        switch (true) {
-            case ($queryNode instanceof AbstractScalarOperatorNode):
-                return $this->makeScalarOperator($queryNode);
-            case ($queryNode instanceof AbstractLogicOperatorNode):
-                return $this->makeLogicOperator($queryNode);
-            case ($queryNode instanceof AbstractArrayOperatorNode):
-                return $this->makeArrayOperator($queryNode);
-            case ($queryNode instanceof BinaryOperatorNodeAbstract):
-                return $this->makeBinaryOperator($queryNode);
-            default:
-                throw new DataStoreException('The Node type not supported: ' . $queryNode->getNodeName());
-        }
+        return match (true) {
+            $queryNode instanceof AbstractScalarOperatorNode => $this->makeScalarOperator($queryNode),
+            $queryNode instanceof AbstractLogicOperatorNode => $this->makeLogicOperator($queryNode),
+            $queryNode instanceof AbstractArrayOperatorNode => $this->makeArrayOperator($queryNode),
+            $queryNode instanceof BinaryOperatorNodeAbstract => $this->makeBinaryOperator($queryNode),
+            default => throw new DataStoreException('The Node type not supported: ' . $queryNode->getNodeName()),
+        };
     }
 
     /**

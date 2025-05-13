@@ -16,11 +16,8 @@ use rollun\datastore\Rql\Node\AggregateSelectNode;
 
 class SelectTokenParser extends AbstractTokenParser
 {
-    private $allowedFunctions;
-
-    public function __construct(array $allowedFunctions)
+    public function __construct(private array $allowedFunctions)
     {
-        $this->allowedFunctions = $allowedFunctions;
     }
 
     /**

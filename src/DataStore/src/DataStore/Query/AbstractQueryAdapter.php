@@ -34,14 +34,11 @@ class AbstractQueryAdapter implements QueryAdapter
             return null;
         }
 
-        switch (true) {
-            case ($queryNode instanceof AbstractComparisonOperatorNode):
-                return $this->processComparisonOperator($queryNode);
-            case ($queryNode instanceof AbstractLogicOperatorNode):
-                return $this->processLogicOperator($queryNode);
-            default:
-                throw new RuntimeException('The Node type not supported: ' . $queryNode->getNodeName());
-        }
+        return match (true) {
+            $queryNode instanceof AbstractComparisonOperatorNode => $this->processComparisonOperator($queryNode),
+            $queryNode instanceof AbstractLogicOperatorNode => $this->processLogicOperator($queryNode),
+            default => throw new RuntimeException('The Node type not supported: ' . $queryNode->getNodeName()),
+        };
     }
 
     protected function processSort(?SortNode $sortNode = null): ?SortNode
@@ -78,16 +75,12 @@ class AbstractQueryAdapter implements QueryAdapter
     {
         $queries = array_map(fn(AbstractQueryNode $node) => $this->processQuery($node), $node->getQueries());
 
-        switch (true) {
-            case ($node instanceof NotNode):
-                return new NotNode($queries);
-            case ($node instanceof AndNode):
-                return new AndNode($queries);
-            case ($node instanceof OrNode):
-                return new OrNode($queries);
-            default:
-                throw new RuntimeException('The LogicNode type not supported: ' . $node->getNodeName());
-        }
+        return match (true) {
+            $node instanceof NotNode => new NotNode($queries),
+            $node instanceof AndNode => new AndNode($queries),
+            $node instanceof OrNode => new OrNode($queries),
+            default => throw new RuntimeException('The LogicNode type not supported: ' . $node->getNodeName()),
+        };
     }
 
 

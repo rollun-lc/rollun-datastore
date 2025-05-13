@@ -12,20 +12,14 @@ use Laminas\ServiceManager\ServiceManager;
 class PluginManagerTypeFactory implements TypeFactory
 {
     /**
-     * @var string
-     */
-    private $typeService;
-
-    /**
      * @var TypePluginManager
      */
     private $typePluginManager;
 
-    public function __construct(string $typeService, ?TypePluginManager $typePluginManager = null)
+    public function __construct(private string $typeService, ?TypePluginManager $typePluginManager = null)
     {
-        $this->typeService = $typeService;
         $this->typePluginManager = $typePluginManager ?? $this->getDefaultTypePluginManager();
-        if (!$this->typePluginManager->has($typeService)) {
+        if (!$this->typePluginManager->has($this->typeService)) {
             throw new InvalidArgumentException('Plugin manager has not type service.');
         };
     }

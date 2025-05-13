@@ -8,36 +8,8 @@ use rollun\datastore\DataStore\Formatter\FormatterInterface;
 
 class FieldInfo
 {
-    /**
-     * @var TypeFactory
-     */
-    private $typeFactory;
-
-    /**
-     * @var FormatterInterface
-     */
-    private $formatter;
-
-    /**
-     * @var Getter
-     */
-    private $getter;
-
-    /**
-     * @var bool
-     */
-    private $nullable;
-
-    public function __construct(
-        TypeFactory $typeFactory,
-        FormatterInterface $formatter,
-        Getter $getter,
-        bool $nullable
-    ) {
-        $this->typeFactory = $typeFactory;
-        $this->formatter = $formatter;
-        $this->getter = $getter;
-        $this->nullable = $nullable;
+    public function __construct(private TypeFactory $typeFactory, private FormatterInterface $formatter, private Getter $getter, private bool $nullable)
+    {
     }
 
     public function getTypeFactory(): TypeFactory

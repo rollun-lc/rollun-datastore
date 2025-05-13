@@ -14,29 +14,17 @@ use Xiag\Rql\Parser\Query;
 class AspectSchema extends AspectEntityMapper
 {
     /**
-     * @var Scheme
-     */
-    private $scheme;
-
-    /**
-     * @var EntityFactory
-     */
-    private $entityFactory;
-
-    /**
      * @var QueryAdapter
      */
     private $queryAdapter;
 
     public function __construct(
         DataStoresInterface $dataStore,
-        Scheme $scheme,
-        EntityFactory $entityFactory,
+        private Scheme $scheme,
+        private EntityFactory $entityFactory,
         ?QueryAdapter $queryAdapter = null
     ) {
         parent::__construct($dataStore);
-        $this->scheme = $scheme;
-        $this->entityFactory = $entityFactory;
         $this->queryAdapter = $queryAdapter ?? new NullQueryAdapter();
     }
 

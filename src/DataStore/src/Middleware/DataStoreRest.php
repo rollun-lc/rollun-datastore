@@ -26,18 +26,12 @@ class DataStoreRest implements MiddlewareInterface
     protected $middlewarePipe;
 
     /**
-     * @var DataStoresInterface
-     */
-    private $dataStore;
-
-    /**
      * DataStoreRest constructor.
      * @param DataStoresInterface $dataStore
      */
-    public function __construct(DataStoresInterface $dataStore)
+    public function __construct(private DataStoresInterface $dataStore)
     {
         $this->middlewarePipe = new MiddlewarePipe();
-        $this->dataStore = $dataStore;
 
         $this->middlewarePipe->pipe(new Handler\HeadHandler($this->dataStore));
         $this->middlewarePipe->pipe(new Handler\DownloadCsvHandler($this->dataStore));

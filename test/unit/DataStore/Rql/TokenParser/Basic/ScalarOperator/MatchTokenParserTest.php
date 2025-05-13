@@ -25,7 +25,7 @@ class MatchTokenParserTest extends TestCase
         $position = 0;
 
         /** @var MatchTokenParser|PHPUnit_Framework_MockObject_MockObject $object */
-        $object = $this->getMockBuilder(get_class($this->createObject()))->setMethods(['getParser'])->getMock();
+        $object = $this->getMockBuilder($this->createObject()::class)->setMethods(['getParser'])->getMock();
         $object->expects($this->once())
             ->method('getParser')
             ->will($this->returnValue(new Parser(new ExpressionParser())));

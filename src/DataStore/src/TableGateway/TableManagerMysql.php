@@ -200,22 +200,17 @@ class TableManagerMysql
     protected $db;
 
     /**
-     * Global table configs
-     *
-     * @var array
-     */
-    protected $config;
-
-    /**
      * TableManagerMysql constructor.
      * @param Adapter\Adapter $db
      * @param null $config
      * @throws Exception
      */
-    public function __construct(Adapter\Adapter $db, $config = null)
+    public function __construct(Adapter\Adapter $db, /**
+     * Global table configs
+     */
+    protected $config = null)
     {
         $this->db = $db;
-        $this->config = $config;
 
         if (!isset($this->config[self::KEY_AUTOCREATE_TABLES])) {
             return;

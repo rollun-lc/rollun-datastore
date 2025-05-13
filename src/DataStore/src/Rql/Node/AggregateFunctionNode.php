@@ -8,12 +8,8 @@ namespace rollun\datastore\Rql\Node;
 
 use Xiag\Rql\Parser\Node\AbstractQueryNode;
 
-class AggregateFunctionNode extends AbstractQueryNode
+class AggregateFunctionNode extends AbstractQueryNode implements \Stringable
 {
-    private $function;
-
-    private $field;
-
     /**
      * @return string
      */
@@ -27,10 +23,8 @@ class AggregateFunctionNode extends AbstractQueryNode
      * @param $function
      * @param $field
      */
-    public function __construct($function, $field)
+    public function __construct(private $function, private $field)
     {
-        $this->function = $function;
-        $this->field = $field;
     }
 
     /**
@@ -49,7 +43,7 @@ class AggregateFunctionNode extends AbstractQueryNode
         return $this->field;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return sprintf("%s(%s)", $this->function, $this->field);
     }

@@ -22,7 +22,7 @@ trait ModelArrayAccess
         try {
             $this->getAttribute($offset);
             return true;
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return false;
         }
     }

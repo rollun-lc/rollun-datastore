@@ -25,7 +25,7 @@ class BaseDto
             }
 
             if (!property_exists($this, $field)) {
-                throw new InvalidArgumentException("Unknown property '$field' in " . get_class($this));
+                throw new InvalidArgumentException("Unknown property '$field' in " . static::class);
             }
 
             $this->{$field} = $typedValue;

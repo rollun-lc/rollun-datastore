@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Rector\CodeQuality\Rector\ClassMethod\OptionalParametersAfterRequiredRector;
 use Rector\Config\RectorConfig;
 
 return RectorConfig::configure()
@@ -13,8 +14,12 @@ return RectorConfig::configure()
     ])
     ->withSkip([
         __DIR__ . '/test/old/*',
+        OptionalParametersAfterRequiredRector::class => [
+            __DIR__ . '/src/Repository/src/ModelRepository.php',
+            __DIR__ . '/test/unit/Repository/ModelRepositoryTest.php'
+        ]
     ])
-    ->withPhpSets(php74: true)
+    ->withPhpSets(php80: true)
     ->withTypeCoverageLevel(0)
     ->withDeadCodeLevel(0)
     ->withCodeQualityLevel(0);

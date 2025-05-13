@@ -10,15 +10,12 @@ use Xiag\Rql\Parser\AbstractNode;
 
 class GroupbyNode extends AbstractNode
 {
-    private $fields;
-
     /**
      * GroupbyNode constructor.
      * @param array $fields
      */
-    public function __construct(array $fields)
+    public function __construct(private array $fields)
     {
-        $this->fields = $fields;
     }
 
     /**

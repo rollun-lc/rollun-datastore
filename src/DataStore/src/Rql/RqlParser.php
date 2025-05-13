@@ -238,19 +238,12 @@ class RqlParser
     {
         $limitNode = $query->getLimit();
 
-        switch (true) {
-            case (!isset($limitNode)):
-                $rqlString = '';
-                break;
-            case $limitNode->getLimit() == DataStoreAbstract::LIMIT_INFINITY && $limitNode->getOffset() == 0:
-                $rqlString = '';
-                break;
-            case empty($limitNode->getOffset()):
-                $rqlString = sprintf('&limit(%s)', $limitNode->getLimit());
-                break;
-            default:
-                $rqlString = sprintf('&limit(%s,%s)', $limitNode->getLimit(), $limitNode->getOffset());
-        }
+        $rqlString = match (true) {
+            !isset($limitNode) => '',
+            $limitNode->getLimit() == DataStoreAbstract::LIMIT_INFINITY && $limitNode->getOffset() == 0 => '',
+            empty($limitNode->getOffset()) => sprintf('&limit(%s)', $limitNode->getLimit()),
+            default => sprintf('&limit(%s,%s)', $limitNode->getLimit(), $limitNode->getOffset()),
+        };
 
         return $rqlString;
     }

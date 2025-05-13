@@ -400,7 +400,7 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
             try {
                 $createdRecord = $this->create($record);
                 $ids[] = $createdRecord[$this->getIdentifier()];
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 // TODO: need to log record that was not created
                 continue;
             }
@@ -428,7 +428,7 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
             try {
                 $updatedRecord = $this->update($record);
                 $ids[] = $updatedRecord[$this->getIdentifier()];
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 // TODO: need to log record that was not updated
                 continue;
             }
@@ -459,7 +459,7 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
             try {
                 $updatedRecord = $this->update(array_merge($record, [$identifier => $forUpdateRecord[$identifier]]));
                 $updatedIds[] = $updatedRecord[$identifier];
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 // TODO: log failed queried updated record
                 continue;
             }
@@ -550,7 +550,7 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
             try {
                 $rewroteRecord = $this->rewrite($record);
                 $ids[] = $rewroteRecord[$this->getIdentifier()];
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 // TODO: need to log record that was not rewrote
                 continue;
             }
@@ -580,7 +580,7 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
             try {
                 $deletedRecord = $this->delete($record[$identifier]);
                 $deletedIds[] = $deletedRecord[$identifier];
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 // TODO: need to log record that was not deleted
                 continue;
             }

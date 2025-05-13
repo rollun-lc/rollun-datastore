@@ -9,16 +9,10 @@ namespace rollun\datastore\DataStore\Type;
 abstract class TypeAbstract implements TypeInterface
 {
     /**
-     * @var mixed
-     */
-    protected $value;
-
-    /**
      * TypeAbstract constructor.
      * @param mixed $value
      */
-    public function __construct($value)
+    public function __construct(protected $value)
     {
-        $this->value = $value;
     }
 }

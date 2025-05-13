@@ -81,7 +81,7 @@ class ModelRepositoryTest extends TestCase
         $logger = $container->get(LoggerInterface::class);
         $model = $this->createModelInterface();
 
-        return new ModelRepository($dataStore, get_class($model), null, $logger);
+        return new ModelRepository($dataStore, $model::class, null, $logger);
     }
 
     public function testCreate()
@@ -170,7 +170,7 @@ class ModelRepositoryTest extends TestCase
         };
         global $container;
         $logger = $container->get(LoggerInterface::class);
-        $repository = new ModelRepository($dataStore, get_class($model), $mapper, $logger);
+        $repository = new ModelRepository($dataStore, $model::class, $mapper, $logger);
 
         $result = $repository->findById(1);
 

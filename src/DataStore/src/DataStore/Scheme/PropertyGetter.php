@@ -6,14 +6,8 @@ namespace rollun\datastore\DataStore\Scheme;
 
 class PropertyGetter implements Getter
 {
-    /**
-     * @var string
-     */
-    private $propertyName;
-
-    public function __construct(string $propertyName)
+    public function __construct(private string $propertyName)
     {
-        $this->propertyName = $propertyName;
     }
 
     /**

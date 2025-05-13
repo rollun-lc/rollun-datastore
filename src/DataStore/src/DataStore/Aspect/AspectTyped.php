@@ -188,7 +188,7 @@ class AspectTyped extends AspectAbstract implements SchemableInterface
             $getter = 'get' . ucfirst($fieldName);
 
             if (!method_exists($dto, $getter)) {
-                throw new RuntimeException("Undefined method '$getter' in " . get_class($dto));
+                throw new RuntimeException("Undefined method '$getter' in " . $dto::class);
             }
 
             /** @var FormatterInterface $formatter */

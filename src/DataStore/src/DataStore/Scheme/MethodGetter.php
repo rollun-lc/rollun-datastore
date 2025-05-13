@@ -6,14 +6,8 @@ namespace rollun\datastore\DataStore\Scheme;
 
 class MethodGetter implements Getter
 {
-    /**
-     * @var string
-     */
-    private $methodName;
-
-    public function __construct(string $methodName)
+    public function __construct(private string $methodName)
     {
-        $this->methodName = $methodName;
     }
 
     public function get($object)

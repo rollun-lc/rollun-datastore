@@ -232,7 +232,7 @@ class ModelAbstractTest extends TestCase
             'field3' => ModelCastingInterface::CAST_JSON,
             'field4' => ModelCastingInterface::CAST_SERIALIZE,
             'field5' => ModelCastingInterface::CAST_OBJECT,
-            'field6' => get_class($custom),
+            'field6' => $custom::class,
             'field7' => ModelCastingInterface::CAST_ARRAY,
             'field8' => ModelCastingInterface::CAST_ARRAY,
             'field9' => ModelCastingInterface::CAST_ARRAY,

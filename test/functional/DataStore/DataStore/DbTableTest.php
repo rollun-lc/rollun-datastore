@@ -389,7 +389,7 @@ class DbTableTest extends TestCase
 
         try {
             $dataStore->delete(1);
-        } catch (\Exception $e) {}
+        } catch (\Exception) {}
     }
 
     public function testNotWriteLogsWhenDisabled()

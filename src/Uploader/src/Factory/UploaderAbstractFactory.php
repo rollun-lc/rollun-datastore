@@ -35,7 +35,7 @@ class UploaderAbstractFactory implements AbstractFactoryInterface
     {
         try {
             $config = $container->get("config");
-        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
+        } catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
             return false;
         }
 

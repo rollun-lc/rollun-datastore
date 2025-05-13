@@ -96,9 +96,9 @@ class AspectTypedTest extends TestCase
                 'formatter' => FormatterInterface::class,
             ],
         ];
-        $dtoClassName = get_class(new class
+        $dtoClassName = (new class
         {
-        });
+        })::class;
 
         /** @var PHPUnit_Framework_MockObject_MockObject|DataStoresInterface $dataStore */
         $dataStore = $this->getMockBuilder(DataStoresInterface::class)

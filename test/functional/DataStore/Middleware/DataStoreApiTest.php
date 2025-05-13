@@ -617,7 +617,7 @@ class DataStoreApiTest extends BaseMiddlewareTest
 
     protected function processWithoutHandlerHandle($method, Exception $exception)
     {
-        $this->expectException(get_class($exception));
+        $this->expectException($exception::class);
         $this->expectExceptionMessage($exception->getMessage());
 
         $request = new ServerRequest();

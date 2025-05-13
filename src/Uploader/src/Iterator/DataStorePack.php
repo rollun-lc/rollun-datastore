@@ -16,11 +16,6 @@ use Xiag\Rql\Parser\Query;
 class DataStorePack implements SeekableIterator
 {
     /**
-     * @var int
-     */
-    protected $limit;
-
-    /**
      * @var DataStoresInterface
      */
     protected $dataStore;
@@ -35,10 +30,9 @@ class DataStorePack implements SeekableIterator
      * @param DataStoresInterface $dataStore
      * @param int $limit
      */
-    public function __construct(DataStoresInterface $dataStore, $limit = 100)
+    public function __construct(DataStoresInterface $dataStore, protected $limit = 100)
     {
         $this->dataStore = $dataStore;
-        $this->limit = $limit;
         $initItem = $this->dataStore->query($this->getInitQuery());
 
         if (!empty($initItem)) {

@@ -79,7 +79,7 @@ abstract class AbstractMapperAspect extends AspectAbstract
                     }
                 }
 
-                $nodeClass = get_class($node);
+                $nodeClass = $node::class;
 
                 return new $nodeClass($repackNode);
             } else {

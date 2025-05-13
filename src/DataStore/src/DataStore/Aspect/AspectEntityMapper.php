@@ -14,14 +14,8 @@ use Xiag\Rql\Parser\Query;
  */
 abstract class AspectEntityMapper implements DataStoreInterface, DataStoresInterface
 {
-    /**
-     * @var DataStoresInterface
-     */
-    private $dataStore;
-
-    public function __construct(DataStoresInterface $dataStore)
+    public function __construct(private DataStoresInterface $dataStore)
     {
-        $this->dataStore = $dataStore;
     }
 
     /**
