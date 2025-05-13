@@ -12,7 +12,7 @@ return RectorConfig::configure()
         __DIR__ . '/test',
     ])
     ->withSkip([
-        __DIR__ . '/tests/old',
+        __DIR__ . '/test/old/*',
     ])
     ->withPhpSets(php53: true)
     ->withTypeCoverageLevel(0)
