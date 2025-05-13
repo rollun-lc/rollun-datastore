@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -29,11 +30,11 @@ use Laminas\Db\TableGateway\TableGateway;
  */
 class TableGatewayAbstractFactory extends AbstractFactoryAbstract
 {
-    const KEY_SQL = 'sql';
+    public const KEY_SQL = 'sql';
 
-    const KEY_TABLE_GATEWAY = 'tableGateway';
+    public const KEY_TABLE_GATEWAY = 'tableGateway';
 
-    const KEY_ADAPTER = 'adapter';
+    public const KEY_ADAPTER = 'adapter';
 
     /**
      * @var null|array
@@ -86,7 +87,7 @@ class TableGatewayAbstractFactory extends AbstractFactoryAbstract
             $this->db = $container->has('db') ? $container->get('db') : false;
         }
 
-        return (bool)$this->db;
+        return (bool) $this->db;
     }
 
     /**

@@ -2,7 +2,6 @@
 
 namespace rollun\repository;
 
-
 use ArrayAccess;
 use rollun\repository\Interfaces\ModelCastingInterface;
 use rollun\repository\Interfaces\ModelHiddenFieldInterface;
@@ -209,7 +208,8 @@ abstract class ModelAbstract implements ModelInterface, ModelHiddenFieldInterfac
      *
      * @return bool
      */
-    public function hasAttribute($name) {
+    public function hasAttribute($name)
+    {
         return isset($this->attributes[$name]);
     }
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -12,6 +13,7 @@ use rollun\datastore\DataStore\Aspect\AspectReadOnly;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
 use rollun\datastore\DataStore\Memory;
+
 //use Xiag\Rql\Parser\Query;
 
 class AspectReadOnlyTest extends TestCase

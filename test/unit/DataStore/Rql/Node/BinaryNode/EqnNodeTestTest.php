@@ -15,7 +15,7 @@ class EqnNodeTestTest extends TestCase
     public function dataProvider()
     {
         return [
-            ['fieldName']
+            ['fieldName'],
         ];
     }
 

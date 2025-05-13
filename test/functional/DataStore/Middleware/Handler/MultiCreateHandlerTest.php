@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace rollun\test\functional\DataStore\Middleware\Handler;
@@ -29,7 +30,7 @@ class MultiCreateHandlerTest extends BaseHandlerTest
             ['PUT', [["id" => 1, "name" => 1]], false],
             ['POST', [["id" => 1, "name" => 1],1], false],
             ['POST', [["id" => 1, "name" => 1]], true],
-            ['POST', [["id" => 1, "name" => 1],["id" => 1, "name" => 1],["id" => 1, "name" => 1],["id" => 1, "name" => 1]], true]
+            ['POST', [["id" => 1, "name" => 1],["id" => 1, "name" => 1],["id" => 1, "name" => 1],["id" => 1, "name" => 1]], true],
         ];
     }
 

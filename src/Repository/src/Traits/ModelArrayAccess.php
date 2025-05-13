@@ -1,10 +1,8 @@
 <?php
 
-
 namespace rollun\repository\Traits;
 
-
-use \Exception;
+use Exception;
 
 /**
  * Trait ModelArrayAccess

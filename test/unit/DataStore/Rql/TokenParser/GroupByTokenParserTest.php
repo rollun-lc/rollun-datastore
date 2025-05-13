@@ -23,7 +23,7 @@ class GroupByTokenParserTest extends TestCase
                 ['a'],
                 ['a', 'b'],
                 ['a', 'b', 'c'],
-            ]
+            ],
         ];
     }
 

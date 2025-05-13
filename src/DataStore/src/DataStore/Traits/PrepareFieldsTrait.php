@@ -1,10 +1,8 @@
 <?php
 
-
 namespace rollun\datastore\DataStore\Traits;
 
 use rollun\utils\CallAttemptsTrait;
-
 
 trait PrepareFieldsTrait
 {

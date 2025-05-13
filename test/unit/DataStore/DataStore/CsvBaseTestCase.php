@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -12,6 +13,7 @@ use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Iterators\CsvIterator;
 use rollun\datastore\Rql\RqlQuery;
 use RuntimeException;
+
 use function rollun\test\isProcessRunning;
 use function rollun\test\killProcess;
 use function rollun\test\runScriptInBackground;
@@ -467,24 +469,24 @@ abstract class CsvBaseTestCase extends TestCase
     private function enableReadingModeInAnotherProcess(): int
     {
         $readScript = <<<PHP
-<?php
+            <?php
 
-namespace rollun\\test\unit\DataStore\DataStore;
+            namespace rollun\\test\unit\DataStore\DataStore;
 
-use rollun\datastore\DataStore\CsvBase;
+            use rollun\datastore\DataStore\CsvBase;
 
-require __DIR__ . '/../../../../vendor/autoload.php';
+            require __DIR__ . '/../../../../vendor/autoload.php';
 
-try {
-    \$dataStore = new CsvBase(filename: \$argv[1], csvDelimiter: ',');
-    file_put_contents(__DIR__ . '/status.txt', 'datastore created');
-    \$dataStore->enableReadMode();
-    file_put_contents(__DIR__ . '/status.txt', 'read mode enabled');
-    sleep(60);
-} catch (\Throwable \$e) {
-    file_put_contents(__DIR__ . '/status.txt', \$e->getMessage());
-}
-PHP;
+            try {
+                \$dataStore = new CsvBase(filename: \$argv[1], csvDelimiter: ',');
+                file_put_contents(__DIR__ . '/status.txt', 'datastore created');
+                \$dataStore->enableReadMode();
+                file_put_contents(__DIR__ . '/status.txt', 'read mode enabled');
+                sleep(60);
+            } catch (\Throwable \$e) {
+                file_put_contents(__DIR__ . '/status.txt', \$e->getMessage());
+            }
+            PHP;
 
         return $this->runInAnotherProcess($readScript, 'read mode enabled');
     }
@@ -492,24 +494,24 @@ PHP;
     private function enableWritingModeInAnotherProcess(): int
     {
         $readScript = <<<PHP
-<?php
+            <?php
 
-namespace rollun\\test\unit\DataStore\DataStore;
+            namespace rollun\\test\unit\DataStore\DataStore;
 
-use rollun\datastore\DataStore\CsvBase;
+            use rollun\datastore\DataStore\CsvBase;
 
-require __DIR__ . '/../../../../vendor/autoload.php';
+            require __DIR__ . '/../../../../vendor/autoload.php';
 
-try {
-    \$dataStore = new CsvBase(filename: \$argv[1], csvDelimiter: ',');
-    file_put_contents(__DIR__ . '/status.txt', 'datastore created');
-    \$dataStore->enableWritingMode();
-    file_put_contents(__DIR__ . '/status.txt', 'writing mode enabled');
-    sleep(60);
-} catch (\Throwable \$e) {
-    file_put_contents(__DIR__ . '/status.txt', \$e->getMessage());
-}
-PHP;
+            try {
+                \$dataStore = new CsvBase(filename: \$argv[1], csvDelimiter: ',');
+                file_put_contents(__DIR__ . '/status.txt', 'datastore created');
+                \$dataStore->enableWritingMode();
+                file_put_contents(__DIR__ . '/status.txt', 'writing mode enabled');
+                sleep(60);
+            } catch (\Throwable \$e) {
+                file_put_contents(__DIR__ . '/status.txt', \$e->getMessage());
+            }
+            PHP;
 
         return $this->runInAnotherProcess($readScript, 'writing mode enabled');
     }

@@ -11,4 +11,3 @@ chdir(dirname(__DIR__));
 
 $container = require 'config/container.php';
 \rollun\dic\InsideConstruct::setContainer($container);
-

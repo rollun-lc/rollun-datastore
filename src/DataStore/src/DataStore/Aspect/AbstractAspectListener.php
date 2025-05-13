@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license   LICENSE.md New BSD License
@@ -39,7 +40,5 @@ abstract class AbstractAspectListener
     /**
      * On unserialize
      */
-    public function __wakeup()
-    {
-    }
+    public function __wakeup() {}
 }

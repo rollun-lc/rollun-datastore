@@ -20,7 +20,7 @@ class AggregateSelectNodeTest extends TestCase
                     'fieldName1' => 'direction1',
                     'fieldName2' => 'direction2',
                 ],
-            ]
+            ],
         ];
     }
 

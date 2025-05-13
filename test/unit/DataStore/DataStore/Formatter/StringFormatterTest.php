@@ -18,7 +18,7 @@ class StringFormatterTest extends TestCase
             'Convert bool false' => [false, ''],
             'Convert bool true' => [true, '1'],
             'Convert associative array' => [['key' => 'value'], '{"key":"value"}'],
-            'Convert list array' => [['str', 123, 1.23], '["str",123,1.23]']
+            'Convert list array' => [['str', 123, 1.23], '["str",123,1.23]'],
         ];
     }
 

@@ -16,7 +16,7 @@ class LikeGlobNodeTest extends TestCase
     public function dataProvider()
     {
         return [
-            ['fieldName', 'fieldValue']
+            ['fieldName', 'fieldValue'],
         ];
     }
 

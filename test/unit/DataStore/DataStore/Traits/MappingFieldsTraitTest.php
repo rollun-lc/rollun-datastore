@@ -1,8 +1,6 @@
 <?php
 
-
 namespace unit\DataStore\DataStore\Traits;
-
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\Traits\MappingFieldsTrait;
@@ -14,11 +12,11 @@ class MappingFieldsTraitTest extends TestCase
         return [
             'Name' => 'Hello',
             'Price' => [
-                'Value' => '10'
+                'Value' => '10',
             ],
             'Data' => [
-                'Test' => 'Value'
-            ]
+                'Test' => 'Value',
+            ],
         ];
     }
 
@@ -32,8 +30,7 @@ class MappingFieldsTraitTest extends TestCase
 
     public function testPrepareDataArray()
     {
-        $instance = new class() extends \stdClass
-        {
+        $instance = new class extends \stdClass {
             use MappingFieldsTrait;
 
             protected $fields;
@@ -55,8 +52,7 @@ class MappingFieldsTraitTest extends TestCase
 
     public function testPrepareDataObject()
     {
-        $instance = new class() extends \stdClass
-        {
+        $instance = new class extends \stdClass {
             use MappingFieldsTrait;
 
             protected $fields;
@@ -78,8 +74,7 @@ class MappingFieldsTraitTest extends TestCase
 
     public function testFormatField()
     {
-        $instance = new class() extends \stdClass
-        {
+        $instance = new class extends \stdClass {
             use MappingFieldsTrait;
 
             protected $fields;
@@ -106,8 +101,7 @@ class MappingFieldsTraitTest extends TestCase
 
     public function testCastField()
     {
-        $instance = new class() extends \stdClass
-        {
+        $instance = new class extends \stdClass {
             use MappingFieldsTrait;
 
             protected $fields;
@@ -131,7 +125,7 @@ class MappingFieldsTraitTest extends TestCase
         $expected = [
             'name' => 'Hello',
             'price' => 10,
-            'data' => json_encode($input['Data'])
+            'data' => json_encode($input['Data']),
         ];
         $actual = $instance->prepareData($input);
 
@@ -140,8 +134,7 @@ class MappingFieldsTraitTest extends TestCase
 
     public function testCastFieldCustom()
     {
-        $instance = new class() extends \stdClass
-        {
+        $instance = new class extends \stdClass {
             use MappingFieldsTrait;
 
             protected $fields;
@@ -165,7 +158,7 @@ class MappingFieldsTraitTest extends TestCase
         $expected = [
             'name' => 'Hello',
             'price' => '10',
-            'data' =>$this->getInputData()['Data']
+            'data' => $this->getInputData()['Data'],
         ];
         $actual = $instance->prepareData($input);
 
@@ -174,8 +167,7 @@ class MappingFieldsTraitTest extends TestCase
 
     public function testMappingWithCallback()
     {
-        $instance = new class() extends \stdClass
-        {
+        $instance = new class extends \stdClass {
             use MappingFieldsTrait;
 
             protected $fields;
@@ -201,7 +193,7 @@ class MappingFieldsTraitTest extends TestCase
         $actual = $instance->prepareData($input, fn($value, $name, $origin) => [
             'name' => $name,
             'value' => $value,
-            'origin' => $origin
+            'origin' => $origin,
         ]);
 
         $this->assertEquals($expected, $actual);

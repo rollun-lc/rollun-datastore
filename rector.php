@@ -16,8 +16,8 @@ return RectorConfig::configure()
         __DIR__ . '/test/old/*',
         OptionalParametersAfterRequiredRector::class => [
             __DIR__ . '/src/Repository/src/ModelRepository.php',
-            __DIR__ . '/test/unit/Repository/ModelRepositoryTest.php'
-        ]
+            __DIR__ . '/test/unit/Repository/ModelRepositoryTest.php',
+        ],
     ])
     ->withPhpSets(php80: true)
     ->withTypeCoverageLevel(0)

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -40,21 +41,21 @@ class DbTableTest extends TestCase
     protected $tableName = 'testTable';
 
     protected $tableConfig = [
-       'id' => [
-           'field_type' => 'Integer',
-       ],
-       'name' => [
-           'field_type' => 'Varchar',
-           'field_params' => [
-               'length' => 255,
-           ]
-       ],
-       'surname' => [
-           'field_type' => 'Varchar',
-           'field_params' => [
-               'length' => 255,
-           ]
-       ],
+        'id' => [
+            'field_type' => 'Integer',
+        ],
+        'name' => [
+            'field_type' => 'Varchar',
+            'field_params' => [
+                'length' => 255,
+            ],
+        ],
+        'surname' => [
+            'field_type' => 'Varchar',
+            'field_params' => [
+                'length' => 255,
+            ],
+        ],
     ];
 
     protected function setUp(): void
@@ -161,7 +162,7 @@ class DbTableTest extends TestCase
 
         $object->update([
             'id' => 1,
-            'name' => 'name'
+            'name' => 'name',
         ]);
     }
 
@@ -373,7 +374,8 @@ class DbTableTest extends TestCase
                 'name' => "name",
                 'surname' => "surname",
             ]);
-        } catch (\Exception $e) {}
+        } catch (\Exception) {
+        }
 
         try {
             $dataStore->update([
@@ -381,15 +383,18 @@ class DbTableTest extends TestCase
                 'name' => "alter name",
                 'surname' => "surname",
             ]);
-        } catch (\Exception $e) {}
+        } catch (\Exception) {
+        }
 
         try {
             $dataStore->read(1);
-        } catch (\Exception $e) {}
+        } catch (\Exception) {
+        }
 
         try {
             $dataStore->delete(1);
-        } catch (\Exception) {}
+        } catch (\Exception) {
+        }
     }
 
     public function testNotWriteLogsWhenDisabled()

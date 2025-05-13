@@ -2,7 +2,6 @@
 
 namespace rollun\repository;
 
-
 use Psr\Log\LoggerInterface;
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\dic\InsideConstruct;
@@ -159,7 +158,7 @@ class ModelRepository implements ModelRepositoryInterface
      * @param $model
      *
      * @return bool
-     * 
+     *
      * @todo * @todo update field created_at
      */
     public function insertModel(ModelInterface $model)
@@ -285,7 +284,7 @@ class ModelRepository implements ModelRepositoryInterface
      * @param $model
      *
      * @return bool
-     * 
+     *
      * @todo update field updated_at
      * @todo updating abstract model original
      */
@@ -356,8 +355,9 @@ class ModelRepository implements ModelRepositoryInterface
      * @return bool
      */
     public function remove(ModelInterface $model): bool
-    {$identifier
-         = $this->dataStore->getIdentifier();
+    {
+        $identifier
+             = $this->dataStore->getIdentifier();
         if (isset($model->{$identifier}) && $this->dataStore->has($model->{$identifier})) {
             return (bool) $this->dataStore->delete($model->{$identifier});
         }

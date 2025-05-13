@@ -13,7 +13,7 @@ class DbTableMysqliDriverDataStoreTest extends BaseTest
     {
         // Create DbTable but with sqlQueryBuilder that always will return sql with sleep for 2 seconds,
         // But with this method we can test only 'query' function, because other functions do not use sqlQueryBuilder
-        return new class(
+        return new class (
             new TableGateway(
                 table: 'mysqli-timeout-test',
                 adapter: $this->getContainer()->get('db.mysqli.timeout-1-sec')
@@ -22,7 +22,7 @@ class DbTableMysqliDriverDataStoreTest extends BaseTest
             protected function getSqlQueryBuilder()
             {
                 if ($this->sqlQueryBuilder == null) {
-                    $this->sqlQueryBuilder = new class(
+                    $this->sqlQueryBuilder = new class (
                         $this->dbTable->getAdapter(),
                         $this->dbTable->table
                     ) extends SqlQueryBuilder {

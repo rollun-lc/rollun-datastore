@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -29,15 +30,15 @@ use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
  */
 class SqlQueryBuilderAbstractFactory implements AbstractFactoryInterface
 {
-    const KEY = self::class;
+    public const KEY = self::class;
 
-    const DEFAULT_CLASS = SqlQueryBuilder::class;
+    public const DEFAULT_CLASS = SqlQueryBuilder::class;
 
-    const KEY_TABLE_NAME = 'tableName';
+    public const KEY_TABLE_NAME = 'tableName';
 
-    const KEY_SQL_CONDITION_BUILDER = 'sqlConditionBuilder';
+    public const KEY_SQL_CONDITION_BUILDER = 'sqlConditionBuilder';
 
-    const KEY_ADAPTER = 'adapter';
+    public const KEY_ADAPTER = 'adapter';
 
     /**
      * @param ContainerInterface $container

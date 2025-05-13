@@ -20,7 +20,7 @@ class GroupByNodeTest extends TestCase
                     'fieldName1',
                     'fieldName2',
                 ],
-            ]
+            ],
         ];
     }
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -40,8 +41,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     public function __construct(
         protected string $filename,
         ?string $csvDelimiter
-    )
-    {
+    ) {
         // At first checks existing file as it is
         // If it doesn't exist converts to full name in the temporary folder
         if (!is_file($filename)) {
@@ -362,9 +362,10 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      * @throws DataStoreException
      */
     protected function lockWithRetries(
-        int $operation, int $maxTries = 40, int $microsecondsBetweenRetries = 50
-    ): void
-    {
+        int $operation,
+        int $maxTries = 40,
+        int $microsecondsBetweenRetries = 50
+    ): void {
         $file = $this->getFile();
         $tries = 0;
 

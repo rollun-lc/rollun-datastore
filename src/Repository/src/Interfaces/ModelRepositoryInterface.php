@@ -1,8 +1,6 @@
 <?php
 
-
 namespace rollun\repository\Interfaces;
-
 
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use Xiag\Rql\Parser\Query;

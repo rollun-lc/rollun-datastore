@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace rollun\datastore\Middleware\Handler;
@@ -29,10 +30,10 @@ class MultiCreateHandler extends AbstractHandler
             return false;
         }
 
-//        // exit if IsMultiCreate disabled
-//        if (!in_array($request->getHeaderLine('IsMultiCreate'), ['true', '1'])) {
-//            return false;
-//        }
+        //        // exit if IsMultiCreate disabled
+        //        if (!in_array($request->getHeaderLine('IsMultiCreate'), ['true', '1'])) {
+        //            return false;
+        //        }
 
         // get rows
         $rows = $request->getParsedBody();

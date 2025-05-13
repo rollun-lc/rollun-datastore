@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -34,7 +35,7 @@ class ConfigProvider
     {
         return [
             'abstract_factories' => [
-                UploaderAbstractFactory::class
+                UploaderAbstractFactory::class,
             ],
         ];
     }

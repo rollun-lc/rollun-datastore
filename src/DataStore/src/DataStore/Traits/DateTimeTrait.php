@@ -1,8 +1,6 @@
 <?php
 
-
 namespace rollun\datastore\DataStore\Traits;
-
 
 use rollun\datastore\DataStore\Interfaces\DateTimeInterface;
 

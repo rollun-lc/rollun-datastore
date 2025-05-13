@@ -2,7 +2,6 @@
 
 namespace rollun\test\unit\Repository;
 
-
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use rollun\datastore\DataStore\Memory;
@@ -25,7 +24,7 @@ class ModelRepositoryTest extends TestCase
 
     protected function createModelInterface($data = [])
     {
-        return new class($data) implements ModelInterface {
+        return new class ($data) implements ModelInterface {
             public $id;
             public $field;
             public $hello;
@@ -47,11 +46,13 @@ class ModelRepositoryTest extends TestCase
                 return ['id' => $this->id, 'field' => $this->field];
             }
 
-            public function isChanged(): bool {
+            public function isChanged(): bool
+            {
                 return !$this->exists || !empty($this->getChanges());
             }
 
-            public function getChanges(): array {
+            public function getChanges(): array
+            {
                 $changes = [];
                 foreach (['id', 'field', 'hello'] as $field) {
                     if (!isset($this->origin[$field]) && !isset($this->{$field})) {
@@ -65,11 +66,13 @@ class ModelRepositoryTest extends TestCase
                 return $changes;
             }
 
-            public function isExists(): bool {
+            public function isExists(): bool
+            {
                 return $this->exists;
             }
 
-            public function setExists(bool $exists): void {
+            public function setExists(bool $exists): void
+            {
                 $this->exists = $exists;
             }
         };
@@ -89,7 +92,8 @@ class ModelRepositoryTest extends TestCase
         $dataStore = new Memory();
         $repository = $this->createRepository($dataStore);
 
-        $item = $this->createModelInterface($this->getItem());;
+        $item = $this->createModelInterface($this->getItem());
+        ;
         $repository->save($item);
 
         $this->assertSame($this->getItem(), $dataStore->read(1));
@@ -161,8 +165,8 @@ class ModelRepositoryTest extends TestCase
     {
         $dataStore = new Memory();
         $dataStore->create($this->getItem());
-        $model = new class() extends ModelAbstract {};
-        $mapper = new class () implements FieldMapperInterface{
+        $model = new class extends ModelAbstract {};
+        $mapper = new class implements FieldMapperInterface {
             public function map(array $data): array
             {
                 return ['id' => $data['id'], 'hello' => $data['field']];

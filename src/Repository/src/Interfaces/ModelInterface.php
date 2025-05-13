@@ -2,7 +2,6 @@
 
 namespace rollun\repository\Interfaces;
 
-
 use rollun\utils\Interfaces\ArrayableInterface;
 
 /**

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -78,7 +79,7 @@ class DeterminatorTest extends TestCase
             'fieldString' => [
                 'type' => TypeString::class,
                 'formatter' => StringFormatter::class,
-            ]
+            ],
         ], UserDto::class);
 
         /** @var DataStorePluginManager|PHPUnit_Framework_MockObject_MockObject $dataStorePluginManagerMock */
@@ -118,8 +119,7 @@ class DeterminatorTest extends TestCase
         $this->expectException(TypeError::class);
         $serviceName = 'dataStoreService';
 
-        $notDataStore = new class {
-        };
+        $notDataStore = new class {};
 
         /** @var DataStorePluginManager|PHPUnit_Framework_MockObject_MockObject $dataStorePluginManagerMock */
         $dataStorePluginManagerMock = $this->getMockBuilder(DataStorePluginManager::class)

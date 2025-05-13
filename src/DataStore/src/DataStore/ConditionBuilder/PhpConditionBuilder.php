@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -74,7 +75,7 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
 
         switch (true) {
             case is_bool($fieldValue):
-                $fieldValue = (bool)$fieldValue ? true : false;
+                $fieldValue = (bool) $fieldValue ? true : false;
 
                 return $fieldValue;
             case is_string($fieldValue):

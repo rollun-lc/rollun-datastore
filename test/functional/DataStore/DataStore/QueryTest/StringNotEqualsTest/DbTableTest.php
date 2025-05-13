@@ -25,7 +25,7 @@ class DbTableTest extends BaseTest
     private function getDbTableFactory(): DbTableFactory
     {
         return new DbTableFactory(
-            adapter:  $this->getContainer()->get('db'),
+            adapter: $this->getContainer()->get('db'),
             tableName: self::TABLE_NAME,
             tableConfig: [
                 self::ID_NAME => [
@@ -35,8 +35,8 @@ class DbTableTest extends BaseTest
                     'field_type' => TableManagerMysql::TYPE_VARCHAR,
                     'field_params' => [
                         'length' => 255,
-                        'nullable' => true
-                    ]
+                        'nullable' => true,
+                    ],
                 ],
             ],
         );

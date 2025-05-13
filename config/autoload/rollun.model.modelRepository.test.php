@@ -12,11 +12,11 @@ return[
             ModelRepositoryAbstractFactory::KEY_CLASS => ModelRepository::class,
             ModelRepositoryAbstractFactory::KEY_DATASTORE => Memory::class,
             ModelRepositoryAbstractFactory::KEY_MODEL => SimpleModelExtendedAbstract::class,
-        ]
+        ],
     ],
     DataStoreAbstractFactory::KEY_DATASTORE => [
         Memory::class => [
-            DataStoreAbstractFactory::KEY_CLASS => Memory::class
-        ]
-    ]
+            DataStoreAbstractFactory::KEY_CLASS => Memory::class,
+        ],
+    ],
 ];

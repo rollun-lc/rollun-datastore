@@ -1,8 +1,6 @@
 <?php
 
-
 namespace rollun\repository\Factory;
-
 
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;

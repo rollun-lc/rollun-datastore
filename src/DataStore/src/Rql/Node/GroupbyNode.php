@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -14,9 +15,7 @@ class GroupbyNode extends AbstractNode
      * GroupbyNode constructor.
      * @param array $fields
      */
-    public function __construct(private array $fields)
-    {
-    }
+    public function __construct(private array $fields) {}
 
     /**
      * @return array

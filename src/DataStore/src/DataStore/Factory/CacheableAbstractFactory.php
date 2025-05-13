@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -31,11 +32,11 @@ use rollun\datastore\DataStore\Memory;
  */
 class CacheableAbstractFactory extends DataStoreAbstractFactory
 {
-    const KEY_DATASOURCE = 'dataSource';
+    public const KEY_DATASOURCE = 'dataSource';
 
-    const KEY_CACHEABLE = 'cacheable';
+    public const KEY_CACHEABLE = 'cacheable';
 
-    const KEY_IS_REFRESH = 'isRefresh';
+    public const KEY_IS_REFRESH = 'isRefresh';
 
     public static $KEY_DATASTORE_CLASS = Cacheable::class;
 

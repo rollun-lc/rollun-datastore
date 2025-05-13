@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -30,8 +31,8 @@ use rollun\datastore\DataStore\DataStoreException;
  */
 class CsvAbstractFactory extends DataStoreAbstractFactory
 {
-    const KEY_FILENAME = 'filename';
-    const KEY_DELIMITER = 'delimiter';
+    public const KEY_FILENAME = 'filename';
+    public const KEY_DELIMITER = 'delimiter';
 
     public static $KEY_DATASTORE_CLASS = CsvBase::class;
 

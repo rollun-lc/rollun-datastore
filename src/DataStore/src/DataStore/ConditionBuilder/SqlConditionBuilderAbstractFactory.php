@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -32,13 +33,13 @@ use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
  */
 class SqlConditionBuilderAbstractFactory implements AbstractFactoryInterface
 {
-    const KEY = self::class;
+    public const KEY = self::class;
 
-    const DEFAULT_CLASS = SqlConditionBuilder::class;
+    public const DEFAULT_CLASS = SqlConditionBuilder::class;
 
-    const KEY_TABLE_NAME = 'tableName';
+    public const KEY_TABLE_NAME = 'tableName';
 
-    const KEY_ADAPTER = 'adapter';
+    public const KEY_ADAPTER = 'adapter';
 
     /**
      * @param ContainerInterface $container

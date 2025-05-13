@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -19,7 +20,7 @@ class TypePluginManager extends AbstractPluginManager
         TypeString::class => TypeFactory::class,
         TypeBoolean::class => TypeFactory::class,
         TypeJson::class => TypeFactory::class,
-        TypeDateTimeImmutable::class => TypeFactory::class
+        TypeDateTimeImmutable::class => TypeFactory::class,
     ];
 
     protected $aliases = [
@@ -32,6 +33,6 @@ class TypePluginManager extends AbstractPluginManager
         'string' => TypeString::class,
         'char' => TypeChar::class,
         'json' => TypeJson::class,
-        'date-time-immutable' => TypeDateTimeImmutable::class
+        'date-time-immutable' => TypeDateTimeImmutable::class,
     ];
 }

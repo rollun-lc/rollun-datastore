@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -89,7 +90,7 @@ class DataStoreApiTest extends BaseMiddlewareTest
         $args[] = [
             new DataStoreApi($determinator),
             $resourceName,
-            $dataStore
+            $dataStore,
         ];
 
         $container = $this->getContainer();
@@ -572,11 +573,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
 
     protected function processSuccessRefresh()
     {
-        $this->dataStore = new class extends Memory implements RefreshableInterface
-        {
-            public function refresh()
-            {
-            }
+        $this->dataStore = new class extends Memory implements RefreshableInterface {
+            public function refresh() {}
         };
 
         $request = new ServerRequest();

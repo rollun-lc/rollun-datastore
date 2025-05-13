@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -113,7 +114,7 @@ class UpdateHandlerTest extends BaseHandlerTest
     {
         $item = [
             'id' => 1,
-            'name' => 'name'
+            'name' => 'name',
         ];
 
         $request = new ServerRequest();

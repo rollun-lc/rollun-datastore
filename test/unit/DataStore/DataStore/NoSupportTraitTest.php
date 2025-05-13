@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -26,16 +27,16 @@ class NoSupportTraitTest extends TestCase
     protected function createObject()
     {
         return new class implements DataStoresInterface {
-            use NoSupportCreateTrait,
-                NoSupportDeleteAllTrait,
-                NoSupportGetIdentifier,
-                NoSupportDeleteTrait,
-                NoSupportHasTrait,
-                NoSupportIteratorTrait,
-                NoSupportQueryTrait,
-                NoSupportReadTrait,
-                NoSupportUpdateTrait,
-                NoSupportCountTrait;
+            use NoSupportCreateTrait;
+            use NoSupportDeleteAllTrait;
+            use NoSupportGetIdentifier;
+            use NoSupportDeleteTrait;
+            use NoSupportHasTrait;
+            use NoSupportIteratorTrait;
+            use NoSupportQueryTrait;
+            use NoSupportReadTrait;
+            use NoSupportUpdateTrait;
+            use NoSupportCountTrait;
         };
     }
 

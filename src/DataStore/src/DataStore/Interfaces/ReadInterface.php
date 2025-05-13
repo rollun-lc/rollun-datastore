@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -22,12 +23,12 @@ interface ReadInterface extends \Countable, \IteratorAggregate
      *
      * @see getIdentifier()
      */
-    const DEF_ID = 'id';
+    public const DEF_ID = 'id';
 
     /**
      * Use it in limit section in query if need
      */
-    const LIMIT_INFINITY = 2147483647;
+    public const LIMIT_INFINITY = 2147483647;
 
     /**
      * Return primary key identifier

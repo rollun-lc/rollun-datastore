@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -104,7 +105,7 @@ class CacheableTest extends TestCase
     {
         $item = [
             'id' => 1,
-            'name' => 'foo'
+            'name' => 'foo',
         ];
         $dataSource = new Foo();
 

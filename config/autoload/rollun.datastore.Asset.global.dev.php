@@ -83,11 +83,11 @@ return [
                 'onPostUpdate' => [function (\Laminas\EventManager\Event $event): void {
                     file_put_contents('test_on_post_create.json', json_encode($event->getParam('result')));
                 }],
-            ]
+            ],
         ],
         'testDataStore1'       => [
             'class'           => \rollun\datastore\DataStore\Memory::class,
-            'requiredColumns' => ['id', 'name']
+            'requiredColumns' => ['id', 'name'],
         ],
     ],
     'tableManagerMysql' => [

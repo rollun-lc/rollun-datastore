@@ -15,7 +15,7 @@ class IeNodeTestTest extends TestCase
     public function dataProvider()
     {
         return [
-            ['fieldName']
+            ['fieldName'],
         ];
     }
 

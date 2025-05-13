@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -47,7 +48,7 @@ class MemoryTest extends TestCase
                 'id'    => 5,
                 'name'  => 'name 2',
                 'price' => 10,
-            ]
+            ],
         ];
     }
 
@@ -93,11 +94,11 @@ class MemoryTest extends TestCase
         $object = $this->createObject();
         $object->create([
             'id' => 1,
-            'name' => 'name1'
+            'name' => 'name1',
         ]);
         $object->create([
             'id' => 1,
-            'name' => 'name2'
+            'name' => 'name2',
         ]);
     }
 
@@ -106,7 +107,7 @@ class MemoryTest extends TestCase
         $item[1] = [
             'id' => 1,
             'name' => 'name1',
-            'surname' => 'surname1'
+            'surname' => 'surname1',
         ];
         $object = $this->createObject();
         $reflection = new ReflectionClass($object);
@@ -115,7 +116,7 @@ class MemoryTest extends TestCase
         $property->setValue($object, $item);
         $object->update([
             'id' => 1,
-            'name' => 'name2'
+            'name' => 'name2',
         ]);
         /*$this->assertAttributeEquals([1 => [
             'id' => 1,
@@ -137,7 +138,7 @@ class MemoryTest extends TestCase
         $this->expectExceptionMessage('Item must has primary key');
         $object = $this->createObject();
         $object->update([
-            'name' => 'name'
+            'name' => 'name',
         ]);
     }
 
@@ -148,7 +149,7 @@ class MemoryTest extends TestCase
         $object = $this->createObject();
         $object->update([
             'id' => 1,
-            'name' => 'name'
+            'name' => 'name',
         ]);
     }
 
@@ -376,7 +377,7 @@ class MemoryTest extends TestCase
     {
         $item[1] = [
             'id' => 1,
-            'name' => 'name1'
+            'name' => 'name1',
         ];
         $object = $this->createObject();
         $reflection = new ReflectionClass($object);
@@ -398,8 +399,8 @@ class MemoryTest extends TestCase
             [
                 1 => [
                     'id' => 1,
-                    'name' => 'name1'
-                ]
+                    'name' => 'name1',
+                ],
             ]
         );
         $object->delete(1);
@@ -420,12 +421,12 @@ class MemoryTest extends TestCase
             [
                 1 => [
                     'id' => 1,
-                    'name' => 'name1'
+                    'name' => 'name1',
                 ],
                 2 => [
                     'id' => 2,
-                    'name' => 'name2'
-                ]
+                    'name' => 'name2',
+                ],
             ]
         );
         $object->deleteAll();
@@ -446,12 +447,12 @@ class MemoryTest extends TestCase
             [
                 1 => [
                     'id' => 1,
-                    'name' => 'name1'
+                    'name' => 'name1',
                 ],
                 2 => [
                     'id' => 2,
-                    'name' => 'name2'
-                ]
+                    'name' => 'name2',
+                ],
             ]
         );
         $this->assertEquals(2, $object->count());

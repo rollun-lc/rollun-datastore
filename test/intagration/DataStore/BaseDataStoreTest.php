@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -32,7 +33,7 @@ abstract class BaseDataStoreTest extends TestCase
 
     protected function identifierToType($id)
     {
-        return (string)$id;
+        return (string) $id;
     }
 
     public function testMajorCrud()

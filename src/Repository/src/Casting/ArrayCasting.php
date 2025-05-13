@@ -1,8 +1,6 @@
 <?php
 
-
 namespace rollun\repository\Casting;
-
 
 use rollun\repository\Interfaces\ModelCastingInterface;
 
@@ -52,7 +50,8 @@ class ArrayCasting implements ModelCastingInterface
      *
      * @todo
      */
-    protected function isJson($string) {
+    protected function isJson($string)
+    {
         json_decode($string);
         return (json_last_error() == JSON_ERROR_NONE);
     }

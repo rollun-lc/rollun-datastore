@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -38,7 +39,7 @@ class MemoryAbstractFactory extends DataStoreAbstractFactory
 
     protected static $KEY_IN_CREATE = 0;
 
-    const KEY_REQUIRED_COLUMNS = 'requiredColumns';
+    public const KEY_REQUIRED_COLUMNS = 'requiredColumns';
 
     /**
      * @param  ContainerInterface $container

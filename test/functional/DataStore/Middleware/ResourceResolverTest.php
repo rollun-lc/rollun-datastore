@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -112,7 +113,7 @@ class ResourceResolverTest extends BaseMiddlewareTest
                 return $var;
             }
 
-            return (string)$var;
+            return (string) $var;
         };
 
         $resourceName = $toString($resourceName);

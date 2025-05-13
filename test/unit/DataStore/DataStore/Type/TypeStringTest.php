@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -44,8 +45,7 @@ class TypeStringTest extends TestCase
     public function testToTypeValueFailWithCallable()
     {
         $this->expectException(TypeException::class);
-        $this->createObject(function (): void {
-        })->toTypeValue();
+        $this->createObject(function (): void {})->toTypeValue();
     }
 
     public function testToTypeValueFailWithResource()

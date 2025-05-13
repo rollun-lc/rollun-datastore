@@ -22,9 +22,7 @@ class FieldInfoFactory
     public const GETTER = 'getter';
     public const IS_NULLABLE = 'isNullable';
 
-    public function __construct(private ContainerInterface $container)
-    {
-    }
+    public function __construct(private ContainerInterface $container) {}
 
     public function create(array $fieldInfo, string $fieldName): FieldInfo
     {

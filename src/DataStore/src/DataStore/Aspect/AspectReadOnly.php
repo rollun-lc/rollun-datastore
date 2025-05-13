@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -28,22 +29,22 @@ class AspectReadOnly extends AspectAbstract
     use NoSupportDeleteAllTrait;
     use NoSupportDeleteTrait;
     use NoSupportUpdateTrait;
-    
+
     public function multiCreate($records)
     {
         throw new DataStoreException("Method don't support.");
     }
-    
+
     public function multiUpdate($records)
     {
         throw new DataStoreException("Method don't support.");
     }
-    
+
     public function queriedUpdate($record, Query $query)
     {
         throw new DataStoreException("Method don't support.");
     }
-    
+
     public function rewrite($record)
     {
         throw new DataStoreException("Method don't support.");

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -61,7 +62,7 @@ class DataStoreApi implements MiddlewareInterface
                 ]);
             }
             $accept = $request->getHeader('Accept');
-            if(in_array('application/json', $accept)) {
+            if (in_array('application/json', $accept)) {
                 return new JsonResponse([
                     'error' => $e->getMessage(),
                 ], 500);

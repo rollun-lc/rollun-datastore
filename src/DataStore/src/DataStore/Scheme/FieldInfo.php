@@ -8,9 +8,7 @@ use rollun\datastore\DataStore\Formatter\FormatterInterface;
 
 class FieldInfo
 {
-    public function __construct(private TypeFactory $typeFactory, private FormatterInterface $formatter, private Getter $getter, private bool $nullable)
-    {
-    }
+    public function __construct(private TypeFactory $typeFactory, private FormatterInterface $formatter, private Getter $getter, private bool $nullable) {}
 
     public function getTypeFactory(): TypeFactory
     {

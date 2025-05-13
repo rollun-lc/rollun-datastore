@@ -21,7 +21,7 @@ class AbstractQueryAdapter implements QueryAdapter
             $query->setQuery($node);
         }
 
-        if ($sort =$this->processSort($query->getSort())) {
+        if ($sort = $this->processSort($query->getSort())) {
             $query->setSort($sort);
         }
 

@@ -68,7 +68,7 @@ class AspectSchemaTest extends TestCase
                         false
                     ),
                 ]),
-                new FloatValueObject($this->getRandomFloat())
+                new FloatValueObject($this->getRandomFloat()),
             ],
             'String value' => [
                 new Scheme([
@@ -79,7 +79,7 @@ class AspectSchemaTest extends TestCase
                         false
                     ),
                 ]),
-                new StringValueObject($this->getRandomString())
+                new StringValueObject($this->getRandomString()),
             ],
             'Bool value' => [
                 new Scheme([
@@ -90,7 +90,7 @@ class AspectSchemaTest extends TestCase
                         false
                     ),
                 ]),
-                new BoolValueObject($value = $this->getRandomBool())
+                new BoolValueObject($value = $this->getRandomBool()),
             ],
         ];
     }
@@ -248,6 +248,6 @@ class AspectSchemaTest extends TestCase
 
     private function getRandomBool(): bool
     {
-        return (bool)random_int(0, 1);
+        return (bool) random_int(0, 1);
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -18,11 +19,11 @@ use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
  */
 class UploaderAbstractFactory implements AbstractFactoryInterface
 {
-    const KEY = UploaderAbstractFactory::class;
+    public const KEY = UploaderAbstractFactory::class;
 
-    const KEY_SOURCE_DATA_ITERATOR_AGGREGATOR = "SourceDataIteratorAggregator";
+    public const KEY_SOURCE_DATA_ITERATOR_AGGREGATOR = "SourceDataIteratorAggregator";
 
-    const KEY_DESTINATION_DATA_STORE = "DestinationDataStore";
+    public const KEY_DESTINATION_DATA_STORE = "DestinationDataStore";
 
     /**
      * Can the factory create an instance for the service?

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -39,13 +40,13 @@ class HttpClientTest extends BaseDataStoreTest
             'field_type' => 'Varchar',
             'field_params' => [
                 'length' => 255,
-            ]
+            ],
         ],
         'surname' => [
             'field_type' => 'Varchar',
             'field_params' => [
                 'length' => 255,
-            ]
+            ],
         ],
     ];
 

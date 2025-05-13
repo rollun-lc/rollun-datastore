@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -42,9 +43,7 @@ class AspectAbstract implements DataStoresInterface, DataStoreInterface
      *
      * By default does nothing
      */
-    protected function preGetIterator()
-    {
-    }
+    protected function preGetIterator() {}
 
     /**
      *
@@ -162,9 +161,7 @@ class AspectAbstract implements DataStoresInterface, DataStoreInterface
      *
      * @param $id
      */
-    protected function preDelete($id)
-    {
-    }
+    protected function preDelete($id) {}
 
     /**
      * {@inheritdoc}
@@ -198,9 +195,7 @@ class AspectAbstract implements DataStoresInterface, DataStoreInterface
      *
      * By default does nothing
      */
-    protected function preDeleteAll()
-    {
-    }
+    protected function preDeleteAll() {}
 
     /**
      * {@inheritdoc}
@@ -233,9 +228,7 @@ class AspectAbstract implements DataStoresInterface, DataStoreInterface
      *
      * By default does nothing
      */
-    protected function preGetIdentifier()
-    {
-    }
+    protected function preGetIdentifier() {}
 
     /**
      * {@inheritdoc}
@@ -270,9 +263,7 @@ class AspectAbstract implements DataStoresInterface, DataStoreInterface
      *
      * @param $id
      */
-    protected function preRead($id)
-    {
-    }
+    protected function preRead($id) {}
 
     /**
      * {@inheritdoc}
@@ -308,9 +299,7 @@ class AspectAbstract implements DataStoresInterface, DataStoreInterface
      *
      * @param $id
      */
-    protected function preHas($id)
-    {
-    }
+    protected function preHas($id) {}
 
     /**
      * {@inheritdoc}
@@ -385,9 +374,7 @@ class AspectAbstract implements DataStoresInterface, DataStoreInterface
      *
      * By default does nothing
      */
-    protected function preCount()
-    {
-    }
+    protected function preCount() {}
 
     /**
      * {@inheritdoc}
@@ -485,9 +472,7 @@ class AspectAbstract implements DataStoresInterface, DataStoreInterface
      * @param mixed $record
      * @param Query $query
      */
-    protected function preQueriedUpdate(&$record, Query $query)
-    {
-    }
+    protected function preQueriedUpdate(&$record, Query $query) {}
 
     /**
      * @inheritDoc
@@ -549,9 +534,7 @@ class AspectAbstract implements DataStoresInterface, DataStoreInterface
     /**
      * @param Query $query
      */
-    protected function preQueriedDelete(Query $query)
-    {
-    }
+    protected function preQueriedDelete(Query $query) {}
 
     /**
      * @inheritDoc

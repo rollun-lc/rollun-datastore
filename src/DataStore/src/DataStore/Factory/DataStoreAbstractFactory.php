@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -16,9 +17,9 @@ use rollun\datastore\DataStore\DataStoreAbstract;
  */
 abstract class DataStoreAbstractFactory extends AbstractFactoryAbstract
 {
-    const KEY_DATASTORE = 'dataStore';
+    public const KEY_DATASTORE = 'dataStore';
 
-    const KEY_WRITE_LOGS = 'writeLogs';
+    public const KEY_WRITE_LOGS = 'writeLogs';
 
     protected static $KEY_DATASTORE_CLASS = DataStoreAbstract::class;
 

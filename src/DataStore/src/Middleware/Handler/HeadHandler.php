@@ -1,8 +1,6 @@
 <?php
 
-
 namespace rollun\datastore\Middleware\Handler;
-
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -12,7 +10,6 @@ use Laminas\Diactoros\Response;
 
 class HeadHandler extends AbstractHandler
 {
-
     protected function canHandle(ServerRequestInterface $request): bool
     {
         return $request->getMethod() === "HEAD";

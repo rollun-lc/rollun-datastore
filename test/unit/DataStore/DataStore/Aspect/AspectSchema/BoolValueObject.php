@@ -6,9 +6,7 @@ namespace rollun\test\unit\DataStore\DataStore\Aspect\AspectSchema;
 
 class BoolValueObject
 {
-    public function __construct(private bool $bool)
-    {
-    }
+    public function __construct(private bool $bool) {}
 
     public function getValue(): bool
     {

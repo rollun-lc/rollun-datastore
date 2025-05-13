@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -12,7 +13,4 @@ namespace rollun\datastore\Middleware;
  * Class RestException
  * @package rollun\rest
  */
-class RestException extends \RuntimeException
-{
-
-}
+class RestException extends \RuntimeException {}

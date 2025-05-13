@@ -1,8 +1,6 @@
 <?php
 
-
 namespace rollun\test\unit\Repository;
-
 
 use PHPUnit\Framework\TestCase;
 use rollun\repository\Interfaces\ModelCastingInterface;
@@ -54,7 +52,7 @@ class ModelAbstractTest extends TestCase
             'field' => 'test',
             'name' => 'hello',
         ];
-        $model = new class($data) extends ModelAbstract {};
+        $model = new class ($data) extends ModelAbstract {};
 
         $this->assertEquals($data['field'], $model->getAttributes()['field']);
         $this->assertEquals($data['name'], $model->getAttributes()['name']);
@@ -67,7 +65,7 @@ class ModelAbstractTest extends TestCase
             'name' => 'hello',
             'hidden' => true,
         ];
-        $model = new class($data) extends ModelAbstract {
+        $model = new class ($data) extends ModelAbstract {
             public function hidden(): array
             {
                 return ['hidden'];
@@ -85,7 +83,7 @@ class ModelAbstractTest extends TestCase
             'field' => 'test',
             'name' => 'hello',
         ];
-        $model = new class($data) extends ModelAbstract {
+        $model = new class ($data) extends ModelAbstract {
             public function setFieldAttribute($value)
             {
                 return 'mutated-' . $value;
@@ -102,7 +100,7 @@ class ModelAbstractTest extends TestCase
             'field' => 'test',
             'name' => 'hello',
         ];
-        $model = new class($data) extends ModelAbstract {
+        $model = new class ($data) extends ModelAbstract {
             public function getFieldAttribute($value)
             {
                 return 'mutated-' . $value;
@@ -119,7 +117,7 @@ class ModelAbstractTest extends TestCase
             'field' => 'test',
             'name' => 'hello',
         ];
-        $model = new class($data, true) extends ModelAbstract {
+        $model = new class ($data, true) extends ModelAbstract {
             public function setFieldAttribute($value)
             {
                 return 'mutated-' . $value;
@@ -139,7 +137,7 @@ class ModelAbstractTest extends TestCase
             'field' => 'test',
             'name' => 'hello',
         ];
-        $model = new class($data, true) extends ModelAbstract {};
+        $model = new class ($data, true) extends ModelAbstract {};
 
         $this->assertEmpty($model->getChanges());
 
@@ -170,7 +168,7 @@ class ModelAbstractTest extends TestCase
         $data = [
             'field' => '1.0',
         ];
-        $model = new class($data, true) extends ModelAbstract {};
+        $model = new class ($data, true) extends ModelAbstract {};
 
         $model->field = '1.00';
 
@@ -182,7 +180,7 @@ class ModelAbstractTest extends TestCase
         $data = [
             'field' => 'test',
         ];
-        $model = new class($data) extends ModelAbstract {};
+        $model = new class ($data) extends ModelAbstract {};
 
         $this->assertEquals($data, $model->getChanges());
 
@@ -214,7 +212,7 @@ class ModelAbstractTest extends TestCase
             'field15' => '{"key": "value"}',
         ];
 
-        $custom = new class() implements ModelCastingInterface{
+        $custom = new class implements ModelCastingInterface {
             public function get($value)
             {
                 return explode('/', $value);
@@ -244,7 +242,7 @@ class ModelAbstractTest extends TestCase
             'field15' => ModelCastingInterface::CAST_OBJECT,
         ];
 
-        $model = new class(array_merge(['casting' => $casting], $data)) extends ModelAbstract {};
+        $model = new class (array_merge(['casting' => $casting], $data)) extends ModelAbstract {};
 
         $this->assertIsInt($model->field1);
         $this->assertIsFloat($model->field2);

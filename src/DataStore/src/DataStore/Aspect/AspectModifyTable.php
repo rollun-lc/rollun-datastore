@@ -17,9 +17,7 @@ use Xiag\Rql\Parser\Query;
  */
 abstract class AspectModifyTable implements DataStoreInterface, DataStoresInterface
 {
-    public function __construct(private DataStoresInterface $dataStore)
-    {
-    }
+    public function __construct(private DataStoresInterface $dataStore) {}
 
     /**
      * Process the record before it enters datastore

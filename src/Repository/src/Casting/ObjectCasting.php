@@ -1,8 +1,6 @@
 <?php
 
-
 namespace rollun\repository\Casting;
-
 
 use rollun\repository\Interfaces\ModelCastingInterface;
 
@@ -43,7 +41,7 @@ class ObjectCasting implements ModelCastingInterface
             $value = (object) $value;
         }
 
-        return json_encode($value, JSON_FORCE_OBJECT|JSON_NUMERIC_CHECK);
+        return json_encode($value, JSON_FORCE_OBJECT | JSON_NUMERIC_CHECK);
     }
 
     /**
@@ -52,7 +50,8 @@ class ObjectCasting implements ModelCastingInterface
      *
      * @todo
      */
-    protected function isJson($string) {
+    protected function isJson($string)
+    {
         json_decode($string);
         return (json_last_error() == JSON_ERROR_NONE);
     }

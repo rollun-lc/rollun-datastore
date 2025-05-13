@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license   LICENSE.md New BSD License
@@ -37,12 +38,12 @@ class AspectAbstractFactory extends DataStoreAbstractFactory
     /**
      * Listener key
      */
-    const KEY_LISTENERS = 'listeners';
+    public const KEY_LISTENERS = 'listeners';
 
     /**
      * All declared events of aspects
      */
-    const EVENTS
+    public const EVENTS
         = [
             'onPreGetIterator',
             'onPostGetIterator',

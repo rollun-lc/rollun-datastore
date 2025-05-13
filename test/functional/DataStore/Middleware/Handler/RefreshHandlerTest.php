@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -97,7 +98,4 @@ class RefreshHandlerTest extends BaseHandlerTest
     }
 }
 
-interface TestInterface extends DataStoresInterface, RefreshableInterface
-{
-
-}
+interface TestInterface extends DataStoresInterface, RefreshableInterface {}

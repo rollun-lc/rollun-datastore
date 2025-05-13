@@ -1,14 +1,11 @@
 <?php
 
-
 namespace rollun\test\functional\DataStore\DataStore;
-
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\DataStore\HttpClient;
-
 use rollun\datastore\TableGateway\TableManagerMysql;
 use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
@@ -41,9 +38,9 @@ class QueryDateTimeTest extends TestCase
         'updated_at' => [
             'field_type' => 'Varchar',
             'field_params' => [
-                'length' => 255
-            ]
-        ]
+                'length' => 255,
+            ],
+        ],
     ];
 
     protected function setUp(): void
@@ -66,7 +63,7 @@ class QueryDateTimeTest extends TestCase
             $this->tableGateway->insert([
                 'id' => $i,
                 'created_at' => "2020-01-01 00:0{$i}:12",
-                'updated_at' => "2020-01-01T21:00:00+00:00"
+                'updated_at' => "2020-01-01T21:00:00+00:00",
             ]);
         }
     }
@@ -88,7 +85,7 @@ class QueryDateTimeTest extends TestCase
         $result = $dataStore->query($query);
 
         $this->assertCount(2, $result);
-        $this->assertEquals([4, 5],array_column($result, 'id') );
+        $this->assertEquals([4, 5], array_column($result, 'id'));
     }
 
     public function testDbTableLessThan()
@@ -131,7 +128,7 @@ class QueryDateTimeTest extends TestCase
         $result = $dataStore->query($query);
 
         $this->assertCount(2, $result);
-        $this->assertEquals([4, 5],array_column($result, 'id') );
+        $this->assertEquals([4, 5], array_column($result, 'id'));
     }
 
     public function testHttpClientLessThan()
@@ -160,7 +157,7 @@ class QueryDateTimeTest extends TestCase
         $result = $dataStore->query($query);
 
         $this->assertCount(2, $result);
-        $this->assertEquals([4, 5],array_column($result, 'id') );
+        $this->assertEquals([4, 5], array_column($result, 'id'));
     }
 
     public function testHttpClientIsoFormatGreatThan()
@@ -175,7 +172,7 @@ class QueryDateTimeTest extends TestCase
         $result = $dataStore->query($query);
 
         $this->assertCount(2, $result);
-        $this->assertEquals([4, 5],array_column($result, 'id') );
+        $this->assertEquals([4, 5], array_column($result, 'id'));
     }
 
     public function testDbTableIsoFormatEqual()
@@ -214,7 +211,7 @@ class QueryDateTimeTest extends TestCase
         $date = '2020-01-01T00:04.12';
 
         $query->setQuery(new InNode('created_at', [
-            $date
+            $date,
         ]));
         $result = $dataStore->query($query);
 
@@ -230,7 +227,7 @@ class QueryDateTimeTest extends TestCase
         $date = '2020-01-01T00:04.12';
 
         $query->setQuery(new InNode('created_at', [
-            $date
+            $date,
         ]));
         $result = $dataStore->query($query);
 

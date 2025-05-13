@@ -2,7 +2,8 @@
 
 namespace rollun\test;
 
-function runScriptInBackground(string $scriptPath, string $args = ''): int {
+function runScriptInBackground(string $scriptPath, string $args = ''): int
+{
     $pid = shell_exec("php \"$scriptPath\"  $args > /dev/null 2>&1 & echo $!");
     return (int) trim($pid);
 }

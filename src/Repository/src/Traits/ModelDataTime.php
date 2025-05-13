@@ -1,8 +1,6 @@
 <?php
 
-
 namespace rollun\repository\Traits;
-
 
 use DateTimeInterface;
 

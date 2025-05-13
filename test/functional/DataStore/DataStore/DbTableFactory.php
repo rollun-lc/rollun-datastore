@@ -13,8 +13,7 @@ final class DbTableFactory
         private AdapterInterface $adapter,
         private string $tableName,
         private array $tableConfig
-    ) {
-    }
+    ) {}
 
     public function create(): DbTable
     {

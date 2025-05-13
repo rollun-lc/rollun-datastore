@@ -1,8 +1,6 @@
 <?php
 
-
 namespace rollun\repository\Casting;
-
 
 use rollun\repository\Interfaces\ModelCastingInterface;
 

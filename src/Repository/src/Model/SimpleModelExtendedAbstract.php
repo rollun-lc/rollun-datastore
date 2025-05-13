@@ -2,7 +2,6 @@
 
 namespace rollun\repository\Model;
 
-
 use rollun\datastore\DataStore\Memory;
 use rollun\dic\InsideConstruct;
 use rollun\repository\ModelAbstract;

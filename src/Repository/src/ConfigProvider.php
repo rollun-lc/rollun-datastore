@@ -1,8 +1,6 @@
 <?php
 
-
 namespace rollun\repository;
-
 
 use rollun\repository\Factory\ModelRepositoryAbstractFactory;
 
@@ -19,7 +17,7 @@ class ConfigProvider
             'dependencies' => [
                 'abstract_factories' => [
                     ModelRepositoryAbstractFactory::class,
-                ]
+                ],
             ],
         ];
     }

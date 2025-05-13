@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -103,7 +104,7 @@ class SqlQueryBuilderTest extends TestCase
         $select = "SELECT `table`.* FROM `table` ";
         $where = "WHERE ((`a` IS NULL OR `a` IS FALSE OR `a` = '') AND (`a` IS TRUE) AND (`a` IS FALSE) AND (`a` IS NULL))";
 
-        $this->assertEquals($select.$where, $object->buildSql($rqlQuery));
+        $this->assertEquals($select . $where, $object->buildSql($rqlQuery));
     }
 
     public function testBuildSqlWithScalarNodes()
@@ -124,7 +125,7 @@ class SqlQueryBuilderTest extends TestCase
         $select = "SELECT `table`.* FROM `table` ";
         $where = "WHERE ((`a`='b') AND (`a`>='b') AND (`a`>'b') AND (`a`<='b') AND (`a`<'b') AND (`a`<>'b'))";
 
-        $this->assertEquals($select.$where, $object->buildSql($rqlQuery));
+        $this->assertEquals($select . $where, $object->buildSql($rqlQuery));
     }
 
     public function testBuildSqlWithLikeNodes()
@@ -143,9 +144,9 @@ class SqlQueryBuilderTest extends TestCase
 
         $select = "SELECT `table`.* FROM `table` ";
         $where = "WHERE ((`a` LIKE BINARY 'b') AND (`a` LIKE BINARY 'b') "
-            ."AND (`a` LIKE 'b') AND (`a` LIKE 'b') AND (`a` LIKE '%b%'))";
+            . "AND (`a` LIKE 'b') AND (`a` LIKE 'b') AND (`a` LIKE '%b%'))";
 
-        $this->assertEquals($select.$where, $object->buildSql($rqlQuery));
+        $this->assertEquals($select . $where, $object->buildSql($rqlQuery));
     }
 
     public function testBuildSqlWithNotNode()
@@ -163,7 +164,7 @@ class SqlQueryBuilderTest extends TestCase
         // TODO: it is misbehavior
         $where = "WHERE ( ((`a` IN ('b','c')) error (`a` NOT IN ('b','c'))) ) IS NOT TRUE";
 
-        $this->assertEquals($select.$where, $object->buildSql($rqlQuery));
+        $this->assertEquals($select . $where, $object->buildSql($rqlQuery));
     }
 
     public function testBuildSqlWithLimitNode()
@@ -178,7 +179,7 @@ class SqlQueryBuilderTest extends TestCase
         $where = "WHERE 1 = 1 ";
         $limit = "LIMIT 5";
 
-        $this->assertEquals($select.$where.$limit, $object->buildSql($rqlQuery));
+        $this->assertEquals($select . $where . $limit, $object->buildSql($rqlQuery));
     }
 
     public function testBuildSqlWithSortNode()
@@ -193,14 +194,14 @@ class SqlQueryBuilderTest extends TestCase
         $where = "WHERE 1 = 1 ";
         $sort = "ORDER BY `a` ASC";
 
-        $this->assertEquals($select.$where.$sort, $object->buildSql($rqlQuery));
+        $this->assertEquals($select . $where . $sort, $object->buildSql($rqlQuery));
 
         $rqlQuery->setSort(new SortNode([
             'a' => SortNode::SORT_ASC,
             'b' => SortNode::SORT_DESC,
         ]));
         $sort = "ORDER BY `a` ASC, `b` DESC";
-        $this->assertEquals($select.$where.$sort, $object->buildSql($rqlQuery));
+        $this->assertEquals($select . $where . $sort, $object->buildSql($rqlQuery));
     }
 
     public function testBuildSqlWithGroupByNode()
@@ -215,7 +216,7 @@ class SqlQueryBuilderTest extends TestCase
         $where = "WHERE 1 = 1 ";
         $groupBy = "GROUP BY `a`, `b`";
 
-        $this->assertEquals($select.$where.$groupBy, $object->buildSql($rqlQuery));
+        $this->assertEquals($select . $where . $groupBy, $object->buildSql($rqlQuery));
     }
 
     public function testBuildSqlWithSelectNode()
@@ -257,7 +258,7 @@ class SqlQueryBuilderTest extends TestCase
         $sort = "ORDER BY `a` ASC ";
         $limit = "LIMIT 5";
 
-        $this->assertEquals($select.$where.$groupBy.$sort.$limit, $object->buildSql($rqlQuery));
+        $this->assertEquals($select . $where . $groupBy . $sort . $limit, $object->buildSql($rqlQuery));
     }
 
     protected function getPlatformMockObject()

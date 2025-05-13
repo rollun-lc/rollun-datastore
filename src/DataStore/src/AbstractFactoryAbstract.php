@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -32,7 +33,7 @@ use Laminas\ServiceManager\ServiceLocatorInterface;
  */
 abstract class AbstractFactoryAbstract implements AbstractFactoryInterface
 {
-    const KEY_CLASS = 'class';
+    public const KEY_CLASS = 'class';
 
     /**
      * Can the factory create an instance for the service?

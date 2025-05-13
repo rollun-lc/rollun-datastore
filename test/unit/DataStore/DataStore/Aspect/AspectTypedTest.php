@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -96,9 +97,7 @@ class AspectTypedTest extends TestCase
                 'formatter' => FormatterInterface::class,
             ],
         ];
-        $dtoClassName = (new class
-        {
-        })::class;
+        $dtoClassName = (new class {})::class;
 
         /** @var PHPUnit_Framework_MockObject_MockObject|DataStoresInterface $dataStore */
         $dataStore = $this->getMockBuilder(DataStoresInterface::class)
@@ -231,6 +230,6 @@ class StringFormatter implements FormatterInterface
 {
     public function format($value)
     {
-        return (string)$value;
+        return (string) $value;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -20,7 +21,7 @@ class BaseDtoTest extends TestCase
         $name = new TypeString('name');
         $object = new TestDto([
             'id' => $id,
-            'name' => $name
+            'name' => $name,
         ]);
 
         //$this->assertAttributeEquals($id, 'id', $object);
@@ -42,7 +43,7 @@ class BaseDtoTest extends TestCase
         $name = new TypeString('name');
         $object = new TestDto([
             'foo' => $id,
-            'boo' => $name
+            'boo' => $name,
         ]);
 
         //$this->assertAttributeEquals($id, 'id', $object);
@@ -59,7 +60,8 @@ class BaseDtoTest extends TestCase
     }
 }
 
-class TestDto extends BaseDto {
+class TestDto extends BaseDto
+{
     /** @var TypeInt  */
     protected $id;
 

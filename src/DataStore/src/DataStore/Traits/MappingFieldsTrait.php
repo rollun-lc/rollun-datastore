@@ -1,15 +1,13 @@
 <?php
 
-
 namespace rollun\datastore\DataStore\Traits;
-
 
 /**
  * Trait MappingFieldsTrait
  * Трейт для датасторов, который умеет мапить данные с массивов и сохранять в базу данных с нужными полями
  *
  * @todo Move to repository or utils
- * 
+ *
  * @package rollun\datastore\DataStore\Traits
  */
 trait MappingFieldsTrait
@@ -22,7 +20,8 @@ trait MappingFieldsTrait
      *
      * @return mixed|null
      */
-    public function getFieldPath($field) {
+    public function getFieldPath($field)
+    {
         if (array_key_exists($field, $this->getFields())) {
             return $this->getFields()[$field];
         }
@@ -40,7 +39,8 @@ trait MappingFieldsTrait
      *
      * @return |null
      */
-    public function getValueByFieldName($itemData, $field) {
+    public function getValueByFieldName($itemData, $field)
+    {
         if ($path = $this->getFieldPath($field)) {
             $result = $this->getValueByFieldPath($itemData, $path);
             $formatMethod = 'format' . str_replace('_', '', ucwords($field, '_')) . 'Field';
@@ -66,7 +66,8 @@ trait MappingFieldsTrait
      *@see AbstractMappingTableDataStore::getFieldPath
      *
      */
-    protected function getValueByFieldPath($itemData, $path) {
+    protected function getValueByFieldPath($itemData, $path)
+    {
         $paths = explode('.', $path);
         $current = $itemData;
         foreach ($paths as $item) {
@@ -181,7 +182,7 @@ trait MappingFieldsTrait
 
     /**
      * Преобразовывает данные в нужный тип
-     * 
+     *
      * @param $type
      * @param $value
      * @return mixed

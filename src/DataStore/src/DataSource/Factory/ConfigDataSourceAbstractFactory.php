@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -18,9 +19,9 @@ use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
  */
 class ConfigDataSourceAbstractFactory implements AbstractFactoryInterface
 {
-    const KEY_DATASOURCE = 'dataSource';
+    public const KEY_DATASOURCE = 'dataSource';
 
-    const KEY_CONFIG = 'config';
+    public const KEY_CONFIG = 'config';
 
     /**
      * @param ContainerInterface $container

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -46,7 +47,7 @@ class HttpClientTest extends TestCase
      */
     protected function createObjectForMultiCreate(Client $clientMock, $url = '', $options = [])
     {
-        return new class($clientMock, $url, $options, $this->container->get(LifeCycleToken::class)) extends HttpClient {
+        return new class ($clientMock, $url, $options, $this->container->get(LifeCycleToken::class)) extends HttpClient {
             /**
              * @inheritDoc
              */
@@ -498,7 +499,7 @@ class HttpClientTest extends TestCase
         $reasonPhrase = 'Internal Server Error';
 
         $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessage("Can't create item {$method} {$url} ${status} {$reasonPhrase}");
+        $this->expectExceptionMessage("Can't create item {$method} {$url} {$status} {$reasonPhrase}");
 
         $clientMock = $this->createClientMock($method, $url, [], 1);
         $clientMock->expects($this->once())
@@ -539,7 +540,7 @@ class HttpClientTest extends TestCase
 
         $this->expectException(DataStoreException::class);
         $this->expectExceptionMessage(
-            "Can't create item {$method} {$url} ${status} {$reasonPhrase} \"{$body}\" New location is '{$location}'"
+            "Can't create item {$method} {$url} {$status} {$reasonPhrase} \"{$body}\" New location is '{$location}'"
         );
 
         $clientMock = $this->createClientMock($method, $url, [], 1);

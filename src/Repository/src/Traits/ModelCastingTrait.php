@@ -1,8 +1,6 @@
 <?php
 
-
 namespace rollun\repository\Traits;
-
 
 use rollun\repository\Interfaces\ModelCastingInterface;
 
@@ -16,7 +14,7 @@ trait ModelCastingTrait
     /**
      * @var array
      */
-    static protected $castObjects = [];
+    protected static $castObjects = [];
 
     /**
      * @param string $name

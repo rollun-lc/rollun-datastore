@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -47,9 +48,9 @@ return [
                     'buffer_results' => true,
                 ],
                 'driver_options' => [
-                    MYSQLI_OPT_READ_TIMEOUT => 1
+                    MYSQLI_OPT_READ_TIMEOUT => 1,
                 ],
             ],
-        ]
+        ],
     ],
 ];

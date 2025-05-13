@@ -17,11 +17,11 @@ use Laminas\Diactoros\Stream;
  */
 class DownloadCsvHandler extends AbstractHandler
 {
-    const HEADER = 'download';
-    const DELIMITER = ',';
-    const ENCLOSURE = '"';
-    const ESCAPE_CHAR = '\\';
-    const LIMIT = 8000;
+    public const HEADER = 'download';
+    public const DELIMITER = ',';
+    public const ENCLOSURE = '"';
+    public const ESCAPE_CHAR = '\\';
+    public const LIMIT = 8000;
 
     /**
      * @inheritDoc

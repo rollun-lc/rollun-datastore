@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -36,11 +37,11 @@ use Laminas\Http\Client;
  */
 class HttpClientAbstractFactory extends DataStoreAbstractFactory
 {
-    const KEY_URL = 'url';
+    public const KEY_URL = 'url';
 
-    const KEY_OPTIONS = 'options';
+    public const KEY_OPTIONS = 'options';
 
-    const KEY_HTTP_CLIENT = "httpClient";
+    public const KEY_HTTP_CLIENT = "httpClient";
 
     public static $KEY_DATASTORE_CLASS = HttpClient::class;
 

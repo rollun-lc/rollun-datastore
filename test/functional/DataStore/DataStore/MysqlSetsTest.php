@@ -29,79 +29,79 @@ class MysqlSetsTest extends FunctionalTestCase
             'Equals in wrong order' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'liquid,screw,tire'], // record
                 new EqNode(self::TAGS_FIELD, 'liquid,screw,tire'), // query
-                null // expected result
+                null, // expected result
             ],
             'Equals in correct order' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'liquid,screw,tire'],
                 new EqNode(self::TAGS_FIELD, 'tire,liquid,screw'),
-                [self::ID_FIELD => 1]
+                [self::ID_FIELD => 1],
             ],
             'Equals in different order' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'tire,liquid,screw'],
                 new EqNode(self::TAGS_FIELD, 'liquid,screw,tire'),
-                null
+                null,
             ],
             'Equals one of value' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'tire,liquid'],
                 new EqNode(self::TAGS_FIELD, 'tire'),
-                null
+                null,
             ],
             'Not empty column equals to empty string' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'liquid,tire'],
                 new EqNode(self::TAGS_FIELD, ''),
-                null
+                null,
             ],
             'Empty column equals to empty string' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => ''],
                 new EqNode(self::TAGS_FIELD, ''),
-                [self::ID_FIELD => 1]
+                [self::ID_FIELD => 1],
             ],
 
             'Not empty column equals to null' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'liquid,tire'],
                 new EqnNode(self::TAGS_FIELD),
-                null
+                null,
             ],
             'Empty column equals to null' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => ''],
                 new EqnNode(self::TAGS_FIELD),
-                null
+                null,
             ],
 
             'Contains exactly same' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => $tags = 'tire,liquid,screw'],
                 new ContainsNode(self::TAGS_FIELD, $tags),
-                [self::ID_FIELD => 1]
+                [self::ID_FIELD => 1],
             ],
             'Contains in different order' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'tire,liquid,screw'],
                 new ContainsNode(self::TAGS_FIELD, 'liquid,screw,tire'),
-                null
+                null,
             ],
             'Contains one of value' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'tire,liquid,screw'],
                 new ContainsNode(self::TAGS_FIELD, 'tire'),
-                [self::ID_FIELD => 1]
+                [self::ID_FIELD => 1],
             ],
             'Contains first value with delimiter' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'tire,liquid,screw'],
                 new ContainsNode(self::TAGS_FIELD, 'tire,'),
-                [self::ID_FIELD => 1]
+                [self::ID_FIELD => 1],
             ],
             'Contains last value with delimiter' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'tire,liquid,screw'],
                 new ContainsNode(self::TAGS_FIELD, 'screw,'),
-                null
+                null,
             ],
             'Not empty column contains empty string' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'liquid,tire'],
                 new ContainsNode(self::TAGS_FIELD, ''),
-                [self::ID_FIELD => 1]
+                [self::ID_FIELD => 1],
             ],
             'Empty column contains empty string' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => ''],
                 new ContainsNode(self::TAGS_FIELD, ''),
-                [self::ID_FIELD => 1]
+                [self::ID_FIELD => 1],
             ],
         ];
     }
@@ -127,23 +127,23 @@ class MysqlSetsTest extends FunctionalTestCase
         return [
             'All tags' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'tire,liquid,screw'], // record
-                ['tire','liquid','screw'] // expected tags
+                ['tire','liquid','screw'], // expected tags
             ],
             'All tags in another order' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'liquid,screw,tire'],
-                ['tire','liquid','screw']
+                ['tire','liquid','screw'],
             ],
             'Duplications is ignored' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'tire,tire,liquid,liquid,screw,screw'],
-                ['tire','liquid','screw']
+                ['tire','liquid','screw'],
             ],
             'Partial' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'screw,tire'],
-                ['screw','tire']
+                ['screw','tire'],
             ],
             'Empty' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => ''],
-                []
+                [],
             ],
         ];
     }
@@ -163,11 +163,11 @@ class MysqlSetsTest extends FunctionalTestCase
     {
         return [
             'Unsupported value' => [
-                [self::ID_FIELD => 1, self::TAGS_FIELD => 'tire,liquid,screw,unsupported']
+                [self::ID_FIELD => 1, self::TAGS_FIELD => 'tire,liquid,screw,unsupported'],
             ],
             'Trailing comma' => [
                 [self::ID_FIELD => 1, self::TAGS_FIELD => 'tire,liquid,screw,'],
-            ]
+            ],
         ];
     }
 

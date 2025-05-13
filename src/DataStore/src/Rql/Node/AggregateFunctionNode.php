@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -23,9 +24,7 @@ class AggregateFunctionNode extends AbstractQueryNode implements \Stringable
      * @param $function
      * @param $field
      */
-    public function __construct(private $function, private $field)
-    {
-    }
+    public function __construct(private $function, private $field) {}
 
     /**
      * @return mixed

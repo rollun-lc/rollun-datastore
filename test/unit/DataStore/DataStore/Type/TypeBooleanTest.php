@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -29,10 +30,8 @@ class TypeBooleanTest extends TestCase
         $this->assertSame(true, $this->createObject(['a', 'b'])->toTypeValue());
         $this->assertSame(true, $this->createObject(true)->toTypeValue());
         $this->assertSame(true, $this->createObject(0.999)->toTypeValue());
-        $this->assertSame(true, $this->createObject(new class {
-        })->toTypeValue());
-        $this->assertSame(true, $this->createObject(function (): void {
-        })->toTypeValue());
+        $this->assertSame(true, $this->createObject(new class {})->toTypeValue());
+        $this->assertSame(true, $this->createObject(function (): void {})->toTypeValue());
         $this->assertSame(false, $this->createObject(false)->toTypeValue());
         $this->assertSame(false, $this->createObject([])->toTypeValue());
         $this->assertSame(false, $this->createObject(null)->toTypeValue());

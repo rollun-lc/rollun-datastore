@@ -1,8 +1,6 @@
 <?php
 
-
 namespace rollun\repository\Model;
-
 
 use rollun\repository\Interfaces\ModelInterface;
 

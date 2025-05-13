@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -14,7 +15,7 @@ use Xiag\Rql\Parser\DataType\Glob;
  */
 class RqlConditionBuilder extends ConditionBuilderAbstract
 {
-    const TEXT_NULL = 'null()';
+    public const TEXT_NULL = 'null()';
 
     protected $literals = [
         'LogicOperator' => [

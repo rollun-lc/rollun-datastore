@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -26,12 +27,12 @@ class UpdateHandler extends AbstractHandler
         $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $row = $request->getParsedBody();
 
-        if(!$primaryKeyValue && isset($row[$this->dataStore->getIdentifier()])) {
+        if (!$primaryKeyValue && isset($row[$this->dataStore->getIdentifier()])) {
             $primaryKeyValue = $row[$this->dataStore->getIdentifier()];
         }
-        
+
         $canHandle = $canHandle && isset($primaryKeyValue);
-        
+
         $canHandle = $canHandle && isset($row) && is_array($row)
             && array_reduce(
                 array_keys($row),
@@ -50,13 +51,13 @@ class UpdateHandler extends AbstractHandler
         $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $primaryKeyIdentifier = $this->dataStore->getIdentifier();
         $item = $request->getParsedBody();
-        
-        if(!$primaryKeyValue && isset($item[$this->dataStore->getIdentifier()])) {
+
+        if (!$primaryKeyValue && isset($item[$this->dataStore->getIdentifier()])) {
             $primaryKeyValue = $item[$this->dataStore->getIdentifier()];
         } else {
-            $item = array_merge([$primaryKeyIdentifier => $primaryKeyValue], $item);        
+            $item = array_merge([$primaryKeyIdentifier => $primaryKeyValue], $item);
         }
-        
+
         $overwriteMode = $request->getAttribute('overwriteMode');
         $isItemExist = !empty($this->dataStore->read($primaryKeyValue));
 

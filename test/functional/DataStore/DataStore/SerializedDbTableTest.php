@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -46,13 +47,13 @@ class SerializedDbTableTest extends TestCase
             'field_type' => 'Varchar',
             'field_params' => [
                 'length' => 255,
-            ]
+            ],
         ],
         'surname' => [
             'field_type' => 'Varchar',
             'field_params' => [
                 'length' => 255,
-            ]
+            ],
         ],
     ];
 

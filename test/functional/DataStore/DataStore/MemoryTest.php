@@ -1,8 +1,6 @@
 <?php
 
-
 namespace rollun\test\functional\DataStore\DataStore;
-
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\Memory;

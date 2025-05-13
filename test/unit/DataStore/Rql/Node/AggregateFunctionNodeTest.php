@@ -15,7 +15,7 @@ class AggregateFunctionNodeTest extends TestCase
     public function dataProvider()
     {
         return [
-            ['functionName', 'fieldName']
+            ['functionName', 'fieldName'],
         ];
     }
 

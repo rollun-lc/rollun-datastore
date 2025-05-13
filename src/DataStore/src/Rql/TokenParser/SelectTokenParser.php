@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -16,9 +17,7 @@ use rollun\datastore\Rql\Node\AggregateSelectNode;
 
 class SelectTokenParser extends AbstractTokenParser
 {
-    public function __construct(private array $allowedFunctions)
-    {
-    }
+    public function __construct(private array $allowedFunctions) {}
 
     /**
      * @param TokenStream $tokenStream

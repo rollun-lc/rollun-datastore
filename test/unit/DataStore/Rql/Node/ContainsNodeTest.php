@@ -15,7 +15,7 @@ class ContainsNodeTest extends TestCase
     public function dataProvider()
     {
         return [
-            ['fieldName', 'fieldValue']
+            ['fieldName', 'fieldValue'],
         ];
     }
 

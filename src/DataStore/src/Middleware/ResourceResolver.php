@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -33,11 +34,11 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 class ResourceResolver implements MiddlewareInterface
 {
-    const BASE_PATH = '/api/datastore';
+    public const BASE_PATH = '/api/datastore';
 
-    const RESOURCE_NAME = 'resourceName';
+    public const RESOURCE_NAME = 'resourceName';
 
-    const PRIMARY_KEY_VALUE = 'primaryKeyValue';
+    public const PRIMARY_KEY_VALUE = 'primaryKeyValue';
 
     /**
      * @var string

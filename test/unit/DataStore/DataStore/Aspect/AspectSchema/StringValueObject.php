@@ -6,9 +6,7 @@ namespace rollun\test\unit\DataStore\DataStore\Aspect\AspectSchema;
 
 class StringValueObject
 {
-    public function __construct(private string $value)
-    {
-    }
+    public function __construct(private string $value) {}
 
     public function getValue(): string
     {

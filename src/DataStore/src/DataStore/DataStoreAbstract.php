@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -195,7 +196,7 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
         $sortFields = $query->getSort()->getFields();
 
         foreach ($sortFields as $ordKey => $ordVal) {
-            if ((int)$ordVal != SortNode::SORT_ASC && (int)$ordVal != SortNode::SORT_DESC) {
+            if ((int) $ordVal != SortNode::SORT_ASC && (int) $ordVal != SortNode::SORT_DESC) {
                 throw new DataStoreException('Invalid condition: ' . $ordVal);
             }
 

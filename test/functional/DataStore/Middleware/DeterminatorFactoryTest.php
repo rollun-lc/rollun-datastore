@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -40,8 +41,7 @@ class DeterminatorFactoryTest extends TestCase
     {
         $this->expectException(TypeError::class);
         $requestedName = DataStorePluginManager::class;
-        $notDataStorePluginManagerMock = new class {
-        };
+        $notDataStorePluginManagerMock = new class {};
 
         /** @var ContainerInterface|PHPUnit_Framework_MockObject_MockObject $containerMock */
         $containerMock = $this->getMockBuilder(ContainerInterface::class)->getMock();

@@ -14,9 +14,7 @@ use Xiag\Rql\Parser\Query;
  */
 abstract class AspectEntityMapper implements DataStoreInterface, DataStoresInterface
 {
-    public function __construct(private DataStoresInterface $dataStore)
-    {
-    }
+    public function __construct(private DataStoresInterface $dataStore) {}
 
     /**
      * Map original value to record
