@@ -478,15 +478,15 @@ class TableManagerMysql
         $fieldType = $fieldData[self::FIELD_TYPE];
 
         switch (true) {
-            case key_exists($fieldType, $this->fieldClasses[self::COLUMN_SIMPLE]):
+            case array_key_exists($fieldType, $this->fieldClasses[self::COLUMN_SIMPLE]):
                 $defaultFieldParameters = $this->parameters[self::COLUMN_SIMPLE];
                 $columnClass = $this->fieldClasses[self::COLUMN_SIMPLE][$fieldType];
                 break;
-            case key_exists($fieldType, $this->fieldClasses[self::COLUMN_LENGTH]):
+            case array_key_exists($fieldType, $this->fieldClasses[self::COLUMN_LENGTH]):
                 $defaultFieldParameters = $this->parameters[self::COLUMN_LENGTH];
                 $columnClass = $this->fieldClasses[self::COLUMN_LENGTH][$fieldType];
                 break;
-            case key_exists($fieldType, $this->fieldClasses[self::COLUMN_PRECISION]):
+            case array_key_exists($fieldType, $this->fieldClasses[self::COLUMN_PRECISION]):
                 $defaultFieldParameters = $this->parameters[self::COLUMN_PRECISION];
                 $columnClass = $this->fieldClasses[self::COLUMN_PRECISION][$fieldType];
                 break;
@@ -499,11 +499,11 @@ class TableManagerMysql
         foreach ($defaultFieldParameters as $key => $value) {
             if ($key === self::PROPERTY_OPTIONS
                 && isset($fieldData[self::FIELD_PARAMS][self::PROPERTY_OPTIONS])
-                && key_exists(self::OPTION_AUTOINCREMENT, $fieldData[self::FIELD_PARAMS][self::PROPERTY_OPTIONS])) {
+                && array_key_exists(self::OPTION_AUTOINCREMENT, $fieldData[self::FIELD_PARAMS][self::PROPERTY_OPTIONS])) {
                 trigger_error("Autoincrement field is deprecated", E_USER_DEPRECATED);
             }
 
-            if (isset($fieldData[self::FIELD_PARAMS]) && key_exists($key, $fieldData[self::FIELD_PARAMS])) {
+            if (isset($fieldData[self::FIELD_PARAMS]) && array_key_exists($key, $fieldData[self::FIELD_PARAMS])) {
                 $args[] = $fieldData[self::FIELD_PARAMS][$key];
             } else {
                 $args[] = $value;

@@ -95,14 +95,13 @@ class CacheableTest extends AbstractTest
     protected function _getDbTableFields($data)
     {
         $record = array_shift($data);
-        reset($record);
-        $firstKey = key($record);
+        $firstKey = array_key_first($record);
         $firstValue = array_shift($record);
         $dbTableFields = '';
 
         if (is_string($firstValue)) {
             $dbTableFields = '`' . $firstKey . '` CHAR(80) PRIMARY KEY';
-        } elseif (is_integer($firstValue)) {
+        } elseif (is_int($firstValue)) {
             $dbTableFields = '`' . $firstKey . '` INT NOT NULL AUTO_INCREMENT PRIMARY KEY';
         } else {
             trigger_error("Type of primary key must be int or string", E_USER_ERROR);
@@ -111,7 +110,7 @@ class CacheableTest extends AbstractTest
         foreach ($record as $key => $value) {
             if (is_string($value)) {
                 $fieldType = ', `' . $key . '` CHAR(80)';
-            } elseif (is_integer($value)) {
+            } elseif (is_int($value)) {
                 $fieldType = ', `' . $key . '` INT';
             } elseif (is_float($value)) {
                 $fieldType = ', `' . $key . '` DOUBLE PRECISION';
@@ -122,7 +121,7 @@ class CacheableTest extends AbstractTest
             } else {
                 trigger_error("Type of field of array isn't supported.", E_USER_ERROR);
             }
-            $dbTableFields = $dbTableFields . $fieldType;
+            $dbTableFields .= $fieldType;
         }
 
         return $dbTableFields;

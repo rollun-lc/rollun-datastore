@@ -257,7 +257,7 @@ class ModelRepository implements ModelRepositoryInterface
 
         $identifier = $this->dataStore->getIdentifier();
 
-        foreach ($models as $key => $model) {
+        foreach ($models as $model) {
             if (!$model->isChanged()) {
                 $notChangedIds[] = $model->{$identifier};
                 continue;

@@ -212,7 +212,7 @@ abstract class ConditionBuilderAbstract
         }
 
         $strQuery = rtrim($strQuery, $this->literals['LogicOperator'][$nodeName]['between']);
-        $strQuery = $strQuery . $this->literals['LogicOperator'][$nodeName]['after'];
+        $strQuery .= $this->literals['LogicOperator'][$nodeName]['after'];
 
         return $strQuery;
     }
@@ -246,7 +246,7 @@ abstract class ConditionBuilderAbstract
         }
 
         $strQuery = rtrim($strQuery, $this->literals['ArrayOperator'][$nodeName]['delimiter']);
-        $strQuery = $strQuery . $this->literals['ArrayOperator'][$nodeName]['after'];
+        $strQuery .= $this->literals['ArrayOperator'][$nodeName]['after'];
 
         return $strQuery;
     }

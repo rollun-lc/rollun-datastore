@@ -130,7 +130,7 @@ class RequestDecoder implements MiddlewareInterface
         $contentTypeArray = $request->getHeader('Content-Type');
         $contentType = isset($contentTypeArray[0]) ? $contentTypeArray[0] : 'text/html';
 
-        if (false !== strpos($contentType, 'json')) {
+        if (str_contains($contentType, 'json')) {
             $body = !empty($request->getBody()->__toString())
                 ? Serializer::jsonUnserialize($request->getBody()->__toString())
                 : null;

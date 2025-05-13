@@ -175,13 +175,13 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
                 case (!($whereFunction($value))):
                     break;
                 case $suitableItemsNumber < $offset:
-                    $suitableItemsNumber = $suitableItemsNumber + 1;
+                    $suitableItemsNumber += 1;
                     break;
                 case $limit <> self::LIMIT_INFINITY && $suitableItemsNumber >= ($limit + $offset):
                     return $result;
                 default:
                     $result[] = $value;
-                    $suitableItemsNumber = $suitableItemsNumber + 1;
+                    $suitableItemsNumber += 1;
             }
         }
 

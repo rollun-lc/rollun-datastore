@@ -46,6 +46,6 @@ class TypeFloatTest extends TestCase
     public function testToTypeValueFailWithCallable()
     {
         $this->expectException(TypeException::class);
-        $this->createObject(function () {})->toTypeValue();
+        $this->createObject(function (): void {})->toTypeValue();
     }
 }

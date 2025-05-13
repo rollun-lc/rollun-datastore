@@ -48,7 +48,7 @@ class TypeIntTest extends TestCase
     public function testToTypeValueFailWithCallable()
     {
         $this->expectException(TypeException::class);
-        $this->createObject(function () {
+        $this->createObject(function (): void {
         })->toTypeValue();
     }
 }

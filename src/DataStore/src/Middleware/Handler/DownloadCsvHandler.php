@@ -67,7 +67,7 @@ class DownloadCsvHandler extends AbstractHandler
                 fputcsv($file, $line, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
             }
 
-            $offset = $offset + self::LIMIT;
+            $offset += self::LIMIT;
         }
 
         // set pointer to the beginning

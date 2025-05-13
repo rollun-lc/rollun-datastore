@@ -31,7 +31,7 @@ class TypeBooleanTest extends TestCase
         $this->assertSame(true, $this->createObject(0.999)->toTypeValue());
         $this->assertSame(true, $this->createObject(new class {
         })->toTypeValue());
-        $this->assertSame(true, $this->createObject(function () {
+        $this->assertSame(true, $this->createObject(function (): void {
         })->toTypeValue());
         $this->assertSame(false, $this->createObject(false)->toTypeValue());
         $this->assertSame(false, $this->createObject([])->toTypeValue());

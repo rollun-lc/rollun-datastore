@@ -99,14 +99,14 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
         $glob = parent::getValueFromGlob($globNode);
         $anchorStart = true;
 
-        if (substr($glob, 0, 1) === '*') {
+        if (str_starts_with($glob, '*')) {
             $anchorStart = false;
             $glob = ltrim($glob, '*');
         }
 
         $anchorEnd = true;
 
-        if (substr($glob, -1) === '*') {
+        if (str_ends_with($glob, '*')) {
             $anchorEnd = false;
             $glob = rtrim($glob, '*');
         }
@@ -121,7 +121,7 @@ class PhpConditionBuilder extends ConditionBuilderAbstract
         }
 
         if ($anchorEnd) {
-            $regex = $regex . '$';
+            $regex .= '$';
         }
 
         return '/' . $regex . '/';

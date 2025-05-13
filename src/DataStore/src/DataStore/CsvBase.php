@@ -489,7 +489,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
         if ($row) {
             array_walk(
                 $row,
-                function (&$item, $key) {
+                function (&$item, $key): void {
                     if ('' === $item) {
                         $item = null;
                     }
@@ -498,7 +498,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
                         $item = '';
                     }
 
-                    $isZeroFirstString = strlen($item) > 1 && substr($item, 0, 1) == "0";
+                    $isZeroFirstString = strlen($item) > 1 && str_starts_with($item, "0");
 
                     if (is_numeric($item) && !$isZeroFirstString) {
                         if (intval($item) == $item) {
@@ -527,7 +527,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     {
         array_walk(
             $row,
-            function (&$item, $key) {
+            function (&$item, $key): void {
                 switch (true) {
                     case ('' === $item):
                         $item = '""';

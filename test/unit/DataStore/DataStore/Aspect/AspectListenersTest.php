@@ -24,7 +24,7 @@ class AspectListenersTest extends TestCase
     {
         $row = ['id' => 1, 'name' => 'name 1'];
         $aspect = new AspectWithEventManagerAbstract(new Memory(['id', 'name']));
-        $aspect->getEventManager()->attach('onPreCreate', function ($event) use ($row) {
+        $aspect->getEventManager()->attach('onPreCreate', function ($event) use ($row): void {
             $this->assertEquals($row, $event->getParam('itemData'));
         });
 
@@ -38,7 +38,7 @@ class AspectListenersTest extends TestCase
     {
         $row = ['id' => 1, 'name' => 'name 1'];
         $aspect = new AspectWithEventManagerAbstract(new Memory(['id', 'name']));
-        $aspect->getEventManager()->attach('onPreUpdate', function ($event) use ($row) {
+        $aspect->getEventManager()->attach('onPreUpdate', function ($event) use ($row): void {
             $this->assertTrue(false);
         });
 

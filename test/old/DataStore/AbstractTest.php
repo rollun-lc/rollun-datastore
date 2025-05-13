@@ -359,7 +359,7 @@ abstract class AbstractTest extends TestCase
         $this->_initObject();
         $i = 0;
         foreach ($this->object as $key => $value) {
-            $i = $i + 1;
+            $i += 1;
             $this->assertEquals($value, $this->object->read($key));
             $this->assertEquals(
                 $this->_itemsArrayDelault[$key - 1],
