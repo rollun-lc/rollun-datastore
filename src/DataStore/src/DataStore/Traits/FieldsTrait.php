@@ -29,9 +29,7 @@ trait FieldsTrait
                 throw new DataStoreException("Can't create reflection", $exception->getCode(), $exception);
             }
             $constant = $reflect->getConstants();
-            $fields = array_filter($constant, function ($key) {
-                return preg_match('/FIELD_([\w_]+)/', $key);
-            }, ARRAY_FILTER_USE_KEY);
+            $fields = array_filter($constant, fn($key) => preg_match('/FIELD_([\w_]+)/', $key), ARRAY_FILTER_USE_KEY);
             self::$filedCacheArray[$calledClass] = $fields;
         }
         return self::$filedCacheArray[$calledClass];

@@ -164,9 +164,7 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
             . 'return $result;';
 
         //$whereFunction = create_function('$item', $whereFunctionBody);
-        $whereFunction = function ($item) use ($whereFunctionBody) {
-            return eval($whereFunctionBody);
-        };
+        $whereFunction = (fn($item) => eval($whereFunctionBody));
         $suitableItemsNumber = 0;
         $result = [];
 
@@ -202,8 +200,8 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
             }
 
             $sortFunctions[] = function ($a, $b) use ($ordKey, $ordVal) {
-                $a[$ordKey] = $a[$ordKey] ?? null;
-                $b[$ordKey] = $b[$ordKey] ?? null;
+                $a[$ordKey] ??= null;
+                $b[$ordKey] ??= null;
                 $result = $a[$ordKey] <=> $b[$ordKey];
                 if (!$result || $ordVal === SortNode::SORT_ASC) {
                     return $result;

@@ -198,13 +198,11 @@ class MappingFieldsTraitTest extends TestCase
                 'origin' => $this->getInputData(),
             ],
         ];
-        $actual = $instance->prepareData($input, function($value, $name, $origin){
-            return [
-                'name' => $name,
-                'value' => $value,
-                'origin' => $origin
-            ];
-        });
+        $actual = $instance->prepareData($input, fn($value, $name, $origin) => [
+            'name' => $name,
+            'value' => $value,
+            'origin' => $origin
+        ]);
 
         $this->assertEquals($expected, $actual);
     }

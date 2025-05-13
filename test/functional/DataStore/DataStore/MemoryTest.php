@@ -139,9 +139,7 @@ class MemoryTest extends TestCase
         $result = $object->query($query);
 
         $withNullChunk = array_chunk($result, $allCount / $everyNull)[0];
-        $this->assertEmpty(array_filter($withNullChunk, function ($item) {
-            return isset($item['created_at']);
-        }));
+        $this->assertEmpty(array_filter($withNullChunk, fn($item) => isset($item['created_at'])));
     }
 
     public function testQuerySortWithNull()
@@ -157,8 +155,6 @@ class MemoryTest extends TestCase
         $result = $object->query($query);
 
         $withNullChunk = array_chunk($result, $allCount / $everyNull)[0];
-        $this->assertEmpty(array_filter($withNullChunk, function ($item) {
-            return isset($item['created_at']);
-        }));
+        $this->assertEmpty(array_filter($withNullChunk, fn($item) => isset($item['created_at'])));
     }
 }

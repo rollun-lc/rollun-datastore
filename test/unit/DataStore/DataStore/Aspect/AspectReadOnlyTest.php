@@ -24,13 +24,9 @@ class AspectReadOnlyTest extends TestCase
 
         $methods = get_class_methods(AspectReadOnly::class);
 
-        $methods = array_filter($methods, function ($method) use ($excluded) {
-            return !in_array($method, $excluded) && !method_exists(ReadInterface::class, $method);
-        });
+        $methods = array_filter($methods, fn($method) => !in_array($method, $excluded) && !method_exists(ReadInterface::class, $method));
 
-        return array_map(function ($method) {
-            return [$method];
-        }, $methods);
+        return array_map(fn($method) => [$method], $methods);
     }
 
     /**

@@ -118,9 +118,7 @@ class ResourceResolverTest extends BaseMiddlewareTest
         $resourceName = $toString($resourceName);
         $primaryKeyValue = $toString($primaryKeyValue);
 
-        return function (ServerRequestInterface $request) use ($resourceName, $primaryKeyValue) {
-            return $request->getAttribute('resourceName') === $resourceName
-                && $request->getAttribute('primaryKeyValue') === $primaryKeyValue;
-        };
+        return fn(ServerRequestInterface $request) => $request->getAttribute('resourceName') === $resourceName
+            && $request->getAttribute('primaryKeyValue') === $primaryKeyValue;
     }
 }

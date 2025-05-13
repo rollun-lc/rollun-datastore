@@ -293,9 +293,7 @@ class TableManagerMysql
     {
         $metadata = Factory::createSourceFromAdapter($this->db);
         $table = $metadata->getTable($tableName);
-        $spaces = function ($count) {
-            return str_repeat(' ', $count);
-        };
+        $spaces = (fn($count) => str_repeat(' ', $count));
 
         $result = "{$spaces(4)}With columns:" . PHP_EOL;
 

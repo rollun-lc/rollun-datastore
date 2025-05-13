@@ -73,9 +73,7 @@ class RequestDecoderTest extends TestCase
 
                     return $request;
                 },
-                function (ServerRequestInterface $request) {
-                    return $request->getAttribute('overwriteMode') == false;
-                },
+                fn(ServerRequestInterface $request) => $request->getAttribute('overwriteMode') == false,
             ],
             [
                 function () {
@@ -84,9 +82,7 @@ class RequestDecoderTest extends TestCase
 
                     return $request;
                 },
-                function (ServerRequestInterface $request) {
-                    return $request->getAttribute('overwriteMode') === true;
-                },
+                fn(ServerRequestInterface $request) => $request->getAttribute('overwriteMode') === true,
             ],
             [
                 function () {
@@ -95,9 +91,7 @@ class RequestDecoderTest extends TestCase
 
                     return $request;
                 },
-                function (ServerRequestInterface $request) {
-                    return $request->getAttribute('overwriteMode') === false;
-                },
+                fn(ServerRequestInterface $request) => $request->getAttribute('overwriteMode') === false,
             ],
         ];
     }
@@ -111,9 +105,7 @@ class RequestDecoderTest extends TestCase
 
                     return $request;
                 },
-                function (ServerRequestInterface $request) {
-                    return $request->getAttribute('withContentRange') == false;
-                },
+                fn(ServerRequestInterface $request) => $request->getAttribute('withContentRange') == false,
             ],
             [
                 function () {
@@ -122,9 +114,7 @@ class RequestDecoderTest extends TestCase
 
                     return $request;
                 },
-                function (ServerRequestInterface $request) {
-                    return $request->getAttribute('withContentRange') === true;
-                },
+                fn(ServerRequestInterface $request) => $request->getAttribute('withContentRange') === true,
             ],
             [
                 function () {
@@ -133,9 +123,7 @@ class RequestDecoderTest extends TestCase
 
                     return $request;
                 },
-                function (ServerRequestInterface $request) {
-                    return $request->getAttribute('withContentRange') === false;
-                },
+                fn(ServerRequestInterface $request) => $request->getAttribute('withContentRange') === false,
             ],
         ];
     }
@@ -225,9 +213,7 @@ class RequestDecoderTest extends TestCase
 
                     return $request;
                 },
-                function (ServerRequestInterface $request) {
-                    return $request->getParsedBody() === ['a' => 'b'];
-                },
+                fn(ServerRequestInterface $request) => $request->getParsedBody() === ['a' => 'b'],
             ],
             [
                 function () {
@@ -236,9 +222,7 @@ class RequestDecoderTest extends TestCase
 
                     return $request;
                 },
-                function (ServerRequestInterface $request) {
-                    return $request->getParsedBody() === null;
-                },
+                fn(ServerRequestInterface $request) => $request->getParsedBody() === null,
             ],
             [
                 function () {
@@ -247,9 +231,7 @@ class RequestDecoderTest extends TestCase
 
                     return $request;
                 },
-                function (ServerRequestInterface $request) {
-                    return $request->getParsedBody() === null;
-                },
+                fn(ServerRequestInterface $request) => $request->getParsedBody() === null,
             ],
             [
                 function () {
@@ -258,9 +240,7 @@ class RequestDecoderTest extends TestCase
 
                     return $request;
                 },
-                function (ServerRequestInterface $request) {
-                    return $request->getParsedBody() === null;
-                },
+                fn(ServerRequestInterface $request) => $request->getParsedBody() === null,
             ],
         ];
     }
@@ -274,9 +254,7 @@ class RequestDecoderTest extends TestCase
 
                     return $request;
                 },
-                function (ServerRequestInterface $request) {
-                    return $request->getAttribute('Limit') === null;
-                },
+                fn(ServerRequestInterface $request) => $request->getAttribute('Limit') === null,
             ],
             [
                 function () {
@@ -299,9 +277,7 @@ class RequestDecoderTest extends TestCase
 
                     return $request;
                 },
-                function (ServerRequestInterface $request) {
-                    return $request->getAttribute('Limit') === null;
-                },
+                fn(ServerRequestInterface $request) => $request->getAttribute('Limit') === null,
             ],
             [
                 function () {

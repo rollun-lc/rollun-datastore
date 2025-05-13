@@ -76,9 +76,7 @@ class AbstractQueryAdapter implements QueryAdapter
 
     protected function processLogicOperator(AbstractLogicOperatorNode $node): AbstractLogicOperatorNode
     {
-        $queries = array_map(function (AbstractQueryNode $node) {
-            return $this->processQuery($node);
-        }, $node->getQueries());
+        $queries = array_map(fn(AbstractQueryNode $node) => $this->processQuery($node), $node->getQueries());
 
         switch (true) {
             case ($node instanceof NotNode):

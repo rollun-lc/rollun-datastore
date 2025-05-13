@@ -79,9 +79,7 @@ abstract class AspectModifyTable implements DataStoreInterface, DataStoresInterf
 
     private function _preProcessRecords(array $records)
     {
-        return array_map(function (array $record) {
-            return $this->_preProcessRecord($record);
-        }, $records);
+        return array_map(fn(array $record) => $this->_preProcessRecord($record), $records);
     }
 
     private function _preProcessRecord($record)
@@ -97,9 +95,7 @@ abstract class AspectModifyTable implements DataStoreInterface, DataStoresInterf
 
     private function _postProcessRecords($records)
     {
-        $result = array_map(function ($record) {
-            return $this->_postProcessRecord($record);
-        }, $records);
+        $result = array_map(fn($record) => $this->_postProcessRecord($record), $records);
 
         return $result;
     }
@@ -121,9 +117,7 @@ abstract class AspectModifyTable implements DataStoreInterface, DataStoresInterf
 
     private function _postProcessIds($ids)
     {
-        $result = array_map(function ($id) {
-            return $this->postProcessId($id);
-        }, $ids);
+        $result = array_map(fn($id) => $this->postProcessId($id), $ids);
 
         return $result;
     }

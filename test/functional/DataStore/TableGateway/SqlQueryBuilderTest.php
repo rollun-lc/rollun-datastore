@@ -267,21 +267,15 @@ class SqlQueryBuilderTest extends TestCase
 
         $platform->expects($this->any())
             ->method('quoteValue')
-            ->will($this->returnCallback(function ($argument) {
-                return "'{$argument}'";
-            }));
+            ->will($this->returnCallback(fn($argument) => "'{$argument}'"));
 
         $platform->expects($this->any())
             ->method('quoteIdentifierInFragment')
-            ->will($this->returnCallback(function ($argument) {
-                return "`{$argument}`";
-            }));
+            ->will($this->returnCallback(fn($argument) => "`{$argument}`"));
 
         $platform->expects($this->any())
             ->method('quoteIdentifier')
-            ->will($this->returnCallback(function ($argument) {
-                return "`{$argument}`";
-            }));
+            ->will($this->returnCallback(fn($argument) => "`{$argument}`"));
 
         $platform->expects($this->any())
             ->method('getIdentifierSeparator')

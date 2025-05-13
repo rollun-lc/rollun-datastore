@@ -47,9 +47,7 @@ class MultiCreateHandler extends AbstractHandler
                 && is_array($row)
                 && array_reduce(
                     array_keys($row),
-                    function ($carry, $item) {
-                        return $carry && is_string($item);
-                    },
+                    fn($carry, $item) => $carry && is_string($item),
                     true
                 );
 

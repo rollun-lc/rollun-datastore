@@ -136,15 +136,11 @@ abstract class AspectEntityMapper implements DataStoreInterface, DataStoresInter
 
     private function mapEntitiesToRecords(array $items): array
     {
-        return array_map(function ($itemData) {
-            return $this->mapEntityToRecord($itemData);
-        }, $items);
+        return array_map(fn($itemData) => $this->mapEntityToRecord($itemData), $items);
     }
 
     private function mapRecordsToEntities(array $records): array
     {
-        return array_map(function ($record) {
-            return $this->mapRecordToEntity($record);
-        }, $records);
+        return array_map(fn($record) => $this->mapRecordToEntity($record), $records);
     }
 }

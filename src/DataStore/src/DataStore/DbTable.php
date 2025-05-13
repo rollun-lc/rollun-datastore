@@ -226,9 +226,7 @@ class DbTable extends DataStoreAbstract
 
         $selectQuery = clone $query;
         $selectQuery->setSelect(new SelectNode([$this->getIdentifier()]));
-        $shouldDeletedIds = array_map(function ($item) {
-            return $item[$this->getIdentifier()];
-        }, $this->query($selectQuery));
+        $shouldDeletedIds = array_map(fn($item) => $item[$this->getIdentifier()], $this->query($selectQuery));
 
         try {
             $statement = $adapter->getDriver()->createStatement($sqlString);
@@ -625,9 +623,7 @@ class DbTable extends DataStoreAbstract
             }
             throw $e;
         }
-        $getIdCallable = function ($item) {
-            return $item[$this->getIdentifier()];
-        };
+        $getIdCallable = (fn($item) => $item[$this->getIdentifier()]);
 
         try {
             $identifiers = array_map($getIdCallable, $itemsData);

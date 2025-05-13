@@ -35,9 +35,7 @@ class UpdateHandler extends AbstractHandler
         $canHandle = $canHandle && isset($row) && is_array($row)
             && array_reduce(
                 array_keys($row),
-                function ($carry, $item) {
-                    return $carry && !is_int($item);
-                },
+                fn($carry, $item) => $carry && !is_int($item),
                 true
             );
 

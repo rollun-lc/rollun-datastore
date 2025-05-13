@@ -22,9 +22,7 @@ trait PrepareFieldsTrait
     public function createData($itemData, $rewriteIfExist = false)
     {
         $itemData = $this->prepareData($itemData);
-        return $this->callAttempts(function() use ($itemData, $rewriteIfExist) {
-            return $this->create($itemData, $rewriteIfExist);
-        });
+        return $this->callAttempts(fn() => $this->create($itemData, $rewriteIfExist));
     }
 
     /**
@@ -57,9 +55,7 @@ trait PrepareFieldsTrait
     public function updateData($itemData, $createIfAbsent = false)
     {
         $itemData = $this->prepareData($itemData);
-        return $this->callAttempts(function() use ($itemData, $createIfAbsent){
-            return $this->update($itemData, $createIfAbsent);
-        });
+        return $this->callAttempts(fn() => $this->update($itemData, $createIfAbsent));
     }
 
     /**
@@ -72,9 +68,7 @@ trait PrepareFieldsTrait
     public function rewriteData($record)
     {
         $itemData = $this->prepareData($record);
-        return $this->callAttempts(function() use ($itemData){
-            return $this->rewrite($itemData);
-        });
+        return $this->callAttempts(fn() => $this->rewrite($itemData));
         //return $this->callAttemptsMethod('rewrite', $itemData);
     }
 }
