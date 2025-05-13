@@ -21,7 +21,7 @@ trait FieldsTrait
         if (!self::$filedCacheArray) {
             self::$filedCacheArray = [];
         }
-        $calledClass = get_called_class();
+        $calledClass = static::class;
         if (!array_key_exists($calledClass, self::$filedCacheArray)) {
             try {
                 $reflect = new ReflectionClass($calledClass);
