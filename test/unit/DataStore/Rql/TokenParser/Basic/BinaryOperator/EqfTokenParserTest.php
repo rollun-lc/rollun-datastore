@@ -3,7 +3,6 @@
 namespace rollun\test\unit\DataStore\Rql\TokenParser\Basic\BinaryOperator;
 
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject;
 use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
 use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqfTokenParser;
 use Xiag\Rql\Parser\Token;
@@ -19,45 +18,16 @@ class EqfTokenParserTest extends TestCase
     public function testParse()
     {
         $field = 'a';
-        $position = 0;
 
-        /** @var TokenStream|PHPUnit_Framework_MockObject_MockObject $tokenStream */
-        $tokenStream = $this->getMockBuilder(TokenStream::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['expect', 'nextIf'])
-            ->getMock();
-
-        $tokenStream
-            ->expects($this->at($position++))
-            ->method('expect')
-            ->with($this->equalTo(Token::T_OPERATOR), $this->equalTo('eqf'))
-            ->will($this->returnValue(new Token(Token::T_OPERATOR, '', 0)));
-
-        $this->insertSimpleToken($tokenStream, Token::T_OPEN_PARENTHESIS, $position++);
-
-        $tokenStream
-            ->expects($this->at($position++))
-            ->method('expect')
-            ->with($this->equalTo(Token::T_STRING))
-            ->will($this->returnValue(new Token(Token::T_STRING, $field, 0)));
-
-        $this->insertSimpleToken($tokenStream, Token::T_CLOSE_PARENTHESIS, $position);
+        $tokenStream = new TokenStream([
+            new Token(Token::T_OPERATOR, 'eqf', 0),
+            new Token(Token::T_OPEN_PARENTHESIS, '(', 1),
+            new Token(Token::T_STRING, $field, 2),
+            new Token(Token::T_CLOSE_PARENTHESIS, ')', 3),
+            new Token(Token::T_END, '', 4),
+        ]);
 
         $node = new EqfNode($field);
         $this->assertEquals($this->createObject()->parse($tokenStream), $node);
-    }
-
-    /**
-     * @param PHPUnit_Framework_MockObject_MockObject $tokenStream
-     * @param $type
-     * @param $position
-     */
-    protected function insertSimpleToken(&$tokenStream, $type, $position)
-    {
-        $tokenStream
-            ->expects($this->at($position))
-            ->method('expect')
-            ->with($this->equalTo($type))
-            ->will($this->returnValue(new Token($type, '', 0)));
     }
 }
