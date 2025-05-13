@@ -16,7 +16,7 @@ down-8.0: docker-down-8.0
 restart: docker-down docker-up
 restart-8.0: docker-down-8.0 docker-up-8.0
 
-check: test
+check: rector test
 
 test: composer-test
 test-8.0: composer-test-8.0
@@ -75,3 +75,6 @@ composer-test:
 
 composer-test-8.0:
 	docker compose -f docker-compose-8.0.yml exec php-fpm composer test
+
+rector:
+	docker compose exec php-fpm composer rector
