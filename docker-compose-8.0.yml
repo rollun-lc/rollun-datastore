@@ -1,0 +1,54 @@
+services:
+  nginx:
+    build:
+      context: docker/nginx
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/var/www/app
+    ports:
+      - 8080:80
+    depends_on:
+      - php-fpm
+
+  php-fpm:
+    build:
+      context: docker/php-fpm/8.0
+      dockerfile: Dockerfile
+      args:
+        WWW_DATA_UID: ${DOCKER_USER_UID}
+        WWW_DATA_GID: ${DOCKER_USER_GID}
+    volumes:
+      - ./:/var/www/app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      PHP_IDE_CONFIG: serverName=rollun-datastore
+      DB_NAME: app
+      DB_USER: app
+      DB_PASS: secret
+      DB_HOST: mysql
+      DB_PORT: 3306
+      TEST_HOST: http://nginx/
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.2
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_USER: app
+      MYSQL_PASSWORD: secret
+      MYSQL_DATABASE: app
+    ports:
+      - 33061:3306
+
+  csfixer:
+    image: ghcr.io/php-cs-fixer/php-cs-fixer:3.66-php8.1
+    volumes:
+      - ./:/code
+
+volumes:
+  mysql:
