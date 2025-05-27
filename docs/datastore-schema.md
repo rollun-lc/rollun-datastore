@@ -4,11 +4,11 @@
 
 ```php
 $app->route(
-        '/api/datastores/{resourceName}/schema',
-        \rollun\datastore\DataStore\Schema\SchemaApiRequestHandler::class,
-        ['GET'],
-        \rollun\datastore\DataStore\Schema\SchemaApiRequestHandler::class,
-    );
+    '/api/datastores/{resourceName}/schema',
+    \rollun\datastore\DataStore\Schema\SchemaApiRequestHandler::class,
+    ['GET'],
+    \rollun\datastore\DataStore\Schema\SchemaApiRequestHandler::class,
+);
 ```
 
 Далі зробіть конфігурацію для датасторів:
