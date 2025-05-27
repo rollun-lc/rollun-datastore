@@ -584,7 +584,7 @@ class DbTable extends DataStoreAbstract
     /**
      * {@inheritdoc}
      */
-    public function count()
+    public function count(): int
     {
         $adapter = $this->dbTable->getAdapter();
 

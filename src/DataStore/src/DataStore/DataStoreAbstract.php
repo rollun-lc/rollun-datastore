@@ -596,7 +596,7 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
      * @see Countable
      * @return int
      */
-    public function count()
+    public function count(): int
     {
         $keys = $this->getKeys();
 
@@ -607,9 +607,8 @@ abstract class DataStoreAbstract implements DataStoresInterface, DataStoreInterf
      * Iterator for Interface IteratorAggregate
      *
      * @see \IteratorAggregate
-     * @return \Iterator
      */
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         trigger_error("Datastore is no more iterable", E_USER_DEPRECATED);
 

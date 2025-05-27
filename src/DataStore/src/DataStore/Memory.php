@@ -171,18 +171,12 @@ class Memory extends DataStoreAbstract
         return $deletedItemsCount;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function count()
+    public function count(): int
     {
         return count($this->items);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         trigger_error("Datastore is no more iterable", E_USER_DEPRECATED);
 
