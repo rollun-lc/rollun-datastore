@@ -6,7 +6,7 @@
 $app->route(
         '/api/datastores/{resourceName}/schema',
         \rollun\datastore\DataStore\Schema\SchemaApiRequestHandler::class,
-        ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+        ['GET'],
         \rollun\datastore\DataStore\Schema\SchemaApiRequestHandler::class,
     );
 ```
@@ -24,7 +24,7 @@ return [
         'Customers' => [
             'type' => 'array',
             'items' => [
-                'type' => 'object'
+                'type' => 'object',
                 'properties' => [
                     'id' => ['type' => 'string', 'format' => 'uuid'],
                     'raw' => ['type' => ['string', 'null'], 'format' => 'json'],
@@ -33,5 +33,5 @@ return [
             ]  
         ]   
     ]
-]
+];
 ```
