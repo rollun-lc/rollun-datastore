@@ -2,7 +2,7 @@
 
 namespace rollun\datastore\DataStore\Schema;
 
-use Laminas\Diactoros\Response\JsonResponse;
+use Zend\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
