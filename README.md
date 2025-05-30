@@ -6,6 +6,7 @@
 http), Memory (для [RAM](https://en.wikipedia.org/wiki/Random-access_memory)).
 
 * [Документация](docs/index.md)
+* Опис історії змін по версіям [CHANGELOG.md](CHANGELOG.md)
 
 ### Для сторонних клиентов
 
