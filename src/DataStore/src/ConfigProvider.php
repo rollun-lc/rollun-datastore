@@ -17,6 +17,11 @@ use rollun\datastore\DataStore\Factory\CsvAbstractFactory;
 use rollun\datastore\DataStore\Factory\DbTableAbstractFactory;
 use rollun\datastore\DataStore\Factory\HttpClientAbstractFactory;
 use rollun\datastore\DataStore\Factory\MemoryAbstractFactory;
+use rollun\datastore\DataStore\Schema\ArraySchemaRepository;
+use rollun\datastore\DataStore\Schema\ArraySchemaRepositoryFactory;
+use rollun\datastore\DataStore\Schema\SchemaApiRequestHandler;
+use rollun\datastore\DataStore\Schema\SchemaApiRequestHandlerFactory;
+use rollun\datastore\DataStore\Schema\SchemasRepositoryInterface;
 use rollun\datastore\DataStore\Scheme\Factory\SchemeAbstractFactory;
 use rollun\datastore\Middleware\DataStoreApi;
 use rollun\datastore\Middleware\Determinator;
@@ -55,6 +60,9 @@ class ConfigProvider
     public function getDependencies()
     {
         return [
+            'aliases' => [
+                SchemasRepositoryInterface::class => ArraySchemaRepository::class,
+            ],
             'factories' => [
                 ResourceResolver::class => InvokableFactory::class,
                 RequestDecoder::class => InvokableFactory::class,
@@ -64,6 +72,9 @@ class ConfigProvider
 
                 'TableManagerMysql' => TableManagerMysqlFactory::class,
                 TableManagerMysql::class => TableManagerMysqlFactory::class,
+
+                SchemaApiRequestHandler::class => SchemaApiRequestHandlerFactory::class,
+                ArraySchemaRepository::class => ArraySchemaRepositoryFactory::class,
             ],
             'abstract_factories' => [
                 // Data stores
