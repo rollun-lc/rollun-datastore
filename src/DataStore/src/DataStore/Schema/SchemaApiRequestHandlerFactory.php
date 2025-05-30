@@ -2,7 +2,7 @@
 
 namespace rollun\datastore\DataStore\Schema;
 
-use Laminas\ServiceManager\Factory\FactoryInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerInterface;
 
 class SchemaApiRequestHandlerFactory implements FactoryInterface
