@@ -436,11 +436,6 @@ return [
 ];
 ```
 
-#### DataStoreApi content negotiation
-
-```DataStoreApi``` также поддерживает возможность content negotiation для формата ```JSON``` для запросов, связанных с датасторами.
-Достаточно указать в запросе заголовок ```Accept``` со значением ```application/json```
-
 2. Через объект `\Zend\Expressive\Application`
 
 ```php
@@ -456,6 +451,11 @@ $app->route(
     DataStoreApi::class // route name
 );
 ```
+
+#### DataStoreApi content negotiation
+
+```DataStoreApi``` также поддерживает возможность content negotiation для формата ```JSON``` для запросов, связанных с датасторами.
+Достаточно указать в запросе заголовок ```Accept``` со значением ```application/json```
 
 #### Headers
 
