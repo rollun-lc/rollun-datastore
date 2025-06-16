@@ -455,7 +455,7 @@ $app->route(
 #### DataStoreApi content negotiation
 
 ```DataStoreApi``` также поддерживает возможность content negotiation для формата ```JSON``` для запросов, связанных с датасторами.
-Достаточно указать в запросе заголовок ```Accept``` со значением ```application/json```
+Достаточно указать в запросе заголовок ```Accept``` со значением ```application/json```, и ответ вернется в формате ```JSON```.
 
 #### Headers
 
