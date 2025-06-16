@@ -452,6 +452,11 @@ $app->route(
 );
 ```
 
+#### DataStoreApi Exception content negotiation
+
+```DataStoreApi``` также поддерживает возможность content negotiation для формата ```JSON``` для исключений (Exception), связанных с датасторами.
+Достаточно указать в запросе заголовок ```Accept``` со значением ```application/json```, и ответ вернется в формате ```JSON```.
+
 #### Headers
 
 **Заголовки запроса**
