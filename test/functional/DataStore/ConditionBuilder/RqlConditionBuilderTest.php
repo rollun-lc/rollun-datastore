@@ -13,6 +13,7 @@ use rollun\datastore\Rql\Node\BinaryNode\EqfNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqnNode;
 use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
 use rollun\datastore\Rql\Node\BinaryNode\IeNode;
+use rollun\datastore\Rql\Node\ContainsNode;
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;
 use Xiag\Rql\Parser\Node\Query\LogicOperator\NotNode;
@@ -125,6 +126,41 @@ class RqlConditionBuilderTest extends ConditionBuilderTest
                     ->getQuery(),
                 'and(eqn(a),eqt(b),eqf(c),ie(d),alike(a,string:*abc?))',
             ],
+        ];
+    }
+
+    /*
+    feat(DJan9hKL)
+    Сутність багу: Для Http датастору new ContainsNode('id', 0) - працює, new ContainsNode('id', '0') - не працює.
+    Для DbTable датастору працюють обидва варіанти.
+
+    Проблема була перетворенні query до rql. А саме в функції, яка тестується нижче.
+    Попередній варіант коду: $value = empty($regexRqlPrepared) ? "empty" : 'string:' . $regexRqlPrepared;
+    Якщо змінна $regexRqlPrepared являє собою "0", або '0' empty($value) приймає значення, хоча по факту не має
+    Рішення (сумісне з php7.2 та php8.0):
+    if ($regexRqlPrepared === '' || $regexRqlPrepared === false) {
+                $value = "empty";
+            } else {
+                $value = 'string:' . $regexRqlPrepared;
+            }
+    */
+    /**
+     * @dataProvider fieldValueProvider
+     */
+    public function testPrepareFieldValue($input, $expected)
+    {
+        $preparedValue = (new RqlConditionBuilder())->prepareFieldValue($input);
+        $this->assertEquals($preparedValue, $expected);
+    }
+
+    public function fieldValueProvider()
+    {
+        return [
+            ['0', 'string:0'],
+            [0, 0],
+            ['', 'empty'],
+            [null, 'null()'],
+            ['abc', 'string:abc'],
         ];
     }
 }
