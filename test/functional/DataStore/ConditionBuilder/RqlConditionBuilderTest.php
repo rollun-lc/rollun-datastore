@@ -144,15 +144,6 @@ class RqlConditionBuilderTest extends ConditionBuilderTest
                 $value = 'string:' . $regexRqlPrepared;
             }
     */
-    /**
-     * @dataProvider fieldValueProvider
-     */
-    public function testPrepareFieldValue($input, $expected)
-    {
-        $preparedValue = (new RqlConditionBuilder())->prepareFieldValue($input);
-        $this->assertEquals($preparedValue, $expected);
-    }
-
     public function fieldValueProvider()
     {
         return [
@@ -162,5 +153,14 @@ class RqlConditionBuilderTest extends ConditionBuilderTest
             [null, 'null()'],
             ['abc', 'string:abc'],
         ];
+    }
+
+    /**
+     * @dataProvider fieldValueProvider
+     */
+    public function testPrepareFieldValue($input, $expected)
+    {
+        $preparedValue = (new RqlConditionBuilder())->prepareFieldValue($input);
+        $this->assertEquals($preparedValue, $expected);
     }
 }
