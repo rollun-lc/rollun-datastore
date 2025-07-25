@@ -10,53 +10,67 @@ use Psr\Http\Message\ResponseInterface;
 
 class QueriedUpdateHandler extends AbstractHandler
 {
-    protected function canHandle(ServerRequestInterface $request): bool
+    /**
+     * @inheritDoc
+     */
+    public function canHandle(ServerRequestInterface $request): bool
     {
-        if ($request->getMethod() !== 'PATCH') {
+        // Только PATCH
+        if ($request->getMethod() !== "PATCH") {
             return false;
         }
+
         // Нет id в path
         if ($request->getAttribute('primaryKeyValue')) {
             return false;
         }
+
         // Есть rqlQueryObject с фильтром
         $query = $request->getAttribute('rqlQueryObject');
         if (!($query instanceof Query) || is_null($query->getQuery())) {
             return false;
         }
-        // Тело — ассоциативный массив
-        $body = $request->getParsedBody();
-        if (!is_array($body) || array_reduce(array_keys($body),
-                fn($c, $k) => $c && !is_int($k), true) === false) {
+
+        // Тело — ассоциативный массив (поля для обновления)
+        $fields = $request->getParsedBody();
+        if (
+            !isset($fields) ||
+            !is_array($fields) ||
+            array_keys($fields) === range(0, count($fields) - 1) // Это list, а не assoc array
+        ) {
             return false;
         }
-        // Без limit/sort/select — только фильтр
-        return $this->isRqlQueryEmptyExceptFilter($request);
+
+        // Только фильтр (нет limit/sort/select)
+        return $this->isRqlQueryEmptyExceptFilter($query);
     }
 
+    /**
+     * @inheritDoc
+     */
     protected function handle(ServerRequestInterface $request): ResponseInterface
     {
         $query = $request->getAttribute('rqlQueryObject');
         $fields = $request->getParsedBody();
 
         try {
-            $ids = $this->dataStore->queriedUpdate($fields, $query);
-        } catch (DataStoreException $e) {
-            return (new Response())
-                ->withStatus(400)
-                ->withBody($this->createStream(['error' => $e->getMessage()]));
+            $result = $this->dataStore->queriedUpdate($fields, $query);
+        } catch (DataStoreException) {
+//            Ignore results as in multiCreate
         }
 
-        return (new Response())
-            ->withBody($this->createStream($ids));
+        $response = new Response();
+        $response = $response->withBody($this->createStream($result));
+        return $response;
     }
 
-    private function isRqlQueryEmptyExceptFilter(ServerRequestInterface $request): bool
+    /**
+     * Проверка что только RQL-фильтр, нет limit/sort/select
+     */
+    private function isRqlQueryEmptyExceptFilter(Query $query): bool
     {
-        $query = $request->getAttribute('rqlQueryObject');
         return is_null($query->getLimit())
             && is_null($query->getSort())
-            && is_null($query->getSelect())
-            && !is_null($query->getQuery());
+            && is_null($query->getSelect());
     }
 }
