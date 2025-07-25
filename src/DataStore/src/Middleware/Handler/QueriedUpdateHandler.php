@@ -32,8 +32,9 @@ class QueriedUpdateHandler extends AbstractHandler
         if (
             !isset($fields) ||
             !is_array($fields) ||
-            array_keys($fields) === range(0, count($fields) - 1) // Array is list ['val1', 'val2'] instead of
+            array_keys($fields) === range(0, count($fields) - 1) || // Array is list ['val1', 'val2'] instead of
 //            ['column1' => 'val1', 'column2' => 'val2']
+            empty($fields)
         ) {
             return false;
         }
@@ -46,11 +47,7 @@ class QueriedUpdateHandler extends AbstractHandler
         $query = $request->getAttribute('rqlQueryObject');
         $fields = $request->getParsedBody();
 
-        try {
-            $result = $this->dataStore->queriedUpdate($fields, $query);
-        } catch (DataStoreException) {
-//            Ignore results as in multiCreate
-        }
+        $result = $this->dataStore->queriedUpdate($fields, $query);
 
         $response = new Response();
         $response = $response->withBody($this->createStream($result));
