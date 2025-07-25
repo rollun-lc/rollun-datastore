@@ -71,7 +71,7 @@ class QueriedUpdateHandlerTest extends BaseHandlerTest
     public function createDataStore(): DataStoresInterface
     {
         $memory = new Memory(['a', 'b', 'c', 'foo']);
-        for($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < 4; $i++) {
             $memory->create(['a' => $i, 'b' => $i, 'c' => $i, 'foo' => $i], true);
         }
         return $memory;
