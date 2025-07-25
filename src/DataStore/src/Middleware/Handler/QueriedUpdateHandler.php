@@ -15,39 +15,32 @@ class QueriedUpdateHandler extends AbstractHandler
      */
     public function canHandle(ServerRequestInterface $request): bool
     {
-        // Только PATCH
         if ($request->getMethod() !== "PATCH") {
             return false;
         }
 
-        // Нет id в path
         if ($request->getAttribute('primaryKeyValue')) {
             return false;
         }
 
-        // Есть rqlQueryObject с фильтром
         $query = $request->getAttribute('rqlQueryObject');
         if (!($query instanceof Query) || is_null($query->getQuery())) {
             return false;
         }
 
-        // Тело — ассоциативный массив (поля для обновления)
         $fields = $request->getParsedBody();
         if (
             !isset($fields) ||
             !is_array($fields) ||
-            array_keys($fields) === range(0, count($fields) - 1) // Это list, а не assoc array
+            array_keys($fields) === range(0, count($fields) - 1) // Array is list ['val1', 'val2'] instead of
+//            ['column1' => 'val1', 'column2' => 'val2']
         ) {
             return false;
         }
 
-        // Только фильтр (нет limit/sort/select)
         return $this->isRqlQueryEmptyExceptFilter($query);
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function handle(ServerRequestInterface $request): ResponseInterface
     {
         $query = $request->getAttribute('rqlQueryObject');
@@ -65,7 +58,7 @@ class QueriedUpdateHandler extends AbstractHandler
     }
 
     /**
-     * Проверка что только RQL-фильтр, нет limit/sort/select
+     * Check that rqs is only RQL-filter, no limit/sort/select
      */
     private function isRqlQueryEmptyExceptFilter(Query $query): bool
     {
