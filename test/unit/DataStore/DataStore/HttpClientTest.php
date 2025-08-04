@@ -18,6 +18,8 @@ use Laminas\Http\Client;
 use Laminas\Http\Header\HeaderInterface;
 use Laminas\Http\Headers;
 use Laminas\Http\Response;
+use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
+use Xiag\Rql\Parser\Query;
 
 class HttpClientTest extends TestCase
 {
@@ -623,5 +625,113 @@ class HttpClientTest extends TestCase
         $object->read($items['test']);
 
         $this->assertEquals('test', $object->getIdentifier());
+    }
+
+    /**
+     * Проверяем, что multiCreate() использует единый POST при поддержке X_MULTI_CREATE
+     */
+    public function testMultiCreateBatchSupported()
+    {
+        // 1) Мокируем Laminas\Http\Client
+        $clientMock = $this->getMockBuilder(Client::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        // ожидаем ровно один setRawBody с массивом записей
+        $clientMock->expects($this->once())
+            ->method('setRawBody')
+            ->with(Serializer::jsonSerialize([
+                ['foo' => 'a'],
+                ['foo' => 'b'],
+            ]));
+        // ожидaем ровно один send() и вернём в ответе два новых объекта
+        $response = new Response();
+        $response->setStatusCode(201);
+        $response->setContent(Serializer::jsonSerialize([
+            ['id' => 10],
+            ['id' => 20],
+        ]));
+        $clientMock->expects($this->once())
+            ->method('send')
+            ->willReturn($response);
+
+        // 2) Анонимный подкласс, чтобы переопределить sendHead() и initHttpClient()
+        $token = $this->createMock(LifeCycleToken::class);
+        $ds = new class ($clientMock, '', ['identifier' => 'id'], $token) extends HttpClient {
+            protected function sendHead()
+            {
+                return ['X_MULTI_CREATE' => true];
+            }
+            protected function initHttpClient(string $method, string $uri, $ifMatch = false)
+            {
+                return $this->client;
+            }
+        };
+
+        // 3) Запускаем
+        $result = $ds->multiCreate([
+            ['foo' => 'a'],
+            ['foo' => 'b'],
+        ]);
+
+        // Ожидаем именно массив записей, а не просто ID
+        $this->assertSame([
+            ['id' => 10],
+            ['id' => 20],
+        ], $result);
+    }
+
+    /**
+     * Проверяем, что queriedUpdate() делает один GET и по одному PUT на каждую запись
+     */
+    public function testQueriedUpdateFetchAndPut()
+    {
+        // 1) Мокаем Laminas\Http\Client
+        $clientMock = $this->getMockBuilder(Client::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        // Подготовим три последовательных ответа:
+        //   1) GET-список
+        //   2) PUT для id=1
+        //   3) PUT для id=2
+        $list = new Response();
+        $list->setStatusCode(200);
+        $list->setContent(Serializer::jsonSerialize([
+            ['id' => 1, 'x' => 'old'],
+            ['id' => 2, 'x' => 'old'],
+        ]));
+        $put1 = new Response();
+        $put1->setStatusCode(200);
+        $put1->setContent(Serializer::jsonSerialize(['id' => 1]));
+        $put2 = new Response();
+        $put2->setStatusCode(200);
+        $put2->setContent(Serializer::jsonSerialize(['id' => 2]));
+
+        $clientMock->expects($this->exactly(3))
+            ->method('send')
+            ->willReturnOnConsecutiveCalls($list, $put1, $put2);
+
+        // Ожидаем два вызова setRawBody с теле только поля 'x'
+        $clientMock->expects($this->exactly(2))
+            ->method('setRawBody')
+            ->with(Serializer::jsonSerialize(['x' => 'new']));
+
+        // 2) Анонимный подкласс, чтобы initHttpClient() всегда возвращал наш мок
+        $token = $this->createMock(LifeCycleToken::class);
+        $ds = new class ($clientMock, '', ['identifier' => 'id'], $token) extends HttpClient {
+            protected function initHttpClient(string $method, string $uri, $ifMatch = false)
+            {
+                return $this->client;
+            }
+        };
+
+        // 3) RQL eq(x,'old') и вызов queriedUpdate
+        $query = new Query();
+        $query->setQuery(new EqNode('x', 'old'));
+
+        $updated = $ds->queriedUpdate(['x' => 'new'], $query);
+
+        // Проверяем, что вернулись именно ID [1,2]
+        $this->assertSame([1, 2], $updated);
     }
 }
