@@ -37,13 +37,13 @@ class DataStoreRest implements MiddlewareInterface
         $this->middlewarePipe->pipe(new Handler\HeadHandler($this->dataStore));
         $this->middlewarePipe->pipe(new Handler\DownloadCsvHandler($this->dataStore));
         $this->middlewarePipe->pipe(new Handler\QueryHandler($this->dataStore));
-        $this->middlewarePipe->pipe(new Handler\QueriedUpdateHandler($this->dataStore));
         $this->middlewarePipe->pipe(new Handler\ReadHandler($this->dataStore));
         $this->middlewarePipe->pipe(new Handler\MultiCreateHandler($this->dataStore));
         $this->middlewarePipe->pipe(new Handler\CreateHandler($this->dataStore));
         $this->middlewarePipe->pipe(new Handler\UpdateHandler($this->dataStore));
         $this->middlewarePipe->pipe(new Handler\RefreshHandler($this->dataStore));
         $this->middlewarePipe->pipe(new Handler\DeleteHandler($this->dataStore));
+        $this->middlewarePipe->pipe(new Handler\QueriedUpdateHandler($this->dataStore));
         $this->middlewarePipe->pipe(new Handler\ErrorHandler());
     }
 
