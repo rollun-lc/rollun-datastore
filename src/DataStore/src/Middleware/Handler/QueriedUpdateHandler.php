@@ -28,7 +28,7 @@ class QueriedUpdateHandler extends AbstractHandler
         }
 
         if ($query->getLimit() === null) {
-            return false; // Нет лимита — не обрабатываем
+            return false;
         }
 
         $fields = $request->getParsedBody();
