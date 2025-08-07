@@ -4,6 +4,7 @@ namespace rollun\datastore\Middleware\Handler;
 
 use Laminas\Diactoros\Response;
 use Psr\Http\Message\ServerRequestInterface;
+use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use Xiag\Rql\Parser\Query;
 use Psr\Http\Message\ResponseInterface;
 
@@ -52,7 +53,11 @@ class QueriedUpdateHandler extends AbstractHandler
         $query = $request->getAttribute('rqlQueryObject');
         $fields = $request->getParsedBody();
 
-        $result = $this->dataStore->queriedUpdate($fields, $query);
+        if ($this->dataStore instanceof DataStoreInterface) {
+            $result = $this->dataStore->queriedUpdate($fields, $query);
+        } else {
+            // TODO: implemets queriedUpdate method
+        }
 
         $response = new Response();
         $response = $response->withBody($this->createStream($result));
