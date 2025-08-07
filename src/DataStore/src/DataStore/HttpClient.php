@@ -403,6 +403,47 @@ class HttpClient extends DataStoreAbstract
         return $result;
     }
 
+    /**
+     * @inheritDoc
+     *
+     * @throws DataStoreException
+     * @throws \rollun\utils\Json\Exception
+     */
+    public function queriedUpdate($record, Query $query)
+    {
+        if (
+            !is_array($record) ||
+            array_keys($record) === range(0, count($record) - 1) || /// Array is list ['val1', 'val2'] instead of
+//            ['column1' => 'val1', 'column2' => 'val2']
+            empty($record)
+        ) {
+            throw new DataStoreException('Expected non-empty associative array for update fields.');
+        }
+
+        $head = $this->sendHead();
+        if ($head && isset($head['X_QUERIED_UPDATE'])) {
+            $uri = $this->createUri($query);
+            $client = $this->initHttpClient(Request::METHOD_PATCH, $uri);
+            $client->setRawBody(Serializer::jsonSerialize($record));
+            $response = self::sendByClient($client);
+
+            $this->checkResonseHeaderIdentifier($response);
+
+            if ($response->isSuccess()) {
+                $result = Serializer::jsonUnserialize($response->getBody());
+            } else {
+                $responseMessage = $this->createResponseMessage($uri, 'PATCH', $response);
+                throw new DataStoreException("Can't queried update items {$responseMessage}");
+            }
+
+            return $result;
+        } else {
+            // TODO: implements queriedUpdate logic if not realised (foreach?)
+            // TODO: update unit test
+            throw new DataStoreException('Queried update for this datastore is not implemented.');
+        }
+    }
+
     protected function createResponseMessage($uri, $method, Response $response)
     {
         $messages = [
