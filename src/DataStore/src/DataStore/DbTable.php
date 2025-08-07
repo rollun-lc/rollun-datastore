@@ -262,12 +262,15 @@ class DbTable extends DataStoreAbstract
      */
     public function queriedUpdate($record, Query $query)
     {
-        if ($query->getLimit()
-            || $query->getSort()
-            || ($query instanceof RqlQuery && $query->getGroupBy())
-            || $query->getSelect()) {
-            throw new InvalidArgumentException('Only where clause allowed for update');
+        if ($query->getLimit() === null) {
+            throw new DataStoreException('Queried update requires limit.');
         }
+
+        if ($query->getSelect() || ($query instanceof RqlQuery && $query->getGroupBy())) {
+            throw new DataStoreException('Queried update does not support select or groupBy.');
+        }
+//        TODO: и тесты - проверить и дополнить если надо
+//        TODO: Подумать как сделать реализацию для всех методов (возможно маг методы) - позже, не тратить пока время, в тикет просто записать
 
         $selectResult = $this->selectForUpdateWithQuery($query);
 
