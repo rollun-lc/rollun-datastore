@@ -4,6 +4,7 @@ namespace rollun\datastore\Middleware\Handler;
 
 use Laminas\Diactoros\Response;
 use Psr\Http\Message\ServerRequestInterface;
+use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use Xiag\Rql\Parser\Query;
 use Psr\Http\Message\ResponseInterface;
@@ -57,6 +58,7 @@ class QueriedUpdateHandler extends AbstractHandler
             $result = $this->dataStore->queriedUpdate($fields, $query);
         } else {
             // TODO: implemets queriedUpdate method
+            throw new DataStoreException('Data store object is not supporting queried update temporarily');
         }
 
         $response = new Response();
