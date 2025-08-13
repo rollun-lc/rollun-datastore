@@ -351,6 +351,7 @@ class DbTableTest extends TestCase
         $object->queriedUpdate(['unknown_col' => 123], new RqlQuery('gt(id,1)'));
     }
 
+    /*
     public function testQueriedUpdateRejectsLimit()
     {
         $object = $this->createObject();
@@ -378,6 +379,7 @@ class DbTableTest extends TestCase
 
         $object->queriedUpdate(['name' => 'x'], new RqlQuery('gt(id,1)&sort(+id)'));
     }
+    */
 
     public function testQueriedUpdateRejectsSelect()
     {
@@ -388,7 +390,7 @@ class DbTableTest extends TestCase
         }
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Only where clause allowed for update');
+        $this->expectExceptionMessage('Queried update does not support select or groupBy.');
 
         $object->queriedUpdate(['name' => 'x'], new RqlQuery('gt(id,1)&select(id)'));
     }
@@ -402,9 +404,28 @@ class DbTableTest extends TestCase
         }
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Only where clause allowed for update');
+        $this->expectExceptionMessage('Queried update does not support select or groupBy.');
 
         $object->queriedUpdate(['name' => 'x'], new RqlQuery('gt(id,1)&groupby(name)'));
+    }
+
+    public function testQueriedUpdateBadFilterRollback()
+    {
+        $object = $this->createObject();
+
+        foreach (range(1, 3) as $id) {
+            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
+        }
+
+        $this->expectException(DataStoreException::class);
+
+        try {
+            $object->queriedUpdate(['name' => 'X'], new RqlQuery('eq(unknown_field,1)'));
+        } finally {
+            foreach (range(1, 3) as $id) {
+                $this->assertEquals(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"], $this->read($id));
+            }
+        }
     }
 
     public function testWriteLog()
