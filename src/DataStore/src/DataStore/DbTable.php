@@ -274,12 +274,12 @@ class DbTable extends DataStoreAbstract
             throw new InvalidArgumentException('Expected non-empty associative array for update fields.');
         }
 
-        if ($query->getLimit() === null) {
-            throw new DataStoreException('Queried update requires limit.');
-        }
+//        if ($query->getLimit() === null) {
+//            throw new DataStoreException('Queried update requires limit.');
+//        }
 
         if ($query->getSelect() || ($query instanceof RqlQuery && $query->getGroupBy()) || is_null($query->getQuery())) {
-            throw new DataStoreException('Queried update does not support select or groupBy.');
+            throw new InvalidArgumentException('Queried update does not support select or groupBy.');
         }
 
 //        if ($query->getLimit()
