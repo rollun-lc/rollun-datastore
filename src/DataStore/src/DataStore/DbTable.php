@@ -7,6 +7,9 @@
 namespace rollun\datastore\DataStore;
 
 use InvalidArgumentException;
+use Zend\Db\Adapter\Exception\RuntimeException;
+use Zend\Db\Sql\Predicate\In;
+use Zend\Db\Sql\Where;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
@@ -263,13 +266,21 @@ class DbTable extends DataStoreAbstract
             throw new InvalidArgumentException('Expected non-empty associative array for update fields.');
         }
 
-        if ($query->getLimit()
-            || $query->getSort()
-            || ($query instanceof RqlQuery && $query->getGroupBy())
-            || $query->getSelect()
-            || is_null($query->getQuery())) {
-            throw new InvalidArgumentException('Only where clause allowed for update');
+        if ($query->getLimit() === null) {
+            throw new DataStoreException('Queried update requires limit.');
         }
+
+        if ($query->getSelect() || ($query instanceof RqlQuery && $query->getGroupBy()) || is_null($query->getQuery())) {
+            throw new DataStoreException('Queried update does not support select or groupBy.');
+        }
+
+//        if ($query->getLimit()
+//            || $query->getSort()
+//            || ($query instanceof RqlQuery && $query->getGroupBy())
+//            || $query->getSelect()
+//            || is_null($query->getQuery())) {
+//            throw new InvalidArgumentException('Only where clause allowed for update');
+//        }
 
         // prepare record
         foreach ($record as $k => $v) {
@@ -279,16 +290,6 @@ class DbTable extends DataStoreAbstract
                 $record[$k] = 1;
             }
         }
-
-//        TODO: uncommit next 2 if{} when release sort & limit
-//        if ($query->getLimit() === null) {
-//            throw new DataStoreException('Queried update requires limit.');
-//        }
-//
-//        if ($query->getSelect() || ($query instanceof RqlQuery && $query->getGroupBy())) {
-//            throw new DataStoreException('Queried update does not support select or groupBy.');
-//        }
-//        TODO: и тесты - проверить и дополнить если надо
 //        TODO: Подумать как сделать реализацию для всех методов (возможно маг методы) - позже, не тратить пока время, в тикет просто записать
 
         $adapter   = $this->getDbTable()->getAdapter();
@@ -303,13 +304,13 @@ class DbTable extends DataStoreAbstract
                 return [];
             }
 
-            // 5) UPDATE по исходному WHERE (как у тебя)
-            $conditionBuilder = new SqlConditionBuilder($adapter, $this->getDbTable()->getTable());
-
             $sql = new Sql($adapter);
             $update = $sql->update($this->getDbTable()->getTable());
-            $update->where($conditionBuilder->__invoke($query->getQuery()));
             $update->set($record);
+
+            $where = new Where();
+            $where->in($this->getIdentifier(), $selectedIds);
+            $update->where($where);
 
             $sqlString = $sql->buildSqlString($update);
 
