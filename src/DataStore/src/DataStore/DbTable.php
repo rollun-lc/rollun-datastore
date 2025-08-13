@@ -330,7 +330,7 @@ class DbTable extends DataStoreAbstract
         } catch (\Throwable $e) {
             $conn->rollback();
             $conn->disconnect();
-            throw new DataStoreException("[{$this->getDbTable()->getTable()}]Can't update records using query", 0, $e);
+            throw new DataStoreException("[{$this->getDbTable()->getTable()}] Can't update records using query", 0, $e);
         }
     }
 
