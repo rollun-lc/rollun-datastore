@@ -273,21 +273,137 @@ class DbTableTest extends TestCase
         }
 
         $query = new RqlQuery('gt(id,3)');
-        $object->queriedUpdate([
+        $ids = $object->queriedUpdate([
             'name' => "name0",
             'surname' => "surname0",
         ], $query);
 
+        sort($ids);
+        $this->assertEquals(range(4, 10), $ids);
+
         foreach (range(1, 10) as $id) {
+            $row = $this->read($id);
             if ($id > 3) {
-                $item = ['name' => "name0", 'surname' => "surname0"];
+                $this->assertEquals(['id' => $id, 'name' => 'name0', 'surname' => 'surname0'], $row);
             } else {
-                $item = ['name' => "name{$id}", 'surname' => "surname{$id}"];
+                $this->assertEquals(['id' => $id, 'name' => "name{$id}", 'surname' => "surname{$id}"], $row);
             }
-
-            $this->assertEquals(array_merge($item, ['id' => $id]), $object->read($id));
-
         }
+    }
+
+    public function testQueriedUpdateEmptyResult()
+    {
+        $object = $this->createObject();
+
+        foreach (range(1, 5) as $id) {
+            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
+        }
+
+        $query = new RqlQuery('gt(id,1000)');
+        $ids = $object->queriedUpdate(['name' => 'X'], $query);
+
+        $this->assertSame([], $ids);
+
+        foreach (range(1, 5) as $id) {
+            $this->assertEquals(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"], $this->read($id));
+        }
+    }
+
+    public function testQueriedUpdateRecordValidationEmptyArray()
+    {
+        $object = $this->createObject();
+
+        foreach (range(1, 3) as $id) {
+            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
+        }
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage('Expected non-empty associative array for update fields.');
+
+        $object->queriedUpdate([], new RqlQuery('gt(id,1)'));
+    }
+
+    public function testQueriedUpdateRecordValidationListInsteadOfAssoc()
+    {
+        $object = $this->createObject();
+
+        foreach (range(1, 3) as $id) {
+            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
+        }
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage('Expected non-empty associative array for update fields.');
+
+        $object->queriedUpdate(['oops'], new RqlQuery('gt(id,1)'));
+    }
+
+    public function testQueriedUpdateDriverErrorUnknownColumn()
+    {
+        $object = $this->createObject();
+
+        foreach (range(1, 3) as $id) {
+            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
+        }
+
+        $this->expectException(DataStoreException::class);
+
+        $object->queriedUpdate(['unknown_col' => 123], new RqlQuery('gt(id,1)'));
+    }
+
+    public function testQueriedUpdateRejectsLimit()
+    {
+        $object = $this->createObject();
+
+        foreach (range(1, 3) as $id) {
+            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
+        }
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Only where clause allowed for update');
+
+        $object->queriedUpdate(['name' => 'x'], new RqlQuery('gt(id,1)&limit(2)'));
+    }
+
+    public function testQueriedUpdateRejectsSort()
+    {
+        $object = $this->createObject();
+
+        foreach (range(1, 3) as $id) {
+            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
+        }
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Only where clause allowed for update');
+
+        $object->queriedUpdate(['name' => 'x'], new RqlQuery('gt(id,1)&sort(+id)'));
+    }
+
+    public function testQueriedUpdateRejectsSelect()
+    {
+        $object = $this->createObject();
+
+        foreach (range(1, 3) as $id) {
+            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
+        }
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Only where clause allowed for update');
+
+        $object->queriedUpdate(['name' => 'x'], new RqlQuery('gt(id,1)&select(id)'));
+    }
+
+    public function testQueriedUpdateRejectsGroupBy()
+    {
+        $object = $this->createObject();
+
+        foreach (range(1, 3) as $id) {
+            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
+        }
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Only where clause allowed for update');
+
+        $object->queriedUpdate(['name' => 'x'], new RqlQuery('gt(id,1)&groupby(name)'));
     }
 
     public function testWriteLog()
