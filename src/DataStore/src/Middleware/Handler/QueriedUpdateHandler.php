@@ -44,7 +44,7 @@ class QueriedUpdateHandler extends AbstractHandler
             return false;
         }
 
-        return $this->isRqlQueryEmptyExceptFilterAndLimit($query);
+        return $this->isRqlQueryEmptyExceptSortAndLimit($query);
 
         // TODO: добавить проверку что датастор может выполнить queriedUpdate()
     }
@@ -69,7 +69,7 @@ class QueriedUpdateHandler extends AbstractHandler
     /**
      * Check that rqs is only RQL-filter, no groupBy/select
      */
-    private function isRqlQueryEmptyExceptFilterAndLimit(Query $query): bool
+    private function isRqlQueryEmptyExceptSortAndLimit(Query $query): bool
     {
         return is_null($query->getGroupBy())
             && is_null($query->getSelect());
