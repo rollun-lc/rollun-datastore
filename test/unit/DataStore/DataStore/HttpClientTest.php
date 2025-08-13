@@ -686,37 +686,34 @@ class HttpClientTest extends TestCase
     public function testQueriedUpdateFetchAndPut()
     {
         // 1) Мокаем Laminas\Http\Client
-        $clientMock = $this->getMockBuilder(Client::class)
+        $clientMock = $this
+            ->getMockBuilder(Client::class)
             ->disableOriginalConstructor()
             ->getMock();
 
-        // Подготовим три последовательных ответа:
-        //   1) GET-список
-        //   2) PUT для id=1
-        //   3) PUT для id=2
-        $list = new Response();
-        $list->setStatusCode(200);
-        $list->setContent(Serializer::jsonSerialize([
-            ['id' => 1, 'x' => 'old'],
-            ['id' => 2, 'x' => 'old'],
-        ]));
-        $put1 = new Response();
-        $put1->setStatusCode(200);
-        $put1->setContent(Serializer::jsonSerialize(['id' => 1]));
-        $put2 = new Response();
-        $put2->setStatusCode(200);
-        $put2->setContent(Serializer::jsonSerialize(['id' => 2]));
+        // HEAD-ответ с нужным заголовком
+        $head = new Response();
+        $head->setStatusCode(200);
+        $head->getHeaders()->addHeaderLine('X_QUERIED_UPDATE', 'true');
 
-        $clientMock->expects($this->exactly(3))
+        // PATCH-ответ cо списком обновлённых id
+        $patch = new Response();
+        $patch->setStatusCode(200);
+        $patch->setContent(Serializer::jsonSerialize([1, 2]));
+
+        // Будет ровно два send(): HEAD, затем PATCH
+        $clientMock
+            ->expects($this->exactly(2))
             ->method('send')
-            ->willReturnOnConsecutiveCalls($list, $put1, $put2);
+            ->willReturnOnConsecutiveCalls($head, $patch);
 
-        // Ожидаем два вызова setRawBody с теле только поля 'x'
-        $clientMock->expects($this->exactly(2))
+        // Тело PATCH — только изменяемые поля
+        $clientMock
+            ->expects($this->once())
             ->method('setRawBody')
             ->with(Serializer::jsonSerialize(['x' => 'new']));
 
-        // 2) Анонимный подкласс, чтобы initHttpClient() всегда возвращал наш мок
+        // 2) Сабкласс, чтобы initHttpClient() возвращал наш мок
         $token = $this->createMock(LifeCycleToken::class);
         $ds = new class ($clientMock, '', ['identifier' => 'id'], $token) extends HttpClient {
             protected function initHttpClient(string $method, string $uri, $ifMatch = false)
@@ -731,7 +728,7 @@ class HttpClientTest extends TestCase
 
         $updated = $ds->queriedUpdate(['x' => 'new'], $query);
 
-        // Проверяем, что вернулись именно ID [1,2]
+        // Вернулись именно ID [1,2]
         $this->assertSame([1, 2], $updated);
     }
 }
