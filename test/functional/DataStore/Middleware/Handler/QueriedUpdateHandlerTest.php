@@ -20,7 +20,7 @@ class QueriedUpdateHandlerTest extends BaseHandlerTest
             // method, body, rqlQueryObject, primaryKeyValue, expected
 
             // Верный PATCH запрос с фильтром, ассоц массивом и без id
-            ['PATCH', ['foo' => 11], new RqlQuery('eq(a,1)'), null, true],
+            ['PATCH', ['foo' => 11], new RqlQuery('eq(a,1)&limit(1)'), null, true],
 
             // PATCH, но обычный list
             ['PATCH', [1, 2], new RqlQuery('eq(a,1)'), null, false],
@@ -80,7 +80,7 @@ class QueriedUpdateHandlerTest extends BaseHandlerTest
     public function testHandleSuccess()
     {
         $fields = ['archived' => true];
-        $rqlQuery = new RqlQuery('eq(status,new)');
+        $rqlQuery = new RqlQuery('eq(status,new)&limit(2)');
 
         /** @var DataStoresInterface|MockObject $dataStore */
         $dataStore = $this->createMock(HttpClient::class);
