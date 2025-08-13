@@ -278,6 +278,15 @@ class DbTable extends DataStoreAbstract
             throw new InvalidArgumentException('Only where clause allowed for update');
         }
 
+        // prepare record
+        foreach ($record as $k => $v) {
+            if ($v === false) {
+                $record[$k] = 0;
+            } elseif ($v === true) {
+                $record[$k] = 1;
+            }
+        }
+
 //        TODO: uncommit next 2 if{} when release sort & limit
 //        if ($query->getLimit() === null) {
 //            throw new DataStoreException('Queried update requires limit.');
@@ -289,68 +298,39 @@ class DbTable extends DataStoreAbstract
 //        TODO: и тесты - проверить и дополнить если надо
 //        TODO: Подумать как сделать реализацию для всех методов (возможно маг методы) - позже, не тратить пока время, в тикет просто записать
 
-        $selectResult = $this->selectForUpdateWithQuery($query);
-        $selectedIds = [];
-        foreach ($selectResult as $row) {
-            $id = null;
-            if (is_array($row)) {
-                $id = array_key_exists($this->getIdentifier(), $row) ? $row[$this->getIdentifier()] : reset($row);
-            }
-            if ($id === null) {
-                throw new DataStoreException("Identifier column '{$this->getIdentifier()}' not found in SELECT result row.");
-            }
-            if (is_numeric($id) && (string)(int)$id === (string)$id) {
-                $id = (int)$id;
-            }
-            $selectedIds[] = $id;
-        }
-        if (count($selectedIds) === 0) {
-            return [];
-        }
+        $adapter   = $this->getDbTable()->getAdapter();
+        $conn      = $adapter->getDriver()->getConnection();
 
-        $conditionBuilder = new SqlConditionBuilder(
-            $this->getDbTable()->getAdapter(),
-            $this->getDbTable()->getTable()
-        );
-
-        // prepare record
-        foreach ($record as $k => $v) {
-            if ($v === false) {
-                $record[$k] = 0;
-            } elseif ($v === true) {
-                $record[$k] = 1;
-            }
-        }
-
-        $sql = new Sql($this->getDbTable()->getAdapter());
-        $update = $sql->update($this->getDbTable()->getTable());
-        $update->where($conditionBuilder->__invoke($query->getQuery()));
-        $update->set($record);
-        $sqlString = $sql->buildSqlString($update);
-
-        $adapter = $this->dbTable->getAdapter();
+        $this->beginTransaction();
 
         try {
-            $statement = $adapter->getDriver()->createStatement($sqlString);
-            $updateResult = $statement->execute();
-            $updatedIds = [];
-
-            if ($selectResult->getAffectedRows() === $updateResult->getAffectedRows()) {
-                $updatedIds = $selectedIds;
-            } else {
-                $effectedRecords = $this->query($query);
-                /** @noinspection SuspiciousLoopInspection */
-                foreach ($selectResult as $record) {
-                    if ($record !== $effectedRecords[$this->getIdentifier()]) {
-                        $updatedIds[] = $effectedRecords[$this->getIdentifier()];
-                    }
-                }
+            $selectedIds = $this->selectIdsForUpdate($query);
+            if ($selectedIds === []) {
+                $conn->commit();
+                return [];
             }
-        } catch (\Throwable $e) {
-            throw new DataStoreException("[{$this->dbTable->getTable()}]Can't update records using query", 0, $e);
-        }
 
-        return $updatedIds;
+            // 5) UPDATE по исходному WHERE (как у тебя)
+            $conditionBuilder = new SqlConditionBuilder($adapter, $this->getDbTable()->getTable());
+
+            $sql = new Sql($adapter);
+            $update = $sql->update($this->getDbTable()->getTable());
+            $update->where($conditionBuilder->__invoke($query->getQuery()));
+            $update->set($record);
+
+            $sqlString = $sql->buildSqlString($update);
+
+            $statement = $adapter->getDriver()->createStatement($sqlString);
+            $statement->execute();
+
+            $conn->commit();
+            return $selectedIds;
+
+        } catch (\Throwable $e) {
+            $conn->rollback();
+            $conn->disconnect();
+            throw new DataStoreException("[{$this->getDbTable()->getTable()}]Can't update records using query", 0, $e);
+        }
     }
 
     /**
@@ -379,19 +359,26 @@ class DbTable extends DataStoreAbstract
     }
 
     /**
-     * @param Query $query
-     * @return \Laminas\Db\Adapter\Driver\ResultInterface
+     * Returns an array of ids by selecting them with FOR UPDATE within an active transaction.
      */
-    private function selectForUpdateWithQuery(Query $query)
+    private function selectIdsForUpdate(Query $query): array
     {
         $adapter = $this->dbTable->getAdapter();
 
-        $sqlString = $this->getSqlQueryBuilder()->buildSql($query);
-        $sqlString .= " FOR UPDATE";
+        $q = clone $query;
+        $q->setSelect(new SelectNode([$this->getIdentifier()]));
 
+        $sqlString = $this->getSqlQueryBuilder()->buildSql($q) . " FOR UPDATE";
         $statement = $adapter->getDriver()->createStatement($sqlString);
+        $result    = $statement->execute();
 
-        return $statement->execute();
+        $ids = [];
+        foreach ($result as $row) {
+            $id = $row[$this->getIdentifier()];
+            $ids[] = $id;
+        }
+
+        return $ids;
     }
 
     /**
