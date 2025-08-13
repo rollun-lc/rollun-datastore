@@ -6,6 +6,7 @@
 
 namespace rollun\test\functional\DataStore\DataStore;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
@@ -317,7 +318,7 @@ class DbTableTest extends TestCase
             $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
         }
 
-        $this->expectException(DataStoreException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Expected non-empty associative array for update fields.');
 
         $object->queriedUpdate([], new RqlQuery('gt(id,1)'));
