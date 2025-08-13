@@ -328,10 +328,7 @@ class DbTable extends DataStoreAbstract
             $updatedIds = [];
 
             if ($selectResult->getAffectedRows() === $updateResult->getAffectedRows()) {
-                /** @noinspection SuspiciousLoopInspection */
-                foreach ($selectResult as $record) {
-                    $updatedIds[] = $record[$this->getIdentifier()];
-                }
+                $updatedIds = $selectedIds;
             } else {
                 $effectedRecords = $this->query($query);
                 /** @noinspection SuspiciousLoopInspection */
