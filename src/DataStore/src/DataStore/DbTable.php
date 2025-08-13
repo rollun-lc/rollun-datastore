@@ -270,7 +270,7 @@ class DbTable extends DataStoreAbstract
             throw new InvalidArgumentException('Only where clause allowed for update');
         }
 
-//        TODO: uncommit next 2 if when release sort & limit
+//        TODO: uncommit next 2 if{} when release sort & limit
 //        if ($query->getLimit() === null) {
 //            throw new DataStoreException('Queried update requires limit.');
 //        }
@@ -282,10 +282,21 @@ class DbTable extends DataStoreAbstract
 //        TODO: Подумать как сделать реализацию для всех методов (возможно маг методы) - позже, не тратить пока время, в тикет просто записать
 
         $selectResult = $this->selectForUpdateWithQuery($query);
-
-//        TODO: поменять следующую проверку на логически правильную
-//        selectResult всегда будет true, даже если вернется 0 строк. execute либо возвращает (не важно что), либо бросает исключение
-        if (!$selectResult) {
+        $selectedIds = [];
+        foreach ($selectResult as $row) {
+            $id = null;
+            if (is_array($row)) {
+                $id = array_key_exists($this->getIdentifier(), $row) ? $row[$this->getIdentifier()] : reset($row);
+            }
+            if ($id === null) {
+                throw new DataStoreException("Identifier column '{$this->getIdentifier()}' not found in SELECT result row.");
+            }
+            if (is_numeric($id) && (string)(int)$id === (string)$id) {
+                $id = (int)$id;
+            }
+            $selectedIds[] = $id;
+        }
+        if (count($selectedIds) === 0) {
             return [];
         }
 
