@@ -275,7 +275,8 @@ class DbTable extends DataStoreAbstract
         if ($query->getLimit()
             || $query->getSort()
             || ($query instanceof RqlQuery && $query->getGroupBy())
-            || $query->getSelect()) {
+            || $query->getSelect()
+            || is_null($query->getQuery())) {
             throw new InvalidArgumentException('Only where clause allowed for update');
         }
 
