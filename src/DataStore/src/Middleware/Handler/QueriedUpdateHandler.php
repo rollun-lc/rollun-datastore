@@ -29,9 +29,9 @@ class QueriedUpdateHandler extends AbstractHandler
             return false;
         }
 
-//        if ($query->getLimit() === null) {
-//            return false;
-//        }
+        if ($query->getLimit() === null) {
+            return false;
+        }
 
         $fields = $request->getParsedBody();
         if (
@@ -46,7 +46,7 @@ class QueriedUpdateHandler extends AbstractHandler
 
         return $this->isRqlQueryEmptyExceptFilterAndLimit($query);
 
-        //        TODO: добавить проверку что датастор может выполнить queriedUpdate()
+        // TODO: добавить проверку что датастор может выполнить queriedUpdate()
     }
 
     protected function handle(ServerRequestInterface $request): ResponseInterface
@@ -67,11 +67,11 @@ class QueriedUpdateHandler extends AbstractHandler
     }
 
     /**
-     * Check that rqs is only RQL-filter, no limit/sort/select
+     * Check that rqs is only RQL-filter, no groupBy/select
      */
     private function isRqlQueryEmptyExceptFilterAndLimit(Query $query): bool
     {
-        return is_null($query->getSort())
+        return is_null($query->getGroupBy())
             && is_null($query->getSelect());
     }
 }
