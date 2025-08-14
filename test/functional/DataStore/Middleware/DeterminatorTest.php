@@ -9,6 +9,7 @@ namespace rollun\test\functional\DataStore\Middleware;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\LoggerInterface;
 use rollun\datastore\DataStore\Aspect\AspectTyped;
 use rollun\datastore\DataStore\BaseDto;
 use rollun\datastore\DataStore\DataStorePluginManager;
@@ -63,7 +64,8 @@ class DeterminatorTest extends TestCase
             ->with($serviceName)
             ->willReturn($dataStoreMock);
 
-        $object = new Determinator($dataStorePluginManagerMock);
+        $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
+        $object = new Determinator($dataStorePluginManagerMock, $logger);
         $object->process($request, $delegate);
     }
 
@@ -107,7 +109,8 @@ class DeterminatorTest extends TestCase
         $request = $request->withAttribute(ResourceResolver::RESOURCE_NAME, $serviceName);
         $request = $request->withAttribute(ResourceResolver::PRIMARY_KEY_VALUE, 1);
 
-        $object = new Determinator($dataStorePluginManagerMock);
+        $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
+        $object = new Determinator($dataStorePluginManagerMock, $logger);
         $response = $object->process($request, $delegate);
 
         $this->assertEquals(json_encode($dataStore->getScheme()), current($response->getHeader('Datastore-Scheme')));
@@ -142,7 +145,8 @@ class DeterminatorTest extends TestCase
             ->with($serviceName)
             ->willReturn($notDataStore);
 
-        $object = new Determinator($dataStorePluginManagerMock);
+        $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
+        $object = new Determinator($dataStorePluginManagerMock, $logger);
         $object->process($request, $delegate);
     }
 }

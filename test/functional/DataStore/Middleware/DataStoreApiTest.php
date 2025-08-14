@@ -84,7 +84,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
             ->with($resourceName)
             ->willReturn($dataStore);
 
-        $determinator = new Middleware\Determinator($dataStorePluginManagerMock);
+        $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
+        $determinator = new Middleware\Determinator($dataStorePluginManagerMock, $logger);
 
         $args[] = [
             new DataStoreApi($determinator),
@@ -186,7 +187,8 @@ class DataStoreApiTest extends BaseMiddlewareTest
             ->method('get')
             ->with(null);
 
-        $determinator = new Middleware\Determinator($dataStorePluginManagerMock);
+        $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
+        $determinator = new Middleware\Determinator($dataStorePluginManagerMock, $logger);
 
         /** @var MiddlewareInterface $object */
         $object = new DataStoreApi($determinator);
@@ -207,9 +209,12 @@ class DataStoreApiTest extends BaseMiddlewareTest
             ->disableOriginalConstructor()
             ->getMock();
 
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
+
+
         /** @var Middleware\Determinator|PHPUnit_Framework_MockObject_MockObject $dataStoreDeterminator */
         $dataStoreDeterminator = $this->getMockBuilder(Middleware\Determinator::class)
-            ->setConstructorArgs([$dataStorePluginManagerMock])
+            ->setConstructorArgs([$dataStorePluginManagerMock, $loggerMock])
             ->getMock();
 
         $middlewarePipe = new MiddlewarePipe();
