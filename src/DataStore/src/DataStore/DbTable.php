@@ -274,21 +274,21 @@ class DbTable extends DataStoreAbstract
             throw new InvalidArgumentException('Expected non-empty associative array for update fields.');
         }
 
-//        if ($query->getLimit() === null) {
-//            throw new DataStoreException('Queried update requires limit.');
-//        }
+        //        if ($query->getLimit() === null) {
+        //            throw new DataStoreException('Queried update requires limit.');
+        //        }
 
         if ($query->getSelect() || ($query instanceof RqlQuery && $query->getGroupBy()) || is_null($query->getQuery())) {
             throw new InvalidArgumentException('Queried update does not support select or groupBy.');
         }
 
-//        if ($query->getLimit()
-//            || $query->getSort()
-//            || ($query instanceof RqlQuery && $query->getGroupBy())
-//            || $query->getSelect()
-//            || is_null($query->getQuery())) {
-//            throw new InvalidArgumentException('Only where clause allowed for update');
-//        }
+        //        if ($query->getLimit()
+        //            || $query->getSort()
+        //            || ($query instanceof RqlQuery && $query->getGroupBy())
+        //            || $query->getSelect()
+        //            || is_null($query->getQuery())) {
+        //            throw new InvalidArgumentException('Only where clause allowed for update');
+        //        }
 
         // prepare record
         foreach ($record as $k => $v) {
@@ -298,7 +298,6 @@ class DbTable extends DataStoreAbstract
                 $record[$k] = 1;
             }
         }
-//        TODO: Подумать как сделать реализацию для всех методов (возможно маг методы) - позже, не тратить пока время, в тикет просто записать
 
         $adapter   = $this->getDbTable()->getAdapter();
         $conn      = $adapter->getDriver()->getConnection();
