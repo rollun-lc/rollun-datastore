@@ -297,7 +297,6 @@ class DbTable extends DataStoreAbstract
                 $record[$k] = 1;
             }
         }
-        //        TODO: Подумать как сделать реализацию для всех методов (возможно маг методы) - позже, не тратить пока время, в тикет просто записать
 
         $adapter   = $this->getDbTable()->getAdapter();
         $conn      = $adapter->getDriver()->getConnection();
