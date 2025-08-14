@@ -38,15 +38,13 @@ class QueriedUpdateHandler extends AbstractHandler
             !isset($fields) ||
             !is_array($fields) ||
             array_keys($fields) === range(0, count($fields) - 1) || // Array is list ['val1', 'val2'] instead of
-//            ['column1' => 'val1', 'column2' => 'val2']
+            // ['column1' => 'val1', 'column2' => 'val2']
             empty($fields)
         ) {
             return false;
         }
 
         return $this->isRqlQueryEmptyExceptSortAndLimit($query);
-
-        // TODO: добавить проверку что датастор может выполнить queriedUpdate()
     }
 
     protected function handle(ServerRequestInterface $request): ResponseInterface
@@ -57,8 +55,24 @@ class QueriedUpdateHandler extends AbstractHandler
         if ($this->dataStore instanceof DataStoreInterface) {
             $result = $this->dataStore->queriedUpdate($fields, $query);
         } else {
-            // TODO: implemets queriedUpdate method
-            throw new DataStoreException('Data store object is not supporting queried update temporarily');
+            $identifier = $this->dataStore->getIdentifier();
+
+            $items   = $this->dataStore->query($query);
+            $updated = [];
+
+            foreach ($items as $item) {
+                $payload = $fields;
+                $payload[$identifier] = $item[$identifier];
+
+                try {
+                    $updated[] = $this->dataStore->update($payload);
+                    usleep(10000); // 10ms
+                } catch (DataStoreException) {
+                    //Ignore result...
+                }
+            }
+
+            $result = array_column($updated, $identifier);
         }
 
         $response = new Response();
