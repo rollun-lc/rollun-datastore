@@ -681,55 +681,86 @@ class HttpClientTest extends TestCase
         ], $result);
     }
 
-    /**
-     * Проверяем, что queriedUpdate() делает один GET и по одному PUT на каждую запись
-     */
-    public function testQueriedUpdateFetchAndPut()
+    public function testQueriedUpdateSuccess()
     {
-        // 1) Мокаем Laminas\Http\Client
-        $clientMock = $this
-            ->getMockBuilder(Client::class)
+        $clientMock = $this->getMockBuilder(Client::class)
             ->disableOriginalConstructor()
             ->getMock();
 
-        // HEAD-ответ с нужным заголовком
-        $head = new Response();
-        $head->setStatusCode(200);
-        $head->getHeaders()->addHeaderLine('X_QUERIED_UPDATE', 'true');
-
-        // PATCH-ответ cо списком обновлённых id
         $patch = new Response();
         $patch->setStatusCode(200);
         $patch->setContent(Serializer::jsonSerialize([1, 2]));
 
-        // Будет ровно два send(): HEAD, затем PATCH
-        $clientMock
-            ->expects($this->exactly(2))
-            ->method('send')
-            ->willReturnOnConsecutiveCalls($head, $patch);
-
-        // Тело PATCH — только изменяемые поля
-        $clientMock
-            ->expects($this->once())
+        $clientMock->expects($this->once())
             ->method('setRawBody')
             ->with(Serializer::jsonSerialize(['x' => 'new']));
 
-        // 2) Сабкласс, чтобы initHttpClient() возвращал наш мок
+        $clientMock->expects($this->once())
+            ->method('send')
+            ->willReturn($patch);
+
         $token = $this->createMock(LifeCycleToken::class);
-        $ds = new class ($clientMock, '', ['identifier' => 'id'], $token) extends HttpClient {
-            protected function initHttpClient(string $method, string $uri, $ifMatch = false)
-            {
-                return $this->client;
-            }
+        $ds = new class ($clientMock, '', [], $token) extends HttpClient {
+            protected function sendHead() { return ['X_QUERIED_UPDATE' => true]; }
+            protected function initHttpClient(string $method, string $uri, $ifMatch = false) { return $this->client; }
         };
 
-        // 3) RQL eq(x,'old') и вызов queriedUpdate
         $query = new Query();
         $query->setQuery(new EqNode('x', 'old'));
 
-        $updated = $ds->queriedUpdate(['x' => 'new'], $query);
+        $result = $ds->queriedUpdate(['x' => 'new'], $query);
+        $this->assertSame([1, 2], $result);
+    }
 
-        // Вернулись именно ID [1,2]
-        $this->assertSame([1, 2], $updated);
+    public function testQueriedUpdateFail()
+    {
+        $clientMock = $this->getMockBuilder(Client::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $response = $this->createResponse('');
+        $response->expects($this->once())
+            ->method('isSuccess')
+            ->willReturn(false);
+
+        $clientMock->expects($this->once())
+            ->method('setRawBody')
+            ->with(Serializer::jsonSerialize(['x' => 'new']));
+
+        $clientMock->expects($this->once())
+            ->method('send')
+            ->willReturn($response);
+
+        $token = $this->createMock(LifeCycleToken::class);
+        $ds = new class ($clientMock, '', [], $token) extends HttpClient {
+            protected function sendHead() { return ['X_QUERIED_UPDATE' => true]; }
+            protected function initHttpClient(string $method, string $uri, $ifMatch = false) { return $this->client; }
+        };
+
+        $query = new Query();
+        $query->setQuery(new EqNode('x', 'old'));
+
+        $this->expectException(DataStoreException::class);
+        $ds->queriedUpdate(['x' => 'new'], $query);
+    }
+
+    public function testQueriedUpdateNotSupported()
+    {
+        $clientMock = $this->getMockBuilder(Client::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $token = $this->createMock(LifeCycleToken::class);
+        $ds = new class ($clientMock, '', [], $token) extends HttpClient {
+            protected function sendHead() { return []; }
+            protected function initHttpClient(string $method, string $uri, $ifMatch = false) { return $this->client; }
+        };
+
+        $query = new Query();
+        $query->setQuery(new EqNode('x', 'old'));
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage('Queried update for this datastore is not implemented.');
+        $ds->queriedUpdate(['x' => 'new'], $query);
     }
 }
