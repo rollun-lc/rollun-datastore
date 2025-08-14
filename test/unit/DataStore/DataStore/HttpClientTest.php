@@ -700,8 +700,14 @@ class HttpClientTest extends TestCase
 
         $token = $this->createMock(LifeCycleToken::class);
         $ds = new class ($clientMock, '', [], $token) extends HttpClient {
-            protected function sendHead() { return ['X_QUERIED_UPDATE' => true]; }
-            protected function initHttpClient(string $method, string $uri, $ifMatch = false) { return $this->client; }
+            protected function sendHead()
+            {
+                return ['X_QUERIED_UPDATE' => true];
+            }
+            protected function initHttpClient(string $method, string $uri, $ifMatch = false)
+            {
+                return $this->client;
+            }
         };
 
         $query = new Query();
@@ -732,8 +738,14 @@ class HttpClientTest extends TestCase
 
         $token = $this->createMock(LifeCycleToken::class);
         $ds = new class ($clientMock, '', [], $token) extends HttpClient {
-            protected function sendHead() { return ['X_QUERIED_UPDATE' => true]; }
-            protected function initHttpClient(string $method, string $uri, $ifMatch = false) { return $this->client; }
+            protected function sendHead()
+            {
+                return ['X_QUERIED_UPDATE' => true];
+            }
+            protected function initHttpClient(string $method, string $uri, $ifMatch = false)
+            {
+                return $this->client;
+            }
         };
 
         $query = new Query();
@@ -751,8 +763,14 @@ class HttpClientTest extends TestCase
 
         $token = $this->createMock(LifeCycleToken::class);
         $ds = new class ($clientMock, '', [], $token) extends HttpClient {
-            protected function sendHead() { return []; }
-            protected function initHttpClient(string $method, string $uri, $ifMatch = false) { return $this->client; }
+            protected function sendHead()
+            {
+                return [];
+            }
+            protected function initHttpClient(string $method, string $uri, $ifMatch = false)
+            {
+                return $this->client;
+            }
         };
 
         $query = new Query();
