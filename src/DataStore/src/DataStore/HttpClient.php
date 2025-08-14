@@ -413,7 +413,7 @@ class HttpClient extends DataStoreAbstract
         if (
             !is_array($record) ||
             array_keys($record) === range(0, count($record) - 1) || /// Array is list ['val1', 'val2'] instead of
-//            ['column1' => 'val1', 'column2' => 'val2']
+            // ['column1' => 'val1', 'column2' => 'val2']
             empty($record)
         ) {
             throw new DataStoreException('Expected non-empty associative array for update fields.');
@@ -437,8 +437,6 @@ class HttpClient extends DataStoreAbstract
 
             return $result;
         } else {
-            // TODO: implements queriedUpdate logic if not realised (foreach?)
-            // TODO: update unit test
             throw new DataStoreException('Queried update for this datastore is not implemented.');
         }
     }
