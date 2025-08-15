@@ -351,36 +351,6 @@ class DbTableTest extends TestCase
         $object->queriedUpdate(['unknown_col' => 123], new RqlQuery('gt(id,1)'));
     }
 
-    /*
-    public function testQueriedUpdateRejectsLimit()
-    {
-        $object = $this->createObject();
-
-        foreach (range(1, 3) as $id) {
-            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
-        }
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Only where clause allowed for update');
-
-        $object->queriedUpdate(['name' => 'x'], new RqlQuery('gt(id,1)&limit(2)'));
-    }
-
-    public function testQueriedUpdateRejectsSort()
-    {
-        $object = $this->createObject();
-
-        foreach (range(1, 3) as $id) {
-            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
-        }
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Only where clause allowed for update');
-
-        $object->queriedUpdate(['name' => 'x'], new RqlQuery('gt(id,1)&sort(+id)'));
-    }
-    */
-
     public function testQueriedUpdateRejectsSelect()
     {
         $object = $this->createObject();
