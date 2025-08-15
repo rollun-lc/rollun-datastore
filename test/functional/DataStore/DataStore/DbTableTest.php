@@ -273,7 +273,7 @@ class DbTableTest extends TestCase
             ]);
         }
 
-        $query = new RqlQuery('gt(id,3)');
+        $query = new RqlQuery('gt(id,3)&limit(100)');
         $ids = $object->queriedUpdate([
             'name' => "name0",
             'surname' => "surname0",
@@ -300,7 +300,7 @@ class DbTableTest extends TestCase
             $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
         }
 
-        $query = new RqlQuery('gt(id,1000)');
+        $query = new RqlQuery('gt(id,1000)&limit(100)');
         $ids = $object->queriedUpdate(['name' => 'X'], $query);
 
         $this->assertSame([], $ids);
@@ -362,7 +362,7 @@ class DbTableTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Queried update does not support select or groupBy.');
 
-        $object->queriedUpdate(['name' => 'x'], new RqlQuery('gt(id,1)&select(id)'));
+        $object->queriedUpdate(['name' => 'x'], new RqlQuery('gt(id,1)&limit(1)&select(id)'));
     }
 
     public function testQueriedUpdateRejectsGroupBy()
@@ -376,7 +376,7 @@ class DbTableTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Queried update does not support select or groupBy.');
 
-        $object->queriedUpdate(['name' => 'x'], new RqlQuery('gt(id,1)&groupby(name)'));
+        $object->queriedUpdate(['name' => 'x'], new RqlQuery('gt(id,1)&limit(1)&groupby(name)'));
     }
 
     public function testQueriedUpdateBadFilterRollback()
