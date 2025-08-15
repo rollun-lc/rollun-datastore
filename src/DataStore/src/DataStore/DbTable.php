@@ -267,27 +267,20 @@ class DbTable extends DataStoreAbstract
         if (
             !is_array($record) ||
             array_keys($record) === range(0, count($record) - 1) || /// Array is list ['val1', 'val2'] instead of
-//            ['column1' => 'val1', 'column2' => 'val2']
+            // ['column1' => 'val1', 'column2' => 'val2']
             empty($record)
         ) {
             throw new InvalidArgumentException('Expected non-empty associative array for update fields.');
         }
 
-        //        if ($query->getLimit() === null) {
-        //            throw new DataStoreException('Queried update requires limit.');
-        //        }
+        if ($query->getLimit() === null) {
+            throw new DataStoreException('Queried update requires limit.');
+        }
 
         if ($query->getSelect() || ($query instanceof RqlQuery && $query->getGroupBy()) || is_null($query->getQuery())) {
             throw new InvalidArgumentException('Queried update does not support select or groupBy.');
         }
 
-        //        if ($query->getLimit()
-        //            || $query->getSort()
-        //            || ($query instanceof RqlQuery && $query->getGroupBy())
-        //            || $query->getSelect()
-        //            || is_null($query->getQuery())) {
-        //            throw new InvalidArgumentException('Only where clause allowed for update');
-        //        }
 
         // prepare record
         foreach ($record as $k => $v) {
