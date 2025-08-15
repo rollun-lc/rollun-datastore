@@ -310,87 +310,70 @@ class DbTableTest extends TestCase
         }
     }
 
-    public function testQueriedUpdateRecordValidationEmptyArray()
+    public function queriedUpdateErrorsDataProvider()
     {
-        $object = $this->createObject();
-
-        foreach (range(1, 3) as $id) {
-            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
-        }
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Expected non-empty associative array for update fields.');
-
-        $object->queriedUpdate([], new RqlQuery('gt(id,1)'));
+        return [
+            'validationEmptyArray' => [
+                InvalidArgumentException::class,
+                'Expected non-empty associative array for update fields.',
+                [],
+                new RqlQuery('gt(id,1)'),
+            ],
+            'validationListInsteadOfAssociativeArray' => [
+                InvalidArgumentException::class,
+                'Expected non-empty associative array for update fields.',
+                ['oops'],
+                new RqlQuery('gt(id,1)'),
+            ],
+            'validationUnknownColumn' => [
+                DataStoreException::class,
+                null,
+                ['unknown_col' => 123],
+                new RqlQuery('gt(id,1)&limit(10)'),
+            ],
+            'validationRejectSelect' => [
+                InvalidArgumentException::class,
+                'Queried update does not support select or groupBy.',
+                ['name' => 'x'],
+                new RqlQuery('gt(id,1)&limit(1)&select(id)'),
+            ],
+            'validationRejectGroupBy' => [
+                InvalidArgumentException::class,
+                'Queried update does not support select or groupBy.',
+                ['name' => 'x'],
+                new RqlQuery('gt(id,1)&limit(1)&groupby(name)'),
+            ],
+            'validationBadFilter' => [
+                DataStoreException::class,
+                null,
+                ['name' => 'X'],
+                new RqlQuery('eq(unknown_field,1)&limit(10)'),
+            ],
+        ];
     }
 
-    public function testQueriedUpdateRecordValidationListInsteadOfAssoc()
-    {
+    /**
+     * @dataProvider queriedUpdateErrorsDataProvider
+     */
+    public function testQueriedUpdateErrorScenarios(
+        string $exception,
+        string|null $exceptionMessage,
+        array $updateBody,
+        RqlQuery $query,
+    ) {
         $object = $this->createObject();
 
         foreach (range(1, 3) as $id) {
             $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
         }
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Expected non-empty associative array for update fields.');
-
-        $object->queriedUpdate(['oops'], new RqlQuery('gt(id,1)'));
-    }
-
-    public function testQueriedUpdateDriverErrorUnknownColumn()
-    {
-        $object = $this->createObject();
-
-        foreach (range(1, 3) as $id) {
-            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
+        $this->expectException($exception);
+        if ($exceptionMessage) {
+            $this->expectExceptionMessage($exceptionMessage);
         }
-
-        $this->expectException(DataStoreException::class);
-
-        $object->queriedUpdate(['unknown_col' => 123], new RqlQuery('gt(id,1)'));
-    }
-
-    public function testQueriedUpdateRejectsSelect()
-    {
-        $object = $this->createObject();
-
-        foreach (range(1, 3) as $id) {
-            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
-        }
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Queried update does not support select or groupBy.');
-
-        $object->queriedUpdate(['name' => 'x'], new RqlQuery('gt(id,1)&limit(1)&select(id)'));
-    }
-
-    public function testQueriedUpdateRejectsGroupBy()
-    {
-        $object = $this->createObject();
-
-        foreach (range(1, 3) as $id) {
-            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
-        }
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Queried update does not support select or groupBy.');
-
-        $object->queriedUpdate(['name' => 'x'], new RqlQuery('gt(id,1)&limit(1)&groupby(name)'));
-    }
-
-    public function testQueriedUpdateBadFilterRollback()
-    {
-        $object = $this->createObject();
-
-        foreach (range(1, 3) as $id) {
-            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
-        }
-
-        $this->expectException(DataStoreException::class);
 
         try {
-            $object->queriedUpdate(['name' => 'X'], new RqlQuery('eq(unknown_field,1)'));
+            $object->queriedUpdate($updateBody, $query);
         } finally {
             foreach (range(1, 3) as $id) {
                 $this->assertEquals(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"], $this->read($id));
