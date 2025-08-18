@@ -22,6 +22,7 @@ final class XiagRqlParserTest extends TestCase
             $this->markTestSkipped('Актуально только для PHP 8.1+');
         }
 
+        // Commit this part to get FatalError with Xiag/Rql-Parser
         $this->markTestSkipped();
 
         //        $this->expectException(\ErrorException::class);
