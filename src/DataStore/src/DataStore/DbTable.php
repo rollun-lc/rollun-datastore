@@ -282,6 +282,11 @@ class DbTable extends DataStoreAbstract
             throw new InvalidArgumentException('Queried update does not support select or groupBy.');
         }
 
+        $identifier = $this->getIdentifier();
+        if (array_key_exists($identifier, $record)) {
+            throw new InvalidArgumentException("Primary key '$identifier' must not be present in queriedUpdate body.");
+        }
+
 
         // prepare record
         foreach ($record as $k => $v) {
@@ -309,7 +314,7 @@ class DbTable extends DataStoreAbstract
             $update->set($record);
 
             $where = new Where();
-            $where->in($this->getIdentifier(), $selectedIds);
+            $where->in($identifier, $selectedIds);
             $update->where($where);
 
             $sqlString = $sql->buildSqlString($update);

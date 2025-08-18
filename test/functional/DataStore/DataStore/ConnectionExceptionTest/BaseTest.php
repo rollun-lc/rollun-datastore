@@ -58,7 +58,7 @@ abstract class BaseTest extends FunctionalTestCase
 
         $query = $this->getQuery();
         $query->setLimit(new LimitNode(100));
-        $this->getDataStore()->queriedUpdate(['id' => 1, 'value' => 'foo'], $query);
+        $this->getDataStore()->queriedUpdate(['value' => 'foo'], $query);
     }
 
     public function testRewrite(): void
