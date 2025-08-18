@@ -5,6 +5,7 @@ namespace rollun\test\functional\DataStore\DataStore\ConnectionExceptionTest;
 use rollun\datastore\DataStore\ConnectionException;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\test\functional\FunctionalTestCase;
+use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Query;
 
@@ -55,7 +56,9 @@ abstract class BaseTest extends FunctionalTestCase
     {
         $this->expectException(ConnectionException::class);
 
-        $this->getDataStore()->queriedUpdate(['id' => 1, 'value' => 'foo'], $this->getQuery());
+        $query = $this->getQuery();
+        $query->setLimit(new LimitNode(100));
+        $this->getDataStore()->queriedUpdate(['value' => 'foo'], $query);
     }
 
     public function testRewrite(): void

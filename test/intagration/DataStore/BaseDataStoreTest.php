@@ -97,7 +97,7 @@ abstract class BaseDataStoreTest extends TestCase
         $object->delete(6);
         $this->assertEquals($object->count(), (count($range13) + count($range49)) - 2);
 
-        $object->queriedUpdate(['name' => 'foo', 'surname' => 'bar'], new RqlQuery());
+        $object->queriedUpdate(['name' => 'foo', 'surname' => 'bar'], new RqlQuery('ge(id,0)&limit(100)'));
         $this->assertEquals($object->count(), (count($range13) + count($range49)) - 2);
 
         $object->create([
@@ -397,7 +397,7 @@ abstract class BaseDataStoreTest extends TestCase
             $items[$id] = $item;
         }
 
-        $query = new RqlQuery('or(eq(id,1),eq(id,3))');
+        $query = new RqlQuery('or(eq(id,1),eq(id,3))&limit(2)');
         $object->queriedUpdate([
             'surname' => "foo",
         ], $query);
