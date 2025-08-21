@@ -121,8 +121,10 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         $strQuery = $this->literals['ScalarOperator'][$nodeName]['before'] . $this->prepareFieldName($node->getField());
 
         if ($nodeName === 'contains') {
+            // TODO: сюда добавляю кодировку спецсимвола _. Неплохо было бы сделать такой же сценари для like & alike?
+            // TODO: потому что там тоже есть такие спец символы как % и _
             $strQuery .= $this->literals['ScalarOperator'][$nodeName]['between']
-                . trim($this->prepareFieldValue($value), '\'');
+                . $this->containsNodeSpecSymbolsEcranation(trim($this->prepareFieldValue($value), '\''));
         } else {
             $strQuery .= $this->literals['ScalarOperator'][$nodeName]['between'] . $this->prepareFieldValue($value);
         }
@@ -130,6 +132,15 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         $strQuery .= $this->literals['ScalarOperator'][$nodeName]['after'];
 
         return $strQuery;
+    }
+
+    private function containsNodeSpecSymbolsEcranation(string $value)
+    {
+        if ((str_contains($value, '\\')) && (str_contains($value, '%') || str_contains($value, '_'))) {
+            throw new DataStoreException('Rql cannot contains backspace AND % OR _ in one request');
+        }
+        $value = str_replace(['%', '_'], ['\%', '\_'], $value);
+        return $value;
     }
 
     /**
