@@ -7,7 +7,7 @@
 
 namespace rollun\datastore\DataStore\ConditionBuilder;
 
-use Xiag\Rql\Parser\DataType\Glob;
+use Graviton\RqlParser\Glob;
 
 /**
  * Class RqlConditionBuilder

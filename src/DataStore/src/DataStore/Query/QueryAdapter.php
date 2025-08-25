@@ -2,7 +2,7 @@
 
 namespace rollun\datastore\DataStore\Query;
 
-use Xiag\Rql\Parser\Query;
+use Graviton\RqlParser\Query;
 
 interface QueryAdapter
 {

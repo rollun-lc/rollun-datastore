@@ -7,7 +7,10 @@
 
 namespace rollun\datastore\Rql;
 
-use Xiag\Rql\Parser\SubLexerChain;
+//use Xiag\Rql\Parser\SubLexerChain;
+use Graviton\RqlParser\Lexer;
+use Graviton\RqlParser\Node\SortNode;
+use Graviton\RqlParser\Query;
 use rollun\datastore\Rql\TokenParser\GroupbyTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqfTokenParser as BasicEqfTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqnTokenParser as BasicEqnTokenParser;
@@ -26,9 +29,9 @@ use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\ContainsTokenPars
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\LikeGlobTokenParser as FiqlLikeGlobTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\AlikeGlobTokenParser as FiqlAlikeGlobTokenParser;
 use Xiag\Rql\Parser\ExpressionParser;
-use Xiag\Rql\Parser\Lexer;
-use Xiag\Rql\Parser\Node\SortNode;
-use Xiag\Rql\Parser\Query;
+//use Xiag\Rql\Parser\Lexer;
+//use Xiag\Rql\Parser\Node\SortNode;
+//use Xiag\Rql\Parser\Query;
 use Xiag\Rql\Parser\TokenParser;
 use Xiag\Rql\Parser\TokenParserGroup;
 use Xiag\Rql\Parser\TypeCaster;

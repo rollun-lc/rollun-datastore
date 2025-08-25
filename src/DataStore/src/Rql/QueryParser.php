@@ -7,7 +7,7 @@
 
 namespace rollun\datastore\Rql;
 
-use Xiag\Rql\Parser\Parser;
+use Graviton\RqlParser\Parser;
 
 class QueryParser extends Parser
 {

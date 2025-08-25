@@ -2,16 +2,16 @@
 
 namespace rollun\datastore\DataStore\Query;
 
+use Graviton\RqlParser\Node\AbstractQueryNode;
+use Graviton\RqlParser\Node\Query\AbstractComparisonOperatorNode;
+use Graviton\RqlParser\Node\Query\AbstractLogicalOperatorNode;
+use Graviton\RqlParser\Node\Query\AbstractScalarOperatorNode;
+use Graviton\RqlParser\Node\Query\LogicalOperator\AndNode;
+use Graviton\RqlParser\Node\Query\LogicalOperator\NotNode;
+use Graviton\RqlParser\Node\Query\LogicalOperator\OrNode;
+use Graviton\RqlParser\Node\SortNode;
+use Graviton\RqlParser\Query;
 use RuntimeException;
-use Xiag\Rql\Parser\Node\AbstractQueryNode;
-use Xiag\Rql\Parser\Node\Query\AbstractComparisonOperatorNode;
-use Xiag\Rql\Parser\Node\Query\AbstractLogicOperatorNode;
-use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
-use Xiag\Rql\Parser\Node\Query\LogicOperator\AndNode;
-use Xiag\Rql\Parser\Node\Query\LogicOperator\NotNode;
-use Xiag\Rql\Parser\Node\Query\LogicOperator\OrNode;
-use Xiag\Rql\Parser\Node\SortNode;
-use Xiag\Rql\Parser\Query;
 
 class AbstractQueryAdapter implements QueryAdapter
 {
@@ -36,7 +36,7 @@ class AbstractQueryAdapter implements QueryAdapter
 
         return match (true) {
             $queryNode instanceof AbstractComparisonOperatorNode => $this->processComparisonOperator($queryNode),
-            $queryNode instanceof AbstractLogicOperatorNode => $this->processLogicOperator($queryNode),
+            $queryNode instanceof AbstractLogicalOperatorNode => $this->processLogicOperator($queryNode),
             default => throw new RuntimeException('The Node type not supported: ' . $queryNode->getNodeName()),
         };
     }
@@ -71,7 +71,7 @@ class AbstractQueryAdapter implements QueryAdapter
     }
 
 
-    protected function processLogicOperator(AbstractLogicOperatorNode $node): AbstractLogicOperatorNode
+    protected function processLogicOperator(AbstractLogicalOperatorNode $node): AbstractLogicalOperatorNode
     {
         $queries = array_map(fn(AbstractQueryNode $node) => $this->processQuery($node), $node->getQueries());
 

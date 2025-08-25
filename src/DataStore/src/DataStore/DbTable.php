@@ -7,6 +7,9 @@
 
 namespace rollun\datastore\DataStore;
 
+use Graviton\RqlParser\Node\Query\ArrayOperator\InNode;
+use Graviton\RqlParser\Node\SelectNode;
+use Graviton\RqlParser\Query;
 use InvalidArgumentException;
 use Laminas\Db\Adapter\Exception\RuntimeException;
 use Psr\Log\LoggerInterface;
@@ -16,10 +19,6 @@ use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
 use rollun\dic\InsideConstruct;
-use Xiag\Rql\Parser\Node\LimitNode;
-use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
-use Xiag\Rql\Parser\Node\SelectNode;
-use Xiag\Rql\Parser\Query;
 use Laminas\Db\Adapter\Driver\ResultInterface;
 use Laminas\Db\Adapter\ParameterContainer;
 use Laminas\Db\Sql\Select;

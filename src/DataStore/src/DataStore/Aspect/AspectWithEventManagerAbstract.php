@@ -7,8 +7,8 @@
 
 namespace rollun\datastore\DataStore\Aspect;
 
+use Graviton\RqlParser\Query;
 use rollun\datastore\DataStore\WithEventManagerInterface;
-use Xiag\Rql\Parser\Query;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use Laminas\EventManager\EventManager;
 use Laminas\EventManager\EventManagerInterface;

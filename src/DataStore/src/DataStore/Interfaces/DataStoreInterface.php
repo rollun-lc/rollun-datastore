@@ -7,8 +7,8 @@
 
 namespace rollun\datastore\DataStore\Interfaces;
 
+use Graviton\RqlParser\Query;
 use rollun\datastore\DataStore\BaseDto;
-use Xiag\Rql\Parser\Query;
 
 /**
  * This interface support all CRUD (create, update, ) action on data store.

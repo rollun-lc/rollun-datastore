@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace rollun\datastore\DataStore\Aspect;
 
 use Exception;
+use Graviton\RqlParser\Query;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
-use Xiag\Rql\Parser\Query;
 
 /**
  * Allow you to map record

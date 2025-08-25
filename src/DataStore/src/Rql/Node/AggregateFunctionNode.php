@@ -7,7 +7,7 @@
 
 namespace rollun\datastore\Rql\Node;
 
-use Xiag\Rql\Parser\Node\AbstractQueryNode;
+use Graviton\RqlParser\Node\AbstractQueryNode;
 
 class AggregateFunctionNode extends AbstractQueryNode implements \Stringable
 {

@@ -2,12 +2,12 @@
 
 namespace rollun\datastore\DataStore\Aspect;
 
+use Graviton\RqlParser\Query;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
 use rollun\utils\Json\Exception;
-use Xiag\Rql\Parser\Query;
 
 /**
  * Allows you to modify all requests and responses of the datastore.

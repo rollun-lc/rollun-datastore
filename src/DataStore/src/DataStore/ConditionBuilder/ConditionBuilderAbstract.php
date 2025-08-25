@@ -7,13 +7,13 @@
 
 namespace rollun\datastore\DataStore\ConditionBuilder;
 
+use Graviton\RqlParser\Glob;
+use Graviton\RqlParser\Node\AbstractQueryNode;
+use Graviton\RqlParser\Node\Query\AbstractArrayOperatorNode;
+use Graviton\RqlParser\Node\Query\AbstractLogicalOperatorNode;
+use Graviton\RqlParser\Node\Query\AbstractScalarOperatorNode;
 use rollun\datastore\DataStore\ConnectionException;
 use rollun\datastore\Rql\Node\BinaryNode\BinaryOperatorNodeAbstract;
-use Xiag\Rql\Parser\DataType\Glob;
-use Xiag\Rql\Parser\Node\AbstractQueryNode;
-use Xiag\Rql\Parser\Node\Query\AbstractArrayOperatorNode;
-use Xiag\Rql\Parser\Node\Query\AbstractLogicOperatorNode;
-use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
 use rollun\datastore\DataStore\DataStoreException;
 
 /**
@@ -69,7 +69,7 @@ abstract class ConditionBuilderAbstract
     {
         return match (true) {
             $queryNode instanceof AbstractScalarOperatorNode => $this->makeScalarOperator($queryNode),
-            $queryNode instanceof AbstractLogicOperatorNode => $this->makeLogicOperator($queryNode),
+            $queryNode instanceof AbstractLogicalOperatorNode => $this->makeLogicOperator($queryNode),
             $queryNode instanceof AbstractArrayOperatorNode => $this->makeArrayOperator($queryNode),
             $queryNode instanceof BinaryOperatorNodeAbstract => $this->makeBinaryOperator($queryNode),
             default => throw new DataStoreException('The Node type not supported: ' . $queryNode->getNodeName()),
@@ -163,7 +163,7 @@ abstract class ConditionBuilderAbstract
     /**
      * Return value from Glob
      *
-     * I have no idea why, but Xiag\Rql\Parser\DataType\Glob
+     * I have no idea why, but Graviton\RqlParser\Glob
      * have not method getValue(). We fix it/
      *
      * @see Glob
@@ -184,11 +184,11 @@ abstract class ConditionBuilderAbstract
     /**
      * Make string with conditions for LogicOperatorNode
      *
-     * @param AbstractLogicOperatorNode $node
+     * @param AbstractLogicalOperatorNode $node
      * @return string
      * @throws DataStoreException
      */
-    public function makeLogicOperator(AbstractLogicOperatorNode $node)
+    public function makeLogicOperator(AbstractLogicalOperatorNode $node)
     {
         $nodeName = $node->getNodeName();
 

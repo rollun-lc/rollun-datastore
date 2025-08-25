@@ -2,11 +2,11 @@
 
 namespace rollun\datastore\Middleware\Handler;
 
+use Graviton\RqlParser\Node\LimitNode;
+use Graviton\RqlParser\Query;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Xiag\Rql\Parser\Node\LimitNode;
-use Xiag\Rql\Parser\Query;
 use Laminas\Diactoros\Response;
 use Laminas\Diactoros\Stream;
 

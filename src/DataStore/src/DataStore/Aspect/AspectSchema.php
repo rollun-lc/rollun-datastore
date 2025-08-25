@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace rollun\datastore\DataStore\Aspect;
 
+use Graviton\RqlParser\Query;
 use rollun\datastore\DataStore\Entity\EntityFactory;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Query\NullQueryAdapter;
 use rollun\datastore\DataStore\Query\QueryAdapter;
 use rollun\datastore\DataStore\Scheme\Scheme;
-use Xiag\Rql\Parser\Query;
 
 class AspectSchema extends AspectEntityMapper
 {

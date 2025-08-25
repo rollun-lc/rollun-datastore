@@ -8,12 +8,12 @@
 namespace rollun\datastore\DataStore;
 
 use Exception;
+use Graviton\RqlParser\Query;
 use Iterator;
 use rollun\datastore\DataSource\DataSourceInterface;
 use rollun\datastore\DataStore\Iterators\CsvIterator;
 use rollun\datastore\DataStore\ConditionBuilder\PhpConditionBuilder;
 use SplFileObject;
-use Xiag\Rql\Parser\Query;
 
 /**
  * Class CsvBase

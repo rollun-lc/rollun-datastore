@@ -7,12 +7,12 @@
 
 namespace rollun\datastore\DataStore\Aspect;
 
+use Graviton\RqlParser\Query;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Traits\NoSupportCreateTrait;
 use rollun\datastore\DataStore\Traits\NoSupportDeleteAllTrait;
 use rollun\datastore\DataStore\Traits\NoSupportDeleteTrait;
 use rollun\datastore\DataStore\Traits\NoSupportUpdateTrait;
-use Xiag\Rql\Parser\Query;
 
 /**
  * Class AspectReadOnly

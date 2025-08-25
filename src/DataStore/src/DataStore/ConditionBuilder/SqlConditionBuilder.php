@@ -7,13 +7,13 @@
 
 namespace rollun\datastore\DataStore\ConditionBuilder;
 
+use Graviton\RqlParser\Glob;
+use Graviton\RqlParser\Node\Query\AbstractScalarOperatorNode;
 use Laminas\Db\Adapter\Exception\RuntimeException;
 use rollun\datastore\DataStore\ConnectionException;
 use rollun\datastore\DataStore\LaminasDbExceptionDetector;
 use rollun\datastore\DataStore\OperationTimedOutException;
 use rollun\datastore\Rql\Node\BinaryNode\BinaryOperatorNodeAbstract;
-use Xiag\Rql\Parser\DataType\Glob;
-use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
 use rollun\datastore\DataStore\DataStoreException;
 use Laminas\Db\Adapter\AdapterInterface;
 

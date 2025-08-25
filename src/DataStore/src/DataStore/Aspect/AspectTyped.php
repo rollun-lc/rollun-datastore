@@ -7,6 +7,7 @@
 
 namespace rollun\datastore\DataStore\Aspect;
 
+use Graviton\RqlParser\Query;
 use InvalidArgumentException;
 use rollun\datastore\DataStore\BaseDto;
 use rollun\datastore\DataStore\Formatter\FormatterInterface;
@@ -15,7 +16,6 @@ use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Interfaces\SchemableInterface;
 use rollun\datastore\DataStore\Type\TypePluginManager;
 use RuntimeException;
-use Xiag\Rql\Parser\Query;
 use Laminas\ServiceManager\ServiceManager;
 
 class AspectTyped extends AspectAbstract implements SchemableInterface
