@@ -7,11 +7,7 @@
 
 namespace rollun\datastore\Rql\TokenParser;
 
-//use Xiag\Rql\Parser\AbstractNode;
-use Xiag\Rql\Parser\AbstractTokenParser;
-//use Xiag\Rql\Parser\Exception\SyntaxErrorException;
-//use Xiag\Rql\Parser\Token;
-//use Xiag\Rql\Parser\TokenStream;
+use Graviton\RqlParser\NodeParserInterface;
 use Graviton\RqlParser\AbstractNode;
 use Graviton\RqlParser\Exception\SyntaxErrorException;
 use Graviton\RqlParser\Token;
@@ -19,7 +15,8 @@ use Graviton\RqlParser\TokenStream;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\Node\AggregateSelectNode;
 
-class SelectTokenParser extends AbstractTokenParser
+//class SelectTokenParser extends AbstractTokenParser
+class SelectTokenParser implements NodeParserInterface
 {
     public function __construct(private array $allowedFunctions) {}
 

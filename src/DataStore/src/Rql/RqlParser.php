@@ -7,10 +7,20 @@
 
 namespace rollun\datastore\Rql;
 
-//use Xiag\Rql\Parser\SubLexerChain;
+use Graviton\RqlParser\AbstractNode;
 use Graviton\RqlParser\Lexer;
 use Graviton\RqlParser\Node\SortNode;
+use Graviton\RqlParser\NodeParser\QueryNodeParser;
+use Graviton\RqlParser\NodeParserChain;
+use Graviton\RqlParser\Parser;
 use Graviton\RqlParser\Query;
+use Graviton\RqlParser\ValueParser;
+use Graviton\RqlParser\TypeCaster;
+use Graviton\RqlParser\ValueParser\ArrayParser;
+use Graviton\RqlParser\ValueParser\FieldParser;
+use Graviton\RqlParser\ValueParser\GlobParser;
+use Graviton\RqlParser\ValueParser\IntegerParser;
+use Graviton\RqlParser\ValueParser\ScalarParser;
 use rollun\datastore\Rql\TokenParser\GroupbyTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqfTokenParser as BasicEqfTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Basic\BinaryOperator\EqnTokenParser as BasicEqnTokenParser;
@@ -28,13 +38,7 @@ use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\MatchTokenParser 
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\ContainsTokenParser as FiqlContainsTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\LikeGlobTokenParser as FiqlLikeGlobTokenParser;
 use rollun\datastore\Rql\TokenParser\Query\Fiql\ScalarOperator\AlikeGlobTokenParser as FiqlAlikeGlobTokenParser;
-use Xiag\Rql\Parser\ExpressionParser;
-//use Xiag\Rql\Parser\Lexer;
-//use Xiag\Rql\Parser\Node\SortNode;
-//use Xiag\Rql\Parser\Query;
-use Xiag\Rql\Parser\TokenParser;
-use Xiag\Rql\Parser\TokenParserGroup;
-use Xiag\Rql\Parser\TypeCaster;
+use Graviton\RqlParser\NodeParser;
 use rollun\datastore\DataStore\ConditionBuilder\ConditionBuilderAbstract;
 use rollun\datastore\DataStore\ConditionBuilder\RqlConditionBuilder;
 use rollun\datastore\DataStore\DataStoreAbstract;
@@ -119,62 +123,119 @@ class RqlParser
 
     /**
      * @param $rqlQueryString . Decode rql string with token and lexler.
-     * @return Query
+     * @return AbstractNode
      */
     public function decode($rqlQueryString)
     {
         $rqlQueryString = RqlParser::prepareStringRql($rqlQueryString);
-        $queryTokenParser = new TokenParserGroup();
-        $queryTokenParser->addTokenParser(new TokenParser\Query\GroupTokenParser($queryTokenParser))
-            ->addTokenParser(new TokenParser\Query\Basic\LogicOperator\AndTokenParser($queryTokenParser))
-            ->addTokenParser(new TokenParser\Query\Basic\LogicOperator\OrTokenParser($queryTokenParser))
-            ->addTokenParser(new TokenParser\Query\Basic\LogicOperator\NotTokenParser($queryTokenParser))
-            ->addTokenParser(new TokenParser\Query\Basic\ArrayOperator\InTokenParser())
-            ->addTokenParser(new TokenParser\Query\Basic\ArrayOperator\OutTokenParser())
-            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\EqTokenParser())
-            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\NeTokenParser())
-            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LtTokenParser())
-            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\GtTokenParser())
-            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LeTokenParser())
-            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\GeTokenParser())
-            ->addTokenParser(new BasicLikeGlobTokenParser())
-            ->addTokenParser(new BasicAlikeGlobTokenParser())
-            ->addTokenParser(new BasicContainsTokenParser())
-            ->addTokenParser(new BasicEqtTokenParser())
-            ->addTokenParser(new BasicEqnTokenParser())
-            ->addTokenParser(new BasicEqfTokenParser())
-            ->addTokenParser(new BasicIeTokenParser())
-            ->addTokenParser(new BasicMatchTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ArrayOperator\InTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ArrayOperator\OutTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\EqTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\NeTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LtTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\GtTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LeTokenParser())
-            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\GeTokenParser())
-            ->addTokenParser(new FiqlLikeGlobTokenParser())
-            ->addTokenParser(new FiqlAlikeGlobTokenParser())
-            ->addTokenParser(new FiqlMatchTokenParser())
-            ->addTokenParser(new FiqlContainsTokenParser())
-            ->addTokenParser(new FiqlEqtTokenParser())
-            ->addTokenParser(new FiqlEqnTokenParser())
-            ->addTokenParser(new FiqlEqfTokenParser())
-            ->addTokenParser(new FiqlIeTokenParser());
+//        $queryTokenParser = new TokenParserGroup();
+//        $queryTokenParser->addTokenParser(new TokenParser\Query\GroupTokenParser($queryTokenParser))
+//            ->addTokenParser(new TokenParser\Query\Basic\LogicOperator\AndTokenParser($queryTokenParser))
+//            ->addTokenParser(new TokenParser\Query\Basic\LogicOperator\OrTokenParser($queryTokenParser))
+//            ->addTokenParser(new TokenParser\Query\Basic\LogicOperator\NotTokenParser($queryTokenParser))
+//            ->addTokenParser(new TokenParser\Query\Basic\ArrayOperator\InTokenParser())
+//            ->addTokenParser(new TokenParser\Query\Basic\ArrayOperator\OutTokenParser())
+//            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\EqTokenParser())
+//            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\NeTokenParser())
+//            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LtTokenParser())
+//            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\GtTokenParser())
+//            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\LeTokenParser())
+//            ->addTokenParser(new TokenParser\Query\Basic\ScalarOperator\GeTokenParser())
+//            ->addTokenParser(new BasicLikeGlobTokenParser())
+//            ->addTokenParser(new BasicAlikeGlobTokenParser())
+//            ->addTokenParser(new BasicContainsTokenParser())
+//            ->addTokenParser(new BasicEqtTokenParser())
+//            ->addTokenParser(new BasicEqnTokenParser())
+//            ->addTokenParser(new BasicEqfTokenParser())
+//            ->addTokenParser(new BasicIeTokenParser())
+//            ->addTokenParser(new BasicMatchTokenParser())
+//            ->addTokenParser(new TokenParser\Query\Fiql\ArrayOperator\InTokenParser())
+//            ->addTokenParser(new TokenParser\Query\Fiql\ArrayOperator\OutTokenParser())
+//            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\EqTokenParser())
+//            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\NeTokenParser())
+//            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LtTokenParser())
+//            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\GtTokenParser())
+//            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\LeTokenParser())
+//            ->addTokenParser(new TokenParser\Query\Fiql\ScalarOperator\GeTokenParser())
+//            ->addTokenParser(new FiqlLikeGlobTokenParser())
+//            ->addTokenParser(new FiqlAlikeGlobTokenParser())
+//            ->addTokenParser(new FiqlMatchTokenParser())
+//            ->addTokenParser(new FiqlContainsTokenParser())
+//            ->addTokenParser(new FiqlEqtTokenParser())
+//            ->addTokenParser(new FiqlEqnTokenParser())
+//            ->addTokenParser(new FiqlEqfTokenParser())
+//            ->addTokenParser(new FiqlIeTokenParser());
+//
+//        $parser = (new QueryParser(
+//            (new ExpressionParser())->registerTypeCaster('string', new TypeCaster\StringTypeCaster())
+//                ->registerTypeCaster('integer', new TypeCaster\IntegerTypeCaster())
+//                ->registerTypeCaster('float', new TypeCaster\FloatTypeCaster())
+//                ->registerTypeCaster('boolean', new TypeCaster\BooleanTypeCaster())
+//        ))->addTokenParser(new SelectTokenParser($this->allowedAggregateFunction))
+//            ->addTokenParser($queryTokenParser)
+//            ->addTokenParser(new TokenParser\SortTokenParser())
+//            ->addTokenParser(new TokenParser\LimitTokenParser())
+//            ->addTokenParser(new GroupbyTokenParser());
 
-        $parser = (new QueryParser(
-            (new ExpressionParser())->registerTypeCaster('string', new TypeCaster\StringTypeCaster())
-                ->registerTypeCaster('integer', new TypeCaster\IntegerTypeCaster())
-                ->registerTypeCaster('float', new TypeCaster\FloatTypeCaster())
-                ->registerTypeCaster('boolean', new TypeCaster\BooleanTypeCaster())
-        ))->addTokenParser(new SelectTokenParser($this->allowedAggregateFunction))
-            ->addTokenParser($queryTokenParser)
-            ->addTokenParser(new TokenParser\SortTokenParser())
-            ->addTokenParser(new TokenParser\LimitTokenParser())
-            ->addTokenParser(new GroupbyTokenParser());
+//        $rqlQueryObject = $parser->parse((new Lexer())->tokenize($rqlQueryString));
 
+        $scalarParser = (new ValueParser\ScalarParser())
+            ->registerTypeCaster('string', new TypeCaster\StringTypeCaster())
+            ->registerTypeCaster('integer', new TypeCaster\IntegerTypeCaster())
+            ->registerTypeCaster('float', new TypeCaster\FloatTypeCaster())
+            ->registerTypeCaster('boolean', new TypeCaster\BooleanTypeCaster());
+        $arrayParser = new ValueParser\ArrayParser($scalarParser);
+        $fieldParser = new ValueParser\FieldParser();
+        $integerParser = new ValueParser\IntegerParser();
+
+        $queryNodeParser = new QueryNodeParser();
+        $queryNodeParser
+            ->addNodeParser(new NodeParser\Query\GroupNodeParser($queryNodeParser))
+            ->addNodeParser(new NodeParser\Query\LogicalOperator\AndNodeParser($queryNodeParser))
+            ->addNodeParser(new NodeParser\Query\LogicalOperator\OrNodeParser($queryNodeParser))
+            ->addNodeParser(new NodeParser\Query\LogicalOperator\NotNodeParser($queryNodeParser))
+            ->addNodeParser(new NodeParser\Query\ComparisonOperator\Rql\InNodeParser($fieldParser, $arrayParser))
+            ->addNodeParser(new NodeParser\Query\ComparisonOperator\Rql\OutNodeParser($fieldParser, $arrayParser))
+            ->addNodeParser(new NodeParser\Query\ComparisonOperator\Rql\EqNodeParser($fieldParser, $scalarParser))
+            ->addNodeParser(new NodeParser\Query\ComparisonOperator\Rql\NeNodeParser($fieldParser, $scalarParser))
+            ->addNodeParser(new NodeParser\Query\ComparisonOperator\Rql\LtNodeParser($fieldParser, $scalarParser))
+            ->addNodeParser(new NodeParser\Query\ComparisonOperator\Rql\GtNodeParser($fieldParser, $scalarParser))
+            ->addNodeParser(new NodeParser\Query\ComparisonOperator\Rql\LeNodeParser($fieldParser, $scalarParser))
+            ->addNodeParser(new NodeParser\Query\ComparisonOperator\Rql\GeNodeParser($fieldParser, $scalarParser))
+            ->addNodeParser(new BasicLikeGlobTokenParser())
+            ->addNodeParser(new BasicAlikeGlobTokenParser())
+            ->addNodeParser(new BasicContainsTokenParser())
+            ->addNodeParser(new BasicEqtTokenParser())
+            ->addNodeParser(new BasicEqnTokenParser())
+            ->addNodeParser(new BasicEqfTokenParser())
+            ->addNodeParser(new BasicIeTokenParser())
+            ->addNodeParser(new BasicMatchTokenParser())
+            ->addNodeParser(new NodeParser\Query\ComparisonOperator\Fiql\InNodeParser($fieldParser, $arrayParser))
+            ->addNodeParser(new NodeParser\Query\ComparisonOperator\Fiql\OutNodeParser($fieldParser, $arrayParser))
+            ->addNodeParser(new NodeParser\Query\ComparisonOperator\Fiql\EqNodeParser($fieldParser, $scalarParser))
+            ->addNodeParser(new NodeParser\Query\ComparisonOperator\Fiql\NeNodeParser($fieldParser, $scalarParser))
+            ->addNodeParser(new NodeParser\Query\ComparisonOperator\Fiql\LtNodeParser($fieldParser, $scalarParser))
+            ->addNodeParser(new NodeParser\Query\ComparisonOperator\Fiql\GtNodeParser($fieldParser, $scalarParser))
+            ->addNodeParser(new NodeParser\Query\ComparisonOperator\Fiql\LeNodeParser($fieldParser, $scalarParser))
+            ->addNodeParser(new NodeParser\Query\ComparisonOperator\Fiql\GeNodeParser($fieldParser, $scalarParser))
+            ->addNodeParser(new FiqlLikeGlobTokenParser())
+            ->addNodeParser(new FiqlAlikeGlobTokenParser())
+            ->addNodeParser(new FiqlMatchTokenParser())
+            ->addNodeParser(new FiqlContainsTokenParser())
+            ->addNodeParser(new FiqlEqtTokenParser())
+            ->addNodeParser(new FiqlEqnTokenParser())
+            ->addNodeParser(new FiqlEqfTokenParser())
+            ->addNodeParser(new FiqlIeTokenParser());
+
+        $nodeParserChain = (new NodeParserChain())
+            ->addNodeParser(new SelectTokenParser($this->allowedAggregateFunction))
+            ->addNodeParser($queryNodeParser)
+            ->addNodeParser(new NodeParser\SortNodeParser($fieldParser))
+            ->addNodeParser(new NodeParser\LimitNodeParser($integerParser))
+            ->addNodeParser(new GroupbyTokenParser());
+
+        $parser = new QueryParser($nodeParserChain);
         $rqlQueryObject = $parser->parse((new Lexer())->tokenize($rqlQueryString));
-
         return $rqlQueryObject;
     }
 

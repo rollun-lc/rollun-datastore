@@ -2,9 +2,9 @@
 
 namespace rollun\test\unit\DataStore\Rql\Node;
 
+use Graviton\RqlParser\Glob;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node\AlikeGlobNode;
-use Xiag\Rql\Parser\DataType\Glob;
 
 class AlikeGlobNodeTest extends TestCase
 {

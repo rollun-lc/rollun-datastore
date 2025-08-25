@@ -2,12 +2,12 @@
 
 namespace rollun\test\unit\DataStore\Rql\TokenParser;
 
+use Graviton\RqlParser\Token;
+use Graviton\RqlParser\TokenStream;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
 use rollun\datastore\Rql\Node\GroupbyNode;
 use rollun\datastore\Rql\TokenParser\GroupbyTokenParser;
-use Xiag\Rql\Parser\Token;
-use Xiag\Rql\Parser\TokenStream;
 
 class GroupByTokenParserTest extends TestCase
 {

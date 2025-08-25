@@ -7,12 +7,12 @@
 
 namespace rollun\uploader\Iterator;
 
+use Graviton\RqlParser\Node\LimitNode;
+use Graviton\RqlParser\Node\Query\ScalarOperator\GtNode;
+use Graviton\RqlParser\Node\SortNode;
+use Graviton\RqlParserExample03\Query;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use SeekableIterator;
-use Xiag\Rql\Parser\Node\LimitNode;
-use Xiag\Rql\Parser\Node\Query\ScalarOperator\GtNode;
-use Xiag\Rql\Parser\Node\SortNode;
-use Xiag\Rql\Parser\Query;
 
 class DataStorePack implements SeekableIterator
 {

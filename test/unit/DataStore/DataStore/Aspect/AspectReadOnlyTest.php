@@ -7,7 +7,7 @@
 
 namespace rollun\test\unit\DataStore\DataStore\Aspect;
 
-use Xiag\Rql\Parser\Query;
+use Graviton\RqlParser\Query;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\Aspect\AspectReadOnly;
 use rollun\datastore\DataStore\DataStoreException;

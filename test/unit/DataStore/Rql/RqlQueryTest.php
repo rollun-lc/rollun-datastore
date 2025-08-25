@@ -2,13 +2,13 @@
 
 namespace rollun\test\unit\DataStore\Rql;
 
+use Graviton\RqlParser\Node\LimitNode;
+use Graviton\RqlParser\Node\SelectNode;
+use Graviton\RqlParser\Node\SortNode;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node\BinaryNode\EqtNode;
 use rollun\datastore\Rql\Node\GroupbyNode;
 use rollun\datastore\Rql\RqlQuery;
-use Xiag\Rql\Parser\Node\LimitNode;
-use Xiag\Rql\Parser\Node\SelectNode;
-use Xiag\Rql\Parser\Node\SortNode;
 
 class RqlQueryTest extends TestCase
 {

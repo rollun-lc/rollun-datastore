@@ -2,8 +2,8 @@
 
 namespace rollun\repository\Interfaces;
 
+use Graviton\RqlParser\Query;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
-use Xiag\Rql\Parser\Query;
 
 /**
  * Interface ModelRepositoryInterface

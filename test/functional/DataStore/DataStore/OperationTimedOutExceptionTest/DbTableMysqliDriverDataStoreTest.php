@@ -2,10 +2,10 @@
 
 namespace rollun\test\functional\DataStore\DataStore\OperationTimedOutExceptionTest;
 
+use Graviton\RqlParser\Query;
 use Laminas\Db\TableGateway\TableGateway;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
-use Xiag\Rql\Parser\Query;
 
 class DbTableMysqliDriverDataStoreTest extends BaseTest
 {

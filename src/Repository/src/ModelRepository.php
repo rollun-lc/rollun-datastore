@@ -2,14 +2,14 @@
 
 namespace rollun\repository;
 
+use Graviton\RqlParser\Node\Query\ArrayOperator\InNode;
+use Graviton\RqlParser\Query;
 use Psr\Log\LoggerInterface;
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\dic\InsideConstruct;
 use rollun\repository\Interfaces\FieldMapperInterface;
 use rollun\repository\Interfaces\ModelRepositoryInterface;
 use rollun\repository\Interfaces\ModelInterface;
-use Xiag\Rql\Parser\Node\Query\ArrayOperator\InNode;
-use Xiag\Rql\Parser\Query;
 
 /**
  * Class ModelRepository

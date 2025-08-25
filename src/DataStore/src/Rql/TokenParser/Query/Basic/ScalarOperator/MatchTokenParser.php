@@ -8,7 +8,7 @@
 namespace rollun\datastore\Rql\TokenParser\Query\Basic\ScalarOperator;
 
 use rollun\datastore\Rql\Node\ContainsNode;
-use Xiag\Rql\Parser\TokenParser\Query\Basic\AbstractScalarOperatorTokenParser;
+use rollun\datastore\Rql\TokenParser\Support\AbstractScalarOperatorTokenParser;
 
 class MatchTokenParser extends AbstractScalarOperatorTokenParser
 {

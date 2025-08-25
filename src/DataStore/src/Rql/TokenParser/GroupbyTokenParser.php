@@ -9,16 +9,13 @@ namespace rollun\datastore\Rql\TokenParser;
 
 use Graviton\RqlParser\AbstractNode;
 use Graviton\RqlParser\Exception\SyntaxErrorException;
+use Graviton\RqlParser\NodeParserInterface;
 use Graviton\RqlParser\Token;
 use Graviton\RqlParser\TokenStream;
 use rollun\datastore\Rql\Node\GroupbyNode;
-//use Xiag\Rql\Parser\AbstractNode;
-use Xiag\Rql\Parser\AbstractTokenParser;
-//use Xiag\Rql\Parser\Exception\SyntaxErrorException;
-//use Xiag\Rql\Parser\Token;
-//use Xiag\Rql\Parser\TokenStream;
 
-class GroupbyTokenParser extends AbstractTokenParser
+//class GroupbyTokenParser extends AbstractTokenParser
+class GroupbyTokenParser implements NodeParserInterface
 {
     /**
      * @param TokenStream $tokenStream
