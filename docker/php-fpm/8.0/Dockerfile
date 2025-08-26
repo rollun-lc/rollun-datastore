@@ -19,11 +19,6 @@ RUN usermod -u $WWW_DATA_UID www-data && groupmod -g $WWW_DATA_GID www-data
 
 USER www-data
 
-ENV COMPOSER_HOME=/tmp/composer
-RUN mkdir -p "$COMPOSER_HOME"
-
-ARG GITHUB_TOKEN
-RUN if [ -n "$GITHUB_TOKEN" ]; then composer config -g --auth github-oauth.github.com "$GITHUB_TOKEN"; fi
 
 WORKDIR /var/www/app
 
