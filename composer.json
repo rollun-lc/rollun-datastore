@@ -14,6 +14,12 @@
       "email": "it.proffesor02@gmail.com"
     }
   ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/rollun-lc/xiag-rql-parser.git"
+    }
+  ],
   "require": {
     "php": "^8.0",
     "ext-pdo": "*",
