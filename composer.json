@@ -17,7 +17,7 @@
   "repositories": [
     {
       "type": "vcs",
-      "url": "git@github.com:rollun-lc/xiag-rql-parser.git"
+      "url": "https://github.com/rollun-lc/xiag-rql-parser.git"
     }
   ],
   "require": {
