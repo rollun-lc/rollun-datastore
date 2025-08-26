@@ -18,8 +18,6 @@ ARG WWW_DATA_GID=33
 RUN usermod -u $WWW_DATA_UID www-data && groupmod -g $WWW_DATA_GID www-data
 
 USER www-data
-
-
 WORKDIR /var/www/app
 
 CMD ["php-fpm", "-R"]
