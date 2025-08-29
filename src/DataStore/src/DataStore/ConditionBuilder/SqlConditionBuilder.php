@@ -135,7 +135,6 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
 
     private function containsNodeSpecSymbolsEcranation(string $value)
     {
-        // В PHP 7.2 нет str_contains — используем strpos.
         $hasBackslash = strpos($value, '\\') !== false;
         $hasPercent   = strpos($value, '%') !== false;
         $hasUnderscore= strpos($value, '_') !== false;
