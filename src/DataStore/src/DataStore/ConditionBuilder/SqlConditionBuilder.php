@@ -121,8 +121,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         $strQuery = $this->literals['ScalarOperator'][$nodeName]['before'] . $this->prepareFieldName($node->getField());
 
         if ($nodeName === 'contains') {
-            // TODO: сюда добавляю кодировку спецсимвола _. Неплохо было бы сделать такой же сценари для like & alike?
-            // TODO: потому что там тоже есть такие спец символы как % и _
+            // TODO: Make the same special character encoding script for like & alike? Because there are also special characters like % and _
             $strQuery .= $this->literals['ScalarOperator'][$nodeName]['between']
                 . $this->containsNodeSpecSymbolsEcranation(trim($this->prepareFieldValue($value), '\''));
         } else {
