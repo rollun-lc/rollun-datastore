@@ -135,11 +135,16 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
 
     private function containsNodeSpecSymbolsEcranation(string $value)
     {
-        if ((str_contains($value, '\\')) && (str_contains($value, '%') || str_contains($value, '_'))) {
-            throw new DataStoreException('Rql cannot contains backspace AND % OR _ in one request');
+        // В PHP 7.2 нет str_contains — используем strpos.
+        $hasBackslash = strpos($value, '\\') !== false;
+        $hasPercent   = strpos($value, '%') !== false;
+        $hasUnderscore= strpos($value, '_') !== false;
+
+        if ($hasBackslash && ($hasPercent || $hasUnderscore)) {
+            throw new DataStoreException('RQL cannot contain backslash together with % or _ in one request');
         }
-        $value = str_replace(['%', '_'], ['\%', '\_'], $value);
-        return $value;
+
+        return str_replace(['%', '_'], ['\\%', '\\_'], $value);
     }
 
     /**
