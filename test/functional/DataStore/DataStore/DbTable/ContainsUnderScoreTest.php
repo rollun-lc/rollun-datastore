@@ -87,8 +87,8 @@ final class ContainsUnderScoreTest extends TestCase
             }
         }
 
-        $foundInSql = strpos($sql, "LIKE '$expected'") !== false
-            || strpos($sql, "LIKE \"$expected\"") !== false;
+        $foundInSql = strpos($sql, "LIKE '$expected'")
+            || strpos($sql, "LIKE \"$expected\"");
 
         $this->assertTrue(
             $foundInParams || $foundInSql,
