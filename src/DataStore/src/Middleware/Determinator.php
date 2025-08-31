@@ -10,11 +10,9 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Log\LoggerInterface;
 use rollun\datastore\DataStore\Aspect\AspectTyped;
 use rollun\datastore\DataStore\DataStorePluginManager;
 use Laminas\Diactoros\Response\EmptyResponse;
-use rollun\datastore\DataStore\HttpClient;
 
 /**
  * Class Determinator
@@ -27,16 +25,13 @@ class Determinator implements MiddlewareInterface
      */
     protected $dataStorePluginManager;
 
-    private LoggerInterface $logger;
-
     /**
      * Determinator constructor.
      * @param DataStorePluginManager $dataStorePluginManager
      */
-    public function __construct(DataStorePluginManager $dataStorePluginManager, LoggerInterface $logger)
+    public function __construct(DataStorePluginManager $dataStorePluginManager)
     {
         $this->dataStorePluginManager = $dataStorePluginManager;
-        $this->logger = $logger;
     }
 
     /**
@@ -56,15 +51,6 @@ class Determinator implements MiddlewareInterface
         }
 
         $dataStore = $this->dataStorePluginManager->get($requestedName);
-
-        // feat(9wDgbMg5): log situations when ds is proxied from rollun-net-prvt to other service
-        if ($dataStore instanceof HttpClient && $request->getUri()->getHost() !== 'rollun-net-front') {
-            $this->logger->warning('Double proxy of datastore', [
-                'request_host' => $request->getUri()->getHost(),
-                'request_uri' => $request->getUri()->getPath(),
-                'resource' => $requestedName,
-            ]);
-        }
 
         $dataStoreRest = new DataStoreRest($dataStore);
         $response = $dataStoreRest->process($request, $handler);

@@ -7,7 +7,6 @@
 namespace rollun\datastore\Middleware\Factory;
 
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
 use rollun\datastore\DataStore\DataStorePluginManager;
 use rollun\datastore\Middleware\Determinator;
 use Laminas\ServiceManager\Factory\FactoryInterface;
@@ -29,8 +28,7 @@ class DeterminatorFactory implements FactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $dataStorePluginManager = $container->get(DataStorePluginManager::class);
-        $logger = $container->get(LoggerInterface::class);
 
-        return new Determinator($dataStorePluginManager, $logger);
+        return new Determinator($dataStorePluginManager);
     }
 }

@@ -9,7 +9,6 @@ namespace rollun\test\functional\DataStore\Middleware;
 use Psr\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
-use Psr\Log\LoggerInterface;
 use rollun\datastore\DataStore\DataStorePluginManager;
 use rollun\datastore\Middleware\Determinator;
 use rollun\datastore\Middleware\Factory\DeterminatorFactory;
@@ -28,17 +27,10 @@ class DeterminatorFactoryTest extends TestCase
 
         /** @var ContainerInterface|PHPUnit_Framework_MockObject_MockObject $containerMock */
         $containerMock = $this->getMockBuilder(ContainerInterface::class)->getMock();
-        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
-        $containerMock->expects($this->exactly(2))
+        $containerMock->expects($this->once())
             ->method('get')
-            ->withConsecutive(
-                [$requestedName],
-                [LoggerInterface::class],
-            )
-            ->willReturnOnConsecutiveCalls(
-                $dataStorePluginManagerMock,
-                $loggerMock
-            );
+            ->with($requestedName)
+            ->willReturn($dataStorePluginManagerMock);
 
         $object = new DeterminatorFactory();
         $this->assertTrue($object->__invoke($containerMock, $requestedName) instanceof Determinator);
@@ -53,17 +45,10 @@ class DeterminatorFactoryTest extends TestCase
 
         /** @var ContainerInterface|PHPUnit_Framework_MockObject_MockObject $containerMock */
         $containerMock = $this->getMockBuilder(ContainerInterface::class)->getMock();
-        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
-        $containerMock->expects($this->exactly(2))
+        $containerMock->expects($this->once())
             ->method('get')
-            ->withConsecutive(
-                [$requestedName],
-                [LoggerInterface::class],
-            )
-            ->willReturnOnConsecutiveCalls(
-                $notDataStorePluginManagerMock,
-                $loggerMock
-            );
+            ->with($requestedName)
+            ->willReturn($notDataStorePluginManagerMock);
 
         $object = new DeterminatorFactory();
         $object->__invoke($containerMock, $requestedName);
