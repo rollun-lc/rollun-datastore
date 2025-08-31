@@ -2,13 +2,13 @@
 
 namespace functional\DataStore\DataStore\DbTable;
 
-use Laminas\Db\Adapter\Adapter;
-use Laminas\Db\Adapter\Profiler\Profiler;
-use Laminas\Db\Adapter\ParameterContainer;
-use Laminas\Db\TableGateway\TableGateway;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\Rql\RqlQuery;
+use Zend\Db\Adapter\Adapter;
+use Zend\Db\Adapter\ParameterContainer;
+use Zend\Db\Adapter\Profiler\Profiler;
+use Zend\Db\TableGateway\TableGateway;
 
 /**
  * feat(11tW8Zly): RQL contains "_" wildcard bug fix.
