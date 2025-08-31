@@ -4,25 +4,29 @@ namespace functional\DataStore\DataStore\DbTable;
 
 use Laminas\Db\Adapter\Adapter;
 use Laminas\Db\Adapter\Profiler\Profiler;
+use Laminas\Db\Adapter\ParameterContainer;
 use Laminas\Db\TableGateway\TableGateway;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\Rql\RqlQuery;
 
 /**
- * feat(11tW8Zly): rql contains _ wildcard symbol bug.
+ * feat(11tW8Zly): RQL contains "_" wildcard bug fix.
  * Bug summary:
  * `contains(...)` was translated to SQL `LIKE '%value%'` without escaping SQL wildcards.
- * In `LIKE`, `_` matches any single character and `%` matches any sequence, so searching for `PU_DS_NV__` also matched
- * values like `PU_DS_NV_NY_TX_WI__...` (false positives).
+ * In `LIKE`, `_` matches any single character and `%` matches any sequence, so searching for `PU_DS_NV__`
+ * also matched values like `PU_DS_NV_NY_TX_WI__...` (false positives).
  * Fix: when building the `LIKE` pattern, escape `\`, `%`, and `_` (e.g., `\%`, `\_`) or use a substring function.
  * This test asserts the generated pattern is `%PU\_DS\_NV\_\_%` instead of `%PU_DS_NV__%`.
  */
 final class ContainsUnderScoreTest extends TestCase
 {
-    private Adapter $adapter;
-    private DbTable $ds;
-    private Profiler $profiler;
+    /** @var Adapter */
+    private $adapter;
+    /** @var DbTable */
+    private $ds;
+    /** @var Profiler */
+    private $profiler;
 
     protected function setUp(): void
     {
@@ -46,7 +50,6 @@ final class ContainsUnderScoreTest extends TestCase
         $gw = new TableGateway('amazon_shipping_templates', $this->adapter);
         $this->ds = new DbTable($gw, 'id');
 
-        // данные
         $rows = [
             ['template_code' => 'PU_DS_NV__2025-03-20',         'shipping_service' => 'Standard Shipping'],
             ['template_code' => 'PU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Standard Shipping'],
@@ -69,30 +72,32 @@ final class ContainsUnderScoreTest extends TestCase
         is_array($it) ? $it : iterator_to_array($it);
 
         $profiles = $this->profiler->getProfiles();
-        $this->assertNotEmpty($profiles, 'Profiler must contains at lease 1 SQL-request.');
+        $this->assertNotEmpty($profiles, 'Profiler must contain at least one SQL statement.');
         $last = end($profiles);
 
-        $sql        = $last['sql']        ?? '';
-        $parameters = $last['parameters'] ?? [];
+        $sqlRaw  = is_array($last) ? (isset($last['sql']) ? $last['sql'] : '') : (method_exists($last, 'getSql') ? $last->getSql() : '');
+        $parsRaw = is_array($last) ? (isset($last['parameters']) ? $last['parameters'] : []) : (method_exists($last, 'getParameters') ? $last->getParameters() : []);
+
+        $sql = (string)$sqlRaw;
+
+        $params = [];
+        if ($parsRaw instanceof ParameterContainer) {
+            foreach ($parsRaw as $name => $meta) {
+                $params[] = (is_array($meta) && array_key_exists('value', $meta)) ? $meta['value'] : $meta;
+            }
+        } elseif (is_array($parsRaw)) {
+            $params = array_values($parsRaw);
+        }
 
         $expected = "%PU\\_DS\\_NV\\_\\_%";
 
-        $foundInParams = false;
-        if (is_array($parameters)) {
-            foreach ($parameters as $p) {
-                if ($p === $expected) {
-                    $foundInParams = true;
-                    break;
-                }
-            }
-        }
-
-        $foundInSql = strpos($sql, "LIKE '$expected'")
-            || strpos($sql, "LIKE \"$expected\"");
+        $foundInParams = in_array($expected, $params, true);
+        $foundInSql    = (false !== strpos($sql, "LIKE '$expected'"))
+            || (false !== strpos($sql, 'LIKE "' . $expected . '"'));
 
         $this->assertTrue(
             $foundInParams || $foundInSql,
-            "Waiting that LIKE will encranation pattern {$expected}. SQL: {$sql}; params: " . json_encode($parameters)
+            "Expected escaped pattern {$expected}. SQL: {$sql}; params: " . json_encode($params)
         );
     }
 
@@ -112,8 +117,7 @@ final class ContainsUnderScoreTest extends TestCase
      */
     public function testRepro_UnderscoreWasWildcard(): void
     {
-        // delete skipping test to see the bug (before fix)
-        $this->markTestSkipped();
+        $this->markTestSkipped('Enable manually to reproduce pre-fix behavior.');
         $rows = $this->materialize($this->ds->query(
             new RqlQuery('contains(template_code,string:PU_DS_NV__)')
         ));
