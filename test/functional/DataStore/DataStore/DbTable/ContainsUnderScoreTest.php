@@ -50,6 +50,7 @@ final class ContainsUnderScoreTest extends TestCase
         $gw = new TableGateway('amazon_shipping_templates', $this->adapter);
         $this->ds = new DbTable($gw, 'id');
 
+        // data to insert
         $rows = [
             ['template_code' => 'PU_DS_NV__2025-03-20',         'shipping_service' => 'Standard Shipping'],
             ['template_code' => 'PU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Standard Shipping'],
@@ -68,37 +69,22 @@ final class ContainsUnderScoreTest extends TestCase
      */
     public function testContainsBuildsEscapedLikePattern(): void
     {
-        $it = $this->ds->query(new RqlQuery('contains(template_code,string:PU_DS_NV__)'));
-        is_array($it) ? $it : iterator_to_array($it);
+        $this->ds->query(new RqlQuery('contains(template_code,string:PU_DS_NV__)'));
 
         $profiles = $this->profiler->getProfiles();
-        $this->assertNotEmpty($profiles, 'Profiler must contain at least one SQL statement.');
+        $this->assertNotEmpty($profiles, 'Profiler must contains at least 1 SQL-request.');
+
         $last = end($profiles);
+        $sql = (string)($last['sql'] ?? '');
 
-        $sqlRaw  = is_array($last) ? (isset($last['sql']) ? $last['sql'] : '') : (method_exists($last, 'getSql') ? $last->getSql() : '');
-        $parsRaw = is_array($last) ? (isset($last['parameters']) ? $last['parameters'] : []) : (method_exists($last, 'getParameters') ? $last->getParameters() : []);
-
-        $sql = (string)$sqlRaw;
-
-        $params = [];
-        if ($parsRaw instanceof ParameterContainer) {
-            foreach ($parsRaw as $name => $meta) {
-                $params[] = (is_array($meta) && array_key_exists('value', $meta)) ? $meta['value'] : $meta;
-            }
-        } elseif (is_array($parsRaw)) {
-            $params = array_values($parsRaw);
-        }
-
-        $expected = "%PU\\_DS\\_NV\\_\\_%";
-
-        $foundInParams = in_array($expected, $params, true);
-        $foundInSql    = (false !== strpos($sql, "LIKE '$expected'"))
-            || (false !== strpos($sql, 'LIKE "' . $expected . '"'));
-
+        $this->assertNotEmpty($sql, 'Last SQL must not be empty.');
         $this->assertTrue(
-            $foundInParams || $foundInSql,
-            "Expected escaped pattern {$expected}. SQL: {$sql}; params: " . json_encode($params)
+            str_contains($sql, 'LIKE'),
+            "Last SQL must contains LIKE. Received: {$sql}"
         );
+
+        $expected = "%PU\_DS\_NV\_\_%";
+        $this->assertTrue(str_contains($sql, $expected));
     }
 
     public function testEqExactMatchReturnsThreeRows(): void
