@@ -45,7 +45,7 @@ class QueriedUpdateHandler extends AbstractHandler
             return false;
         }
 
-        return $this->isRqlQueryNotContainsSortAndLimit($query);
+        return $this->isRqlQueryNotContainsGroupByAndSelect($query);
     }
 
     protected function handle(ServerRequestInterface $request): ResponseInterface
@@ -85,7 +85,7 @@ class QueriedUpdateHandler extends AbstractHandler
     /**
      * Check that rqs is only RQL-filter, no groupBy/select
      */
-    private function isRqlQueryNotContainsSortAndLimit(Query $query): bool
+    private function isRqlQueryNotContainsGroupByAndSelect(Query $query): bool
     {
         return is_null($query->getGroupBy())
             && is_null($query->getSelect());
