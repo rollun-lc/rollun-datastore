@@ -71,7 +71,7 @@ final class ContainsUnderScoreTest extends TestCase
         $this->assertNotEmpty($profiles, 'Profiler must contains at lease 1 SQL-request.');
 
         $last = end($profiles);
-        $sql = (string)($last['sql'] ?? '');
+        $sql = (string) ($last['sql'] ?? '');
 
         $this->assertNotEmpty($sql, 'Last SQL must not be empty.');
         $this->assertTrue(
