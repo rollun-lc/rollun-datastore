@@ -79,8 +79,7 @@ final class ContainsUnderScoreTest extends TestCase
             "Last SQL must contains LIKE. Received: {$sql}"
         );
 
-        $expected = "%PU\_DS\_NV\_\_%";
-        $this->assertTrue(str_contains($sql, $expected));
+        $this->assertTrue(str_contains($sql, "%PU\_DS\_NV\_\_%"));
     }
 
     public function testEqExactMatchReturnsThreeRows(): void
@@ -89,8 +88,8 @@ final class ContainsUnderScoreTest extends TestCase
         $rows = $this->materialize($this->ds->query($q));
 
         $this->assertCount(3, $rows);
-        foreach ($rows as $r) {
-            $this->assertSame('PU_DS_NV__2025-03-20', $r['template_code']);
+        foreach ($rows as $row) {
+            $this->assertSame('PU_DS_NV__2025-03-20', $row['template_code']);
         }
     }
 
