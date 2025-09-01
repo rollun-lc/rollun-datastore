@@ -46,7 +46,7 @@ final class ContainsUnderScoreTest extends TestCase
         $gw = new TableGateway('amazon_shipping_templates', $this->adapter);
         $this->ds = new DbTable($gw, 'id');
 
-        // данные
+        // data to insert
         $rows = [
             ['template_code' => 'PU_DS_NV__2025-03-20',         'shipping_service' => 'Standard Shipping'],
             ['template_code' => 'PU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Standard Shipping'],
@@ -65,35 +65,22 @@ final class ContainsUnderScoreTest extends TestCase
      */
     public function testContainsBuildsEscapedLikePattern(): void
     {
-        $it = $this->ds->query(new RqlQuery('contains(template_code,string:PU_DS_NV__)'));
-        is_array($it) ? $it : iterator_to_array($it);
+        $this->ds->query(new RqlQuery('contains(template_code,string:PU_DS_NV__)'));
 
         $profiles = $this->profiler->getProfiles();
         $this->assertNotEmpty($profiles, 'Profiler must contains at lease 1 SQL-request.');
+
         $last = end($profiles);
+        $sql = (string)($last['sql'] ?? '');
 
-        $sql        = $last['sql']        ?? '';
-        $parameters = $last['parameters'] ?? [];
-
-        $expected = "%PU\\_DS\\_NV\\_\\_%";
-
-        $foundInParams = false;
-        if (is_array($parameters)) {
-            foreach ($parameters as $p) {
-                if ($p === $expected) {
-                    $foundInParams = true;
-                    break;
-                }
-            }
-        }
-
-        $foundInSql = strpos($sql, "LIKE '$expected'")
-            || strpos($sql, "LIKE \"$expected\"");
-
+        $this->assertNotEmpty($sql, 'Last SQL must not be empty.');
         $this->assertTrue(
-            $foundInParams || $foundInSql,
-            "Waiting that LIKE will encranation pattern {$expected}. SQL: {$sql}; params: " . json_encode($parameters)
+            str_contains($sql, 'LIKE'),
+            "Last SQL must contains LIKE. Received: {$sql}"
         );
+
+        $expected = "%PU\_DS\_NV\_\_%";
+        $this->assertTrue(str_contains($sql, $expected));
     }
 
     public function testEqExactMatchReturnsThreeRows(): void
