@@ -67,7 +67,7 @@ final class ContainsUnderScoreTest extends TestCase
     /**
      * Check that LIKE-pattern is ecranated: %PU\_DS\_NV\_\_%
      */
-    public function testContainsBuildsEscapedLikePattern(): void
+    public function testContainsBuildsWithEscapedUnderscore(): void
     {
         $this->ds->query(new RqlQuery('contains(template_code,string:PU_DS_NV__)'));
 
@@ -86,7 +86,7 @@ final class ContainsUnderScoreTest extends TestCase
         $this->assertTrue(str_contains($sql, "%PU\_DS\_NV\_\_%"));
     }
 
-    public function testEqExactMatchReturnsThreeRows(): void
+    public function testEqMatchReturnsRows(): void
     {
         $q = new RqlQuery('eq(template_code,string:PU_DS_NV__2025%2D03%2D20)');
         $rows = $this->materialize($this->ds->query($q));
@@ -100,7 +100,7 @@ final class ContainsUnderScoreTest extends TestCase
     /**
      * Optional test. To see bug before fix
      */
-    public function testRepro_UnderscoreWasWildcard(): void
+    public function testUnderscoreWasWildcard(): void
     {
         $this->markTestSkipped('Enable manually to reproduce pre-fix behavior.');
         $rows = $this->materialize($this->ds->query(
