@@ -5,7 +5,6 @@ namespace rollun\test\unit\Files\FileObject;
 use rollun\test\unit\Files\FilesAbstractTest;
 use rollun\files\FileObject;
 use rollun\files\FileManager;
-use rollun\installer\Command;
 
 abstract class FileObjectAbstractTest extends FilesAbstractTest
 {

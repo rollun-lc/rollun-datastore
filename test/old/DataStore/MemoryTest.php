@@ -7,7 +7,7 @@
 namespace rollun\test\old\DataStore;
 
 use rollun\datastore\DataStore\Memory;
-use rollun\installer\Command;
+use rollun\test\TestHelper;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
@@ -53,7 +53,7 @@ class MemoryTest extends AbstractTest
 
     public function test_exploitQueryValue()
     {
-        $file = Command::getDataDir() . "haha.dat";
+        $file = TestHelper::getDataDir() . "haha.dat";
         if (file_exists($file)) {
             unlink($file);
         }
@@ -82,7 +82,7 @@ class MemoryTest extends AbstractTest
 
     public function test_exploitQueryField()
     {
-        $file = Command::getDataDir() . "haha.dat";
+        $file = TestHelper::getDataDir() . "haha.dat";
         if (file_exists($file)) {
             unlink($file);
         }
@@ -111,7 +111,7 @@ class MemoryTest extends AbstractTest
 
     public function test_exploitSort()
     {
-        $file = Command::getDataDir() . "haha.dat";
+        $file = TestHelper::getDataDir() . "haha.dat";
         if (file_exists($file)) {
             unlink($file);
         }

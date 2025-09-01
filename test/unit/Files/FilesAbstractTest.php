@@ -4,7 +4,7 @@ namespace rollun\test\unit\Files;
 
 use rollun\files\FileObject;
 use rollun\files\FileManager;
-use rollun\installer\Command;
+use rollun\test\TestHelper;
 use PHPUnit\Framework\TestCase;
 
 abstract class FilesAbstractTest extends TestCase
@@ -21,7 +21,7 @@ abstract class FilesAbstractTest extends TestCase
     protected function makeDirName()
     {
         $fileManager = new FileManager;
-        $dataDir = Command::getDataDir();
+        $dataDir = TestHelper::getDataDir();
         $pathArray = explode('\\', strtolower(get_class($this)));
         array_shift($pathArray);
         $subDir = implode('/', $pathArray);
