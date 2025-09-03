@@ -121,7 +121,7 @@ final class ContainsUnderScoreTest extends TestCase
         $this->assertCount(2, $rows);
     }
 
-        private function materialize($rows): array
+    private function materialize($rows): array
     {
         return is_array($rows) ? $rows : iterator_to_array($rows);
     }
