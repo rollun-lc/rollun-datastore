@@ -58,6 +58,8 @@ final class ContainsUnderScoreTest extends TestCase
             ['template_code' => 'PU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Free Economy'],
             ['template_code' => 'PU_DS_NV__2025-03-20',         'shipping_service' => 'Expedited Shipping'],
             ['template_code' => 'PU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Expedited Shipping'],
+            ['template_code' => '__PU_DS_NV__NY_TX_WI__2025-03-24', 'shipping_service' => 'Expedited Shipping'],
+            ['template_code' => 'XXPU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Expedited Shipping'],
         ];
         foreach ($rows as $row) {
             $this->ds->create($row);
@@ -98,7 +100,7 @@ final class ContainsUnderScoreTest extends TestCase
     }
 
     /**
-     * Optional test. To see bug before fix
+     * Optional tests. To see bug before fix
      */
     public function testUnderscoreWasWildcard(): void
     {
@@ -106,10 +108,20 @@ final class ContainsUnderScoreTest extends TestCase
         $rows = $this->materialize($this->ds->query(
             new RqlQuery('contains(template_code,string:PU_DS_NV__)')
         ));
-        $this->assertCount(6, $rows);
+        $this->assertCount(8, $rows);
     }
 
-    private function materialize($rows): array
+    public function testUnderscoreWasWildcardBeforeFirstSymbol(): void
+    {
+        // delete skipping test to see the bug (before fix)
+        $this->markTestSkipped();
+        $rows = $this->materialize($this->ds->query(
+            new RqlQuery('contains(template_code,string:__PU_DS_NV__)')
+        ));
+        $this->assertCount(2, $rows);
+    }
+
+        private function materialize($rows): array
     {
         return is_array($rows) ? $rows : iterator_to_array($rows);
     }
