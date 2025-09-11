@@ -18,9 +18,8 @@ class HeadHandler extends AbstractHandler
 
     protected function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $response = new JsonResponse([]);
-
-        $response = $response->withHeader('X_DATASTORE_IDENTIFIER', $this->dataStore->getIdentifier());
+        $response = (new JsonResponse([]))
+            ->withHeader('X_DATASTORE_IDENTIFIER', $this->dataStore->getIdentifier());
 
         if (method_exists($this->dataStore, 'multiCreate')) {
             $response = $response->withHeader('X_MULTI_CREATE', 'true');
