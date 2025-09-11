@@ -23,20 +23,12 @@ class ErrorHandler implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $response = $request->getAttribute(ResponseInterface::class);
-
-        if (!($response instanceof ResponseInterface)) {
-            throw new RestException(
-                "No one datastore handler was executed. "
-                . "Method: '{$request->getMethod()}'. "
-                . "Uri: '{$request->getUri()->getPath()}'. "
-                . "ParsedBody: '" . json_encode($request->getParsedBody()) . "'. "
-                . "Attributes: '" . json_encode($request->getAttributes()) . "'. "
-            );
-        }
-
-        $response = $handler->handle($request);
-
-        return $response;
+        throw new RestException(
+            "No one datastore handler was executed. "
+            . "Method: '{$request->getMethod()}'. "
+            . "Uri: '{$request->getUri()->getPath()}'. "
+            . "ParsedBody: '" . json_encode($request->getParsedBody()) . "'. "
+            . "Attributes: '" . json_encode($request->getAttributes()) . "'. "
+        );
     }
 }
