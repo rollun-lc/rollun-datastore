@@ -2,14 +2,14 @@
 
 namespace rollun\datastore\Middleware\Handler;
 
+
+use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use Laminas\Diactoros\Response;
 
 class HeadHandler extends AbstractHandler
 {
+
     protected function canHandle(ServerRequestInterface $request): bool
     {
         return $request->getMethod() === "HEAD";
@@ -17,7 +17,7 @@ class HeadHandler extends AbstractHandler
 
     protected function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $response = new Response();
+        $response = new JsonResponse([]);
 
         $response = $response->withHeader('X_DATASTORE_IDENTIFIER', $this->dataStore->getIdentifier());
 
