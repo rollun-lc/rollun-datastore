@@ -7,9 +7,9 @@
 
 namespace rollun\datastore\Middleware\Handler;
 
+use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Laminas\Diactoros\Response;
 
 /**
  * Class DeleteHandler
@@ -38,13 +38,11 @@ class DeleteHandler extends AbstractHandler
         $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $items = $this->dataStore->delete($primaryKeyValue);
 
-        $response = new Response();
+        $response = new JsonResponse($items);
 
         if (!isset($items)) {
             $response = $response->withStatus(204);
         }
-
-        $response = $response->withBody($this->createStream($items));
 
         return $response;
     }
