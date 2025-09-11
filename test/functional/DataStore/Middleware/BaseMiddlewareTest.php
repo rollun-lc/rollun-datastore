@@ -87,14 +87,15 @@ abstract class BaseMiddlewareTest extends TestCase
     protected function assertDelegateCallWithAssertionCallback(
         callable $assertion,
         ServerRequestInterface $request,
-        MiddlewareInterface $object
+        MiddlewareInterface $object,
+        ?bool $handle = true,
     ) {
         /** @var PHPUnit_Framework_MockObject_MockObject|RequestHandlerInterface $mockHandler */
         $mockHandler = $this->getMockBuilder(RequestHandlerInterface::class)
             ->getMock();
-        $mockHandler->expects($this->once())
-            ->method('handle')
-            ->with($this->callback($assertion));
+            $mockHandler->expects($handle ? $this->once() : $this->never())
+                ->method('handle')
+                ->with($this->callback($assertion));
 
         $object->process($request, $mockHandler);
     }
