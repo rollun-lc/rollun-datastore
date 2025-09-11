@@ -6,11 +6,11 @@
 
 namespace rollun\datastore\Middleware\Handler;
 
+use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\Interfaces\RefreshableInterface;
 use rollun\datastore\Middleware\RestException;
-use Laminas\Diactoros\Response;
 
 /**
  * Class RefreshHandler
@@ -33,9 +33,8 @@ class RefreshHandler extends AbstractHandler
     {
         if ($this->dataStore instanceof RefreshableInterface) {
             $this->dataStore->refresh();
-            $response = new Response();
 
-            return $response;
+            return new JsonResponse([]);
         }
 
         throw new RestException("DataStore is not implement RefreshableInterface");
