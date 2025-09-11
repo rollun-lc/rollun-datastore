@@ -13,7 +13,7 @@ use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Query;
-use Zend\Diactoros\Response;
+use Zend\Diactoros\Response\JsonResponse;
 
 /**
  * Class QueryHandler
@@ -46,8 +46,7 @@ class QueryHandler extends AbstractHandler
         $rqlQuery = $request->getAttribute('rqlQueryObject');
         $items = $this->dataStore->query($rqlQuery);
 
-        $response = new Response();
-        $response = $response->withBody($this->createStream($items));
+        $response = new JsonResponse($items);
 
         if ($request->getAttribute('withContentRange')) {
             $contentRange = $this->createContentRange($rqlQuery, $items);
