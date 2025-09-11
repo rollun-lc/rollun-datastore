@@ -38,7 +38,6 @@ class ReadHandler extends AbstractHandler
         $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $items = $this->dataStore->read($primaryKeyValue);
 
-        $response = new JsonResponse($items);
-        return $response;
+        return new JsonResponse($items);
     }
 }
