@@ -36,15 +36,7 @@ abstract class AbstractHandler extends DataStoreAbstract
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($this->canHandle($request)) {
-            $response = $this->handle($request);
-            $stream = $response->getBody();
-
-            if (isset($stream)) {
-                $data = unserialize($stream->getContents());
-                $request = $request->withAttribute(JsonRenderer::RESPONSE_DATA, $data);
-            }
-
-            $request = $request->withAttribute(ResponseInterface::class, $response);
+            return $this->handle($request);
         }
 
         $response = $handler->handle($request);
