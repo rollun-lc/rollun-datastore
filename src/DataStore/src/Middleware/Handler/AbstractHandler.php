@@ -11,9 +11,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\Middleware\DataStoreAbstract;
-use rollun\datastore\Middleware\JsonRenderer;
 use Xiag\Rql\Parser\Query;
-use Laminas\Diactoros\Stream;
 
 abstract class AbstractHandler extends DataStoreAbstract
 {
@@ -40,19 +38,6 @@ abstract class AbstractHandler extends DataStoreAbstract
         }
 
         return $handler->handle($request);
-    }
-
-    /**
-     * Create stream with base64 encoded data
-     *
-     * @param $data
-     * @return Stream
-     */
-    protected function createStream($data)
-    {
-        $stream = fopen("data://text/plain;base64," . base64_encode(serialize($data)), 'r');
-
-        return new Stream($stream);
     }
 
     /**
