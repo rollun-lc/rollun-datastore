@@ -39,9 +39,7 @@ abstract class AbstractHandler extends DataStoreAbstract
             return $this->handle($request);
         }
 
-        $response = $handler->handle($request);
-
-        return $response;
+        return $handler->handle($request);
     }
 
     /**
