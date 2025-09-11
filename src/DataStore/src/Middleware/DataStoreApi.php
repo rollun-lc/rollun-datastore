@@ -41,14 +41,6 @@ class DataStoreApi implements MiddlewareInterface
         $this->middlewarePipe->pipe(new ResourceResolver());
         $this->middlewarePipe->pipe(new RequestDecoder());
         $this->middlewarePipe->pipe($determinator);
-
-        if ($renderer) {
-            $renderer = new RequestHandlerMiddleware($renderer);
-        } else {
-            $renderer = new JsonRenderer();
-        }
-
-        $this->middlewarePipe->pipe($renderer);
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
