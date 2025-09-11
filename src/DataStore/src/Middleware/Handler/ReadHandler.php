@@ -7,9 +7,9 @@
 
 namespace rollun\datastore\Middleware\Handler;
 
+use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Laminas\Diactoros\Response;
 
 /**
  * Class ReadHandler
@@ -38,9 +38,7 @@ class ReadHandler extends AbstractHandler
         $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $items = $this->dataStore->read($primaryKeyValue);
 
-        $response = new Response();
-        $response = $response->withBody($this->createStream($items));
-
+        $response = new JsonResponse($items);
         return $response;
     }
 }
