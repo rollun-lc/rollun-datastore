@@ -9,7 +9,7 @@ namespace rollun\datastore\Middleware\Handler;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\DataStoreException;
-use Zend\Diactoros\Response;
+use Zend\Diactoros\Response\JsonResponse;
 
 /**
  * Class CreateHandler
@@ -55,8 +55,6 @@ class CreateHandler extends AbstractHandler
             $row = array_merge([$primaryKeyIdentifier => $primaryKeyValue], $row);
         }
 
-        $response = new Response();
-
         if ($primaryKeyValue) {
             $isRowExist = !empty($this->dataStore->read($primaryKeyValue));
 
@@ -65,15 +63,15 @@ class CreateHandler extends AbstractHandler
             }
         }
 
+        $newItem = $this->dataStore->create($row, $overwriteMode);
+        $response = new JsonResponse($newItem);
+
         if (!$isRowExist) {
             $response = $response->withStatus(201);
             $location = $request->getUri()
                 ->getPath();
             $response = $response->withHeader('Location', $location);
         }
-
-        $newItem = $this->dataStore->create($row, $overwriteMode);
-        $response = $response->withBody($this->createStream($newItem));
 
         return $response;
     }
