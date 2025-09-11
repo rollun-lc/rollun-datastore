@@ -98,7 +98,7 @@ class DeleteHandlerTest extends BaseHandlerTest
             ->willReturn($item);
 
         $object = $this->createObject($dataStore);
-        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object);
+        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object, false);
     }
 
     public function testProcessCannotDeleteNotExistingItem()
@@ -120,6 +120,6 @@ class DeleteHandlerTest extends BaseHandlerTest
             ->willReturn(null);
 
         $object = $this->createObject($dataStore);
-        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object);
+        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object, false);
     }
 }

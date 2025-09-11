@@ -98,6 +98,6 @@ class ReadHandlerTest extends BaseHandlerTest
             ->willReturn($item);
 
         $object = $this->createObject($dataStore);
-        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object);
+        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object, false);
     }
 }

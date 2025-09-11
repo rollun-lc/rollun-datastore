@@ -124,7 +124,7 @@ class QueryHandlerTest extends BaseHandlerTest
         );
 
         $object = $this->createObject($dataStore);
-        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object);
+        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object, false);
     }
 
     /**
@@ -154,7 +154,7 @@ class QueryHandlerTest extends BaseHandlerTest
         $response = $this->createResponse(200, [], [$item]);
 
         $object = $this->createObject($dataStore);
-        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object);
+        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object, false);
     }
 
     /**
