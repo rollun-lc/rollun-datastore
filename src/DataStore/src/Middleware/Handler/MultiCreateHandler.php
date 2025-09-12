@@ -84,8 +84,12 @@ class MultiCreateHandler extends AbstractHandler
             $result = array_column($result, $this->dataStore->getIdentifier());
         }
 
-        return new JsonResponse($result, 201, [
-                'Location' => $request->getUri()->getPath()]
+        return new JsonResponse(
+            $result,
+            201,
+            [
+                'Location' => $request->getUri()->getPath()
+            ]
         );
     }
 }

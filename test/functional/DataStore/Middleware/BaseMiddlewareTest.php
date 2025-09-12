@@ -93,9 +93,9 @@ abstract class BaseMiddlewareTest extends TestCase
         /** @var PHPUnit_Framework_MockObject_MockObject|RequestHandlerInterface $mockHandler */
         $mockHandler = $this->getMockBuilder(RequestHandlerInterface::class)
             ->getMock();
-            $mockHandler->expects($handle ? $this->once() : $this->never())
-                ->method('handle')
-                ->with($this->callback($assertion));
+        $mockHandler->expects($handle ? $this->once() : $this->never())
+            ->method('handle')
+            ->with($this->callback($assertion));
 
         $object->process($request, $mockHandler);
     }

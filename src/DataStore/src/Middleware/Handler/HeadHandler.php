@@ -2,14 +2,12 @@
 
 namespace rollun\datastore\Middleware\Handler;
 
-
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class HeadHandler extends AbstractHandler
 {
-
     protected function canHandle(ServerRequestInterface $request): bool
     {
         return $request->getMethod() === "HEAD";
