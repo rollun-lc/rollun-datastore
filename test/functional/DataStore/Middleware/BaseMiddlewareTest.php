@@ -87,7 +87,7 @@ abstract class BaseMiddlewareTest extends TestCase
         callable $assertion,
         ServerRequestInterface $request,
         MiddlewareInterface $object,
-        ?bool $handle = true,
+        bool $handle = true
     ) {
         /** @var PHPUnit_Framework_MockObject_MockObject|RequestHandlerInterface $mockHandler */
         $mockHandler = $this->getMockBuilder(RequestHandlerInterface::class)
