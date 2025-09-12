@@ -79,7 +79,6 @@ class QueriedUpdateHandlerTest extends BaseHandlerTest
 
     public function testHandleSuccess()
     {
-        $this->markTestIncomplete('Atm queried update handler functional is stubbed for test');
         $fields = ['archived' => true];
         $rqlQuery = new RqlQuery('eq(status,new)&limit(2)');
 

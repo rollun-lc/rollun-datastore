@@ -6,7 +6,6 @@ use Laminas\Diactoros\Response;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
-use rollun\datastore\Middleware\RestException;
 use Xiag\Rql\Parser\Query;
 use Psr\Http\Message\ResponseInterface;
 
@@ -50,7 +49,6 @@ class QueriedUpdateHandler extends AbstractHandler
 
     protected function handle(ServerRequestInterface $request): ResponseInterface
     {
-        throw new RestException('Queried update stub exception');
         $query = $request->getAttribute('rqlQueryObject');
         $fields = $request->getParsedBody();
 

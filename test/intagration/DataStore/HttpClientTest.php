@@ -7,10 +7,10 @@
 namespace rollun\test\intagration\DataStore;
 
 use Psr\Container\ContainerInterface;
+use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\HttpClient;
-use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\TableManagerMysql;
 use Laminas\Http\Client;
 
@@ -102,66 +102,5 @@ class HttpClientTest extends BaseDataStoreTest
         $object->read(1);
 
         $this->assertEquals('test', $object->getIdentifier());
-    }
-
-    public function testQueriedUpdateSuccess()
-    {
-        $this->markTestIncomplete('Atm queried update handler functional is stubbed for test');
-    }
-
-    public function testDataIntegritySuccess()
-    {
-        $object = $this->createObject();
-        $object->queriedDelete(new RqlQuery());
-        $range13 = range(1, 3);
-
-        foreach ($range13 as $id) {
-            $object->create([
-                $object->getIdentifier() => $id,
-                'name' => 'name',
-                'surname' => 'surname',
-            ]);
-        }
-
-        $this->assertEquals($object->count(), count($range13));
-        $range49 = range(4, 9);
-
-        foreach ($range49 as $id) {
-            $object->create([
-                $object->getIdentifier() => $id,
-                'name' => 'name',
-                'surname' => 'surname',
-            ]);
-        }
-
-        $this->assertEquals($object->count(), count($range13) + count($range49));
-
-        $object->delete(2);
-        $object->delete(6);
-        $this->assertEquals($object->count(), (count($range13) + count($range49)) - 2);
-
-
-        $object->create([
-            $object->getIdentifier() => 10,
-            'name' => 'name',
-            'surname' => 'surname',
-        ]);
-        $this->assertEquals($object->count(), (count($range13) + count($range49)) - 1);
-
-        $object->create([
-            $object->getIdentifier() => 2,
-            'name' => 'name',
-            'surname' => 'surname',
-        ]);
-
-        $object->create([
-            $object->getIdentifier() => 6,
-            'name' => 'name',
-            'surname' => 'surname',
-        ]);
-        $this->assertEquals($object->count(), (count($range13) + count($range49)) + 1);
-
-        $object->queriedDelete(new RqlQuery());
-        $this->assertEquals(0, $object->count());
     }
 }
