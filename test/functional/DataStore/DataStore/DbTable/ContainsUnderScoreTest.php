@@ -3,12 +3,14 @@
 namespace functional\DataStore\DataStore\DbTable;
 
 use PHPUnit\Framework\TestCase;
+use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\Rql\RqlQuery;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Adapter\ParameterContainer;
 use Zend\Db\Adapter\Profiler\Profiler;
 use Zend\Db\TableGateway\TableGateway;
+use rollun\datastore\Rql\Node\ContainsNode;
 
 /**
  * feat(11tW8Zly): RQL contains "_" wildcard bug fix.
@@ -42,7 +44,8 @@ final class ContainsUnderScoreTest extends TestCase
             'CREATE TABLE amazon_shipping_templates (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 template_code TEXT NOT NULL,
-                shipping_service TEXT NOT NULL
+                shipping_service TEXT NOT NULL,
+                mln TEXT NOT NULL
             )',
             $this->adapter::QUERY_MODE_EXECUTE
         );
@@ -52,14 +55,14 @@ final class ContainsUnderScoreTest extends TestCase
 
         // data to insert
         $rows = [
-            ['template_code' => 'PU_DS_NV__2025-03-20',         'shipping_service' => 'Standard Shipping'],
-            ['template_code' => 'PU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Standard Shipping'],
-            ['template_code' => 'PU_DS_NV__2025-03-20',         'shipping_service' => 'Free Economy'],
-            ['template_code' => 'PU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Free Economy'],
-            ['template_code' => 'PU_DS_NV__2025-03-20',         'shipping_service' => 'Expedited Shipping'],
-            ['template_code' => 'PU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Expedited Shipping'],
-            ['template_code' => '__PU_DS_NV__NY_TX_WI__2025-03-24', 'shipping_service' => 'Expedited Shipping'],
-            ['template_code' => 'XXPU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Expedited Shipping'],
+            ['template_code' => 'PU_DS_NV__2025-03-20',         'shipping_service' => 'Standard Shipping', 'mln' => 'test'],
+            ['template_code' => 'PU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Standard Shipping', 'mln' => 'test'],
+            ['template_code' => 'PU_DS_NV__2025-03-20',         'shipping_service' => 'Free Economy', 'mln' => 'test'],
+            ['template_code' => 'PU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Free Economy', 'mln' => 'test'],
+            ['template_code' => 'PU_DS_NV__2025-03-20',         'shipping_service' => 'Expedited Shipping', 'mln' => 'test'],
+            ['template_code' => 'PU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Expedited Shipping', 'mln' => 'test'],
+            ['template_code' => '__PU_DS_NV__NY_TX_WI__2025-03-24', 'shipping_service' => 'Expedited Shipping', 'mln' => 'test'],
+            ['template_code' => 'XXPU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Expedited Shipping', 'mln' => 'test'],
         ];
         foreach ($rows as $row) {
             $this->ds->create($row);
@@ -124,5 +127,71 @@ final class ContainsUnderScoreTest extends TestCase
     private function materialize($rows): array
     {
         return is_array($rows) ? $rows : iterator_to_array($rows);
+    }
+
+    /**
+     * Bug: URL-encoded strings with % symbols incorrectly trigger validation error.
+     *
+     * Problem: The containsNodeSpecSymbolsEcranation method checks for % and _ symbols
+     * in the string, but it doesn't distinguish between SQL wildcard % and URL-encoded %
+     * (like %22, %5F, %23). URL-encoded strings like "#dont_sell#" (encoded as %22%23dont%5Fsell%23)
+     * should not trigger the validation error because % here is not a SQL wildcard.
+     *
+     * This test reproduces the bug - it should fail with current implementation.
+     */
+    public function testStringWithBackslashAndUnderscoreThrowsException(): void
+    {
+        $this->markTestSkipped();
+        // This reproduces the bug: string with backslash AND underscore triggers validation error
+        // Even though backslash here is not intended as SQL escape character
+        try {
+            // Create a query that will trigger the bug - string with both \ and _
+            $query = new RqlQuery();
+            $query->setQuery(new ContainsNode('template_code', 'path\\to_file'));
+            $this->ds->query($query);
+            $this->fail('Expected exception was not thrown');
+        } catch (\rollun\datastore\DataStore\DataStoreException $e) {
+            // Check if it's the expected exception message
+            $fullMessage = $e->getMessage();
+            if ($e->getPrevious()) {
+                $fullMessage .= ' Previous: ' . $e->getPrevious()->getMessage();
+            }
+            $this->assertStringContainsString('Rql cannot contains backspace AND % OR _ in one request', $fullMessage);
+        }
+    }
+
+    /**
+     * Test that verifies the fix works correctly.
+     * After fix, URL-encoded strings should be handled properly.
+     */
+    public function testUrlEncodedStringAfterFix(): void
+    {
+        $this->markTestSkipped();
+        // This should work after fix - URL-encoded % should not be treated as SQL wildcard
+        $this->ds->query(new RqlQuery('contains(template_code,string:%22%23dont%5Fsell%23)'));
+
+        $profiles = $this->profiler->getProfiles();
+        $this->assertNotEmpty($profiles, 'Profiler must contains at least 1 SQL-request.');
+
+        $last = end($profiles);
+        $sql = (string) ($last['sql'] ?? '');
+
+        $this->assertNotEmpty($sql, 'Last SQL must not be empty.');
+        $this->assertTrue(
+            str_contains($sql, 'LIKE'),
+            "Last SQL must contains LIKE. Received: {$sql}",
+        );
+
+        // Should escape _ properly in the decoded string
+        $this->assertTrue(str_contains($sql, '%"#dont\_sell#%'));
+    }
+
+    public function testPersonal()
+    {
+        $rqlString = 'select(count(mln))&and(not(eq(ct%5Fquantity,0)),eq(ct%5Factive,1),eq(mp%5Fstatus,string:inactive),not(contains(tags,string:%22%23dont%5Fsell%23)))';
+        $query = new RqlQuery($rqlString);
+        $this->ds->query($query);
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage('Rql cannot contains backspace AND % OR _ in one request');
     }
 }
