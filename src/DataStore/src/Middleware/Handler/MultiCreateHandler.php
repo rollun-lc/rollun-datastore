@@ -88,7 +88,7 @@ class MultiCreateHandler extends AbstractHandler
             $result,
             201,
             [
-                'Location' => $request->getUri()->getPath()
+                'Location' => $request->getUri()->getPath(),
             ]
         );
     }
