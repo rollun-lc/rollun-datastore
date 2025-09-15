@@ -3,11 +3,8 @@
 namespace functional\DataStore\DataStore\DbTable;
 
 use Laminas\Db\Adapter\Adapter;
-use Laminas\Db\Adapter\Exception\InvalidQueryException;
 use Laminas\Db\Adapter\Profiler\Profiler;
-use Laminas\Db\TableGateway\TableGateway;
 use PHPUnit\Framework\TestCase;
-use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\Rql\Node\ContainsNode;
@@ -44,14 +41,13 @@ final class ContainsUnderScoreTest extends TestCase
             'profiler' => $this->profiler,
             'options'  => [
                 \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-                \PDO::ATTR_EMULATE_PREPARES => false, // см. примечание ниже
+                \PDO::ATTR_EMULATE_PREPARES => false,
                 \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
             ],
         ]);
 
-        // схема для MySQL
         $this->adapter->query(
-            'CREATE TABLE IF NOT EXISTS amazon_shipping_templates (
+            'CREATE TABLE IF NOT EXISTS amazon_shipping_templates_underscore_test (
             id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
             template_code    VARCHAR(191) NOT NULL,
             shipping_service VARCHAR(191) NOT NULL,
@@ -60,11 +56,14 @@ final class ContainsUnderScoreTest extends TestCase
             $this->adapter::QUERY_MODE_EXECUTE
         );
 
-        $gw = new \Laminas\Db\TableGateway\TableGateway('amazon_shipping_templates', $this->adapter);
+        $gw = new \Laminas\Db\TableGateway\TableGateway('amazon_shipping_templates_underscore_test', $this->adapter);
         $this->ds = new \rollun\datastore\DataStore\DbTable($gw, 'id');
 
-        // data to insert
+        $this->adapter->query('TRUNCATE TABLE amazon_shipping_templates_underscore_test', $this->adapter::QUERY_MODE_EXECUTE);
+
+        // data to insert - covering various edge cases with % and _ symbols
         $rows = [
+            // Original underscore test data
             ['template_code' => 'PU_DS_NV__2025-03-20',         'shipping_service' => 'Standard Shipping', 'mln' => 'test'],
             ['template_code' => 'PU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Standard Shipping', 'mln' => 'test'],
             ['template_code' => 'PU_DS_NV__2025-03-20',         'shipping_service' => 'Free Economy', 'mln' => 'test'],
@@ -73,6 +72,21 @@ final class ContainsUnderScoreTest extends TestCase
             ['template_code' => 'PU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Expedited Shipping', 'mln' => 'test'],
             ['template_code' => '__PU_DS_NV__NY_TX_WI__2025-03-24', 'shipping_service' => 'Expedited Shipping', 'mln' => 'test'],
             ['template_code' => 'XXPU_DS_NV_NY_TX_WI__2025-03-24', 'shipping_service' => 'Expedited Shipping', 'mln' => 'test'],
+
+            // Test data for percent symbol scenarios
+            ['template_code' => 'test%value_2025',              'shipping_service' => 'Express', 'mln' => 'percent_test'],
+            ['template_code' => 'test_percent_value_2025',      'shipping_service' => 'Express', 'mln' => 'percent_test'],
+            ['template_code' => 'testXvalue_2025',              'shipping_service' => 'Express', 'mln' => 'percent_test'],
+
+            // Test data for combined % and _ scenarios
+            ['template_code' => 'order_%_status_active',        'shipping_service' => 'Premium', 'mln' => 'combined_test'],
+            ['template_code' => 'order_XX_status_active',       'shipping_service' => 'Premium', 'mln' => 'combined_test'],
+            ['template_code' => 'order_pending_status_active',  'shipping_service' => 'Premium', 'mln' => 'combined_test'],
+
+            // URL-encoded scenario test data
+            ['template_code' => '"#dont_sell#"',                'shipping_service' => 'Special', 'mln' => 'url_test'],
+            ['template_code' => '"#dont_sell_more#"',           'shipping_service' => 'Special', 'mln' => 'url_test'],
+            ['template_code' => '"#dontXsell#"',                'shipping_service' => 'Special', 'mln' => 'url_test'],
         ];
         foreach ($rows as $row) {
             $this->ds->create($row);
@@ -84,7 +98,6 @@ final class ContainsUnderScoreTest extends TestCase
      */
     public function testContainsBuildsWithEscapedUnderscore(): void
     {
-        $this->markTestSkipped();
         $this->ds->query(new RqlQuery('contains(template_code,string:PU_DS_NV__)'));
 
         $profiles = $this->profiler->getProfiles();
@@ -104,7 +117,6 @@ final class ContainsUnderScoreTest extends TestCase
 
     public function testEqMatchReturnsRows(): void
     {
-        $this->markTestSkipped();
         $q = new RqlQuery('eq(template_code,string:PU_DS_NV__2025%2D03%2D20)');
         $rows = $this->materialize($this->ds->query($q));
 
@@ -174,12 +186,107 @@ final class ContainsUnderScoreTest extends TestCase
     }
 
     /**
+     * Test that percent symbol is properly escaped in contains queries.
+     * Should escape % as \% to prevent SQL wildcard matching.
+     */
+    public function testContainsEscapesPercentSymbol(): void
+    {
+        // Create query programmatically to avoid RQL parser issues with %
+        $query = new RqlQuery();
+        $query->setQuery(new ContainsNode('template_code', 'test%value'));
+        $this->ds->query($query);
+
+        $profiles = $this->profiler->getProfiles();
+        $this->assertNotEmpty($profiles, 'Profiler must contains at least 1 SQL-request.');
+
+        $last = end($profiles);
+        $sql = (string) ($last['sql'] ?? '');
+
+        $this->assertNotEmpty($sql, 'Last SQL must not be empty.');
+        $this->assertTrue(str_contains($sql, 'LIKE'), "SQL must contain LIKE. Received: {$sql}");
+
+        // Check that % is escaped as \%
+        $this->assertTrue(str_contains($sql, '%test\%value%'), "SQL should contain escaped percent: {$sql}");
+
+        // Check that only exact matches are found (not wildcard matches)
+        $query2 = new RqlQuery();
+        $query2->setQuery(new ContainsNode('template_code', 'test%value'));
+        $rows = $this->materialize($this->ds->query($query2));
+        $this->assertCount(1, $rows, 'Should find exactly 1 row with test%value');
+        $this->assertSame('test%value_2025', $rows[0]['template_code']);
+    }
+
+    /**
+     * Test that both percent and underscore symbols are properly escaped together.
+     * Should escape both % as \% and _ as \_ to prevent SQL wildcard matching.
+     */
+    public function testContainsEscapesBothPercentAndUnderscore(): void
+    {
+        // Create query programmatically to avoid RQL parser issues with %
+        $query = new RqlQuery();
+        $query->setQuery(new ContainsNode('template_code', 'order_%_status'));
+        $this->ds->query($query);
+
+        $profiles = $this->profiler->getProfiles();
+        $this->assertNotEmpty($profiles, 'Profiler must contains at least 1 SQL-request.');
+
+        $last = end($profiles);
+        $sql = (string) ($last['sql'] ?? '');
+
+        $this->assertNotEmpty($sql, 'Last SQL must not be empty.');
+        $this->assertTrue(str_contains($sql, 'LIKE'), "SQL must contain LIKE. Received: {$sql}");
+
+        // Check that both % and _ are escaped
+        $this->assertTrue(str_contains($sql, '%order\_\%\_status%'), "SQL should contain both escaped symbols: {$sql}");
+
+        // Check that only exact matches are found (not wildcard matches)
+        $query2 = new RqlQuery();
+        $query2->setQuery(new ContainsNode('template_code', 'order_%_status'));
+        $rows = $this->materialize($this->ds->query($query2));
+        $this->assertCount(1, $rows, 'Should find exactly 1 row with order_%_status');
+        $this->assertSame('order_%_status_active', $rows[0]['template_code']);
+    }
+
+    /**
+     * Test edge case with only special characters.
+     * Should properly escape and find exact matches.
+     */
+    public function testContainsWithOnlySpecialCharacters(): void
+    {
+        // Add test data with only special chars
+        $this->ds->create(['template_code' => '_%', 'shipping_service' => 'Special', 'mln' => 'edge_case']);
+        $this->ds->create(['template_code' => '_X', 'shipping_service' => 'Special', 'mln' => 'edge_case']);
+
+        // Create query programmatically to avoid RQL parser issues with %
+        $query = new RqlQuery();
+        $query->setQuery(new ContainsNode('template_code', '_%'));
+        $this->ds->query($query);
+
+        $profiles = $this->profiler->getProfiles();
+        $last = end($profiles);
+        $sql = (string) ($last['sql'] ?? '');
+
+        // Check proper escaping
+        $this->assertTrue(str_contains($sql, '%\_\%%'), "SQL should escape both characters: {$sql}");
+
+        // Check exact match count - only '_%' should be found
+        $query2 = new RqlQuery();
+        $query2->setQuery(new ContainsNode('template_code', '_%'));
+        $rows = $this->materialize($this->ds->query($query2));
+
+        // Both rows should be found: '_%' and 'order_%_status_active' (contains '_%')
+        $foundCodes = array_column($rows, 'template_code');
+        $this->assertCount(2, $rows, 'Should find 2 rows containing _%' . '. Found: ' . implode(', ', $foundCodes));
+        $this->assertContains('_%', $foundCodes);
+        $this->assertContains('order_%_status_active', $foundCodes);
+    }
+
+    /**
      * Test that verifies the fix works correctly.
      * After fix, URL-encoded strings should be handled properly.
      */
-    public function testUrlEncodedStringAfterFix(): void
+    public function testContainsPrepareValuesCorrectWithSpecSymbolsAndMysqlQuote(): void
     {
-        $this->markTestSkipped();
         // This should work after fix - URL-encoded % should not be treated as SQL wildcard
         $this->ds->query(new RqlQuery('contains(template_code,string:%22%23dont%5Fsell%23)'));
 
@@ -196,16 +303,11 @@ final class ContainsUnderScoreTest extends TestCase
         );
 
         // Should escape _ properly in the decoded string
-        $this->assertTrue(str_contains($sql, '%"#dont\_sell#%'));
-    }
+        $this->assertTrue(str_contains($sql, '%\"#dont\_sell#%'));
 
-    public function testPersonal()
-    {
-        $rqlString = 'contains(tags,string:%22%23dont%5Fsell%23)';
-        $this->expectException(DataStoreException::class);
-//        $this->expectExceptionMessage("Can't build sql from rql query");
-        $query = new RqlQuery($rqlString);
-        $this->expectException(InvalidQueryException::class);
-        $this->ds->query($query);
+        // Check that only exact matches are found
+        $rows = $this->materialize($this->ds->query(new RqlQuery('contains(template_code,string:%22%23dont%5Fsell%23)')));
+        $this->assertCount(1, $rows, 'Should find exactly 1 row with "#dont_sell#"');
+        $this->assertSame('"#dont_sell#"', $rows[0]['template_code']);
     }
 }
