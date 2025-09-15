@@ -136,7 +136,7 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
     private function containsNodeSpecSymbolsEcranation(string $value)
     {
         $value = preg_replace('~(?<!\\\\)%~', '\\\\%', $value); // %  -> \%
-        $value = preg_replace('~(?<!\\\\)_~',  '\\\\_', $value); // _  -> \_
+        $value = preg_replace('~(?<!\\\\)_~', '\\\\_', $value); // _  -> \_
         return $value;
     }
 
