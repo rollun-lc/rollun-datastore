@@ -304,7 +304,7 @@ final class ContainsUnderScoreTest extends TestCase
         $this->assertNotEmpty($sql, 'Last SQL must not be empty.');
         $this->assertTrue(
             str_contains($sql, 'LIKE'),
-            "Last SQL must contains LIKE. Received: {$sql}",
+            "Last SQL must contains LIKE. Received: {$sql}"
         );
 
         // Should escape _ properly in the decoded string
