@@ -114,11 +114,11 @@ final class ContainsUnderScoreTest extends TestCase
 
         $this->assertNotEmpty($sql, 'Last SQL must not be empty.');
         $this->assertTrue(
-            str_contains($sql, 'LIKE'),
+            strpos($sql, 'LIKE') !== false,
             "Last SQL must contains LIKE. Received: {$sql}"
         );
 
-        $this->assertTrue(str_contains($sql, "%PU\_DS\_NV\_\_%"));
+        $this->assertTrue(strpos($sql, "%PU\_DS\_NV\_\_%") !== false);
     }
 
     public function testEqMatchReturnsRows(): void
@@ -208,10 +208,10 @@ final class ContainsUnderScoreTest extends TestCase
         $sql = (string) ($last['sql'] ?? '');
 
         $this->assertNotEmpty($sql, 'Last SQL must not be empty.');
-        $this->assertTrue(str_contains($sql, 'LIKE'), "SQL must contain LIKE. Received: {$sql}");
+        $this->assertTrue(strpos($sql, 'LIKE') !== false, "SQL must contain LIKE. Received: {$sql}");
 
         // Check that % is escaped as \%
-        $this->assertTrue(str_contains($sql, '%test\%value%'), "SQL should contain escaped percent: {$sql}");
+        $this->assertTrue(strpos($sql, '%test\%value%') !== false, "SQL should contain escaped percent: {$sql}");
 
         // Check that only exact matches are found (not wildcard matches)
         $query2 = new RqlQuery();
@@ -239,10 +239,10 @@ final class ContainsUnderScoreTest extends TestCase
         $sql = (string) ($last['sql'] ?? '');
 
         $this->assertNotEmpty($sql, 'Last SQL must not be empty.');
-        $this->assertTrue(str_contains($sql, 'LIKE'), "SQL must contain LIKE. Received: {$sql}");
+        $this->assertTrue(strpos($sql, 'LIKE') !== false, "SQL must contain LIKE. Received: {$sql}");
 
         // Check that both % and _ are escaped
-        $this->assertTrue(str_contains($sql, '%order\_\%\_status%'), "SQL should contain both escaped symbols: {$sql}");
+        $this->assertTrue(strpos($sql, '%order\_\%\_status%') !== false, "SQL should contain both escaped symbols: {$sql}");
 
         // Check that only exact matches are found (not wildcard matches)
         $query2 = new RqlQuery();
@@ -272,7 +272,7 @@ final class ContainsUnderScoreTest extends TestCase
         $sql = (string) ($last['sql'] ?? '');
 
         // Check proper escaping
-        $this->assertTrue(str_contains($sql, '%\_\%%'), "SQL should escape both characters: {$sql}");
+        $this->assertTrue(strpos($sql, '%\_\%%') !== false, "SQL should escape both characters: {$sql}");
 
         // Check exact match count - only '_%' should be found
         $query2 = new RqlQuery();
@@ -303,12 +303,12 @@ final class ContainsUnderScoreTest extends TestCase
 
         $this->assertNotEmpty($sql, 'Last SQL must not be empty.');
         $this->assertTrue(
-            str_contains($sql, 'LIKE'),
+            strpos($sql, 'LIKE') !== false,
             "Last SQL must contains LIKE. Received: {$sql}"
         );
 
         // Should escape _ properly in the decoded string
-        $this->assertTrue(str_contains($sql, '%\"#dont\_sell#%'));
+        $this->assertTrue(strpos($sql, '%\"#dont\_sell#%') !== false);
 
         // Check that only exact matches are found
         $rows = $this->materialize($this->ds->query(new RqlQuery('contains(template_code,string:%22%23dont%5Fsell%23)')));
