@@ -32,15 +32,15 @@ final class ContainsUnderScoreTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->profiler = new \Laminas\Db\Adapter\Profiler\Profiler();
+        $this->profiler = new Profiler();
 
-        $this->adapter = new \Laminas\Db\Adapter\Adapter([
+        $this->adapter = new Adapter([
             'driver'   => 'Pdo_Mysql',
             'dsn'      => sprintf(
                 'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
                 getenv('DB_HOST') ?: 'mysql',
                 getenv('DB_PORT') ?: '3306',
-                getenv('DB_NAME') ?: 'app_test',
+                getenv('DB_NAME') ?: 'app_test'
             ),
             'username' => getenv('DB_USER') ?: 'app',
             'password' => getenv('DB_PASS') ?: 'secret',
@@ -62,8 +62,8 @@ final class ContainsUnderScoreTest extends TestCase
             $this->adapter::QUERY_MODE_EXECUTE
         );
 
-        $gw = new \Laminas\Db\TableGateway\TableGateway('amazon_shipping_templates_underscore_test', $this->adapter);
-        $this->ds = new \rollun\datastore\DataStore\DbTable($gw, 'id');
+        $gw = new TableGateway('amazon_shipping_templates_underscore_test', $this->adapter);
+        $this->ds = new DbTable($gw, 'id');
 
         $this->adapter->query('TRUNCATE TABLE amazon_shipping_templates_underscore_test', $this->adapter::QUERY_MODE_EXECUTE);
 
