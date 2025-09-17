@@ -146,10 +146,8 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
 
     private function containsNodeSpecSymbolsEcranation(string $value)
     {
-        if ((str_contains($value, '\\')) && (str_contains($value, '%') || str_contains($value, '_'))) {
-            throw new DataStoreException('Rql cannot contains backspace AND % OR _ in one request');
-        }
-        $value = str_replace(['%', '_'], ['\%', '\_'], $value);
+        $value = preg_replace('~(?<!\\\\)%~', '\\\\%', $value); // %  -> \%
+        $value = preg_replace('~(?<!\\\\)_~', '\\\\_', $value); // _  -> \_
         return $value;
     }
 
