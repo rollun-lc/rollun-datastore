@@ -135,15 +135,9 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
 
     private function containsNodeSpecSymbolsEcranation(string $value)
     {
-        $hasBackslash = strpos($value, '\\') !== false;
-        $hasPercent   = strpos($value, '%') !== false;
-        $hasUnderscore= strpos($value, '_') !== false;
-
-        if ($hasBackslash && ($hasPercent || $hasUnderscore)) {
-            throw new DataStoreException('RQL cannot contain backslash together with % or _ in one request');
-        }
-
-        return str_replace(['%', '_'], ['\\%', '\\_'], $value);
+        $value = preg_replace('~(?<!\\\\)%~', '\\\\%', $value); // %  -> \%
+        $value = preg_replace('~(?<!\\\\)_~', '\\\\_', $value); // _  -> \_
+        return $value;
     }
 
     /**
