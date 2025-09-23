@@ -33,6 +33,9 @@ final class EqOnJsonFieldBugTest extends TestCase
     {
         $this->profiler = new Profiler();
 
+        // TODO: charset - разобратся какие распостраненный и подходил ли мой, может несколько вариантов для тестов
+        //  почему я не могу запустить тесты из vendor? может проверить конфиги при сборке тестов
+        // FIXME: убрать getenv БД переменные, только локально, чтобы кто-то с прода не запустил тесты
         $this->adapter = new Adapter([
             'driver'   => 'Pdo_Mysql',
             'dsn'      => sprintf(
@@ -65,6 +68,8 @@ final class EqOnJsonFieldBugTest extends TestCase
         $gw = new TableGateway('orders_json_eq_test', $this->adapter);
         $this->ds = new DbTable($gw, 'id');
 
+        // TODO: проверить как в других случаях собирались таблицы  (TableManager?) (DataProvider?) - нужно проверить как делалось
+        //  потому что каждый раз подымать gateway, создавать таблицу и заполнять так себе вариант
         // Базовые данные
         $rows = [
             ['purchase_order_number' => 'bulk return', 'items' => '[]'],
