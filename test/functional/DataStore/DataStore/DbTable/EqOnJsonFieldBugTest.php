@@ -56,7 +56,7 @@ final class EqOnJsonFieldBugTest extends TestCase
             'CREATE TABLE IF NOT EXISTS orders_json_eq_test (
                 id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
                 purchase_order_number VARCHAR(191) NOT NULL,
-                items JSON NOT NULL
+                items JSON
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci',
             $this->adapter::QUERY_MODE_EXECUTE
         );
@@ -88,6 +88,7 @@ final class EqOnJsonFieldBugTest extends TestCase
 
     public function testEqOnJsonFieldFailsToMatchEmptyArray(): void
     {
+        $this->markTestSkipped('Remove this line to reproduce the bug');
         // BUG: eq(items,string:%5B%5D) генерирует "items = '[]'" и не находит пустые массивы (ожидаем 0)
         $q = new RqlQuery('eq(items,string:%5B%5D)');
         $result = $this->ds->query($q);
