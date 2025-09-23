@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace functional\DataStore\DataStore\DbTable;
 
 use Laminas\Db\Adapter\Profiler\Profiler;
@@ -26,35 +28,12 @@ use rollun\datastore\TableGateway\TableManagerMysql;
  */
 final class EqOnJsonFieldBugTest extends TestCase
 {
-    /**
-     * @var TableManagerMysql
-     */
-    protected $mysqlManager;
-
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
-
-    /**
-     * @var TableGateway
-     */
-    protected $tableGateway;
-
-    /**
-     * @var DbTable
-     */
-    protected $dataStore;
-
-    /**
-     * @var Profiler
-     */
-    protected $profiler;
-
-    /**
-     * @var string
-     */
-    protected $tableName = 'orders_json_eq_test';
+    private TableManagerMysql $mysqlManager;
+    private ContainerInterface $container;
+    private TableGateway $tableGateway;
+    private DbTable $dataStore;
+    private Profiler $profiler;
+    private string $tableName = 'orders_json_eq_test';
 
     protected function setUp(): void
     {
@@ -97,27 +76,29 @@ final class EqOnJsonFieldBugTest extends TestCase
     /**
      * Create test data for JSON field tests
      */
-    protected function createTestData(): void
+    private function createTestData(): void
     {
-        $rows = [
+        $testData = [
+            // Empty arrays test cases
             ['purchase_order_number' => 'bulk return', 'items' => '[]'],
-            ['purchase_order_number' => '',            'items' => '[]'],
+            ['purchase_order_number' => '', 'items' => '[]'],
 
-            ['purchase_order_number' => 'Canceled',  'items' => '[{"csn":"873-0056","rid":"IB99N","unitPrice":64.2,"warehouse":"TX","qtyOrdered":1,"qtyShipped":1,"trackNumbers":[],"qtyBackOrdered":0}]'],
-            ['purchase_order_number' => '637686nm',  'items' => '[{"csn":"03060005","rid":"72D6L","unitPrice":99.3,"warehouse":null,"qtyOrdered":1,"qtyShipped":0,"trackNumbers":[],"qtyBackOrdered":0}]'],
-            ['purchase_order_number' => '644261nm',  'items' => '[{"csn":"03060003","rid":"4WXCA","unitPrice":125.1,"warehouse":null,"qtyOrdered":1,"qtyShipped":0,"trackNumbers":[],"qtyBackOrdered":0}]'],
-            ['purchase_order_number' => '650229nm',  'items' => '[{"csn":"37040193","rid":"MYF9N","unitPrice":50.92,"warehouse":null,"qtyOrdered":1,"qtyShipped":0,"trackNumbers":[],"qtyBackOrdered":0}]'],
-            ['purchase_order_number' => '657824nm',  'items' => '[{"csn":"03410011","rid":"39LDA","unitPrice":19.32,"warehouse":"NC","qtyOrdered":1,"qtyShipped":0,"trackNumbers":[],"qtyBackOrdered":0}]'],
-            ['purchase_order_number' => '635653nm',  'items' => '[{"csn":"234130","rid":"76ZRC","unitPrice":8.9,"warehouse":"2","qtyOrdered":3,"qtyShipped":3,"trackNumbers":["9400136208090275678269"],"qtyBackOrdered":0}]'],
-            ['purchase_order_number' => '635747nm',  'items' => '[{"csn":"987170","rid":"1I3RU","unitPrice":8.04,"warehouse":"2","qtyOrdered":1,"qtyShipped":1,"trackNumbers":["390292096488"],"qtyBackOrdered":0}]'],
-            ['purchase_order_number' => '635994nm',  'items' => '[{"csn":"163274","rid":"A5VRM","unitPrice":25.75,"warehouse":"3","qtyOrdered":1,"qtyShipped":1,"trackNumbers":["390323657983"],"qtyBackOrdered":0}]'],
+            // Complex JSON objects
+            ['purchase_order_number' => 'Canceled', 'items' => '[{"csn":"873-0056","rid":"IB99N","unitPrice":64.2,"warehouse":"TX","qtyOrdered":1,"qtyShipped":1,"trackNumbers":[],"qtyBackOrdered":0}]'],
+            ['purchase_order_number' => '637686nm', 'items' => '[{"csn":"03060005","rid":"72D6L","unitPrice":99.3,"warehouse":null,"qtyOrdered":1,"qtyShipped":0,"trackNumbers":[],"qtyBackOrdered":0}]'],
+            ['purchase_order_number' => '644261nm', 'items' => '[{"csn":"03060003","rid":"4WXCA","unitPrice":125.1,"warehouse":null,"qtyOrdered":1,"qtyShipped":0,"trackNumbers":[],"qtyBackOrdered":0}]'],
+            ['purchase_order_number' => '650229nm', 'items' => '[{"csn":"37040193","rid":"MYF9N","unitPrice":50.92,"warehouse":null,"qtyOrdered":1,"qtyShipped":0,"trackNumbers":[],"qtyBackOrdered":0}]'],
+            ['purchase_order_number' => '657824nm', 'items' => '[{"csn":"03410011","rid":"39LDA","unitPrice":19.32,"warehouse":"NC","qtyOrdered":1,"qtyShipped":0,"trackNumbers":[],"qtyBackOrdered":0}]'],
+            ['purchase_order_number' => '635653nm', 'items' => '[{"csn":"234130","rid":"76ZRC","unitPrice":8.9,"warehouse":"2","qtyOrdered":3,"qtyShipped":3,"trackNumbers":["9400136208090275678269"],"qtyBackOrdered":0}]'],
+            ['purchase_order_number' => '635747nm', 'items' => '[{"csn":"987170","rid":"1I3RU","unitPrice":8.04,"warehouse":"2","qtyOrdered":1,"qtyShipped":1,"trackNumbers":["390292096488"],"qtyBackOrdered":0}]'],
+            ['purchase_order_number' => '635994nm', 'items' => '[{"csn":"163274","rid":"A5VRM","unitPrice":25.75,"warehouse":"3","qtyOrdered":1,"qtyShipped":1,"trackNumbers":["390323657983"],"qtyBackOrdered":0}]'],
 
-            // Additional test cases for bugs:
-            ['purchase_order_number' => 'json-null',  'items' => 'null'], // JSON literal null
-            ['purchase_order_number' => 'sql-null',   'items' => null],   // SQL NULL
+            // Additional test cases for bugs
+            ['purchase_order_number' => 'json-null', 'items' => 'null'], // JSON literal null
+            ['purchase_order_number' => 'sql-null', 'items' => null],   // SQL NULL
         ];
 
-        foreach ($rows as $row) {
+        foreach ($testData as $row) {
             $this->dataStore->create($row);
         }
     }
@@ -249,7 +230,7 @@ final class EqOnJsonFieldBugTest extends TestCase
     }
 
 
-    private function materialize($rows): array
+    private function materialize(iterable $rows): array
     {
         return is_array($rows) ? $rows : iterator_to_array($rows);
     }
