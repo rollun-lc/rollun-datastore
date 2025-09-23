@@ -118,7 +118,25 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
         $value = $node->getValue() instanceof \DateTime ? $node->getValue()
             ->format("Y-m-d") : $node->getValue();
 
-        $strQuery = $this->literals['ScalarOperator'][$nodeName]['before'] . $this->prepareFieldName($node->getField());
+        // ВАЖНО: получаем имя поля один раз и сохраняем
+        $fieldRaw = $node->getField();
+        $fieldSql = $this->prepareFieldName($fieldRaw);
+
+        if ($nodeName === 'eq') {
+            if ($value === '[]') {
+                return "(JSON_TYPE({$fieldSql})='ARRAY' AND JSON_LENGTH({$fieldSql})=0)";
+            }
+            if ($value === '{}') {
+                return "(JSON_TYPE({$fieldSql})='OBJECT' AND JSON_LENGTH({$fieldSql})=0)";
+            }
+            if ($value === 'null') { // JSON null, НЕ SQL NULL
+                $quoted = $this->prepareFieldValue($value); // -> 'null'
+                return "({$fieldSql} = CAST({$quoted} AS JSON))";
+            }
+        }
+
+        // Базовая логика
+        $strQuery  = $this->literals['ScalarOperator'][$nodeName]['before'] . $fieldSql;
 
         if ($nodeName === 'contains') {
             // TODO: Make the same special character encoding script for like & alike? Because there are also special characters like % and _
