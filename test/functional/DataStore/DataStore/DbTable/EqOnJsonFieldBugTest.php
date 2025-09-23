@@ -2,12 +2,13 @@
 
 namespace functional\DataStore\DataStore\DbTable;
 
-use Laminas\Db\Adapter\Adapter;
 use Laminas\Db\Adapter\Profiler\Profiler;
 use Laminas\Db\TableGateway\TableGateway;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\Rql\RqlQuery;
+use rollun\datastore\TableGateway\TableManagerMysql;
 
 /**
  * Bug summary (eq-on-JSON):
@@ -25,52 +26,79 @@ use rollun\datastore\Rql\RqlQuery;
  */
 final class EqOnJsonFieldBugTest extends TestCase
 {
-    private Adapter $adapter;
-    private DbTable $ds;
-    private Profiler $profiler;
+    /**
+     * @var TableManagerMysql
+     */
+    protected $mysqlManager;
+
+    /**
+     * @var ContainerInterface
+     */
+    protected $container;
+
+    /**
+     * @var TableGateway
+     */
+    protected $tableGateway;
+
+    /**
+     * @var DbTable
+     */
+    protected $dataStore;
+
+    /**
+     * @var Profiler
+     */
+    protected $profiler;
+
+    /**
+     * @var string
+     */
+    protected $tableName = 'orders_json_eq_test';
 
     protected function setUp(): void
     {
+        /** @var ContainerInterface $container */
+        $this->container = include './config/container.php';
+        $adapter = $this->container->get('db');
+        
+        // Add profiler to track SQL queries
         $this->profiler = new Profiler();
+        $adapter->setProfiler($this->profiler);
+        
+        $this->mysqlManager = new TableManagerMysql($adapter);
 
-        // TODO: charset - разобратся какие распостраненный и подходил ли мой, может несколько вариантов для тестов
-        //  почему я не могу запустить тесты из vendor? может проверить конфиги при сборке тестов
-        // FIXME: убрать getenv БД переменные, только локально, чтобы кто-то с прода не запустил тесты
-        $this->adapter = new Adapter([
-            'driver'   => 'Pdo_Mysql',
-            'dsn'      => sprintf(
-                'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
-                getenv('DB_HOST') ?: 'mysql',
-                getenv('DB_PORT') ?: '3306',
-                getenv('DB_NAME') ?: 'app_test',
-            ),
-            'username' => getenv('DB_USER') ?: 'app',
-            'password' => getenv('DB_PASS') ?: 'secret',
-            'profiler' => $this->profiler,
-            'options'  => [
-                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-                \PDO::ATTR_EMULATE_PREPARES => false,
-                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-            ],
-        ]);
+        if ($this->mysqlManager->hasTable($this->tableName)) {
+            $this->mysqlManager->deleteTable($this->tableName);
+        }
 
-        // JSON-таблица (items допускает NULL)
-        $this->adapter->query(
-            'CREATE TABLE IF NOT EXISTS orders_json_eq_test (
+        // Create table manually with proper JSON column and AUTO_INCREMENT
+        // mysqlManager->createTable does not support JSON fields in tableConfig
+        $adapter->query(
+            "CREATE TABLE {$this->tableName} (
                 id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
                 purchase_order_number VARCHAR(191) NOT NULL,
                 items JSON
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci',
-            $this->adapter::QUERY_MODE_EXECUTE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+            $adapter::QUERY_MODE_EXECUTE
         );
-        $this->adapter->query('TRUNCATE TABLE orders_json_eq_test', $this->adapter::QUERY_MODE_EXECUTE);
+        
+        $this->tableGateway = new TableGateway($this->tableName, $adapter);
+        $this->dataStore = new DbTable($this->tableGateway);
 
-        $gw = new TableGateway('orders_json_eq_test', $this->adapter);
-        $this->ds = new DbTable($gw, 'id');
+        $this->createTestData();
+    }
 
-        // TODO: проверить как в других случаях собирались таблицы  (TableManager?) (DataProvider?) - нужно проверить как делалось
-        //  потому что каждый раз подымать gateway, создавать таблицу и заполнять так себе вариант
-        // Базовые данные
+    protected function tearDown(): void
+    {
+        $this->mysqlManager->deleteTable($this->tableName);
+    }
+
+    /**
+     * Create test data for JSON field tests
+     */
+    protected function createTestData(): void
+    {
         $rows = [
             ['purchase_order_number' => 'bulk return', 'items' => '[]'],
             ['purchase_order_number' => '',            'items' => '[]'],
@@ -84,13 +112,13 @@ final class EqOnJsonFieldBugTest extends TestCase
             ['purchase_order_number' => '635747nm',  'items' => '[{"csn":"987170","rid":"1I3RU","unitPrice":8.04,"warehouse":"2","qtyOrdered":1,"qtyShipped":1,"trackNumbers":["390292096488"],"qtyBackOrdered":0}]'],
             ['purchase_order_number' => '635994nm',  'items' => '[{"csn":"163274","rid":"A5VRM","unitPrice":25.75,"warehouse":"3","qtyOrdered":1,"qtyShipped":1,"trackNumbers":["390323657983"],"qtyBackOrdered":0}]'],
 
-            // ДОП для багов:
+            // Additional test cases for bugs:
             ['purchase_order_number' => 'json-null',  'items' => 'null'], // JSON literal null
             ['purchase_order_number' => 'sql-null',   'items' => null],   // SQL NULL
         ];
 
-        foreach ($rows as $r) {
-            $this->ds->create($r);
+        foreach ($rows as $row) {
+            $this->dataStore->create($row);
         }
     }
 
@@ -102,7 +130,7 @@ final class EqOnJsonFieldBugTest extends TestCase
         $this->markTestSkipped('Remove this line to reproduce the bug');
 
         $q = new RqlQuery('eq(items,string:%5B%5D)'); // []
-        $rows = $this->materialize($this->ds->query($q));
+        $rows = $this->materialize($this->dataStore->query($q));
 
         $this->assertCount(0, $rows, 'Ожидали 0 из-за неверного сравнения JSON = \'[]\'.');
 
@@ -119,7 +147,7 @@ final class EqOnJsonFieldBugTest extends TestCase
         $this->markTestSkipped('Remove this line to reproduce the bug');
 
         $q = new RqlQuery('eq(items,string:%7B%7D)'); // {}
-        $this->ds->query($q);
+        $this->dataStore->query($q);
 
         $sql = $this->lastSql();
         $this->assertNotEmpty($sql);
@@ -135,7 +163,7 @@ final class EqOnJsonFieldBugTest extends TestCase
         $this->markTestSkipped('Remove this line to reproduce the bug');
 
         $q = new RqlQuery('eq(items,string:null)');
-        $rows = $this->materialize($this->ds->query($q));
+        $rows = $this->materialize($this->dataStore->query($q));
 
         // В таблице есть строка с JSON null, но сравнение как с текстом 'null' вернёт 0
         $this->assertCount(0, $rows, 'Ожидали 0: JSON null не найден из-за строкового сравнения.');
@@ -150,7 +178,7 @@ final class EqOnJsonFieldBugTest extends TestCase
      */
     public function testEqnMatchesSqlNull(): void
     {
-        $rows = $this->materialize($this->ds->query(new RqlQuery('eqn(items)')));
+        $rows = $this->materialize($this->dataStore->query(new RqlQuery('eqn(items)')));
         $this->assertCount(1, $rows, 'eqn(items) должен вернуть 1 строку с SQL NULL.');
         $this->assertSame('sql-null', $rows[0]['purchase_order_number']);
     }
@@ -158,7 +186,7 @@ final class EqOnJsonFieldBugTest extends TestCase
     public function testContainsOnPurchaseOrderNumberFindsNm(): void
     {
         $q = new RqlQuery('contains(purchase_order_number,string:nm)');
-        $rows = $this->materialize($this->ds->query($q));
+        $rows = $this->materialize($this->dataStore->query($q));
 
         $this->assertCount(7, $rows, 'Ожидали 7 строк с "nm" в purchase_order_number');
 
@@ -173,7 +201,7 @@ final class EqOnJsonFieldBugTest extends TestCase
 
     public function testEqEmptyArrayUsesJsonFuncsAndReturnsTwo(): void
     {
-        $rows = $this->materialize($this->ds->query(new RqlQuery('eq(items,string:%5B%5D)')));
+        $rows = $this->materialize($this->dataStore->query(new RqlQuery('eq(items,string:%5B%5D)')));
 
         // После фикса должны найтись 2 строки с пустым массивом
         $this->assertCount(2, $rows, 'Ожидали 2 строки с пустым JSON-массивом');
@@ -201,7 +229,7 @@ final class EqOnJsonFieldBugTest extends TestCase
 
     public function testEqJsonNullUsesCastAndReturnsOne(): void
     {
-        $rows = $this->materialize($this->ds->query(new RqlQuery('eq(items,string:null)')));
+        $rows = $this->materialize($this->dataStore->query(new RqlQuery('eq(items,string:null)')));
 
         // Должна найтись 1 строка с JSON literal null (а не SQL NULL)
         $this->assertCount(1, $rows, 'Ожидали 1 строку с JSON null');
@@ -232,21 +260,5 @@ final class EqOnJsonFieldBugTest extends TestCase
         $this->assertNotEmpty($profiles, 'Profiler должен содержать хотя бы 1 SQL-запрос.');
         $last = end($profiles);
         return (string)($last['sql'] ?? '');
-    }
-
-    protected function tearDown(): void
-    {
-        try {
-            if (isset($this->adapter)) {
-                $this->adapter->query(
-                    'DROP TABLE IF EXISTS orders_json_eq_test',
-                    $this->adapter::QUERY_MODE_EXECUTE
-                );
-            }
-        } catch (\Throwable $e) {
-            // гасим, чтобы не маскировать исходное падение теста
-        } finally {
-            parent::tearDown();
-        }
     }
 }
