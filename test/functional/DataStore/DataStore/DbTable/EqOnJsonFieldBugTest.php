@@ -9,6 +9,20 @@ use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\Rql\RqlQuery;
 
+/**
+ * Bug summary (eq-on-JSON):
+ * Для запроса RQL eq(items,string:%5B%5D) билдер генерирует SQL вида:
+ *   WHERE items = '[]'
+ * где items — колонка типа JSON. Такое "бинарное" сравнение JSON с текстом '[]'
+ * в MySQL возвращает FALSE, поэтому пустые массивы не находятся.
+ *
+ * Правильные варианты сопоставления:
+ *   - WHERE JSON_TYPE(items) = 'ARRAY' AND JSON_LENGTH(items) = 0
+ *   - WHERE items = CAST('[]' AS JSON)
+ *
+ * Тест ниже воспроизводит баг (eq по пустому JSON-массиву возвращает 0 строк),
+ * а также содержит кейс, подтверждающий, что contains по строковому полю работает корректно.
+ */
 final class EqOnJsonFieldBugTest extends TestCase
 {
     private Adapter $adapter;
