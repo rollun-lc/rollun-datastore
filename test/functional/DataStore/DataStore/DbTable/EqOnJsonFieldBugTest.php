@@ -152,6 +152,56 @@ final class EqOnJsonFieldBugTest extends TestCase
         $this->assertTrue(str_contains($sql, 'LIKE'), "SQL должен содержать LIKE. Получено: {$sql}");
     }
 
+    public function testEqEmptyArrayUsesJsonFuncsAndReturnsTwo(): void
+    {
+        $rows = $this->materialize($this->ds->query(new RqlQuery('eq(items,string:%5B%5D)')));
+
+        // После фикса должны найтись 2 строки с пустым массивом
+        $this->assertCount(2, $rows, 'Ожидали 2 строки с пустым JSON-массивом');
+
+        // SQL должен использовать JSON_TYPE/JSON_LENGTH (а не `items`='[]')
+        $sql = $this->lastSql();
+        $this->assertNotEmpty($sql);
+
+        // JSON_TYPE(...)= 'ARRAY'
+        $this->assertMatchesRegularExpression(
+            '/JSON_TYPE\(\s*(?:`?\w+`?\.)?`?items`?\s*\)\s*=\s*\'ARRAY\'/i',
+            $sql,
+            "Ожидаем JSON_TYPE(items)='ARRAY'. SQL: {$sql}"
+        );
+        // JSON_LENGTH(...)= 0
+        $this->assertMatchesRegularExpression(
+            '/JSON_LENGTH\(\s*(?:`?\w+`?\.)?`?items`?\s*\)\s*=\s*0/i',
+            $sql,
+            "Ожидаем JSON_LENGTH(items)=0. SQL: {$sql}"
+        );
+
+        // И точно не строковое сравнение
+        $this->assertStringNotContainsString("`items`='[]'", $sql, "Не должно быть `items`='[]'. SQL: {$sql}");
+    }
+
+    public function testEqJsonNullUsesCastAndReturnsOne(): void
+    {
+        $rows = $this->materialize($this->ds->query(new RqlQuery('eq(items,string:null)')));
+
+        // Должна найтись 1 строка с JSON literal null (а не SQL NULL)
+        $this->assertCount(1, $rows, 'Ожидали 1 строку с JSON null');
+        $this->assertSame('json-null', $rows[0]['purchase_order_number']);
+
+        // SQL: поле = CAST('null' AS JSON), не строковое сравнение
+        $sql = $this->lastSql();
+        $this->assertNotEmpty($sql);
+
+        $this->assertMatchesRegularExpression(
+            '~(?:`?\w+`?\.)?`?items`?\s*=\s*CAST\(\s*\'null\'\s*AS\s+JSON\)~i',
+            $sql,
+            "Ожидаем items = CAST('null' AS JSON). SQL: {$sql}"
+        );
+
+        $this->assertStringNotContainsString("`items`='null'", $sql, "Не должно быть `items`='null'. SQL: {$sql}");
+    }
+
+
     private function materialize($rows): array
     {
         return is_array($rows) ? $rows : iterator_to_array($rows);
