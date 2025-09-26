@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace rollun\datastore\Middleware\Handler;
 
+use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
-use Laminas\Diactoros\Response;
 
 /**
  * Class MultiCreateHandler
@@ -85,11 +85,8 @@ class MultiCreateHandler extends AbstractHandler
             $result = array_column($result, $this->dataStore->getIdentifier());
         }
 
-        $response = new Response();
-        $response = $response->withStatus(201);
-        $response = $response->withHeader('Location', $request->getUri()->getPath());
-        $response = $response->withBody($this->createStream($result));
-
-        return $response;
+        return new JsonResponse($result, 201, [
+                'Location' => $request->getUri()->getPath()]
+        );
     }
 }

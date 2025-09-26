@@ -10,9 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use rollun\datastore\Middleware\DataStoreAbstract;
-use rollun\datastore\Middleware\JsonRenderer;
 use Xiag\Rql\Parser\Query;
-use Laminas\Diactoros\Stream;
 
 abstract class AbstractHandler extends DataStoreAbstract
 {
@@ -35,33 +33,10 @@ abstract class AbstractHandler extends DataStoreAbstract
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($this->canHandle($request)) {
-            $response = $this->handle($request);
-            $stream = $response->getBody();
-
-            if (isset($stream)) {
-                $data = unserialize($stream->getContents());
-                $request = $request->withAttribute(JsonRenderer::RESPONSE_DATA, $data);
-            }
-
-            $request = $request->withAttribute(ResponseInterface::class, $response);
+            return $this->handle($request);
         }
 
-        $response = $handler->handle($request);
-
-        return $response;
-    }
-
-    /**
-     * Create stream with base64 encoded data
-     *
-     * @param $data
-     * @return Stream
-     */
-    protected function createStream($data)
-    {
-        $stream = fopen("data://text/plain;base64," . base64_encode(serialize($data)), 'r');
-
-        return new Stream($stream);
+        return $handler->handle($request);
     }
 
     /**
