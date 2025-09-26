@@ -2,7 +2,7 @@
 
 namespace rollun\datastore\Middleware\Handler;
 
-use Laminas\Diactoros\Response;
+use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
@@ -75,9 +75,7 @@ class QueriedUpdateHandler extends AbstractHandler
             $result = array_column($updated, $identifier);
         }
 
-        $response = new Response();
-        $response = $response->withBody($this->createStream($result));
-        return $response;
+        return new JsonResponse($result);
     }
 
     /**
