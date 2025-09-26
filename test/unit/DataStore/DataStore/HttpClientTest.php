@@ -633,18 +633,15 @@ class HttpClientTest extends TestCase
      */
     public function testMultiCreateBatchSupported()
     {
-        // 1) Мокируем Laminas\Http\Client
         $clientMock = $this->getMockBuilder(Client::class)
             ->disableOriginalConstructor()
             ->getMock();
-        // ожидаем ровно один setRawBody с массивом записей
         $clientMock->expects($this->once())
             ->method('setRawBody')
             ->with(Serializer::jsonSerialize([
                 ['foo' => 'a'],
                 ['foo' => 'b'],
             ]));
-        // ожидaем ровно один send() и вернём в ответе два новых объекта
         $response = new Response();
         $response->setStatusCode(201);
         $response->setContent(Serializer::jsonSerialize([
@@ -655,7 +652,6 @@ class HttpClientTest extends TestCase
             ->method('send')
             ->willReturn($response);
 
-        // 2) Анонимный подкласс, чтобы переопределить sendHead() и initHttpClient()
         $token = $this->createMock(LifeCycleToken::class);
         $ds = new class ($clientMock, '', ['identifier' => 'id'], $token) extends HttpClient {
             protected function sendHead()
@@ -668,13 +664,11 @@ class HttpClientTest extends TestCase
             }
         };
 
-        // 3) Запускаем
         $result = $ds->multiCreate([
             ['foo' => 'a'],
             ['foo' => 'b'],
         ]);
 
-        // Ожидаем именно массив записей, а не просто ID
         $this->assertSame([
             ['id' => 10],
             ['id' => 20],
