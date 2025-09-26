@@ -7,7 +7,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
-use Zend\Diactoros\Response;
+use Zend\Diactoros\Response\JsonResponse;
 
 /**
  * Class MultiCreateHandler
@@ -85,11 +85,8 @@ class MultiCreateHandler extends AbstractHandler
             $result = array_column($result, $this->dataStore->getIdentifier());
         }
 
-        $response = new Response();
-        $response = $response->withStatus(201);
-        $response = $response->withHeader('Location', $request->getUri()->getPath());
-        $response = $response->withBody($this->createStream($result));
-
-        return $response;
+        return new JsonResponse($result, 201, [
+                'Location' => $request->getUri()->getPath()]
+        );
     }
 }

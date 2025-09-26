@@ -8,7 +8,7 @@ namespace rollun\datastore\Middleware\Handler;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Zend\Diactoros\Response;
+use Zend\Diactoros\Response\JsonResponse;
 
 /**
  * Class DeleteHandler
@@ -37,13 +37,11 @@ class DeleteHandler extends AbstractHandler
         $primaryKeyValue = $request->getAttribute('primaryKeyValue');
         $items = $this->dataStore->delete($primaryKeyValue);
 
-        $response = new Response();
+        $response = new JsonResponse($items);
 
         if (!isset($items)) {
             $response = $response->withStatus(204);
         }
-
-        $response = $response->withBody($this->createStream($items));
 
         return $response;
     }

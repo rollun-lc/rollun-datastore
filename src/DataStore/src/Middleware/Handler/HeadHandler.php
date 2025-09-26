@@ -6,9 +6,7 @@ namespace rollun\datastore\Middleware\Handler;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use Zend\Diactoros\Response;
+use Zend\Diactoros\Response\JsonResponse;
 
 class HeadHandler extends AbstractHandler
 {
@@ -20,9 +18,8 @@ class HeadHandler extends AbstractHandler
 
     protected function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $response = new Response();
-
-        $response = $response->withHeader('X_DATASTORE_IDENTIFIER', $this->dataStore->getIdentifier());
+        $response = (new JsonResponse([]))
+            ->withHeader('X_DATASTORE_IDENTIFIER', $this->dataStore->getIdentifier());
 
         if (method_exists($this->dataStore, 'multiCreate')) {
             $response = $response->withHeader('X_MULTI_CREATE', 'true');

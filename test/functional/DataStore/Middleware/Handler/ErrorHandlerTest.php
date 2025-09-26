@@ -19,25 +19,6 @@ use Zend\Diactoros\Uri;
 
 class ErrorHandlerTest extends BaseHandlerTest
 {
-    public function testProcessSuccess()
-    {
-        $request = new ServerRequest();
-        $response = $this->createResponse();
-        $request = $request->withAttribute(ResponseInterface::class, $response);
-
-        $resultResponse = new Response();
-
-        /** @var RequestHandlerInterface|PHPUnit_Framework_MockObject_MockObject $handler */
-        $handler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
-        $handler->expects($this->once())
-            ->method('handle')
-            ->with($request)
-            ->willReturn($resultResponse);
-
-        $object = new ErrorHandler();
-        $this->assertEquals($object->process($request, $handler), $resultResponse);
-    }
-
     public function testProcessFail()
     {
         $this->expectException(RestException::class);

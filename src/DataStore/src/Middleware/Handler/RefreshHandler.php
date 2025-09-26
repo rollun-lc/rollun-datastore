@@ -10,7 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\Interfaces\RefreshableInterface;
 use rollun\datastore\Middleware\RestException;
-use Zend\Diactoros\Response;
+use Zend\Diactoros\Response\JsonResponse;
 
 /**
  * Class RefreshHandler
@@ -33,7 +33,7 @@ class RefreshHandler extends AbstractHandler
     {
         if ($this->dataStore instanceof RefreshableInterface) {
             $this->dataStore->refresh();
-            $response = new Response();
+            $response = new JsonResponse([]);
 
             return $response;
         }
