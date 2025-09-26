@@ -36,7 +36,7 @@ final class DownloadCsvHandlerTest extends TestCase
             ->withUri(new Uri('https://example.com/orders'));
 
         foreach ($headers as $name => $values) {
-            foreach ((array)$values as $v) {
+            foreach ((array) $values as $v) {
                 $request = $request->withAddedHeader($name, $v);
             }
         }
@@ -69,9 +69,9 @@ final class DownloadCsvHandlerTest extends TestCase
         self::assertStringContainsString('attachment;', $cd);
         self::assertStringContainsString('filename=orders.csv', $cd);
 
-        $csv = (string)$response->getBody();
+        $csv = (string) $response->getBody();
         self::assertSame("1,a\n2,b\n3,c\n4,d\n", $csv);
-        self::assertSame((string)strlen($csv), $response->getHeaderLine('Content-Length'));
+        self::assertSame((string) strlen($csv), $response->getHeaderLine('Content-Length'));
     }
 
     public function testHandleMutatesOriginalRqlLimit(): void
@@ -117,7 +117,7 @@ final class DownloadCsvHandlerTest extends TestCase
 
     private function makeHandler(object $dataStore): DownloadCsvHandler
     {
-        return new class($dataStore) extends DownloadCsvHandler {
+        return new class ($dataStore) extends DownloadCsvHandler {
             public function __construct($ds)
             {
                 $this->dataStore = $ds;
