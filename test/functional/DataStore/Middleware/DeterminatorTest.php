@@ -100,7 +100,7 @@ class DeterminatorTest extends TestCase
         /** @var RequestHandlerInterface|PHPUnit_Framework_MockObject_MockObject $delegate */
         $delegate = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
 
-        $delegate->expects($this->once())
+        $delegate->expects($this->never())
             ->method('handle')
             ->willReturn(new Response());
 

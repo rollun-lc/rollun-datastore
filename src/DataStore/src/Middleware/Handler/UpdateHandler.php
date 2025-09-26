@@ -7,9 +7,9 @@
 
 namespace rollun\datastore\Middleware\Handler;
 
+use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Laminas\Diactoros\Response;
 
 /**
  * Class UpdateHandler
@@ -63,8 +63,7 @@ class UpdateHandler extends AbstractHandler
 
         $newItem = $this->dataStore->update($item, $overwriteMode);
 
-        $response = new Response();
-        $response = $response->withBody($this->createStream($newItem));
+        $response = new JsonResponse($newItem);
 
         if ($overwriteMode && !$isItemExist) {
             $response = $response->withStatus(201);

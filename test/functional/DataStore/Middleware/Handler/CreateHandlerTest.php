@@ -121,7 +121,7 @@ class CreateHandlerTest extends BaseHandlerTest
             ->willReturn($item);
 
         $object = $this->createObject($dataStore);
-        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object);
+        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object, false);
     }
 
     public function testProcessWithoutOverwriteMode()
@@ -181,7 +181,7 @@ class CreateHandlerTest extends BaseHandlerTest
             ->willReturn($item);
 
         $object = $this->createObject($dataStore);
-        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object);
+        $this->assertDelegateCallWithAssertionCallback($this->getAssertionCallback($response), $request, $object, false);
     }
 
     /**
