@@ -2,7 +2,7 @@
 
 namespace rollun\datastore\Middleware\Handler;
 
-use Laminas\Diactoros\Response\JsonResponse;
+use Zend\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
@@ -67,7 +67,7 @@ class QueriedUpdateHandler extends AbstractHandler
                 try {
                     $updated[] = $this->dataStore->update($payload);
                     usleep(10000); // 10ms
-                } catch (DataStoreException) {
+                } catch (DataStoreException $e) {
                     //Ignore result...
                 }
             }
