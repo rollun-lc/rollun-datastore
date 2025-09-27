@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace rollun\test\functional\DataStore\Middleware\Handler;
 
-use Laminas\Diactoros\ServerRequest;
-use Laminas\Diactoros\Uri;
+use Zend\Diactoros\ServerRequest;
+use Zend\Diactoros\Uri;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\Middleware\Handler\DownloadCsvHandler;
 use rollun\datastore\DataStore\DbTable;
@@ -105,7 +105,7 @@ final class DownloadCsvHandlerTest extends TestCase
         $mock = $this
             ->getMockBuilder(DbTable::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['query'])
+            ->setMethods(['query'])
             ->getMock();
 
         $mock
