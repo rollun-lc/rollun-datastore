@@ -10,7 +10,7 @@ use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Memory;
 use rollun\datastore\Middleware\Handler\QueriedUpdateHandler;
 use rollun\datastore\Rql\RqlQuery;
-use Laminas\Diactoros\ServerRequest;
+use Zend\Diactoros\ServerRequest;
 
 class QueriedUpdateHandlerTest extends BaseHandlerTest
 {
