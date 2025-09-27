@@ -354,12 +354,16 @@ class DbTableTest extends TestCase
 
     /**
      * @dataProvider queriedUpdateErrorsDataProvider
+     * @param string $exception
+     * @param string|null $exceptionMessage
+     * @param array $updateBody
+     * @param RqlQuery $query
      */
     public function testQueriedUpdateErrorScenarios(
-        string $exception,
-        string|null $exceptionMessage,
-        array $updateBody,
-        RqlQuery $query,
+        $exception,
+        $exceptionMessage,
+        $updateBody,
+        $query
     ) {
         $object = $this->createObject();
 
