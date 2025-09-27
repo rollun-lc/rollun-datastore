@@ -424,7 +424,7 @@ class HttpClient extends DataStoreAbstract
             $uri = $this->createUri($query);
             $client = $this->initHttpClient(Request::METHOD_PATCH, $uri);
             $client->setRawBody(Serializer::jsonSerialize($record));
-            $response = self::sendByClient($client);
+            $response = $client->send();
 
             $this->checkResonseHeaderIdentifier($response);
 
