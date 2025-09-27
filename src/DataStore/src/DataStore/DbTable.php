@@ -292,7 +292,7 @@ class DbTable extends DataStoreAbstract
         $adapter   = $this->getDbTable()->getAdapter();
         $conn      = $adapter->getDriver()->getConnection();
 
-        $this->beginTransaction();
+        $conn->beginTransaction();
 
         try {
             $selectedIds = $this->selectIdsForUpdate($query);
