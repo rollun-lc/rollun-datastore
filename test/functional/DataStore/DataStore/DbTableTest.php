@@ -6,6 +6,8 @@
 
 namespace rollun\test\functional\DataStore\DataStore;
 
+use InvalidArgumentException;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
@@ -271,21 +273,115 @@ class DbTableTest extends TestCase
             ]);
         }
 
-        $query = new RqlQuery('gt(id,3)');
-        $object->queriedUpdate([
+        $query = new RqlQuery('gt(id,3)&limit(100)');
+        $ids = $object->queriedUpdate([
             'name' => "name0",
             'surname' => "surname0",
         ], $query);
 
+        sort($ids);
+        $this->assertEquals(range(4, 10), $ids);
+
         foreach (range(1, 10) as $id) {
+            $row = $this->read($id);
             if ($id > 3) {
-                $item = ['name' => "name0", 'surname' => "surname0"];
+                $this->assertEquals(['id' => $id, 'name' => 'name0', 'surname' => 'surname0'], $row);
             } else {
-                $item = ['name' => "name{$id}", 'surname' => "surname{$id}"];
+                $this->assertEquals(['id' => $id, 'name' => "name{$id}", 'surname' => "surname{$id}"], $row);
             }
+        }
+    }
 
-            $this->assertEquals(array_merge($item, ['id' => $id]), $object->read($id));
+    public function testQueriedUpdateEmptyResult()
+    {
+        $object = $this->createObject();
 
+        foreach (range(1, 5) as $id) {
+            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
+        }
+
+        $query = new RqlQuery('gt(id,1000)&limit(100)');
+        $ids = $object->queriedUpdate(['name' => 'X'], $query);
+
+        $this->assertSame([], $ids);
+
+        foreach (range(1, 5) as $id) {
+            $this->assertEquals(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"], $this->read($id));
+        }
+    }
+
+    public function queriedUpdateErrorsDataProvider()
+    {
+        return [
+            'validationEmptyArray' => [
+                InvalidArgumentException::class,
+                'Expected non-empty associative array for update fields.',
+                [],
+                new RqlQuery('gt(id,1)'),
+            ],
+            'validationListInsteadOfAssociativeArray' => [
+                InvalidArgumentException::class,
+                'Expected non-empty associative array for update fields.',
+                ['oops'],
+                new RqlQuery('gt(id,1)'),
+            ],
+            'validationUnknownColumn' => [
+                DataStoreException::class,
+                null,
+                ['unknown_col' => 123],
+                new RqlQuery('gt(id,1)&limit(10)'),
+            ],
+            'validationRejectSelect' => [
+                InvalidArgumentException::class,
+                'Queried update does not support select or groupBy.',
+                ['name' => 'x'],
+                new RqlQuery('gt(id,1)&limit(1)&select(id)'),
+            ],
+            'validationRejectGroupBy' => [
+                InvalidArgumentException::class,
+                'Queried update does not support select or groupBy.',
+                ['name' => 'x'],
+                new RqlQuery('gt(id,1)&limit(1)&groupby(name)'),
+            ],
+            'validationBadFilter' => [
+                DataStoreException::class,
+                null,
+                ['name' => 'X'],
+                new RqlQuery('eq(unknown_field,1)&limit(10)'),
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider queriedUpdateErrorsDataProvider
+     * @param string $exception
+     * @param string|null $exceptionMessage
+     * @param array $updateBody
+     * @param RqlQuery $query
+     */
+    public function testQueriedUpdateErrorScenarios(
+        $exception,
+        $exceptionMessage,
+        $updateBody,
+        $query
+    ) {
+        $object = $this->createObject();
+
+        foreach (range(1, 3) as $id) {
+            $object->create(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"]);
+        }
+
+        $this->expectException($exception);
+        if ($exceptionMessage) {
+            $this->expectExceptionMessage($exceptionMessage);
+        }
+
+        try {
+            $object->queriedUpdate($updateBody, $query);
+        } finally {
+            foreach (range(1, 3) as $id) {
+                $this->assertEquals(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"], $this->read($id));
+            }
         }
     }
 
