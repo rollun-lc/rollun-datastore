@@ -113,6 +113,7 @@ class TableManagerMysql
     public const TYPE_DECIMAL = 'Decimal';
     public const TYPE_FLOAT = 'Float';
     public const TYPE_FLOATING = 'Floating';
+    public const TYPE_JSON = 'Json';
 
     // Column properties
     public const PROPERTY_NULLABLE = 'nullable';
@@ -151,6 +152,7 @@ class TableManagerMysql
             self::TYPE_DATE => Column\Date::class,
             self::TYPE_DATETIME => Column\Datetime::class,
             self::TYPE_INTEGER => Column\Integer::class,
+            self::TYPE_JSON => \rollun\datastore\TableGateway\Column\Json::class,
             self::TYPE_TIME => Column\Time::class,
             self::TYPE_TIMESTAMP => Column\Timestamp::class,
         ],
