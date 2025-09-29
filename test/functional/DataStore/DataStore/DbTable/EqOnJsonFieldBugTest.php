@@ -170,54 +170,6 @@ final class EqOnJsonFieldBugTest extends FunctionalTestCase
     }
 
     /**
-     * Repro 1: eq(items,'[]') генерирует "`items`='[]'" и не находит пустые массивы.
-     */
-    public function testEqOnJsonFieldFailsToMatchEmptyArray(): void
-    {
-        $this->markTestSkipped('Remove this line to reproduce the bug');
-
-        $rows = $this->executeQuery('eq(items,string:%5B%5D)'); // []
-
-        $this->assertCount(0, $rows, 'Ожидали 0 из-за неверного сравнения JSON = \'[]\'.');
-
-        $sql = $this->lastSql();
-        $this->assertNotEmpty($sql);
-        $this->assertStringContainsString("`items`='[]'", $sql, "Должно быть бинарное сравнение с '[]'. SQL: {$sql}");
-    }
-
-    /**
-     * Repro 2: eq(items,'{}') тоже строится как текстовое равенство "`items`='{}'".
-     */
-    public function testEqOnJsonFieldBuildsWrongEqualityForEmptyObject(): void
-    {
-        $this->markTestSkipped('Remove this line to reproduce the bug');
-
-        $rows = $this->executeQuery('eq(items,string:%7B%7D)'); // {}
-
-        $sql = $this->lastSql();
-        $this->assertNotEmpty($sql);
-        $this->assertStringContainsString("`items`='{}'", $sql, "Ожидали ошибочное равенство `items`='{}'. SQL: {$sql}");
-    }
-
-    /**
-     * Repro 3: eq(items,'null') — JSON null не находится, а SQL сравнивает с текстом 'null'.
-     * (Отдельно от SQL NULL, который проверяется eqn(items))
-     */
-    public function testEqOnJsonFieldFailsForJsonNullAndBuildsWrongSql(): void
-    {
-        $this->markTestSkipped('Remove this line to reproduce the bug');
-
-        $rows = $this->executeQuery('eq(items,string:null)');
-
-        // В таблице есть строка с JSON null, но сравнение как с текстом 'null' вернёт 0
-        $this->assertCount(0, $rows, 'Ожидали 0: JSON null не найден из-за строкового сравнения.');
-
-        $sql = $this->lastSql();
-        $this->assertNotEmpty($sql);
-        $this->assertStringContainsString("`items`='null'", $sql, "Ожидали `items`='null' в SQL (неправильно). SQL: {$sql}");
-    }
-
-    /**
      * Контроль: eqn(items) должен находить строку с SQL NULL.
      */
     public function testEqnMatchesSqlNull(): void
@@ -225,6 +177,55 @@ final class EqOnJsonFieldBugTest extends FunctionalTestCase
         $rows = $this->materialize($this->dataStore->query(new RqlQuery('eqn(items)')));
         $this->assertCount(1, $rows, 'eqn(items) должен вернуть 1 строку с SQL NULL.');
         $this->assertSame('sql-null', $rows[0]['purchase_order_number']);
+    }
+
+    /**
+     * Data provider for JSON bug reproduction tests
+     */
+    public function jsonBugDataProvider(): array
+    {
+        return [
+            'empty array bug' => [
+                'query' => 'eq(items,string:%5B%5D)', // []
+                'expectedCount' => 0,
+                'expectedSqlPattern' => '`items`=\'[]\'',
+                'description' => 'Empty JSON array should return 0 due to wrong string comparison',
+            ],
+            'empty object bug' => [
+                'query' => 'eq(items,string:%7B%7D)', // {}
+                'expectedCount' => 0,
+                'expectedSqlPattern' => '`items`=\'{}\'',
+                'description' => 'Empty JSON object should return 0 due to wrong string comparison',
+            ],
+            'json null bug' => [
+                'query' => 'eq(items,string:null)',
+                'expectedCount' => 0,
+                'expectedSqlPattern' => '`items`=\'null\'',
+                'description' => 'JSON null should return 0 due to wrong string comparison',
+            ],
+        ];
+    }
+
+    /**
+     * Test JSON bug reproduction with data provider
+     * 
+     * @dataProvider jsonBugDataProvider
+     */
+    public function testJsonBugReproduction(
+        string $query,
+        int $expectedCount,
+        string $expectedSqlPattern,
+        string $description
+    ): void {
+        $this->markTestSkipped('Remove this line to reproduce the bug');
+
+        $rows = $this->executeQuery($query);
+
+        $this->assertCount($expectedCount, $rows, $description);
+
+        $sql = $this->lastSql();
+        $this->assertNotEmpty($sql);
+        $this->assertStringContainsString($expectedSqlPattern, $sql, "Expected SQL pattern '{$expectedSqlPattern}' not found in: {$sql}");
     }
 
     /**
@@ -360,25 +361,5 @@ final class EqOnJsonFieldBugTest extends FunctionalTestCase
         $this->assertNotEmpty($profiles, 'Profiler MUST contains at least 1 SQL-request.');
         $last = end($profiles);
         return (string)($last['sql'] ?? '');
-    }
-
-    /**
-     * Assert SQL contains specific pattern
-     */
-    private function assertSqlContains(string $pattern, string $message = ''): void
-    {
-        $sql = $this->lastSql();
-        $this->assertNotEmpty($sql);
-        $this->assertMatchesRegularExpression($pattern, $sql, $message ?: "SQL should match pattern: {$sql}");
-    }
-
-    /**
-     * Assert SQL does not contain specific string
-     */
-    private function assertSqlNotContains(string $string, string $message = ''): void
-    {
-        $sql = $this->lastSql();
-        $this->assertNotEmpty($sql);
-        $this->assertStringNotContainsString($string, $sql, $message ?: "SQL should not contain: {$string}. SQL: {$sql}");
     }
 }
