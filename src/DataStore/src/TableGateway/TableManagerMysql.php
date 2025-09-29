@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
  * @license LICENSE.md New BSD License
@@ -79,64 +80,65 @@ s * <code>
 class TableManagerMysql
 {
     // Default config keys
-    const KEY_IN_CONFIG = 'tableManagerMysql';
-    const KEY_TABLES_CONFIGS = 'tablesConfigs';
-    const KEY_AUTOCREATE_TABLES = 'autocreateTables';
+    public const KEY_IN_CONFIG = 'tableManagerMysql';
+    public const KEY_TABLES_CONFIGS = 'tablesConfigs';
+    public const KEY_AUTOCREATE_TABLES = 'autocreateTables';
 
     // Config key for each field
-    const FIELD_TYPE = 'field_type';
-    const FIELD_PARAMS = 'field_params';
-    const FOREIGN_KEY = 'field_foreign_key';
-    const UNIQUE_KEY = 'field_unique_key';
-    const PRIMARY_KEY = 'field_primary_key';
+    public const FIELD_TYPE = 'field_type';
+    public const FIELD_PARAMS = 'field_params';
+    public const FOREIGN_KEY = 'field_foreign_key';
+    public const UNIQUE_KEY = 'field_unique_key';
+    public const PRIMARY_KEY = 'field_primary_key';
 
     // Column type groups
-    const COLUMN_SIMPLE = 'Column';
-    const COLUMN_LENGTH = 'LengthColumn';
-    const COLUMN_PRECISION = 'PrecisionColumn';
+    public const COLUMN_SIMPLE = 'Column';
+    public const COLUMN_LENGTH = 'LengthColumn';
+    public const COLUMN_PRECISION = 'PrecisionColumn';
 
     // Types
-    const TYPE_BIG_INTEGER = 'BigInteger';
-    const TYPE_BOOLEAN = 'Boolean';
-    const TYPE_DATE = 'Date';
-    const TYPE_DATETIME = 'Datetime';
-    const TYPE_INTEGER = 'Integer';
-    const TYPE_TIME = 'Time';
-    const TYPE_TIMESTAMP = 'Timestamp';
-    const TYPE_BINARY = 'Binary';
-    const TYPE_BLOB = 'Blob';
-    const TYPE_CHAR = 'Char';
-    const TYPE_TEXT = 'Text';
-    const TYPE_VARBINARY = 'Varbinary';
-    const TYPE_VARCHAR = 'Varchar';
-    const TYPE_DECIMAL = 'Decimal';
-    const TYPE_FLOAT = 'Float';
-    const TYPE_FLOATING = 'Floating';
+    public const TYPE_BIG_INTEGER = 'BigInteger';
+    public const TYPE_BOOLEAN = 'Boolean';
+    public const TYPE_DATE = 'Date';
+    public const TYPE_DATETIME = 'Datetime';
+    public const TYPE_INTEGER = 'Integer';
+    public const TYPE_TIME = 'Time';
+    public const TYPE_TIMESTAMP = 'Timestamp';
+    public const TYPE_BINARY = 'Binary';
+    public const TYPE_BLOB = 'Blob';
+    public const TYPE_CHAR = 'Char';
+    public const TYPE_TEXT = 'Text';
+    public const TYPE_VARBINARY = 'Varbinary';
+    public const TYPE_VARCHAR = 'Varchar';
+    public const TYPE_DECIMAL = 'Decimal';
+    public const TYPE_FLOAT = 'Float';
+    public const TYPE_FLOATING = 'Floating';
+    public const TYPE_JSON = 'Json';
 
     // Column properties
-    const PROPERTY_NULLABLE = 'nullable';
-    const PROPERTY_DEFAULT = 'default';
-    const PROPERTY_LENGTH = 'length';
-    const PROPERTY_DIGITS = 'digits';
-    const PROPERTY_DECIMAL = 'decimal';
-    const PROPERTY_OPTIONS = 'options';
+    public const PROPERTY_NULLABLE = 'nullable';
+    public const PROPERTY_DEFAULT = 'default';
+    public const PROPERTY_LENGTH = 'length';
+    public const PROPERTY_DIGITS = 'digits';
+    public const PROPERTY_DECIMAL = 'decimal';
+    public const PROPERTY_OPTIONS = 'options';
 
     // Option keys
-    const OPTION_REFERENCE_TABLE = 'referenceTable';
-    const OPTION_REFERENCE_COLUMN = 'referenceColumn';
-    const OPTION_ON_DELETE_RULE = 'onDeleteRule';
-    const OPTION_ON_UPDATE_RULE = 'onUpdateRule';
-    const OPTION_NAME = 'name';
+    public const OPTION_REFERENCE_TABLE = 'referenceTable';
+    public const OPTION_REFERENCE_COLUMN = 'referenceColumn';
+    public const OPTION_ON_DELETE_RULE = 'onDeleteRule';
+    public const OPTION_ON_UPDATE_RULE = 'onUpdateRule';
+    public const OPTION_NAME = 'name';
 
-    const OPTION_AUTOINCREMENT = 'autoincrement';
-    const OPTION_UNSIGNED = 'unsigned';
-    const OPTION_ZEROFILL = 'zerofill';
-    const OPTION_IDENTITY = 'identity';
-    const OPTION_SERIAL = 'serial';
-    const OPTION_COMMENT = 'comment';
-    const OPTION_COLUMNFORMAT = 'columnformat';
-    const OPTION_FORMAT = 'format';
-    const OPTION_STORAGE = 'storage';
+    public const OPTION_AUTOINCREMENT = 'autoincrement';
+    public const OPTION_UNSIGNED = 'unsigned';
+    public const OPTION_ZEROFILL = 'zerofill';
+    public const OPTION_IDENTITY = 'identity';
+    public const OPTION_SERIAL = 'serial';
+    public const OPTION_COMMENT = 'comment';
+    public const OPTION_COLUMNFORMAT = 'columnformat';
+    public const OPTION_FORMAT = 'format';
+    public const OPTION_STORAGE = 'storage';
 
     /**
      * Grouped column types by column type group
@@ -150,6 +152,7 @@ class TableManagerMysql
             self::TYPE_DATE => Column\Date::class,
             self::TYPE_DATETIME => Column\Datetime::class,
             self::TYPE_INTEGER => Column\Integer::class,
+            self::TYPE_JSON => \rollun\datastore\TableGateway\Column\Json::class,
             self::TYPE_TIME => Column\Time::class,
             self::TYPE_TIMESTAMP => Column\Timestamp::class,
         ],
