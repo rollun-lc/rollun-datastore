@@ -62,11 +62,11 @@ final class EqOnJsonFieldTest extends FunctionalTestCase
     {
         $container = $this->getContainer();
         $adapter = $container->get('db');
-        
+
         // Add profiler to track SQL queries
         $this->profiler = new Profiler();
         $adapter->setProfiler($this->profiler);
-        
+
         $this->mysqlManager = new TableManagerMysql($adapter);
 
         if ($this->mysqlManager->hasTable($this->tableName)) {
@@ -74,7 +74,7 @@ final class EqOnJsonFieldTest extends FunctionalTestCase
         }
 
         $this->mysqlManager->createTable($this->tableName, $this->getTableConfig());
-        
+
         $this->tableGateway = new TableGateway($this->tableName, $adapter);
         $this->dataStore = new DbTable($this->tableGateway);
 
@@ -133,27 +133,27 @@ final class EqOnJsonFieldTest extends FunctionalTestCase
                 'query' => 'eq(items,string:%5B%5D)',
                 'expectedCount' => 2,
                 'expectedSqlPattern' => '/JSON_TYPE\(\s*(?:`?\w+`?\.)?`?items`?\s*\)\s*=\s*\'ARRAY\'/i',
-                'description' => 'Empty JSON array should use JSON_TYPE and JSON_LENGTH functions'
+                'description' => 'Empty JSON array should use JSON_TYPE and JSON_LENGTH functions',
             ],
             // Test that JSON null query uses CAST function after fix
             'json null' => [
                 'query' => 'eq(items,string:null)',
                 'expectedCount' => 1,
                 'expectedSqlPattern' => '~(?:`?\w+`?\.)?`?items`?\s*=\s*CAST\(\s*\'null\'\s*AS\s+JSON\)~i',
-                'description' => 'JSON null should use CAST function'
+                'description' => 'JSON null should use CAST function',
             ],
             'empty object' => [
                 'query' => 'eq(items,string:%7B%7D)',
                 'expectedCount' => 0,
                 'expectedSqlPattern' => '/JSON_TYPE\(\s*(?:`?\w+`?\.)?`?items`?\s*\)\s*=\s*\'OBJECT\'/i',
-                'description' => 'Empty object should use JSON_TYPE and JSON_LENGTH functions'
+                'description' => 'Empty object should use JSON_TYPE and JSON_LENGTH functions',
             ],
         ];
     }
 
     /**
      * Test JSON field equality queries
-     * 
+     *
      * @dataProvider jsonQueryDataProvider
      */
     public function testJsonFieldEqualityQueries(
@@ -210,7 +210,7 @@ final class EqOnJsonFieldTest extends FunctionalTestCase
 
     /**
      * Test with bug reproduction
-     * 
+     *
      * @dataProvider jsonBugDataProvider
      */
     public function testJsonBugReproduction(
@@ -240,14 +240,14 @@ final class EqOnJsonFieldTest extends FunctionalTestCase
                 'field' => 'purchase_order_number',
                 'value' => 'nm',
                 'expectedCount' => 7,
-                'description' => 'Should find 7 rows with "nm" in purchase_order_number'
+                'description' => 'Should find 7 rows with "nm" in purchase_order_number',
             ],
         ];
     }
 
     /**
      * Test contains queries
-     * 
+     *
      * @dataProvider containsTestDataProvider
      */
     public function testContainsQueries(
@@ -294,6 +294,6 @@ final class EqOnJsonFieldTest extends FunctionalTestCase
         $profiles = $this->profiler->getProfiles();
         $this->assertNotEmpty($profiles, 'Profiler MUST contain at least 1 SQL request.');
         $last = end($profiles);
-        return (string)($last['sql'] ?? '');
+        return (string) ($last['sql'] ?? '');
     }
 }

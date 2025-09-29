@@ -13,7 +13,7 @@ use Laminas\Db\Sql\Ddl\Column\Column;
 
 /**
  * JSON column type for MySQL
- * 
+ *
  * Usage:
  * <code>
  * $column = new Json('field_name', true, null, ['comment' => 'JSON data']);
@@ -23,7 +23,7 @@ class Json extends Column
 {
     /** @var string */
     protected $type = 'JSON';
-    
+
     /**
      * @param string|null $name
      * @param bool $nullable
