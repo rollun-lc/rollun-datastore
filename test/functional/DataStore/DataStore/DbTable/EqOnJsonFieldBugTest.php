@@ -128,12 +128,14 @@ final class EqOnJsonFieldBugTest extends FunctionalTestCase
     public function jsonQueryDataProvider(): array
     {
         return [
+            // Test that empty JSON array query uses proper JSON functions after fix
             'empty array' => [
                 'query' => 'eq(items,string:%5B%5D)',
                 'expectedCount' => 2,
                 'expectedSqlPattern' => '/JSON_TYPE\(\s*(?:`?\w+`?\.)?`?items`?\s*\)\s*=\s*\'ARRAY\'/i',
                 'description' => 'Empty JSON array should use JSON_TYPE and JSON_LENGTH functions'
             ],
+            // Test that JSON null query uses CAST function after fix
             'json null' => [
                 'query' => 'eq(items,string:null)',
                 'expectedCount' => 1,
@@ -207,7 +209,7 @@ final class EqOnJsonFieldBugTest extends FunctionalTestCase
     }
 
     /**
-     * Test JSON bug reproduction with data provider
+     * Test with bug reproduction
      * 
      * @dataProvider jsonBugDataProvider
      */
@@ -244,7 +246,7 @@ final class EqOnJsonFieldBugTest extends FunctionalTestCase
     }
 
     /**
-     * Test contains queries with data provider
+     * Test contains queries
      * 
      * @dataProvider containsTestDataProvider
      */
@@ -265,74 +267,6 @@ final class EqOnJsonFieldBugTest extends FunctionalTestCase
         $sql = $this->lastSql();
         $this->assertNotEmpty($sql);
         $this->assertTrue(str_contains($sql, 'LIKE'), "SQL должен содержать LIKE. Получено: {$sql}");
-    }
-
-    public function testContainsOnPurchaseOrderNumberFindsNm(): void
-    {
-        $rows = $this->executeQuery('contains(purchase_order_number,string:nm)');
-
-        $this->assertCount(7, $rows, 'Ожидали 7 строк с "nm" в purchase_order_number');
-
-        foreach ($rows as $row) {
-            $this->assertStringContainsString('nm', $row['purchase_order_number']);
-        }
-
-        $sql = $this->lastSql();
-        $this->assertNotEmpty($sql);
-        $this->assertTrue(str_contains($sql, 'LIKE'), "SQL должен содержать LIKE. Получено: {$sql}");
-    }
-
-    /**
-     * Test that empty JSON array query uses proper JSON functions after fix
-     */
-    public function testEqEmptyArrayUsesJsonFuncsAndReturnsTwo(): void
-    {
-        $rows = $this->executeQuery('eq(items,string:%5B%5D)');
-
-        $this->assertCount(2, $rows, 'Ожидали 2 строки с пустым JSON-массивом');
-
-        $sql = $this->lastSql();
-        $this->assertNotEmpty($sql);
-
-        // Should use JSON_TYPE and JSON_LENGTH functions
-        $this->assertMatchesRegularExpression(
-            '/JSON_TYPE\(\s*(?:`?\w+`?\.)?`?items`?\s*\)\s*=\s*\'ARRAY\'/i',
-            $sql,
-            "Ожидаем JSON_TYPE(items)='ARRAY'. SQL: {$sql}"
-        );
-        
-        $this->assertMatchesRegularExpression(
-            '/JSON_LENGTH\(\s*(?:`?\w+`?\.)?`?items`?\s*\)\s*=\s*0/i',
-            $sql,
-            "Ожидаем JSON_LENGTH(items)=0. SQL: {$sql}"
-        );
-
-        // Should NOT use string comparison
-        $this->assertStringNotContainsString("`items`='[]'", $sql, "Не должно быть `items`='[]'. SQL: {$sql}");
-    }
-
-    /**
-     * Test that JSON null query uses CAST function after fix
-     */
-    public function testEqJsonNullUsesCastAndReturnsOne(): void
-    {
-        $rows = $this->executeQuery('eq(items,string:null)');
-
-        $this->assertCount(1, $rows, 'Ожидали 1 строку с JSON null');
-        $this->assertSame('json-null', $rows[0]['purchase_order_number']);
-
-        $sql = $this->lastSql();
-        $this->assertNotEmpty($sql);
-
-        // Should use CAST function
-        $this->assertMatchesRegularExpression(
-            '~(?:`?\w+`?\.)?`?items`?\s*=\s*CAST\(\s*\'null\'\s*AS\s+JSON\)~i',
-            $sql,
-            "Ожидаем items = CAST('null' AS JSON). SQL: {$sql}"
-        );
-
-        // Should NOT use string comparison
-        $this->assertStringNotContainsString("`items`='null'", $sql, "Не должно быть `items`='null'. SQL: {$sql}");
     }
 
 
