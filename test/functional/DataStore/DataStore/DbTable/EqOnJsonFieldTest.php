@@ -25,7 +25,7 @@ use rollun\test\functional\FunctionalTestCase;
  * The test below reproduces the bug (eq on empty JSON array returns 0 rows),
  * and also contains a case confirming that contains on string field works correctly.
  */
-final class EqOnJsonFieldBugTest extends FunctionalTestCase
+final class EqOnJsonFieldTest extends FunctionalTestCase
 {
     private TableManagerMysql $mysqlManager;
     private TableGateway $tableGateway;
