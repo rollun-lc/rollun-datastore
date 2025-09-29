@@ -13,17 +13,17 @@ use rollun\test\functional\FunctionalTestCase;
 
 /**
  * Bug summary (eq-on-JSON):
- * Для запроса RQL eq(items,string:%5B%5D) билдер генерирует SQL вида:
+ * For RQL query eq(items,string:%5B%5D) the builder generates SQL like:
  *   WHERE items = '[]'
- * где items — колонка типа JSON. Такое "бинарное" сравнение JSON с текстом '[]'
- * в MySQL возвращает FALSE, поэтому пустые массивы не находятся.
+ * where items is a JSON column. Such "binary" comparison of JSON with text '[]'
+ * in MySQL returns FALSE, so empty arrays are not found.
  *
- * Правильные варианты сопоставления:
+ * Correct comparison options:
  *   - WHERE JSON_TYPE(items) = 'ARRAY' AND JSON_LENGTH(items) = 0
  *   - WHERE items = CAST('[]' AS JSON)
  *
- * Тест ниже воспроизводит баг (eq по пустому JSON-массиву возвращает 0 строк),
- * а также содержит кейс, подтверждающий, что contains по строковому полю работает корректно.
+ * The test below reproduces the bug (eq on empty JSON array returns 0 rows),
+ * and also contains a case confirming that contains on string field works correctly.
  */
 final class EqOnJsonFieldBugTest extends FunctionalTestCase
 {
@@ -152,7 +152,7 @@ final class EqOnJsonFieldBugTest extends FunctionalTestCase
     }
 
     /**
-     * Test JSON field equality queries with data provider
+     * Test JSON field equality queries
      * 
      * @dataProvider jsonQueryDataProvider
      */
@@ -172,12 +172,12 @@ final class EqOnJsonFieldBugTest extends FunctionalTestCase
     }
 
     /**
-     * Контроль: eqn(items) должен находить строку с SQL NULL.
+     * Control: eqn(items) should find a row with SQL NULL.
      */
     public function testEqnMatchesSqlNull(): void
     {
         $rows = $this->materialize($this->dataStore->query(new RqlQuery('eqn(items)')));
-        $this->assertCount(1, $rows, 'eqn(items) должен вернуть 1 строку с SQL NULL.');
+        $this->assertCount(1, $rows, 'eqn(items) should return 1 row with SQL NULL.');
         $this->assertSame('sql-null', $rows[0]['purchase_order_number']);
     }
 
@@ -266,7 +266,7 @@ final class EqOnJsonFieldBugTest extends FunctionalTestCase
 
         $sql = $this->lastSql();
         $this->assertNotEmpty($sql);
-        $this->assertTrue(str_contains($sql, 'LIKE'), "SQL должен содержать LIKE. Получено: {$sql}");
+        $this->assertTrue(str_contains($sql, 'LIKE'), "SQL should contain LIKE. Got: {$sql}");
     }
 
 
@@ -292,7 +292,7 @@ final class EqOnJsonFieldBugTest extends FunctionalTestCase
     private function lastSql(): string
     {
         $profiles = $this->profiler->getProfiles();
-        $this->assertNotEmpty($profiles, 'Profiler MUST contains at least 1 SQL-request.');
+        $this->assertNotEmpty($profiles, 'Profiler MUST contain at least 1 SQL request.');
         $last = end($profiles);
         return (string)($last['sql'] ?? '');
     }
