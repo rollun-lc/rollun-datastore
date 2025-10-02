@@ -118,7 +118,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      */
     public function getIterator()
     {
-//        trigger_error("Datastore is no more iterable", E_USER_DEPRECATED);
+        // trigger_error("Datastore is no more iterable", E_USER_DEPRECATED);
 
         return new CsvIterator($this);
     }
