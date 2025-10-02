@@ -108,10 +108,17 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
 
     /**
      * {@inheritdoc}
+     *
+     *  feat(hvtWPJsD):
+     *  Internal iterator for service passes without E_USER_DEPRECATED.
+     *  Not intended for third-party client code.
+     *
+     *  We don't know exactly why E_USER_DEPRECATED was added to getIterator(),
+     *  so we're collecting information this way.
      */
     public function getIterator()
     {
-        trigger_error("Datastore is no more iterable", E_USER_DEPRECATED);
+//        trigger_error("Datastore is no more iterable", E_USER_DEPRECATED);
 
         return new CsvIterator($this);
     }
