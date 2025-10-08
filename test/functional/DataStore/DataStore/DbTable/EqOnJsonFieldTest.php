@@ -99,55 +99,53 @@ final class EqOnJsonFieldTest extends FunctionalTestCase
     /**
      * Test data provider for JSON field tests
      */
-    public function getTestData(): array
+    public function getTestData(): iterable
     {
-        return [
-            // Empty arrays test cases
-            ['id' => 1, 'purchase_order_number' => 'bulk return', 'items' => '[]'],
-            ['id' => 2, 'purchase_order_number' => '', 'items' => '[]'],
+        // Empty arrays test cases
+        yield ['id' => 1, 'purchase_order_number' => 'bulk return', 'items' => '[]'];
+        yield ['id' => 2, 'purchase_order_number' => '', 'items' => '[]'];
 
-            // Complex JSON objects
-            ['id' => 3, 'purchase_order_number' => 'Canceled', 'items' => '[{"csn":"873-0056","rid":"IB99N","unitPrice":64.2,"warehouse":"TX","qtyOrdered":1,"qtyShipped":1,"trackNumbers":[],"qtyBackOrdered":0}]'],
-            ['id' => 4, 'purchase_order_number' => '637686nm', 'items' => '[{"csn":"03060005","rid":"72D6L","unitPrice":99.3,"warehouse":null,"qtyOrdered":1,"qtyShipped":0,"trackNumbers":[],"qtyBackOrdered":0}]'],
-            ['id' => 5, 'purchase_order_number' => '644261nm', 'items' => '[{"csn":"03060003","rid":"4WXCA","unitPrice":125.1,"warehouse":null,"qtyOrdered":1,"qtyShipped":0,"trackNumbers":[],"qtyBackOrdered":0}]'],
-            ['id' => 6, 'purchase_order_number' => '650229nm', 'items' => '[{"csn":"37040193","rid":"MYF9N","unitPrice":50.92,"warehouse":null,"qtyOrdered":1,"qtyShipped":0,"trackNumbers":[],"qtyBackOrdered":0}]'],
-            ['id' => 7, 'purchase_order_number' => '657824nm', 'items' => '[{"csn":"03410011","rid":"39LDA","unitPrice":19.32,"warehouse":"NC","qtyOrdered":1,"qtyShipped":0,"trackNumbers":[],"qtyBackOrdered":0}]'],
-            ['id' => 8, 'purchase_order_number' => '635653nm', 'items' => '[{"csn":"234130","rid":"76ZRC","unitPrice":8.9,"warehouse":"2","qtyOrdered":3,"qtyShipped":3,"trackNumbers":["9400136208090275678269"],"qtyBackOrdered":0}]'],
-            ['id' => 9, 'purchase_order_number' => '635747nm', 'items' => '[{"csn":"987170","rid":"1I3RU","unitPrice":8.04,"warehouse":"2","qtyOrdered":1,"qtyShipped":1,"trackNumbers":["390292096488"],"qtyBackOrdered":0}]'],
-            ['id' => 10, 'purchase_order_number' => '635994nm', 'items' => '[{"csn":"163274","rid":"A5VRM","unitPrice":25.75,"warehouse":"3","qtyOrdered":1,"qtyShipped":1,"trackNumbers":["390323657983"],"qtyBackOrdered":0}]'],
+        // Complex JSON objects
+        yield ['id' => 3, 'purchase_order_number' => 'Canceled', 'items' => '[{"csn":"873-0056","rid":"IB99N","unitPrice":64.2,"warehouse":"TX","qtyOrdered":1,"qtyShipped":1,"trackNumbers":[],"qtyBackOrdered":0}]'];
+        yield ['id' => 4, 'purchase_order_number' => '637686nm', 'items' => '[{"csn":"03060005","rid":"72D6L","unitPrice":99.3,"warehouse":null,"qtyOrdered":1,"qtyShipped":0,"trackNumbers":[],"qtyBackOrdered":0}]'];
+        yield ['id' => 5, 'purchase_order_number' => '644261nm', 'items' => '[{"csn":"03060003","rid":"4WXCA","unitPrice":125.1,"warehouse":null,"qtyOrdered":1,"qtyShipped":0,"trackNumbers":[],"qtyBackOrdered":0}]'];
+        yield ['id' => 6, 'purchase_order_number' => '650229nm', 'items' => '[{"csn":"37040193","rid":"MYF9N","unitPrice":50.92,"warehouse":null,"qtyOrdered":1,"qtyShipped":0,"trackNumbers":[],"qtyBackOrdered":0}]'];
+        yield ['id' => 7, 'purchase_order_number' => '657824nm', 'items' => '[{"csn":"03410011","rid":"39LDA","unitPrice":19.32,"warehouse":"NC","qtyOrdered":1,"qtyShipped":0,"trackNumbers":[],"qtyBackOrdered":0}]'];
+        yield ['id' => 8, 'purchase_order_number' => '635653nm', 'items' => '[{"csn":"234130","rid":"76ZRC","unitPrice":8.9,"warehouse":"2","qtyOrdered":3,"qtyShipped":3,"trackNumbers":["9400136208090275678269"],"qtyBackOrdered":0}]'];
+        yield ['id' => 9, 'purchase_order_number' => '635747nm', 'items' => '[{"csn":"987170","rid":"1I3RU","unitPrice":8.04,"warehouse":"2","qtyOrdered":1,"qtyShipped":1,"trackNumbers":["390292096488"],"qtyBackOrdered":0}]'];
+        yield ['id' => 10, 'purchase_order_number' => '635994nm', 'items' => '[{"csn":"163274","rid":"A5VRM","unitPrice":25.75,"warehouse":"3","qtyOrdered":1,"qtyShipped":1,"trackNumbers":["390323657983"],"qtyBackOrdered":0}]'];
 
-            // Additional test cases for bugs
-            ['id' => 11, 'purchase_order_number' => 'json-null', 'items' => 'null'], // JSON literal null
-            ['id' => 12, 'purchase_order_number' => 'sql-null', 'items' => null],   // SQL NULL
-        ];
+        // Additional test cases for bugs
+        yield ['id' => 11, 'purchase_order_number' => 'json-null', 'items' => 'null']; // JSON literal null
+        yield ['id' => 12, 'purchase_order_number' => 'sql-null', 'items' => null];   // SQL NULL
     }
 
     /**
      * Data provider for JSON query tests
      */
-    public function jsonQueryDataProvider(): array
+    public function jsonQueryDataProvider(): iterable
     {
-        return [
-            // Test that empty JSON array query uses proper JSON functions after fix
-            'empty array' => [
-                'query' => 'eq(items,string:%5B%5D)',
-                'expectedCount' => 2,
-                'expectedSqlPattern' => '/JSON_TYPE\(\s*(?:`?\w+`?\.)?`?items`?\s*\)\s*=\s*\'ARRAY\'/i',
-                'description' => 'Empty JSON array should use JSON_TYPE and JSON_LENGTH functions',
-            ],
-            // Test that JSON null query uses CAST function after fix
-            'json null' => [
-                'query' => 'eq(items,string:null)',
-                'expectedCount' => 1,
-                'expectedSqlPattern' => '~(?:`?\w+`?\.)?`?items`?\s*=\s*CAST\(\s*\'null\'\s*AS\s+JSON\)~i',
-                'description' => 'JSON null should use CAST function',
-            ],
-            'empty object' => [
-                'query' => 'eq(items,string:%7B%7D)',
-                'expectedCount' => 0,
-                'expectedSqlPattern' => '/JSON_TYPE\(\s*(?:`?\w+`?\.)?`?items`?\s*\)\s*=\s*\'OBJECT\'/i',
-                'description' => 'Empty object should use JSON_TYPE and JSON_LENGTH functions',
-            ],
+        // Test that empty JSON array query uses proper JSON functions after fix
+        yield 'empty array' => [
+            'query' => 'eq(items,string:%5B%5D)',
+            'expectedCount' => 2,
+            'expectedSqlPattern' => '/JSON_TYPE\(\s*(?:`?\w+`?\.)?`?items`?\s*\)\s*=\s*\'ARRAY\'/i',
+            'description' => 'Empty JSON array should use JSON_TYPE and JSON_LENGTH functions',
+        ];
+
+        // Test that JSON null query uses CAST function after fix
+        yield 'json null' => [
+            'query' => 'eq(items,string:null)',
+            'expectedCount' => 1,
+            'expectedSqlPattern' => '~(?:`?\w+`?\.)?`?items`?\s*=\s*CAST\(\s*\'null\'\s*AS\s+JSON\)~i',
+            'description' => 'JSON null should use CAST function',
+        ];
+
+        yield 'empty object' => [
+            'query' => 'eq(items,string:%7B%7D)',
+            'expectedCount' => 0,
+            'expectedSqlPattern' => '/JSON_TYPE\(\s*(?:`?\w+`?\.)?`?items`?\s*\)\s*=\s*\'OBJECT\'/i',
+            'description' => 'Empty object should use JSON_TYPE and JSON_LENGTH functions',
         ];
     }
 
@@ -184,27 +182,27 @@ final class EqOnJsonFieldTest extends FunctionalTestCase
     /**
      * Data provider for JSON bug reproduction tests
      */
-    public function jsonBugDataProvider(): array
+    public function jsonBugDataProvider(): iterable
     {
-        return [
-            'empty array bug' => [
-                'query' => 'eq(items,string:%5B%5D)', // []
-                'expectedCount' => 0,
-                'expectedSqlPattern' => '`items`=\'[]\'',
-                'description' => 'Empty JSON array should return 0 due to wrong string comparison',
-            ],
-            'empty object bug' => [
-                'query' => 'eq(items,string:%7B%7D)', // {}
-                'expectedCount' => 0,
-                'expectedSqlPattern' => '`items`=\'{}\'',
-                'description' => 'Empty JSON object should return 0 due to wrong string comparison',
-            ],
-            'json null bug' => [
-                'query' => 'eq(items,string:null)',
-                'expectedCount' => 0,
-                'expectedSqlPattern' => '`items`=\'null\'',
-                'description' => 'JSON null should return 0 due to wrong string comparison',
-            ],
+        yield 'empty array bug' => [
+            'query' => 'eq(items,string:%5B%5D)', // []
+            'expectedCount' => 0,
+            'expectedSqlPattern' => '`items`=\'[]\'',
+            'description' => 'Empty JSON array should return 0 due to wrong string comparison',
+        ];
+
+        yield 'empty object bug' => [
+            'query' => 'eq(items,string:%7B%7D)', // {}
+            'expectedCount' => 0,
+            'expectedSqlPattern' => '`items`=\'{}\'',
+            'description' => 'Empty JSON object should return 0 due to wrong string comparison',
+        ];
+
+        yield 'json null bug' => [
+            'query' => 'eq(items,string:null)',
+            'expectedCount' => 0,
+            'expectedSqlPattern' => '`items`=\'null\'',
+            'description' => 'JSON null should return 0 due to wrong string comparison',
         ];
     }
 
@@ -233,15 +231,13 @@ final class EqOnJsonFieldTest extends FunctionalTestCase
     /**
      * Data provider for contains tests
      */
-    public function containsTestDataProvider(): array
+    public function containsTestDataProvider(): iterable
     {
-        return [
-            'nm in purchase_order_number' => [
-                'field' => 'purchase_order_number',
-                'value' => 'nm',
-                'expectedCount' => 7,
-                'description' => 'Should find 7 rows with "nm" in purchase_order_number',
-            ],
+        yield 'nm in purchase_order_number' => [
+            'field' => 'purchase_order_number',
+            'value' => 'nm',
+            'expectedCount' => 7,
+            'description' => 'Should find 7 rows with "nm" in purchase_order_number',
         ];
     }
 
