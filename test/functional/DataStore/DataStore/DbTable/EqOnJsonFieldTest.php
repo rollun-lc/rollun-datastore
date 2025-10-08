@@ -181,7 +181,7 @@ final class EqOnJsonFieldTest extends FunctionalTestCase
 
         $sql = $this->lastSql();
         $this->assertNotEmpty($sql);
-        $this->assertMatchesRegularExpression($expectedSqlPattern, $sql, "SQL should match pattern: {$sql}");
+        $this->assertRegExp($expectedSqlPattern, $sql, "SQL should match pattern: {$sql}");
     }
 
     /**
@@ -277,7 +277,7 @@ final class EqOnJsonFieldTest extends FunctionalTestCase
 
         $sql = $this->lastSql();
         $this->assertNotEmpty($sql);
-        $this->assertTrue(str_contains($sql, 'LIKE'), "SQL should contain LIKE. Got: {$sql}");
+        $this->assertTrue(strpos($sql, 'LIKE') !== false, "SQL should contain LIKE. Got: {$sql}");
     }
 
 
