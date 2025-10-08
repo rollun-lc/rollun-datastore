@@ -114,6 +114,7 @@ class TableManagerMysql
     public const TYPE_DECIMAL = 'Decimal';
     public const TYPE_FLOAT = 'Float';
     public const TYPE_FLOATING = 'Floating';
+    public const TYPE_JSON = 'Json';
 
     // Column properties
     public const PROPERTY_NULLABLE = 'nullable';
