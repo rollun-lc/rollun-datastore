@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace functional\DataStore\DataStore\DbTable;
 
-use Laminas\Db\Adapter\Profiler\Profiler;
-use Laminas\Db\TableGateway\TableGateway;
+use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\TableManagerMysql;
-use rollun\test\functional\FunctionalTestCase;
+use Zend\Db\Adapter\Profiler\Profiler;
+use Zend\Db\TableGateway\TableGateway;
 
 /**
  * Bug summary (eq-on-JSON):
@@ -25,13 +25,28 @@ use rollun\test\functional\FunctionalTestCase;
  * The test below reproduces the bug (eq on empty JSON array returns 0 rows),
  * and also contains a case confirming that contains on string field works correctly.
  */
-final class EqOnJsonFieldTest extends FunctionalTestCase
+final class EqOnJsonFieldTest extends TestCase
 {
-    private TableManagerMysql $mysqlManager;
-    private TableGateway $tableGateway;
-    private DbTable $dataStore;
-    private Profiler $profiler;
-    private string $tableName = 'orders_json_eq_test';
+    /**
+     * @var TableManagerMysql
+     */
+    private $mysqlManager;
+    /**
+     * @var TableGateway
+     */
+    private $tableGateway;
+    /**
+     * @var DbTable
+     */
+    private $dataStore;
+    /**
+     * @var Profiler
+     */
+    private $profiler;
+    /**
+     * @var string
+     */
+    private $tableName = 'orders_json_eq_test';
 
     /**
      * Table configuration with JSON support
@@ -41,20 +56,20 @@ final class EqOnJsonFieldTest extends FunctionalTestCase
         return [
             'id' => [
                 'field_type' => 'Integer',
-                'field_primary_key' => true,
+                'field_primary_key' => true
             ],
             'purchase_order_number' => [
                 'field_type' => 'Varchar',
                 'field_params' => [
                     'length' => 255,
-                ],
+                ]
             ],
             'items' => [
                 'field_type' => 'Json',
                 'field_params' => [
                     'nullable' => true,
-                ],
-            ],
+                ]
+            ]
         ];
     }
 
@@ -130,7 +145,7 @@ final class EqOnJsonFieldTest extends FunctionalTestCase
             'query' => 'eq(items,string:%5B%5D)',
             'expectedCount' => 2,
             'expectedSqlPattern' => '/JSON_TYPE\(\s*(?:`?\w+`?\.)?`?items`?\s*\)\s*=\s*\'ARRAY\'/i',
-            'description' => 'Empty JSON array should use JSON_TYPE and JSON_LENGTH functions',
+            'description' => 'Empty JSON array should use JSON_TYPE and JSON_LENGTH functions'
         ];
 
         // Test that JSON null query uses CAST function after fix
@@ -138,14 +153,14 @@ final class EqOnJsonFieldTest extends FunctionalTestCase
             'query' => 'eq(items,string:null)',
             'expectedCount' => 1,
             'expectedSqlPattern' => '~(?:`?\w+`?\.)?`?items`?\s*=\s*CAST\(\s*\'null\'\s*AS\s+JSON\)~i',
-            'description' => 'JSON null should use CAST function',
+            'description' => 'JSON null should use CAST function'
         ];
 
         yield 'empty object' => [
             'query' => 'eq(items,string:%7B%7D)',
             'expectedCount' => 0,
             'expectedSqlPattern' => '/JSON_TYPE\(\s*(?:`?\w+`?\.)?`?items`?\s*\)\s*=\s*\'OBJECT\'/i',
-            'description' => 'Empty object should use JSON_TYPE and JSON_LENGTH functions',
+            'description' => 'Empty object should use JSON_TYPE and JSON_LENGTH functions'
         ];
     }
 
@@ -188,21 +203,21 @@ final class EqOnJsonFieldTest extends FunctionalTestCase
             'query' => 'eq(items,string:%5B%5D)', // []
             'expectedCount' => 0,
             'expectedSqlPattern' => '`items`=\'[]\'',
-            'description' => 'Empty JSON array should return 0 due to wrong string comparison',
+            'description' => 'Empty JSON array should return 0 due to wrong string comparison'
         ];
 
         yield 'empty object bug' => [
             'query' => 'eq(items,string:%7B%7D)', // {}
             'expectedCount' => 0,
             'expectedSqlPattern' => '`items`=\'{}\'',
-            'description' => 'Empty JSON object should return 0 due to wrong string comparison',
+            'description' => 'Empty JSON object should return 0 due to wrong string comparison'
         ];
 
         yield 'json null bug' => [
             'query' => 'eq(items,string:null)',
             'expectedCount' => 0,
             'expectedSqlPattern' => '`items`=\'null\'',
-            'description' => 'JSON null should return 0 due to wrong string comparison',
+            'description' => 'JSON null should return 0 due to wrong string comparison'
         ];
     }
 
@@ -237,7 +252,7 @@ final class EqOnJsonFieldTest extends FunctionalTestCase
             'field' => 'purchase_order_number',
             'value' => 'nm',
             'expectedCount' => 7,
-            'description' => 'Should find 7 rows with "nm" in purchase_order_number',
+            'description' => 'Should find 7 rows with "nm" in purchase_order_number'
         ];
     }
 
