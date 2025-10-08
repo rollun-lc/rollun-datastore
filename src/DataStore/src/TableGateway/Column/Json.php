@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace rollun\datastore\TableGateway\Column;
 
-use Laminas\Db\Sql\Ddl\Column\Column;
+use Zend\Db\Sql\Ddl\Column\Column;
 
 /**
  * JSON column type for MySQL
