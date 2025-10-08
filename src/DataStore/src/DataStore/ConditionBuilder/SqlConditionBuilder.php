@@ -135,23 +135,23 @@ class SqlConditionBuilder extends ConditionBuilderAbstract
 
         // ВАЖНО: получаем имя поля один раз и сохраняем
         $fieldRaw = $node->getField();
-        $fieldSql = $this->prepareFieldName($fieldRaw);
+        $fieldSqlName = $this->prepareFieldName($fieldRaw);
 
         if ($nodeName === 'eq') {
             if ($value === '[]') {
-                return "(JSON_TYPE({$fieldSql})='ARRAY' AND JSON_LENGTH({$fieldSql})=0)";
+                return "(JSON_TYPE({$fieldSqlName})='ARRAY' AND JSON_LENGTH({$fieldSqlName})=0)";
             }
             if ($value === '{}') {
-                return "(JSON_TYPE({$fieldSql})='OBJECT' AND JSON_LENGTH({$fieldSql})=0)";
+                return "(JSON_TYPE({$fieldSqlName})='OBJECT' AND JSON_LENGTH({$fieldSqlName})=0)";
             }
             if ($value === 'null') { // JSON null, НЕ SQL NULL
                 $quoted = $this->prepareFieldValue($value); // -> 'null'
-                return "({$fieldSql} = CAST({$quoted} AS JSON))";
+                return "({$fieldSqlName} = CAST({$quoted} AS JSON))";
             }
         }
 
         // Базовая логика
-        $strQuery  = $this->literals['ScalarOperator'][$nodeName]['before'] . $fieldSql;
+        $strQuery  = $this->literals['ScalarOperator'][$nodeName]['before'] . $fieldSqlName;
 
         if ($nodeName === 'contains') {
             // TODO: Make the same special character encoding script for like & alike? Because there are also special characters like % and _
