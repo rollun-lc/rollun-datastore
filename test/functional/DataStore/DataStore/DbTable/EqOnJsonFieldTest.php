@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace functional\DataStore\DataStore\DbTable;
 
-use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\DbTable;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\TableManagerMysql;
+use rollun\test\functional\FunctionalTestCase;
 use Zend\Db\Adapter\Profiler\Profiler;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -25,7 +25,7 @@ use Zend\Db\TableGateway\TableGateway;
  * The test below reproduces the bug (eq on empty JSON array returns 0 rows),
  * and also contains a case confirming that contains on string field works correctly.
  */
-final class EqOnJsonFieldTest extends TestCase
+final class EqOnJsonFieldTest extends FunctionalTestCase
 {
     /**
      * @var TableManagerMysql
