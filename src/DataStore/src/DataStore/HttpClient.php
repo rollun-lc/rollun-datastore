@@ -208,7 +208,7 @@ class HttpClient extends DataStoreAbstract
      * @param bool $ifMatch
      * @return Client
      */
-    protected function initHttpClient(string $method, string $uri, $ifMatch = false)
+    protected function initHttpClient(string $method, string $uri, $ifMatch = false/*, array $extraHeaders = [] - и это зачем было добавлено?*/)
     {
         $httpClient = clone $this->client;
         $httpClient->setUri($uri);
@@ -222,6 +222,14 @@ class HttpClient extends DataStoreAbstract
         if ($ifMatch) {
             $headers['If-Match'] = '*';
         }
+
+        /*
+         * Откуда это вылезло? Зачем?
+         * Я так понимаю таким образом он хотел проконтролировать выполнение запроса обработчиком исключительно со спец заголовком?
+        foreach ($extraHeaders as $header => $value) {
+            $headers[$header] = $value;
+        }
+        */
 
         $httpClient->setHeaders($headers);
 
@@ -379,6 +387,54 @@ class HttpClient extends DataStoreAbstract
         }
 
         return $result;
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * @throws DataStoreException
+     * @throws \rollun\utils\Json\Exception
+     */
+    public function multiUpdate($records)
+    {
+        if (!isset($records[0]) || !is_array($records[0])) {
+            throw new DataStoreException('Collection of arrays expected');
+        }
+
+        $identifier = $this->getIdentifier();
+        foreach ($records as $record) {
+            if (!array_key_exists($identifier, $record)) {
+                throw new DataStoreException('Item must has primary key');
+            }
+        }
+
+        $head = $this->sendHead();
+        if ($head && isset($head['X_MULTI_UPDATE'])) {
+            $client = $this->initHttpClient(
+                Request::METHOD_PATCH,
+                $this->url,
+                false,
+                ['X-DataStore-Operation' => 'multi-update']
+            );
+            $client->setRawBody(Serializer::jsonSerialize($records));
+            $response = self::sendByClient($client);
+
+            if ($response->isSuccess()) {
+                return Serializer::jsonUnserialize($response->getBody());
+            }
+
+            $responseMessage = $this->createResponseMessage($this->url, Request::METHOD_PATCH, $response);
+            throw new DataStoreException("Can't update items {$responseMessage}");
+        }
+
+        // Это вобще не нужно, нужно заменить на бросание исключения как в queriedUpdate. Я сказал ему сделать по аналогии
+        // Почему он в таком случае добавил эти куски кода?
+        $updated = [];
+        foreach ($records as $record) {
+            $updated[] = $this->update($record);
+        }
+
+        return array_column($updated, $identifier);
     }
 
     /**
