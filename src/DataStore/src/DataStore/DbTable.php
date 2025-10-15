@@ -202,6 +202,154 @@ class DbTable extends DataStoreAbstract
     /**
      * {@inheritdoc}
      *
+     * @throws ConnectionException|DataStoreException
+     */
+    public function multiUpdate($records)
+    {
+        if (!is_array($records) || $records === []) {
+            throw new InvalidArgumentException('Expected non-empty list of records for multiUpdate.');
+        }
+
+        $identifier = $this->getIdentifier();
+        $normalizedRecords = [];
+        $columnsToUpdate = [];
+        $uniqueIds = [];
+
+        foreach ($records as $index => $record) {
+            if (!is_array($record) || $record === []) {
+                throw new InvalidArgumentException('Each record must be a non-empty associative array.');
+            }
+
+            if (!array_key_exists($identifier, $record)) {
+                throw new DataStoreException('Item must has primary key');
+            }
+
+            $id = $record[$identifier];
+            $this->checkIdentifierType($id);
+
+            if (isset($uniqueIds[$id])) {
+                throw new InvalidArgumentException('Duplicate identifier values detected in multiUpdate payload.');
+            }
+            $uniqueIds[$id] = true;
+
+            $normalizedRecords[$id] = $record;
+
+            foreach ($record as $column => $value) {
+                if ($column === $identifier) {
+                    continue;
+                }
+
+                $columnsToUpdate[$column][$id] = $value;
+            }
+        }
+
+        if ($columnsToUpdate === []) {
+            throw new InvalidArgumentException('No updatable fields provided for multiUpdate.');
+        }
+
+        $adapter = $this->dbTable->getAdapter();
+        $connection = $adapter->getDriver()->getConnection();
+        $ids = array_keys($normalizedRecords);
+
+        $this->beginTransaction();
+
+        try {
+            $selected = $this->selectForUpdateWithIds($ids);
+            $existingIds = [];
+            foreach ($selected as $row) {
+                $existingIds[] = $row[$identifier];
+            }
+
+            if (count($existingIds) !== count($ids)) {
+                $missing = array_values(array_diff($ids, $existingIds));
+                $missingId = reset($missing);
+                throw new DataStoreException("[{$this->dbTable->getTable()}]Can't update item with id = $missingId");
+            }
+
+            $platform = $adapter->getPlatform();
+            $quotedTable = $platform->quoteIdentifier($this->dbTable->getTable());
+            $quotedIdentifier = $platform->quoteIdentifier($identifier);
+
+            $setFragments = [];
+            $parameters = [];
+
+            foreach ($columnsToUpdate as $column => $valuesById) {
+                $quotedColumn = $platform->quoteIdentifier($column);
+                $caseSql = "{$quotedColumn} = CASE {$quotedIdentifier}";
+
+                foreach ($ids as $id) {
+                    if (!array_key_exists($id, $valuesById)) {
+                        continue;
+                    }
+
+                    $caseSql .= ' WHEN ? THEN ?';
+                    $parameters[] = $id;
+                    $parameters[] = $valuesById[$id];
+                }
+
+                $caseSql .= " ELSE {$quotedColumn} END";
+                $setFragments[] = $caseSql;
+            }
+
+            if ($setFragments === []) {
+                throw new InvalidArgumentException('No valid fields resolved for multiUpdate.');
+            }
+
+            $placeholders = implode(', ', array_fill(0, count($ids), '?'));
+            $sqlString = sprintf(
+                'UPDATE %s SET %s WHERE %s IN (%s)',
+                $quotedTable,
+                implode(', ', $setFragments),
+                $quotedIdentifier,
+                $placeholders
+            );
+
+            $parameters = array_merge($parameters, $ids);
+
+            $statement = $adapter->getDriver()->createStatement($sqlString);
+            $statement->setParameterContainer(new ParameterContainer($parameters));
+            $start = microtime(true);
+            $statement->execute();
+            $end = microtime(true);
+
+            $logContext = [
+                self::LOG_METHOD => __METHOD__,
+                self::LOG_TABLE => $this->dbTable->getTable(),
+                self::LOG_REQUEST => $records,
+                self::LOG_TIME => $this->getRequestTime($start, $end),
+                self::LOG_SQL => $sqlString,
+            ];
+            $this->writeLogsIfNeeded($logContext);
+
+            $connection->commit();
+        } catch (\Throwable $e) {
+            $connection->rollback();
+            // https://github.com/laminas/laminas-db/issues/56
+            $connection->disconnect();
+            $logContext = [
+                self::LOG_METHOD => __METHOD__,
+                self::LOG_TABLE => $this->dbTable->getTable(),
+                self::LOG_REQUEST => $records,
+                self::LOG_ROLLBACK => true,
+                'exception' => $e,
+            ];
+            $this->writeLogsIfNeeded($logContext, "Request to db table '{$this->dbTable->getTable()}' failed");
+            if ($e instanceof DataStoreException) {
+                throw $e;
+            }
+            throw new DataStoreException(
+                "[{$this->dbTable->getTable()}]Can't update items. {$e->getMessage()}",
+                0,
+                $e
+            );
+        }
+
+        return $ids;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
      * @param Query $query
      * @return array
      * @throws DataStoreException
