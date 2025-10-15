@@ -124,6 +124,65 @@ abstract class BaseDataStoreTest extends TestCase
         $this->assertEquals(0, $object->count());
     }
 
+    public function testMultiUpdateContract(): void
+    {
+        $this->markTestIncomplete('Wrong functional craeted by spec kit');
+        $object = $this->createObject();
+        $object->queriedDelete(new RqlQuery());
+
+        $records = [
+            [
+                $object->getIdentifier() => $this->identifierToType(1),
+                'name' => 'name1',
+                'surname' => 'surname1',
+            ],
+            [
+                $object->getIdentifier() => $this->identifierToType(2),
+                'name' => 'name2',
+                'surname' => 'surname2',
+            ],
+        ];
+
+        foreach ($records as $record) {
+            $object->create($record);
+        }
+
+        $updatedIds = $object->multiUpdate([
+            [
+                $object->getIdentifier() => $this->identifierToType(1),
+                'name' => 'updated1',
+            ],
+            [
+                $object->getIdentifier() => $this->identifierToType(2),
+                'surname' => 'updated2',
+            ],
+        ]);
+
+        sort($updatedIds);
+        $this->assertSame(
+            [$this->identifierToType(1), $this->identifierToType(2)],
+            $updatedIds
+        );
+
+        $this->assertEquals(
+            [
+                $object->getIdentifier() => $this->identifierToType(1),
+                'name' => 'updated1',
+                'surname' => 'surname1',
+            ],
+            $object->read($this->identifierToType(1))
+        );
+
+        $this->assertEquals(
+            [
+                $object->getIdentifier() => $this->identifierToType(2),
+                'name' => 'name2',
+                'surname' => 'updated2',
+            ],
+            $object->read($this->identifierToType(2))
+        );
+    }
+
     public function testCreateItemAlreadyExistException()
     {
         $this->expectException(DataStoreException::class);
