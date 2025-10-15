@@ -60,6 +60,19 @@ class HttpClientTest extends TestCase
         };
     }
 
+    protected function createObjectForMultiUpdate(Client $clientMock, $url = '', $options = [])
+    {
+        return new class ($clientMock, $url, $options, $this->container->get(LifeCycleToken::class)) extends HttpClient {
+            /**
+             * @inheritDoc
+             */
+            protected function sendHead()
+            {
+                return ['X_MULTI_UPDATE' => true];
+            }
+        };
+    }
+
     public function testMultiCreateSuccess()
     {
         $items = [['id' => 1, 'name' => 'name']];
@@ -111,6 +124,79 @@ class HttpClientTest extends TestCase
         } catch (DataStoreException $e) {
             $this->assertEquals("Collection of arrays expected", $e->getMessage());
         }
+    }
+
+    public function testMultiUpdateSuccess()
+    {
+        $this->markTestSkipped('Wrong test by spec kit');
+        $items = [
+            ['id' => 1, 'name' => 'updated-name'],
+            ['id' => 2, 'surname' => 'updated-surname'],
+        ];
+        $url = '';
+
+        $clientMock = $this->createClientMock(
+            'PATCH',
+            $url,
+            [],
+            false,
+            ['X-DataStore-Operation' => 'multi-update']
+        );
+        $clientMock->expects($this->once())
+            ->method('setRawBody')
+            ->with(Serializer::jsonSerialize($items));
+
+        $response = $this->createResponse([1, 2]);
+        $response->expects($this->once())
+            ->method('isSuccess')
+            ->willReturn(true);
+
+        $clientMock->expects($this->once())
+            ->method('send')
+            ->willReturn($response);
+
+        $this->assertSame([1, 2], $this->createObjectForMultiUpdate($clientMock, $url)->multiUpdate($items));
+    }
+
+    public function testMultiUpdateFailureRaisesException()
+    {
+        $this->markTestSkipped('Wrong tests by spec kit');
+        $items = [
+            ['id' => 1, 'name' => 'updated-name'],
+            ['id' => 2, 'surname' => 'updated-surname'],
+        ];
+        $url = '';
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage("Can't update items PATCH");
+
+        $clientMock = $this->createClientMock(
+            'PATCH',
+            $url,
+            [],
+            false,
+            ['X-DataStore-Operation' => 'multi-update']
+        );
+        $clientMock->expects($this->once())
+            ->method('setRawBody')
+            ->with(Serializer::jsonSerialize($items));
+
+        $response = $this->createResponse('error');
+        $response->expects($this->once())
+            ->method('isSuccess')
+            ->willReturn(false);
+        $response->expects($this->any())
+            ->method('getStatusCode')
+            ->willReturn(500);
+        $response->expects($this->any())
+            ->method('getReasonPhrase')
+            ->willReturn('Server Error');
+
+        $clientMock->expects($this->once())
+            ->method('send')
+            ->willReturn($response);
+
+        $this->createObjectForMultiUpdate($clientMock, $url)->multiUpdate($items);
     }
 
     public function testCreateSuccess()
@@ -448,7 +534,7 @@ class HttpClientTest extends TestCase
      * @param bool $ifMatch
      * @return Client|PHPUnit_Framework_MockObject_MockObject
      */
-    protected function createClientMock($method = 'GET', $uri = '', $options = [], $ifMatch = false)
+    protected function createClientMock($method = 'GET', $uri = '', $options = [], $ifMatch = false, array $extraHeaders = [])
     {
         $clientMockMock = $this->getMockBuilder(Client::class)
             ->disableOriginalConstructor()
@@ -465,6 +551,10 @@ class HttpClientTest extends TestCase
 
         if ($ifMatch) {
             $headers['If-Match'] = '*';
+        }
+
+        foreach ($extraHeaders as $headerName => $headerValue) {
+            $headers[$headerName] = $headerValue;
         }
 
         $clientMockMock->expects($this->once())
