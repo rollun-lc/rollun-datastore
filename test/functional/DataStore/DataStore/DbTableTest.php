@@ -382,6 +382,44 @@ class DbTableTest extends TestCase
         }
     }
 
+    public function testMultiUpdateSuccess(): void
+    {
+        $object = $this->createObject();
+        $object->create(['id' => 1, 'name' => 'name1', 'surname' => 'surname1']);
+        $object->create(['id' => 2, 'name' => 'name2', 'surname' => 'surname2']);
+
+        $updatedIds = $object->multiUpdate([
+            ['id' => 1, 'name' => 'updated1'],
+            ['id' => 2, 'surname' => 'updated2'],
+        ]);
+
+        sort($updatedIds);
+        $this->assertSame([1, 2], $updatedIds);
+
+        $this->assertEquals(['id' => 1, 'name' => 'updated1', 'surname' => 'surname1'], $this->read(1));
+        $this->assertEquals(['id' => 2, 'name' => 'name2', 'surname' => 'updated2'], $this->read(2));
+    }
+
+    public function testMultiUpdateRollsBackOnFailure(): void
+    {
+        $object = $this->createObject();
+        $object->create(['id' => 1, 'name' => 'name1', 'surname' => 'surname1']);
+        $object->create(['id' => 2, 'name' => 'name2', 'surname' => 'surname2']);
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessageMatches('/Can\'t update item with id = 999/');
+
+        try {
+            $object->multiUpdate([
+                ['id' => 1, 'name' => 'updated1'],
+                ['id' => 999, 'name' => 'should_fail'],
+            ]);
+        } finally {
+            $this->assertEquals(['id' => 1, 'name' => 'name1', 'surname' => 'surname1'], $this->read(1));
+            $this->assertEquals(['id' => 2, 'name' => 'name2', 'surname' => 'surname2'], $this->read(2));
+        }
+    }
+
     public function testWriteLog()
     {
         $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
