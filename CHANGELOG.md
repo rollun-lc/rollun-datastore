@@ -11,3 +11,7 @@
 - Removed rollun-com/rollun-installer as it was unused
 - Removed `rollun\files` as it was moved to another package
 - Make "count(): int" and "getIterator(): \Traversable" functions typed in DataStoreAbstract
+
+## Unreleased
+
+- Added transactional multiUpdate support for DbTable with dedicated DataStoreRest handler, HttpClient forwarding, and HEAD/HTTP documentation updates.
