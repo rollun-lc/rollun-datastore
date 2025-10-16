@@ -412,8 +412,7 @@ class HttpClient extends DataStoreAbstract
             $client = $this->initHttpClient(
                 Request::METHOD_PATCH,
                 $this->url,
-                false,
-                ['X-DataStore-Operation' => 'multi-update']
+                false
             );
             $client->setRawBody(Serializer::jsonSerialize($records));
             $response = self::sendByClient($client);

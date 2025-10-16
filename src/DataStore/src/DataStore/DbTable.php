@@ -214,7 +214,7 @@ class DbTable extends DataStoreAbstract
         $columnsToUpdate = [];
         $uniqueIds = [];
 
-        foreach ($records as $index => $record) {
+        foreach ($records as $record) {
             if (!is_array($record) || $record === []) {
                 throw new InvalidArgumentException('Each record must be a non-empty associative array.');
             }

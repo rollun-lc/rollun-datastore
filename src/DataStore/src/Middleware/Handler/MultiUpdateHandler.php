@@ -22,9 +22,9 @@ class MultiUpdateHandler extends AbstractHandler
         }
 
         $operation = strtolower($request->getHeaderLine('X-DataStore-Operation'));
-//        if ($operation !== 'multi-update') {
-//            return false;
-//        }
+        //        if ($operation !== 'multi-update') {
+        //            return false;
+        //        }
 
         if ($request->getAttribute('primaryKeyValue')) {
             return false;
