@@ -59,6 +59,26 @@ class HttpClientTest extends TestCase
         };
     }
 
+    /**
+     * @param Client $clientMock
+     * @param string $url
+     * @param array  $options
+     *
+     * @return HttpClient
+     */
+    protected function createObjectForMultiUpdate(Client $clientMock, $url = '', $options = [])
+    {
+        return new class ($clientMock, $url, $options, $this->container->get(LifeCycleToken::class)) extends HttpClient {
+            /**
+             * @inheritDoc
+             */
+            protected function sendHead()
+            {
+                return ['X_MULTI_UPDATE' => true];
+            }
+        };
+    }
+
     public function testMultiCreateSuccess()
     {
         $items = [['id' => 1, 'name' => 'name']];
@@ -107,6 +127,65 @@ class HttpClientTest extends TestCase
 
         try {
             $this->createObjectForMultiCreate($clientMock, $url)->multiCreate(['id' => 1, 'name' => 'name']);
+        } catch (DataStoreException $e) {
+            $this->assertEquals("Collection of arrays expected", $e->getMessage());
+        }
+    }
+
+    public function testMultiUpdateSuccess()
+    {
+        $items = [
+            ['id' => 1, 'name' => 'updated1'],
+            ['id' => 2, 'name' => 'updated2']
+        ];
+        $url = '';
+        $clientMock = $this->createClientMock('PUT', $url);
+        $clientMock->expects($this->once())
+            ->method('setRawBody')
+            ->with(Serializer::jsonSerialize($items));
+
+        $response = $this->createResponse([1, 2]);
+        $response->expects($this->once())
+            ->method('isSuccess')
+            ->willReturn(true);
+
+        $clientMock->expects($this->once())
+            ->method('send')
+            ->willReturn($response);
+
+        $this->assertEquals([1, 2], $this->createObjectForMultiUpdate($clientMock, $url)->multiUpdate($items));
+    }
+
+    public function testMultiUpdateFail()
+    {
+        $items = [
+            ['id' => 1, 'name' => 'updated1'],
+            ['id' => 2, 'name' => 'updated2']
+        ];
+        $url = '';
+
+        $clientMock = $this->createClientMock('PUT', $url);
+        $clientMock->expects($this->once())
+            ->method('setRawBody')
+            ->with(Serializer::jsonSerialize($items));
+
+        $response = $this->createResponse('');
+        $response->expects($this->once())
+            ->method('isSuccess')
+            ->willReturn(false);
+
+        $clientMock->expects($this->once())
+            ->method('send')
+            ->willReturn($response);
+
+        try {
+            $this->createObjectForMultiUpdate($clientMock, $url)->multiUpdate($items);
+        } catch (DataStoreException $e) {
+            $this->assertEquals('Can\'t update items PUT    ""', $e->getMessage());
+        }
+
+        try {
+            $this->createObjectForMultiUpdate($clientMock, $url)->multiUpdate(['id' => 1, 'name' => 'name']);
         } catch (DataStoreException $e) {
             $this->assertEquals("Collection of arrays expected", $e->getMessage());
         }
