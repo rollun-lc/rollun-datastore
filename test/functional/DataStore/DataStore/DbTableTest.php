@@ -381,6 +381,111 @@ class DbTableTest extends TestCase
         }
     }
 
+    public function testMultiUpdateSuccess()
+    {
+        $object = $this->createObject();
+
+        // Create initial records
+        $initialRecords = [
+            ['id' => 1, 'name' => 'name1', 'surname' => 'surname1'],
+            ['id' => 2, 'name' => 'name2', 'surname' => 'surname2'],
+            ['id' => 3, 'name' => 'name3', 'surname' => 'surname3'],
+        ];
+
+        foreach ($initialRecords as $record) {
+            $object->create($record);
+        }
+
+        // Update multiple records
+        $updateRecords = [
+            ['id' => 1, 'name' => 'updated1', 'surname' => 'updated_surname1'],
+            ['id' => 2, 'name' => 'updated2'],
+            ['id' => 3, 'surname' => 'updated_surname3'],
+        ];
+
+        $ids = $object->multiUpdate($updateRecords);
+
+        sort($ids);
+        $this->assertEquals([1, 2, 3], $ids);
+
+        // Verify updates
+        $this->assertEquals(
+            ['id' => 1, 'name' => 'updated1', 'surname' => 'updated_surname1'],
+            $this->read(1)
+        );
+        $this->assertEquals(
+            ['id' => 2, 'name' => 'updated2', 'surname' => 'surname2'],
+            $this->read(2)
+        );
+        $this->assertEquals(
+            ['id' => 3, 'name' => 'name3', 'surname' => 'updated_surname3'],
+            $this->read(3)
+        );
+    }
+
+    public function testMultiUpdateEmpty()
+    {
+        $object = $this->createObject();
+
+        $ids = $object->multiUpdate([]);
+
+        $this->assertEquals([], $ids);
+    }
+
+    public function testMultiUpdatePartialSuccess()
+    {
+        $object = $this->createObject();
+
+        // Create only some records
+        $object->create(['id' => 1, 'name' => 'name1', 'surname' => 'surname1']);
+        $object->create(['id' => 2, 'name' => 'name2', 'surname' => 'surname2']);
+
+        // Try to update records including non-existent one
+        $updateRecords = [
+            ['id' => 1, 'name' => 'updated1'],
+            ['id' => 2, 'name' => 'updated2'],
+            ['id' => 999, 'name' => 'non_existent'],
+        ];
+
+        $ids = $object->multiUpdate($updateRecords);
+
+        // Should return only successfully updated ids
+        sort($ids);
+        $this->assertEquals([1, 2], $ids);
+
+        // Verify updates
+        $this->assertEquals(
+            ['id' => 1, 'name' => 'updated1', 'surname' => 'surname1'],
+            $this->read(1)
+        );
+        $this->assertEquals(
+            ['id' => 2, 'name' => 'updated2', 'surname' => 'surname2'],
+            $this->read(2)
+        );
+        $this->assertNull($this->read(999));
+    }
+
+    public function testMultiUpdateWithMissingIdentifier()
+    {
+        $object = $this->createObject();
+
+        $object->create(['id' => 1, 'name' => 'name1', 'surname' => 'surname1']);
+
+        // Record without identifier should be skipped
+        $updateRecords = [
+            ['id' => 1, 'name' => 'updated1'],
+            ['name' => 'no_id', 'surname' => 'no_id_surname'],
+        ];
+
+        $ids = $object->multiUpdate($updateRecords);
+
+        $this->assertEquals([1], $ids);
+        $this->assertEquals(
+            ['id' => 1, 'name' => 'updated1', 'surname' => 'surname1'],
+            $this->read(1)
+        );
+    }
+
     public function testWriteLog()
     {
         $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
