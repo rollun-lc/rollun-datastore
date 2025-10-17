@@ -345,6 +345,44 @@ class HttpClient extends DataStoreAbstract
     }
 
     /**
+     * @inheritDoc
+     *
+     * @throws DataStoreException
+     * @throws \rollun\utils\Json\Exception
+     */
+    public function multiUpdate($records)
+    {
+        if (!isset($records[0]) || !is_array($records[0])) {
+            throw new DataStoreException('Collection of arrays expected');
+        }
+
+        $head = $this->sendHead();
+        if ($head && isset($head['X_MULTI_UPDATE'])) {
+            $client = $this->initHttpClient(Request::METHOD_PUT, $this->url);
+            $client->setRawBody(Serializer::jsonSerialize($records));
+            $response = self::sendByClient($client);
+            if ($response->isSuccess()) {
+                $result = Serializer::jsonUnserialize($response->getBody());
+            } else {
+                $responseMessage = $this->createResponseMessage($this->url, Request::METHOD_PUT, $response);
+                throw new DataStoreException("Can't update items {$responseMessage}");
+            }
+        } else {
+            $result = [];
+            foreach ($records as $record) {
+                try {
+                    $updatedRecord = $this->update($record);
+                    $result[] = $updatedRecord[$this->getIdentifier()];
+                } catch (DataStoreException) {
+                    // Skip failed updates as per parent implementation
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function update($itemData, $createIfAbsent = false)
