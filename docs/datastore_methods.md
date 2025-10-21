@@ -4,7 +4,7 @@
 
 **Единый справочник возможностей DataStore, без привязки к HTTP и конкретной реализации**
 
-### Interface DataStoreInterface
+### [Interface DataStoreInterface](/src/DataStore/src/DataStore/Interfaces/DataStoreInterface.php)
 
 | Name (operation) | Request shape req | Request shape optional | Response shape | id semantics | preconditions | notes |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -17,7 +17,7 @@
 | Delete | `int`\|`string` | - | `array`\|`\ArrayObject`\|`BaseDto`\|`object` | required | - | - |
 | QueriedDelete | `Query` | - | `array` - list of deleted records | forbidden | - | if regular record is not exist or record can't be deleted it should pass it and start delete next one |
 
-### DataStoresInterface
+### [DataStoresInterface](/src/DataStore/src/DataStore/Interfaces/DataStoresInterface.php)
 
 | Name (operation) | Request shape req | Request shape optional | Response shape | id semantics | preconditions | notes |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -28,7 +28,7 @@
 
 ## Abstraction
 
-- **DataStoreAbstract implements both interfaces - DataStoreInterface & DataStoresInterface**
+- **[DataStoreAbstract](/src/DataStore/src/DataStore/DataStoreAbstract.php) implements both interfaces - DataStoreInterface & DataStoresInterface**
 - **Realizations extends DataStoreAbstract**
 
 | Name (operation) | Request shape | Response shape | id semantics | preconditions | notes |
@@ -51,34 +51,34 @@
 
 ## Realizations
 
-| Name (operation) | DbTable | Notes | Preconditions | CsvBase | Memory | HttpClient |
-| --- | --- | --- | --- | --- | --- | --- |
-| Read | ✅ | - | identifier is only integer, double or string | ✅ | ✅ | ✅ |
-| GetIdentifier | ❌ | - | - | ❌ | ❌ | ✅ |
-| Query | ✅ | - | - | ❌ | ❌ | ✅ |
-| Create | ✅ | Option 'rewriteIfExist' is no more use, E_DEPRECATED | - | ✅ | ✅ | ✅ |
-| MultiCreate | ✅ | - | - | ❌ | ❌ | ✅ |
-| Update | ✅ | Option 'createIfAbsent' is no more use, E_DEPRECATED | Item must has primary key | ✅ | ✅ | ✅ |
-| MultiUpdate | ❌ | - | - | ❌ | ❌ | ❌ |
-| QueriedUpdate | ✅ | using SELECT FOR UPDATE<br>rollback after any error | Expected non-empty associative array for update fields<br>requires limit<br>does not support select or groupBy<br>Primary key must not be present in queriedUpdate body | ❌ | ❌ | ❌ |
-| DeleteAll | ✅ | - | - | ✅ | ✅ | ❌ |
-| Rewrite | ❌ | - | - | ❌ | ❌ | ❌ |
-| MultiRewrite | ❌ | - | - | ❌ | ❌ | ❌ |
-| Delete | ✅ | - | identifier is only integer, double or string | ✅ | ✅ | ✅ |
-| QueriedDelete | ✅ | - | Only where clause allowed for operation | ❌ | ❌ | ❌ |
-| Count | ✅ | SELECT COUNT(*) AS count FROM table | - | ✅ | ✅ | ❌ |
+| Name (operation) | [DbTable](/src/DataStore/src/DataStore/DbTable.php) | Notes | Preconditions | [CsvBase](/src/DataStore/src/DataStore/CsvBase.php) | [Memory](/src/DataStore/src/DataStore/Memory.php) | [HttpClient](/src/DataStore/src/DataStore/HttpClient.php) |
+| --- |-----------------------------------------------------| --- | --- |-----------------------------------------------------| --- | --- |
+| Read | ✅                                                   | - | identifier is only integer, double or string | ✅                                                   | ✅ | ✅ |
+| GetIdentifier | ❌                                                   | - | - | ❌                                                   | ❌ | ✅ |
+| Query | ✅                                                   | - | - | ❌                                                   | ❌ | ✅ |
+| Create | ✅                                                   | Option 'rewriteIfExist' is no more use, E_DEPRECATED | - | ✅                                                   | ✅ | ✅ |
+| MultiCreate | ✅                                                   | - | - | ❌                                                   | ❌ | ✅ |
+| Update | ✅                                                   | Option 'createIfAbsent' is no more use, E_DEPRECATED | Item must has primary key | ✅                                                   | ✅ | ✅ |
+| MultiUpdate | ❌                                                   | - | - | ❌                                                   | ❌ | ❌ |
+| QueriedUpdate | ✅                                                   | using SELECT FOR UPDATE<br>rollback after any error | Expected non-empty associative array for update fields<br>requires limit<br>does not support select or groupBy<br>Primary key must not be present in queriedUpdate body | ❌                                                   | ❌ | ❌ |
+| DeleteAll | ✅                                                   | - | - | ✅                                                   | ✅ | ❌ |
+| Rewrite | ❌                                                   | - | - | ❌                                                   | ❌ | ❌ |
+| MultiRewrite | ❌                                                   | - | - | ❌                                                   | ❌ | ❌ |
+| Delete | ✅                                                   | - | identifier is only integer, double or string | ✅                                                   | ✅ | ✅ |
+| QueriedDelete | ✅                                                   | - | Only where clause allowed for operation | ❌                                                   | ❌ | ❌ |
+| Count | ✅                                                   | SELECT COUNT(*) AS count FROM table | - | ✅                                                   | ✅ | ❌ |
 
 ## HTTP callable
 
 | HTTP method | PHP method                                   | Handler | Request | Body | Description | Request features |
 | --- |----------------------------------------------| --- | --- | --- | --- | --- |
-| HEAD | `getIdentifier()`                            | HeadHandler | HEAD / | any | get PK | - |
-| GET | `read($id)`                                  | ReadHandler | GET /{$id} | any | Read record by PK | - |
-| GET | `query(Query $query)`                        | QueryHandler | GET /?rql | any | Read records by RQL filter | allowed withContentRange header (items and offset) |
-| GET | none                                         | DownloadCsvHandler | GET /?rql | any | Obtaining datastore content in CSV format<br>Header will be changed to standarst (text/csv) in next releases. | - HEADER = 'download'<br>- limit in rql will be changed by server - you'll get all the content of DataStore |
-| POST | `create($itemData, $rewriteIfExist = false)` | CreateHandler | POST / | {<br>"id":"value" (PK),<br>notNull fields<br>} | Creating a record | allowed overwriteMode - the ability to re-create a record if such a PK already exists |
-| POST | `multiCreate($records)`                      | MultiCreateHandler | POST / | [<br>{create},<br>{create}<br>] | Create multiple records by one request | если в дс не реализован метод, циклически create |
-| PUT | `update($itemData, $createIfAbsent = false)` | UpdateHandler | PUT /{$id} (либо в body id} | {<br>"field":"value"<br>} | partial update, correct method is PATCH, will be fixed in next releases | - allowed overwriteMode - create an entry if the transferred PK does not yet have one<br>- If "id":"value" is specified in the request body, it takes precedence over the id from the path param |
-| PATCH | `queriedUpdate($record, Query $query)`       | QueriedUpdateHandler | PATCH /?limit()&rql | {<br>"field":"value"<br>} | Partial update of records matching the RQL filter conditions | Limit required |
-| PATCH | `refresh()`                                  | RefreshHandler | PATCH / | any | Refresh datastore contents | only if DataStore realisation implements RefreshableInterface |
-| DELETE | `delete($id)`                                | DeleteHandler | DELETE /{$id} | any | Delete record by PK | - |
+| HEAD | `getIdentifier()`                            | [HeadHandler](/src/DataStore/src/Middleware/Handler/HeadHandler.php) | HEAD / | any | get PK | - |
+| GET | `read($id)`                                  | [ReadHandler](/src/DataStore/src/Middleware/Handler/ReadHandler.php) | GET /{$id} | any | Read record by PK | - |
+| GET | `query(Query $query)`                        | [QueryHandler](/src/DataStore/src/Middleware/Handler/QueryHandler.php) | GET /?rql | any | Read records by RQL filter | allowed withContentRange header (items and offset) |
+| GET | none                                         | [DownloadCsvHandler](/src/DataStore/src/Middleware/Handler/DownloadCsvHandler.php) | GET /?rql | any | Obtaining datastore content in CSV format<br>Header will be changed to standarst (text/csv) in next releases. | - HEADER = 'download'<br>- limit in rql will be changed by server - you'll get all the content of DataStore |
+| POST | `create($itemData, $rewriteIfExist = false)` | [CreateHandler](/src/DataStore/src/Middleware/Handler/CreateHandler.php) | POST / | {<br>"id":"value" (PK),<br>notNull fields<br>} | Creating a record | allowed overwriteMode - the ability to re-create a record if such a PK already exists |
+| POST | `multiCreate($records)`                      | [MultiCreateHandler](/src/DataStore/src/Middleware/Handler/MultiCreateHandler.php) | POST / | [<br>{create},<br>{create}<br>] | Create multiple records by one request | если в дс не реализован метод, циклически create |
+| PUT | `update($itemData, $createIfAbsent = false)` | [UpdateHandler](/src/DataStore/src/Middleware/Handler/UpdateHandler.php) | PUT /{$id} (либо в body id} | {<br>"field":"value"<br>} | partial update, correct method is PATCH, will be fixed in next releases | - allowed overwriteMode - create an entry if the transferred PK does not yet have one<br>- If "id":"value" is specified in the request body, it takes precedence over the id from the path param |
+| PATCH | `queriedUpdate($record, Query $query)`       | [QueriedUpdateHandler](/src/DataStore/src/Middleware/Handler/QueriedUpdateHandler.php) | PATCH /?limit()&rql | {<br>"field":"value"<br>} | Partial update of records matching the RQL filter conditions | Limit required |
+| PATCH | `refresh()`                                  | [RefreshHandler](/src/DataStore/src/Middleware/Handler/RefreshHandler.php) | PATCH / | any | Refresh datastore contents | only if DataStore realisation implements RefreshableInterface |
+| DELETE | `delete($id)`                                | [DeleteHandler](/src/DataStore/src/Middleware/Handler/DeleteHandler.php) | DELETE /{$id} | any | Delete record by PK | - |
