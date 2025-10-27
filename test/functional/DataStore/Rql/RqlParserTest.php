@@ -238,78 +238,74 @@ class RqlParserTest extends TestCase
      * Data provider for basic eq() type-hinting tests
      * Format: [rqlString, expectedType, expectedValue, description]
      */
-    public function eqTypeHintingDataProvider(): array
+    public function eqTypeHintingDataProvider(): \Generator
     {
-        return [
-            // Integer auto-type
-            ['eq(id,108693)', 'integer', 108693, 'integer without prefix'],
-            ['eq(id,integer:42)', 'integer', 42, 'explicit integer prefix'],
-            ['eq(count,0)', 'integer', 0, 'zero as integer'],
-            ['eq(balance,-500)', 'integer', -500, 'negative integer'],
-            ['eq(id,999999999)', 'integer', 999999999, 'large integer'],
+        // Integer auto-type
+        yield 'integer without prefix' => ['eq(id,108693)', 'integer', 108693];
+        yield 'explicit integer prefix' => ['eq(id,integer:42)', 'integer', 42];
+        yield 'zero as integer' => ['eq(count,0)', 'integer', 0];
+        yield 'negative integer' => ['eq(balance,-500)', 'integer', -500];
+        yield 'large integer' => ['eq(id,999999999)', 'integer', 999999999];
 
-            // String explicit type
-            ['eq(id,string:108693)', 'string', '108693', 'explicit string prefix'],
-            ['eq(code,string:1abc)', 'string', '1abc', 'string with non-numeric chars'],
+        // String explicit type
+        yield 'explicit string prefix' => ['eq(id,string:108693)', 'string', '108693'];
+        yield 'string with non-numeric chars' => ['eq(code,string:1abc)', 'string', '1abc'];
 
-            // Leading zeros behavior - parser treats them as octal (float in PHP 8)
-            ['eq(id,01)', 'double', 1.0, 'leading zero treated as octal/float'],
-            ['eq(id,string:01)', 'string', '01', 'leading zero preserved as string'],
-            ['eq(id,00042)', 'double', 42.0, 'multiple leading zeros as float'],
-            ['eq(id,string:00042)', 'string', '00042', 'multiple leading zeros as string'],
-            ['eq(id,0108693)', 'double', 108693.0, 'number-like string with leading zero becomes float'],
-            ['eq(id,string:0108693)', 'string', '0108693', 'number-like string with prefix stays string'],
-            ['eq(id,integer:007)', 'integer', 7, 'explicit integer prefix strips zeros'],
+        // Leading zeros behavior - parser treats them as octal (float in PHP 8)
+        yield 'leading zero treated as octal/float' => ['eq(id,01)', 'double', 1.0];
+        yield 'leading zero preserved as string' => ['eq(id,string:01)', 'string', '01'];
+        yield 'multiple leading zeros as float' => ['eq(id,00042)', 'double', 42.0];
+        yield 'multiple leading zeros as string' => ['eq(id,string:00042)', 'string', '00042'];
+        yield 'number-like with leading zero becomes float' => ['eq(id,0108693)', 'double', 108693.0];
+        yield 'number-like with prefix stays string' => ['eq(id,string:0108693)', 'string', '0108693'];
+        yield 'explicit integer prefix strips zeros' => ['eq(id,integer:007)', 'integer', 7];
 
-            // Float type
-            ['eq(price,1.0)', 'double', 1.0, 'float literal 1.0'],
-            ['eq(price,float:1)', 'double', 1.0, 'explicit float prefix'],
-            ['eq(rate,1.5)', 'double', 1.5, 'float value'],
-            ['eq(amount,0.0)', 'double', 0.0, 'zero as float'],
-            ['eq(temperature,-15.5)', 'double', -15.5, 'negative float'],
-            ['eq(price,123.456789)', 'double', 123.456789, 'float with many decimals'],
+        // Float type
+        yield 'float literal 1.0' => ['eq(price,1.0)', 'double', 1.0];
+        yield 'explicit float prefix' => ['eq(price,float:1)', 'double', 1.0];
+        yield 'float value' => ['eq(rate,1.5)', 'double', 1.5];
+        yield 'zero as float' => ['eq(amount,0.0)', 'double', 0.0];
+        yield 'negative float' => ['eq(temperature,-15.5)', 'double', -15.5];
+        yield 'float with many decimals' => ['eq(price,123.456789)', 'double', 123.456789];
 
-            // Boolean type
-            ['eq(active,true())', 'boolean', true, 'true() function'],
-            ['eq(active,boolean:1)', 'boolean', true, 'boolean:1 prefix'],
-            ['eq(active,false())', 'boolean', false, 'false() function'],
-            ['eq(active,boolean:0)', 'boolean', false, 'boolean:0 prefix'],
-        ];
+        // Boolean type
+        yield 'true() function' => ['eq(active,true())', 'boolean', true];
+        yield 'boolean:1 prefix' => ['eq(active,boolean:1)', 'boolean', true];
+        yield 'false() function' => ['eq(active,false())', 'boolean', false];
+        yield 'boolean:0 prefix' => ['eq(active,boolean:0)', 'boolean', false];
     }
 
     /**
      * @dataProvider eqTypeHintingDataProvider
      * Test eq() operator with various type hints
      */
-    public function testEqTypeHinting(string $rqlString, string $expectedType, $expectedValue, string $description): void
+    public function testEqTypeHinting(string $rqlString, string $expectedType, $expectedValue): void
     {
         $query = RqlParser::rqlDecode($rqlString);
         /** @var EqNode $node */
         $node = $query->getQuery();
 
-        $this->assertInstanceOf(EqNode::class, $node, "Failed for: {$description}");
-        $this->assertSame($expectedType, gettype($node->getValue()), "Type mismatch for: {$description}");
-        $this->assertSame($expectedValue, $node->getValue(), "Value mismatch for: {$description}");
+        $this->assertInstanceOf(EqNode::class, $node);
+        $this->assertSame($expectedType, gettype($node->getValue()));
+        $this->assertSame($expectedValue, $node->getValue());
     }
 
     /**
      * Data provider for comparison operators type-hinting
      * Format: [operator, rqlString, nodeClass, expectedType, expectedValue]
      */
-    public function comparisonOperatorsDataProvider(): array
+    public function comparisonOperatorsDataProvider(): \Generator
     {
-        return [
-            ['lt', 'lt(age,10)', LtNode::class, 'integer', 10],
-            ['lt', 'lt(price,9.99)', LtNode::class, 'double', 9.99],
-            ['gt', 'gt(rate,1.5)', GtNode::class, 'double', 1.5],
-            ['gt', 'gt(count,100)', GtNode::class, 'integer', 100],
-            ['le', 'le(code,string:100)', LeNode::class, 'string', '100'],
-            ['le', 'le(score,50)', LeNode::class, 'integer', 50],
-            ['ge', 'ge(flag,boolean:0)', GeNode::class, 'boolean', false],
-            ['ge', 'ge(amount,0.0)', GeNode::class, 'double', 0.0],
-            ['ne', 'ne(status,0)', NeNode::class, 'integer', 0],
-            ['ne', 'ne(name,string:test)', NeNode::class, 'string', 'test'],
-        ];
+        yield 'lt with integer' => ['lt', 'lt(age,10)', LtNode::class, 'integer', 10];
+        yield 'lt with float' => ['lt', 'lt(price,9.99)', LtNode::class, 'double', 9.99];
+        yield 'gt with float' => ['gt', 'gt(rate,1.5)', GtNode::class, 'double', 1.5];
+        yield 'gt with integer' => ['gt', 'gt(count,100)', GtNode::class, 'integer', 100];
+        yield 'le with string' => ['le', 'le(code,string:100)', LeNode::class, 'string', '100'];
+        yield 'le with integer' => ['le', 'le(score,50)', LeNode::class, 'integer', 50];
+        yield 'ge with boolean false' => ['ge', 'ge(flag,boolean:0)', GeNode::class, 'boolean', false];
+        yield 'ge with float' => ['ge', 'ge(amount,0.0)', GeNode::class, 'double', 0.0];
+        yield 'ne with integer' => ['ne', 'ne(status,0)', NeNode::class, 'integer', 0];
+        yield 'ne with string' => ['ne', 'ne(name,string:test)', NeNode::class, 'string', 'test'];
     }
 
     /**
@@ -335,27 +331,27 @@ class RqlParserTest extends TestCase
      * Data provider for array operators (in/out) with mixed types
      * Format: [rqlString, nodeClass, field, expectedValues]
      */
-    public function arrayOperatorsDataProvider(): array
+    public function arrayOperatorsDataProvider(): \Generator
     {
-        return [
-            'in with mixed types' => [
-                'in(tag,(2,float:3,string:004,boolean:1))',
-                InNode::class,
-                'tag',
-                [2, 3.0, '004', true], // int, float, string, bool
-            ],
-            'out with mixed types' => [
-                'out(code,(1,string:02,3))',
-                OutNode::class,
-                'code',
-                [1, '02', 3], // int, string, int
-            ],
-            'in with all boolean variants' => [
-                'in(flags,(true(),false(),boolean:1,boolean:0))',
-                InNode::class,
-                'flags',
-                [true, false, true, false],
-            ],
+        yield 'in with mixed types' => [
+            'in(tag,(2,float:3,string:004,boolean:1))',
+            InNode::class,
+            'tag',
+            [2, 3.0, '004', true], // int, float, string, bool
+        ];
+
+        yield 'out with mixed types' => [
+            'out(code,(1,string:02,3))',
+            OutNode::class,
+            'code',
+            [1, '02', 3], // int, string, int
+        ];
+
+        yield 'in with all boolean variants' => [
+            'in(flags,(true(),false(),boolean:1,boolean:0))',
+            InNode::class,
+            'flags',
+            [true, false, true, false],
         ];
     }
 
@@ -388,27 +384,27 @@ class RqlParserTest extends TestCase
      * Data provider for edge cases in type-hinting
      * Format: [rqlQueries, expectedTypes, expectedValues, shouldBeEquivalent]
      */
-    public function edgeCasesDataProvider(): array
+    public function edgeCasesDataProvider(): \Generator
     {
-        return [
-            'type difference: 1 vs 1.0 vs float:1' => [
-                ['eq(v,1)', 'eq(v,1.0)', 'eq(v,float:1)'],
-                ['integer', 'double', 'double'],
-                [1, 1.0, 1.0],
-                false, // different types, not strictly equivalent
-            ],
-            'boolean equivalence: true() vs boolean:1' => [
-                ['eq(f,true())', 'eq(f,boolean:1)'],
-                ['boolean', 'boolean'],
-                [true, true],
-                true, // same type and value
-            ],
-            'boolean equivalence: false() vs boolean:0' => [
-                ['eq(f,false())', 'eq(f,boolean:0)'],
-                ['boolean', 'boolean'],
-                [false, false],
-                true, // same type and value
-            ],
+        yield 'type difference: 1 vs 1.0 vs float:1' => [
+            ['eq(v,1)', 'eq(v,1.0)', 'eq(v,float:1)'],
+            ['integer', 'double', 'double'],
+            [1, 1.0, 1.0],
+            false, // different types, not strictly equivalent
+        ];
+
+        yield 'boolean equivalence: true() vs boolean:1' => [
+            ['eq(f,true())', 'eq(f,boolean:1)'],
+            ['boolean', 'boolean'],
+            [true, true],
+            true, // same type and value
+        ];
+
+        yield 'boolean equivalence: false() vs boolean:0' => [
+            ['eq(f,false())', 'eq(f,boolean:0)'],
+            ['boolean', 'boolean'],
+            [false, false],
+            true, // same type and value
         ];
     }
 
