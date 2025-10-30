@@ -6,7 +6,6 @@
 http), Memory (для [RAM](https://en.wikipedia.org/wiki/Random-access_memory)).
 
 * [Документация](docs/index.md)
-* [Поддерживаемые запросы к датасторам и их методы](https://docs.google.com/spreadsheets/d/1UknTHmrL8HaCDPefSGKUoMysKwInPynrTOQwRd62e2U/edit?usp=sharing)
 
 ## Краткая таблица операций
 
