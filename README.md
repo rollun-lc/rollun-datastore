@@ -9,6 +9,33 @@ http), Memory (для [RAM](https://en.wikipedia.org/wiki/Random-access_memory))
 * Опис історії змін по версіям [CHANGELOG.md](CHANGELOG.md)
 * [Поддерживаемые запросы к датасторам и их методы](https://docs.google.com/spreadsheets/d/1UknTHmrL8HaCDPefSGKUoMysKwInPynrTOQwRd62e2U/edit?usp=sharing)
 
+## 📚 LLM-Generated Documentation
+
+### Основная документация
+- **[API Reference](non_examined_llm_docs/api_reference.md)** - ✅ Проверено и исправлено (95% точность)
+- **[Примеры использования](non_examined_llm_docs/examples.md)**
+- **[Архитектура](non_examined_llm_docs/architecture.md)**
+- **[Конфигурация](non_examined_llm_docs/configuration.md)**
+
+### Детальная документация
+- **[DataStore классы](non_examined_llm_docs/ULTRA_DETAILED_DATASTORES.md)** - 85% точность
+- **[HTTP API](non_examined_llm_docs/ENDPOINT_ANALYSIS_DETAILED.md)** - 90% точность
+- **[HTTP Handlers](non_examined_llm_docs/ULTRA_DETAILED_HANDLERS.md)** - 85% точность
+
+### Полный список
+См. **[Статус документации](non_examined_llm_docs/README_VERIFICATION_STATUS.md)** - навигация по всем файлам с оценкой точности.
+
+## ⚠️ Важно о документации
+
+Документация была сгенерирована с помощью LLM и прошла проверку на соответствие исходному коду.
+
+**Статус проверки:**
+- ✅ API Reference: исправлен, 95% точность
+- ✅ ULTRA_DETAILED файлы: высокая точность (85-90%)
+- ⚠️ Остальные файлы: используйте с осторожностью
+
+**Отчёты о проверке:** См. `verification_reports/`
+
 ### Для сторонних клиентов
 
 В DataStore используется дополненная версия `rawurlencode`.
