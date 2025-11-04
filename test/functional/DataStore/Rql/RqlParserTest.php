@@ -5,7 +5,7 @@
  * @license LICENSE.md New BSD License
  */
 
-namespace rollun\test\old\RqlParser;
+namespace rollun\test\functional\DataStore\Rql;
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node\AlikeGlobNode;
