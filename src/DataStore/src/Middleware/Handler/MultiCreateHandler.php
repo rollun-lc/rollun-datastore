@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace rollun\datastore\Middleware\Handler;
@@ -29,10 +30,10 @@ class MultiCreateHandler extends AbstractHandler
             return false;
         }
 
-//        // exit if IsMultiCreate disabled
-//        if (!in_array($request->getHeaderLine('IsMultiCreate'), ['true', '1'])) {
-//            return false;
-//        }
+        //        // exit if IsMultiCreate disabled
+        //        if (!in_array($request->getHeaderLine('IsMultiCreate'), ['true', '1'])) {
+        //            return false;
+        //        }
 
         // get rows
         $rows = $request->getParsedBody();
@@ -47,9 +48,7 @@ class MultiCreateHandler extends AbstractHandler
                 && is_array($row)
                 && array_reduce(
                     array_keys($row),
-                    function ($carry, $item) {
-                        return $carry && is_string($item);
-                    },
+                    fn($carry, $item) => $carry && is_string($item),
                     true
                 );
 
@@ -70,23 +69,22 @@ class MultiCreateHandler extends AbstractHandler
         // get rows
         $rows = $request->getParsedBody();
 
-        if ($this->dataStore instanceof DataStoreInterface) {
-            $result = $this->dataStore->multiCreate($rows);
-        } else {
-            $result = [];
-            foreach ($rows as $row) {
-                try {
-                    $result[] = $this->dataStore->create($row);
-                    usleep(10000); // 10ms
-                } catch (DataStoreException $exception) {
-                    //Ignore result...
-                }
-            }
-            $result = array_column($result, $this->dataStore->getIdentifier());
+        // Strict approach: require multiCreate to be implemented
+        if (!method_exists($this->dataStore, 'multiCreate')) {
+            throw new DataStoreException(
+                'Multi create is not supported by this datastore. ' .
+                'Please implement the multiCreate() method or use individual create() calls.'
+            );
         }
 
-        return new JsonResponse($result, 201, [
-                'Location' => $request->getUri()->getPath()]
+        $result = $this->dataStore->multiCreate($rows);
+
+        return new JsonResponse(
+            $result,
+            201,
+            [
+                'Location' => $request->getUri()->getPath(),
+            ]
         );
     }
 }
