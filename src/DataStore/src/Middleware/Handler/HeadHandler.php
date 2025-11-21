@@ -22,6 +22,10 @@ class HeadHandler extends AbstractHandler
             $response = $response->withHeader('X_MULTI_CREATE', 'true');
         }
 
+        if (method_exists($this->dataStore, 'multiUpdate')) {
+            $response = $response->withHeader('X_MULTI_UPDATE', 'true');
+        }
+
         if (method_exists($this->dataStore, 'queriedUpdate')) {
             $response = $response->withHeader('X_QUERIED_UPDATE', 'true');
         }
