@@ -18,7 +18,7 @@
     "php": "^8.0",
     "ext-pdo": "*",
     "ext-json": "*",
-    "xiag/rql-parser": "^v1.0.0",
+    "rollun-com/xiag-rql-parser": "^v1.0.0",
     "symfony/filesystem": "^6.0",
     "rollun-com/rollun-utils": "^7.0|^8.0",
     "rollun-com/rollun-logger": "^7.0.1",
