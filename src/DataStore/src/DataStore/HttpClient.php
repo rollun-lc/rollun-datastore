@@ -345,6 +345,36 @@ class HttpClient extends DataStoreAbstract
     }
 
     /**
+     * @inheritDoc
+     *
+     * @throws DataStoreException
+     * @throws \rollun\utils\Json\Exception
+     */
+    public function multiUpdate($records)
+    {
+        if (!isset($records[0]) || !is_array($records[0])) {
+            throw new DataStoreException('Collection of arrays expected');
+        }
+
+        $head = $this->sendHead();
+        if ($head && isset($head['X_MULTI_UPDATE'])) {
+            $client = $this->initHttpClient(Request::METHOD_PUT, $this->url);
+            $client->setRawBody(Serializer::jsonSerialize($records));
+            $response = self::sendByClient($client);
+            if ($response->isSuccess()) {
+                $result = Serializer::jsonUnserialize($response->getBody());
+            } else {
+                $responseMessage = $this->createResponseMessage($this->url, Request::METHOD_PUT, $response);
+                throw new DataStoreException("Can't update items {$responseMessage}");
+            }
+
+            return $result;
+        } else {
+            throw new DataStoreException('Multi update for this datastore is not implemented.');
+        }
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function update($itemData, $createIfAbsent = false)
