@@ -360,7 +360,7 @@ class HttpClient extends DataStoreAbstract
         if ($head && isset($head['X_MULTI_UPDATE'])) {
             $client = $this->initHttpClient(Request::METHOD_PUT, $this->url);
             $client->setRawBody(Serializer::jsonSerialize($records));
-            $response = self::sendByClient($client);
+            $response = $client->send();
             if ($response->isSuccess()) {
                 $result = Serializer::jsonUnserialize($response->getBody());
             } else {

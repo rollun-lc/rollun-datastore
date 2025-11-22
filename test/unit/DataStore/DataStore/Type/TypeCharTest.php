@@ -59,7 +59,7 @@ class TypeCharTest extends TestCase
     public function testToTypeValueFailWithResource()
     {
         $this->expectException(TypeException::class);
-        $resource = fopen('http://google.com', 'r');
+        $resource = fopen('php://memory', 'r');
         $this->assertSame(true, $this->createObject($resource)->toTypeValue());
     }
 

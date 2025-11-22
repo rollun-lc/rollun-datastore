@@ -667,7 +667,7 @@ class DbTable extends DataStoreAbstract
         }
 
         try {
-            $this->beginTransaction();
+            $adapter->getDriver()->getConnection()->beginTransaction();
         } catch (RuntimeException $e) {
             if (ZendDbExceptionDetector::isConnectionException($e)) {
                 throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
