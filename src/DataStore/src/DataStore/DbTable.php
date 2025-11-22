@@ -13,6 +13,7 @@ use Zend\Db\Sql\Where;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
+use rollun\datastore\DataStore\ZendDbExceptionDetector;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
@@ -668,10 +669,10 @@ class DbTable extends DataStoreAbstract
         try {
             $this->beginTransaction();
         } catch (RuntimeException $e) {
-            if (LaminasDbExceptionDetector::isConnectionException($e)) {
+            if (ZendDbExceptionDetector::isConnectionException($e)) {
                 throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
             }
-            if (LaminasDbExceptionDetector::isOperationTimedOutException($e)) {
+            if (ZendDbExceptionDetector::isOperationTimedOutException($e)) {
                 throw new OperationTimedOutException($e->getMessage(), $e->getCode(), $e);
             }
             throw $e;
@@ -762,10 +763,10 @@ class DbTable extends DataStoreAbstract
             ];
             $this->writeLogsIfNeeded($logContext, "Request to db table '{$this->dbTable->getTable()}' failed");
 
-            if (LaminasDbExceptionDetector::isConnectionException($e)) {
+            if (ZendDbExceptionDetector::isConnectionException($e)) {
                 throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
             }
-            if (LaminasDbExceptionDetector::isOperationTimedOutException($e)) {
+            if (ZendDbExceptionDetector::isOperationTimedOutException($e)) {
                 throw new OperationTimedOutException($e->getMessage(), $e->getCode(), $e);
             }
 

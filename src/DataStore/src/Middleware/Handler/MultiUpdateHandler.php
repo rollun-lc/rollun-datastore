@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace rollun\datastore\Middleware\Handler;
 
-use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
+use Zend\Diactoros\Response\JsonResponse;
 
 /**
  * Handler for multiUpdate operation

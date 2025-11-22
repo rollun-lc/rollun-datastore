@@ -10,7 +10,7 @@ use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Memory;
 use rollun\datastore\Middleware\Handler\MultiUpdateHandler;
 use rollun\datastore\Rql\RqlQuery;
-use Laminas\Diactoros\ServerRequest;
+use Zend\Diactoros\ServerRequest;
 
 /**
  * Test for MultiUpdateHandler
@@ -130,7 +130,7 @@ class MultiUpdateHandlerTest extends BaseHandlerTest
         return new class implements \Psr\Http\Server\RequestHandlerInterface {
             public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface
             {
-                return new \Laminas\Diactoros\Response();
+                return new \Zend\Diactoros\Response();
             }
         };
     }
