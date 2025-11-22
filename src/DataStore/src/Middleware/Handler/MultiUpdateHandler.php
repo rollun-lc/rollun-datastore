@@ -63,7 +63,9 @@ class MultiUpdateHandler extends AbstractHandler
             // Check if it's associative array (not list)
             $isAssociative = array_reduce(
                 array_keys($row),
-                fn($carry, $item) => $carry && is_string($item),
+                function ($carry, $item) {
+                    return $carry && is_string($item);
+                },
                 true
             );
 
