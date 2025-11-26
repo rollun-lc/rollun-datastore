@@ -65,6 +65,11 @@
       ]
     }
   },
+  "config": {
+    "audit": {
+      "ignore": ["PKSA-wws7-mr54-jsny"]
+    }
+  },
   "scripts": {
     "test": "phpunit --colors=always",
     "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",
