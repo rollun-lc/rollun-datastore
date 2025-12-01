@@ -640,7 +640,7 @@ class DbTable extends DataStoreAbstract
         foreach ($records as $record) {
             // Validate each record is an array
             if (!is_array($record)) {
-                throw new DataStoreException('Each record must be an array');
+                throw new DataStoreException('Collection of arrays expected for multiUpdate');
             }
 
             if (!isset($record[$identifier])) {
