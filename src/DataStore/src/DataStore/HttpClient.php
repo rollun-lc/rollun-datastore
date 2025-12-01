@@ -352,8 +352,14 @@ class HttpClient extends DataStoreAbstract
      */
     public function multiUpdate($records)
     {
-        if (!isset($records[0]) || !is_array($records[0])) {
-            throw new DataStoreException('Collection of arrays expected');
+        if (!is_array($records)) {
+            throw new DataStoreException('Collection of arrays expected for multiUpdate');
+        }
+
+        foreach ($records as $record) {
+            if (!is_array($record)) {
+                throw new DataStoreException('Collection of arrays expected for multiUpdate');
+            }
         }
 
         $head = $this->sendHead();
