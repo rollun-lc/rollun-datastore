@@ -439,7 +439,7 @@ class DbTableTest extends TestCase
         $object = $this->createObject();
 
         $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessage('Each record must be an array');
+        $this->expectExceptionMessage('Collection of arrays expected for multiUpdate');
 
         // Pass array with non-array element
         $object->multiUpdate([
@@ -537,6 +537,34 @@ class DbTableTest extends TestCase
                 'description' => 'Should return empty array when no records exist',
             ],
         ];
+    }
+
+    public function testMultiUpdateRollsBackOnFailure()
+    {
+        $object = $this->createObject();
+
+        $initialRecords = [
+            ['id' => 1, 'name' => 'name1', 'surname' => 'surname1'],
+            ['id' => 2, 'name' => 'name2', 'surname' => 'surname2'],
+        ];
+
+        foreach ($initialRecords as $record) {
+            $object->create($record);
+        }
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage("Can't multi update records");
+
+        try {
+            $object->multiUpdate([
+                ['id' => 1, 'name' => 'updated1'],
+                // Unknown column should make UPDATE fail and trigger rollback
+                ['id' => 2, 'unknown_field' => 'boom'],
+            ]);
+        } finally {
+            $this->assertEquals($initialRecords[0], $this->read(1));
+            $this->assertEquals($initialRecords[1], $this->read(2));
+        }
     }
 
     public function testWriteLog()
