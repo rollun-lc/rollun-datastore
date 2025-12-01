@@ -70,23 +70,22 @@ class MultiCreateHandler extends AbstractHandler
         // get rows
         $rows = $request->getParsedBody();
 
-        if ($this->dataStore instanceof DataStoreInterface) {
-            $result = $this->dataStore->multiCreate($rows);
-        } else {
-            $result = [];
-            foreach ($rows as $row) {
-                try {
-                    $result[] = $this->dataStore->create($row);
-                    usleep(10000); // 10ms
-                } catch (DataStoreException $exception) {
-                    //Ignore result...
-                }
-            }
-            $result = array_column($result, $this->dataStore->getIdentifier());
+        // Strict approach: require multiCreate to be implemented
+        if (!method_exists($this->dataStore, 'multiCreate')) {
+            throw new DataStoreException(
+                'Multi create is not supported by this datastore. ' .
+                'Please implement the multiCreate() method or use individual create() calls.'
+            );
         }
 
-        return new JsonResponse($result, 201, [
-                'Location' => $request->getUri()->getPath()]
+        $result = $this->dataStore->multiCreate($rows);
+
+        return new JsonResponse(
+            $result,
+            201,
+            [
+                'Location' => $request->getUri()->getPath(),
+            ]
         );
     }
 }

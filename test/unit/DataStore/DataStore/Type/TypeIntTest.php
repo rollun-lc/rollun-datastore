@@ -34,7 +34,7 @@ class TypeIntTest extends TestCase
         $this->assertSame(0, $this->createObject([])->toTypeValue());
         $this->assertSame(0, $this->createObject(null)->toTypeValue());
 
-        $resource = fopen('http://google.com', 'r');
+        $resource = fopen('php://memory', 'r');
         $this->assertSame(intval($resource), $this->createObject($resource)->toTypeValue());
     }
 

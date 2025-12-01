@@ -13,6 +13,7 @@ use Zend\Db\Sql\Where;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use rollun\datastore\DataStore\ConditionBuilder\SqlConditionBuilder;
+use rollun\datastore\DataStore\ZendDbExceptionDetector;
 use rollun\datastore\Rql\RqlQuery;
 use rollun\datastore\TableGateway\DbSql\MultiInsertSql;
 use rollun\datastore\TableGateway\SqlQueryBuilder;
@@ -602,6 +603,209 @@ class DbTable extends DataStoreAbstract
         }
 
         return array_map($getIdCallable, $insertedItems);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * Update multiple records using UPDATE CASE query in single transaction
+     *
+     * @param array $records Array of records to update, each must contain identifier
+     * @return array Array of successfully updated identifiers
+     * @throws DataStoreException
+     * @throws ConnectionException
+     * @throws OperationTimedOutException
+     */
+    public function multiUpdate($records)
+    {
+        // Validate input is a non-empty array
+        if (!is_array($records) || empty($records)) {
+            return [];
+        }
+
+        // Validate it's an array of arrays (not a single record)
+        if (!isset($records[0]) || !is_array($records[0])) {
+            throw new DataStoreException('Collection of arrays expected for multiUpdate');
+        }
+
+        $identifier = $this->getIdentifier();
+        $adapter = $this->dbTable->getAdapter();
+        $platform = $adapter->getPlatform();
+        $tableName = $platform->quoteIdentifier($this->dbTable->getTable());
+
+        // Filter records with identifier and collect data
+        $ids = [];
+        $columnUpdates = [];
+
+        foreach ($records as $record) {
+            // Validate each record is an array
+            if (!is_array($record)) {
+                throw new DataStoreException('Collection of arrays expected for multiUpdate');
+            }
+
+            if (!isset($record[$identifier])) {
+                // Skip records without identifier as per parent implementation
+                continue;
+            }
+
+            $id = $record[$identifier];
+            $ids[] = $id;
+
+            // Collect all columns to update (excluding identifier)
+            foreach ($record as $column => $value) {
+                if ($column !== $identifier) {
+                    if (!isset($columnUpdates[$column])) {
+                        $columnUpdates[$column] = [];
+                    }
+                    $columnUpdates[$column][$id] = $value;
+                }
+            }
+        }
+
+        if (empty($ids)) {
+            return [];
+        }
+
+        try {
+            $adapter->getDriver()->getConnection()->beginTransaction();
+        } catch (RuntimeException $e) {
+            if (ZendDbExceptionDetector::isConnectionException($e)) {
+                throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
+            }
+            if (ZendDbExceptionDetector::isOperationTimedOutException($e)) {
+                throw new OperationTimedOutException($e->getMessage(), $e->getCode(), $e);
+            }
+            throw $e;
+        }
+
+        try {
+            // Lock records for update
+            $existingIds = $this->selectExistingIdsForUpdate($ids);
+
+            if (empty($existingIds)) {
+                $adapter->getDriver()->getConnection()->commit();
+                return [];
+            }
+
+            // Build UPDATE CASE query
+            $setClauses = [];
+            $parameters = [];
+
+            foreach ($columnUpdates as $column => $updates) {
+                $quotedColumn = $platform->quoteIdentifier($column);
+                $caseWhenParts = [];
+
+                foreach ($existingIds as $id) {
+                    if (isset($updates[$id])) {
+                        $value = $updates[$id];
+                        // Handle boolean values
+                        if ($value === false) {
+                            $value = 0;
+                        } elseif ($value === true) {
+                            $value = 1;
+                        }
+                        $caseWhenParts[] = "WHEN {$platform->quoteIdentifier($identifier)} = ? THEN ?";
+                        $parameters[] = $id;
+                        $parameters[] = $value;
+                    }
+                }
+
+                if (!empty($caseWhenParts)) {
+                    $caseClause = "CASE " . implode(" ", $caseWhenParts) . " ELSE {$quotedColumn} END";
+                    $setClauses[] = "{$quotedColumn} = {$caseClause}";
+                }
+            }
+
+            if (empty($setClauses)) {
+                $adapter->getDriver()->getConnection()->commit();
+                return $existingIds;
+            }
+
+            // Build WHERE IN clause
+            $inPlaceholders = implode(',', array_fill(0, count($existingIds), '?'));
+            $parameters = array_merge($parameters, $existingIds);
+
+            $sql = "UPDATE {$tableName} SET " . implode(", ", $setClauses)
+                . " WHERE {$platform->quoteIdentifier($identifier)} IN ({$inPlaceholders})";
+
+            $logContext = [
+                self::LOG_METHOD => __FUNCTION__,
+                self::LOG_TABLE => $this->dbTable->getTable(),
+                self::LOG_SQL => $sql,
+                self::LOG_REQUEST => $records,
+            ];
+
+            $start = microtime(true);
+            $statement = $adapter->getDriver()->createStatement($sql);
+            $statement->setParameterContainer(new ParameterContainer($parameters));
+            $result = $statement->execute();
+            $end = microtime(true);
+
+            $logContext[self::LOG_TIME] = $this->getRequestTime($start, $end);
+            $logContext[self::LOG_RESPONSE] = $result->getAffectedRows();
+
+            $this->writeLogsIfNeeded($logContext);
+
+            $adapter->getDriver()->getConnection()->commit();
+
+            return $existingIds;
+        } catch (\Throwable $e) {
+            $adapter->getDriver()->getConnection()->rollback();
+            // https://github.com/laminas/laminas-db/issues/56
+            $adapter->getDriver()->getConnection()->disconnect();
+
+            $logContext = [
+                self::LOG_METHOD => __FUNCTION__,
+                self::LOG_TABLE => $this->dbTable->getTable(),
+                self::LOG_REQUEST => $records,
+                self::LOG_ROLLBACK => true,
+                'exception' => $e,
+            ];
+            $this->writeLogsIfNeeded($logContext, "Request to db table '{$this->dbTable->getTable()}' failed");
+
+            if (ZendDbExceptionDetector::isConnectionException($e)) {
+                throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
+            }
+            if (ZendDbExceptionDetector::isOperationTimedOutException($e)) {
+                throw new OperationTimedOutException($e->getMessage(), $e->getCode(), $e);
+            }
+
+            throw new DataStoreException(
+                "[{$this->dbTable->getTable()}]Can't multi update records. {$e->getMessage()}",
+                500,
+                $e
+            );
+        }
+    }
+
+    /**
+     * Select and lock records by IDs for update
+     *
+     * @param array $ids
+     * @return array
+     */
+    private function selectExistingIdsForUpdate(array $ids): array
+    {
+        $adapter = $this->dbTable->getAdapter();
+        $platform = $adapter->getPlatform();
+        $identifier = $this->getIdentifier();
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $sqlString = "SELECT {$platform->quoteIdentifier($identifier)}"
+            . " FROM {$platform->quoteIdentifier($this->dbTable->getTable())}"
+            . " WHERE {$platform->quoteIdentifier($identifier)} IN ({$placeholders})"
+            . " FOR UPDATE";
+
+        $statement = $adapter->getDriver()->createStatement($sqlString);
+        $statement->setParameterContainer(new ParameterContainer($ids));
+        $result = $statement->execute();
+
+        $selectedIds = [];
+        foreach ($result as $row) {
+            $selectedIds[] = $row[$identifier];
+        }
+
+        return $selectedIds;
     }
 
     /**

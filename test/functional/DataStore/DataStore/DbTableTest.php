@@ -385,6 +385,192 @@ class DbTableTest extends TestCase
         }
     }
 
+    public function testMultiUpdateSuccess()
+    {
+        $object = $this->createObject();
+
+        // Create initial records
+        $initialRecords = [
+            ['id' => 1, 'name' => 'name1', 'surname' => 'surname1'],
+            ['id' => 2, 'name' => 'name2', 'surname' => 'surname2'],
+            ['id' => 3, 'name' => 'name3', 'surname' => 'surname3'],
+        ];
+
+        foreach ($initialRecords as $record) {
+            $object->create($record);
+        }
+
+        // Update multiple records
+        $updateRecords = [
+            ['id' => 1, 'name' => 'updated1', 'surname' => 'updated_surname1'],
+            ['id' => 2, 'name' => 'updated2'],
+            ['id' => 3, 'surname' => 'updated_surname3'],
+        ];
+
+        $ids = $object->multiUpdate($updateRecords);
+
+        sort($ids);
+        $this->assertEquals([1, 2, 3], $ids);
+
+        // Verify updates
+        $this->assertEquals(
+            ['id' => 1, 'name' => 'updated1', 'surname' => 'updated_surname1'],
+            $this->read(1)
+        );
+        $this->assertEquals(
+            ['id' => 2, 'name' => 'updated2', 'surname' => 'surname2'],
+            $this->read(2)
+        );
+        $this->assertEquals(
+            ['id' => 3, 'name' => 'name3', 'surname' => 'updated_surname3'],
+            $this->read(3)
+        );
+    }
+
+    public function testMultiUpdateThrowsExceptionForSingleRecord()
+    {
+        $object = $this->createObject();
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage('Collection of arrays expected for multiUpdate');
+
+        // Pass single record instead of array of records
+        $object->multiUpdate(['id' => 1, 'name' => 'test']);
+    }
+
+    public function testMultiUpdateThrowsExceptionForInvalidRecord()
+    {
+        $object = $this->createObject();
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage('Collection of arrays expected for multiUpdate');
+
+        // Pass array with non-array element
+        $object->multiUpdate([
+            ['id' => 1, 'name' => 'valid'],
+            'invalid_record',
+        ]);
+    }
+
+    /**
+     * @dataProvider multiUpdateEdgeCasesProvider
+     */
+    public function testMultiUpdateEdgeCases(
+        array $initialRecords,
+        array $updateRecords,
+        array $expectedIds,
+        array $verifications,
+        string $description
+    ) {
+        $object = $this->createObject();
+
+        // Create initial records
+        foreach ($initialRecords as $record) {
+            $object->create($record);
+        }
+
+        // Execute multiUpdate
+        $ids = $object->multiUpdate($updateRecords);
+        sort($ids);
+
+        // Verify returned IDs
+        $this->assertEquals($expectedIds, $ids, $description);
+
+        // Verify record states
+        foreach ($verifications as $id => $expectedRecord) {
+            $this->assertEquals($expectedRecord, $this->read($id), "Failed for record ID {$id}: {$description}");
+        }
+    }
+
+    public function multiUpdateEdgeCasesProvider(): array
+    {
+        return [
+            'empty records array' => [
+                'initialRecords' => [],
+                'updateRecords' => [],
+                'expectedIds' => [],
+                'verifications' => [],
+                'description' => 'Empty update should return empty array',
+            ],
+            'partial success - some non-existent records' => [
+                'initialRecords' => [
+                    ['id' => 1, 'name' => 'name1', 'surname' => 'surname1'],
+                    ['id' => 2, 'name' => 'name2', 'surname' => 'surname2'],
+                ],
+                'updateRecords' => [
+                    ['id' => 1, 'name' => 'updated1'],
+                    ['id' => 2, 'name' => 'updated2'],
+                    ['id' => 999, 'name' => 'non_existent'],
+                ],
+                'expectedIds' => [1, 2],
+                'verifications' => [
+                    1 => ['id' => 1, 'name' => 'updated1', 'surname' => 'surname1'],
+                    2 => ['id' => 2, 'name' => 'updated2', 'surname' => 'surname2'],
+                    999 => null,
+                ],
+                'description' => 'Should update only existing records',
+            ],
+            'skip records without identifier' => [
+                'initialRecords' => [
+                    ['id' => 1, 'name' => 'name1', 'surname' => 'surname1'],
+                ],
+                'updateRecords' => [
+                    ['id' => 1, 'name' => 'updated1'],
+                    ['name' => 'no_id', 'surname' => 'no_id_surname'],
+                ],
+                'expectedIds' => [1],
+                'verifications' => [
+                    1 => ['id' => 1, 'name' => 'updated1', 'surname' => 'surname1'],
+                ],
+                'description' => 'Records without identifier should be skipped',
+            ],
+            'all non-existent records' => [
+                'initialRecords' => [
+                    ['id' => 1, 'name' => 'name1', 'surname' => 'surname1'],
+                ],
+                'updateRecords' => [
+                    ['id' => 999, 'name' => 'non_existent1'],
+                    ['id' => 998, 'name' => 'non_existent2'],
+                ],
+                'expectedIds' => [],
+                'verifications' => [
+                    1 => ['id' => 1, 'name' => 'name1', 'surname' => 'surname1'],
+                    999 => null,
+                    998 => null,
+                ],
+                'description' => 'Should return empty array when no records exist',
+            ],
+        ];
+    }
+
+    public function testMultiUpdateRollsBackOnFailure()
+    {
+        $object = $this->createObject();
+
+        $initialRecords = [
+            ['id' => 1, 'name' => 'name1', 'surname' => 'surname1'],
+            ['id' => 2, 'name' => 'name2', 'surname' => 'surname2'],
+        ];
+
+        foreach ($initialRecords as $record) {
+            $object->create($record);
+        }
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage("Can't multi update records");
+
+        try {
+            $object->multiUpdate([
+                ['id' => 1, 'name' => 'updated1'],
+                // Unknown column should make UPDATE fail and trigger rollback
+                ['id' => 2, 'unknown_field' => 'boom'],
+            ]);
+        } finally {
+            $this->assertEquals($initialRecords[0], $this->read(1));
+            $this->assertEquals($initialRecords[1], $this->read(2));
+        }
+    }
+
     public function testWriteLog()
     {
         $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
