@@ -6,6 +6,7 @@
 Detailed exhaustive analysis of specific modules:
 
 - [RQL Module Deep-Dive](./deep-dive-rql-module.md) - Comprehensive analysis of RQL query parsing and encoding system (38 files, ~1,350 LOC) - Generated 2025-12-05
+- [DataStore Module Deep-Dive](./deep-dive-datastore-module.md) - Core data abstraction layer with multiple storage backends, middleware, aspects, and type system (146 files, ~12,537 LOC) - Generated 2025-12-05
 
 ---
 
