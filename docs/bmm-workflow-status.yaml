@@ -1,0 +1,135 @@
+# Workflow Status Template
+
+# This tracks progress through BMM methodology Analysis, Planning, and Solutioning phases.
+# Implementation phase is tracked separately in sprint-status.yaml
+
+# STATUS DEFINITIONS:
+# ==================
+# Initial Status (before completion):
+#   - required: Must be completed to progress
+#   - optional: Can be completed but not required
+#   - recommended: Strongly suggested but not required
+#   - conditional: Required only if certain conditions met (e.g., if_has_ui)
+#
+# Completion Status:
+#   - {file-path}: File created/found (e.g., "docs/product-brief.md")
+#   - skipped: Optional/conditional workflow that was skipped
+
+generated: "2025-12-05"
+project: "rollun-datastore"
+project_type: "Library Refactoring - Clean Architecture + DDD"
+selected_track: "method"
+field_type: "brownfield"
+workflow_path: ".bmad/bmm/workflows/workflow-status/paths/method-brownfield.yaml"
+
+workflow_status:
+  # ==================
+  # PREREQUISITE: Documentation (for brownfield without docs)
+  # ==================
+  - id: "document-project"
+    name: "Document Project"
+    phase: "prerequisite"
+    agent: "analyst"
+    command: "/bmad:bmm:workflows:document-project"
+    status: "required"
+    output: "Comprehensive project documentation"
+    purpose: "Understand existing codebase before planning"
+    note: "CRITICAL: Must be completed first to give AI agents context about current system"
+
+  # ==================
+  # PHASE 0: Discovery (Optional)
+  # ==================
+  - id: "research"
+    name: "Research"
+    phase: 0
+    agent: "analyst"
+    command: "/bmad:bmm:workflows:research"
+    status: "optional"
+    output: "Research report on DataStore patterns, Clean Architecture, DDD best practices"
+    note: "User selected during init - will research best practices for library refactoring"
+
+  # ==================
+  # PHASE 1: Planning
+  # ==================
+  - id: "prd"
+    name: "Product Requirements Document"
+    phase: 1
+    agent: "pm"
+    command: "/bmad:bmm:workflows:prd"
+    status: "required"
+    output: "PRD for rollun-datastore v2"
+    note: "Define requirements for new Clean Architecture + DDD version"
+
+  - id: "validate-prd"
+    name: "Validate PRD"
+    phase: 1
+    agent: "pm"
+    command: "/bmad:bmm:workflows:validate-prd"
+    status: "optional"
+
+  - id: "create-ux-design"
+    name: "UX Design"
+    phase: 1
+    agent: "ux-designer"
+    command: "/bmad:bmm:workflows:create-ux-design"
+    status: "conditional"
+    condition: "if_has_ui"
+    note: "Not applicable for library (no UI)"
+
+  # ==================
+  # PHASE 2: Solutioning
+  # ==================
+  - id: "create-architecture"
+    name: "Architecture Document"
+    phase: 2
+    agent: "architect"
+    command: "/bmad:bmm:workflows:create-architecture"
+    status: "recommended"
+    output: "Clean Architecture + DDD design with bounded contexts, layers, adapters"
+    note: "HIGHLY RECOMMENDED: Defines DDD bounded contexts, Clean Arch layers, migration strategy"
+
+  - id: "create-epics-and-stories"
+    name: "Epics and Stories"
+    phase: 2
+    agent: "pm"
+    command: "/bmad:bmm:workflows:create-epics-and-stories"
+    status: "required"
+    output: "Implementation breakdown into actionable stories"
+    note: "Break down refactoring into implementable epics and stories"
+
+  - id: "test-design"
+    name: "Test Design"
+    phase: 2
+    agent: "tea"
+    command: "/bmad:bmm:workflows:test-design"
+    status: "recommended"
+    output: "Testability assessment and strategy"
+    note: "Important: You have 890 existing tests to maintain compatibility"
+
+  - id: "validate-architecture"
+    name: "Validate Architecture"
+    phase: 2
+    agent: "architect"
+    command: "/bmad:bmm:workflows:validate-architecture"
+    status: "optional"
+
+  - id: "implementation-readiness"
+    name: "Implementation Readiness"
+    phase: 2
+    agent: "architect"
+    command: "/bmad:bmm:workflows:implementation-readiness"
+    status: "required"
+    output: "Validation that all artifacts are aligned and complete"
+    note: "Gate check before implementation phase"
+
+  # ==================
+  # PHASE 3: Implementation
+  # ==================
+  - id: "sprint-planning"
+    name: "Sprint Planning"
+    phase: 3
+    agent: "sm"
+    command: "/bmad:bmm:workflows:sprint-planning"
+    status: "required"
+    output: "Sprint plan with story assignments"
+    note: "Creates sprint-status.yaml for tracking implementation"
