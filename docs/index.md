@@ -1,6 +1,14 @@
 
 # rollun-datastore
 
+## Deep-Dive Documentation
+
+Detailed exhaustive analysis of specific modules:
+
+- [RQL Module Deep-Dive](./deep-dive-rql-module.md) - Comprehensive analysis of RQL query parsing and encoding system (38 files, ~1,350 LOC) - Generated 2025-12-05
+
+---
+
 ### швидка Установка
 
 Встановлення за допомогою [composer](https://getcomposer.org/).
