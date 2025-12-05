@@ -90,3 +90,4 @@ data/test
 .claude
 .codex
 .npm
+docker-compose.override.yml
