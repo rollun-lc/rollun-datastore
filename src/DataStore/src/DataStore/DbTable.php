@@ -689,6 +689,7 @@ class DbTable extends DataStoreAbstract
 
         try {
             $updatedIds = [];
+            $start = microtime(true);
 
             foreach ($records as $record) {
                 // Use existing update() method for each record
@@ -697,6 +698,18 @@ class DbTable extends DataStoreAbstract
             }
 
             $this->dbTable->getAdapter()->getDriver()->getConnection()->commit();
+            $end = microtime(true);
+
+            // Log performance metrics
+            $logContext = [
+                self::LOG_METHOD => __FUNCTION__,
+                self::LOG_TABLE => $this->dbTable->getTable(),
+                self::LOG_TIME => $this->getRequestTime($start, $end),
+                self::LOG_REQUEST => count($records) . ' records',
+                self::LOG_RESPONSE => count($updatedIds) . ' updated',
+                'approach' => 'simple-loop',
+            ];
+            $this->writeLogsIfNeeded($logContext);
 
             return $updatedIds;
         } catch (\Throwable $e) {
