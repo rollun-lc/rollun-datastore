@@ -774,21 +774,24 @@ class DbTable extends DataStoreAbstract
             $sqlData = $this->buildValuesRowUpdateSql($recordsMap, $existingIds, $columns, $identifier, $platform);
 
             // Execute UPDATE
-            $logContext = [
-                self::LOG_METHOD => __FUNCTION__,
-                self::LOG_TABLE => $this->dbTable->getTable(),
-                self::LOG_SQL => $sqlData['query'],
-                self::LOG_REQUEST => $records,
-            ];
-
             $start = microtime(true);
             $statement = $adapter->getDriver()->createStatement($sqlData['query']);
             $statement->setParameterContainer(new ParameterContainer($sqlData['parameters']));
             $result = $statement->execute();
             $end = microtime(true);
 
-            $logContext[self::LOG_TIME] = $this->getRequestTime($start, $end);
-            $logContext[self::LOG_RESPONSE] = $result->getAffectedRows();
+            // Log performance metrics
+            $logContext = [
+                self::LOG_METHOD => __FUNCTION__,
+                self::LOG_TABLE => $this->dbTable->getTable(),
+                self::LOG_SQL => $sqlData['query'],
+                self::LOG_TIME => $this->getRequestTime($start, $end),
+                self::LOG_REQUEST => count($records) . ' records',
+                self::LOG_RESPONSE => $result->getAffectedRows() . ' updated',
+                'approach' => 'hybrid-flags',
+                'total_columns' => count($columns),
+                'total_parameters' => count($sqlData['parameters']),
+            ];
 
             $this->writeLogsIfNeeded($logContext);
 
