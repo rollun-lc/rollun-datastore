@@ -667,7 +667,11 @@ class DbTable extends DataStoreAbstract
     /**
      * {@inheritdoc}
      *
-     * Update multiple records using UPDATE CASE query in single transaction
+     * Update multiple records using VALUES ROW with update flags (Hybrid approach) in single transaction.
+     *
+     * This method implements partial updates where each record can update different columns.
+     * Uses flag columns to control which columns should be updated for each record, preventing
+     * NULL overwrites of columns not specified in the input data.
      *
      * @param array $records Array of records to update, each must contain identifier
      * @return array Array of successfully updated identifiers
@@ -677,126 +681,94 @@ class DbTable extends DataStoreAbstract
      */
     public function multiUpdate($records)
     {
-        // Validate input is a non-empty array
+        // Validate input is a non-empty collection
         if (!is_array($records) || empty($records)) {
-            return [];
-        }
-
-        // Validate it's an array of arrays (not a single record)
-        if (!isset($records[0]) || !is_array($records[0])) {
             throw new DataStoreException('Collection of arrays expected for multiUpdate');
         }
 
         $identifier = $this->getIdentifier();
         $adapter = $this->dbTable->getAdapter();
         $platform = $adapter->getPlatform();
-        $tableName = $platform->quoteIdentifier($this->dbTable->getTable());
 
-        // Filter records with identifier and collect data
-        $ids = [];
-        $columnUpdates = [];
+        // Collect and validate records
+        $recordsMap = []; // [id => [column => value, ...]]
+        $allColumns = []; // Track all columns across all records
 
-        foreach ($records as $record) {
+        foreach ($records as $key => $record) {
+            // Calculate item number for error messages
+            $itemNumber = is_int($key) ? $key + 1 : $key;
+
             // Validate each record is an array
             if (!is_array($record)) {
-                throw new DataStoreException('Collection of arrays expected for multiUpdate');
+                throw new DataStoreException(
+                    "Item {$itemNumber} must be an array, " . gettype($record) . " given"
+                );
             }
 
+            // Validate: each record must have primary key
             if (!isset($record[$identifier])) {
-                // Skip records without identifier as per parent implementation
-                continue;
+                throw new DataStoreException("Item {$itemNumber} must have primary key");
             }
 
             $id = $record[$identifier];
-            $ids[] = $id;
+            $this->checkIdentifierType($id);
 
-            // Collect all columns to update (excluding identifier)
+            // Collect columns for this record (excluding PK)
+            $recordData = [];
             foreach ($record as $column => $value) {
                 if ($column !== $identifier) {
-                    if (!isset($columnUpdates[$column])) {
-                        $columnUpdates[$column] = [];
+                    // Handle boolean values
+                    if ($value === false) {
+                        $value = 0;
+                    } elseif ($value === true) {
+                        $value = 1;
                     }
-                    $columnUpdates[$column][$id] = $value;
+                    $recordData[$column] = $value;
+                    $allColumns[$column] = true;
                 }
             }
+
+            $recordsMap[$id] = $recordData;
         }
 
-        if (empty($ids)) {
-            return [];
+        if (empty($recordsMap)) {
+            throw new DataStoreException('No valid records to update');
         }
+
+        $ids = array_keys($recordsMap);
+        $columns = array_keys($allColumns);
+
+        $this->beginTransaction();
 
         try {
-            $this->beginTransaction();
-        } catch (RuntimeException $e) {
-            if (LaminasDbExceptionDetector::isConnectionException($e)) {
-                throw new ConnectionException($e->getMessage(), $e->getCode(), $e);
-            }
-            if (LaminasDbExceptionDetector::isOperationTimedOutException($e)) {
-                throw new OperationTimedOutException($e->getMessage(), $e->getCode(), $e);
-            }
-            throw $e;
-        }
+            // Lock records for update and verify they exist
+            $query = new Query();
+            $query->setQuery(new InNode($identifier, $ids));
+            $existingIds = $this->selectIdsForUpdate($query);
 
-        try {
-            // Lock records for update
-            $existingIds = $this->selectExistingIdsForUpdate($ids);
-
-            if (empty($existingIds)) {
-                $adapter->getDriver()->getConnection()->commit();
-                return [];
+            // Check if all records exist (same behavior as update())
+            $missingIds = array_diff($ids, $existingIds);
+            if (!empty($missingIds)) {
+                $missingIdsList = implode(', ', $missingIds);
+                throw new DataStoreException(
+                    "[{$this->dbTable->getTable()}]Can't update items with ids: {$missingIdsList}. Records not found."
+                );
             }
 
-            // Build UPDATE CASE query
-            $setClauses = [];
-            $parameters = [];
+            // Build VALUES ROW UPDATE SQL
+            $sqlData = $this->buildValuesRowUpdateSql($recordsMap, $existingIds, $columns, $identifier, $platform);
 
-            foreach ($columnUpdates as $column => $updates) {
-                $quotedColumn = $platform->quoteIdentifier($column);
-                $caseWhenParts = [];
-
-                foreach ($existingIds as $id) {
-                    if (isset($updates[$id])) {
-                        $value = $updates[$id];
-                        // Handle boolean values
-                        if ($value === false) {
-                            $value = 0;
-                        } elseif ($value === true) {
-                            $value = 1;
-                        }
-                        $caseWhenParts[] = "WHEN {$platform->quoteIdentifier($identifier)} = ? THEN ?";
-                        $parameters[] = $id;
-                        $parameters[] = $value;
-                    }
-                }
-
-                if (!empty($caseWhenParts)) {
-                    $caseClause = "CASE " . implode(" ", $caseWhenParts) . " ELSE {$quotedColumn} END";
-                    $setClauses[] = "{$quotedColumn} = {$caseClause}";
-                }
-            }
-
-            if (empty($setClauses)) {
-                $adapter->getDriver()->getConnection()->commit();
-                return $existingIds;
-            }
-
-            // Build WHERE IN clause
-            $inPlaceholders = implode(',', array_fill(0, count($existingIds), '?'));
-            $parameters = array_merge($parameters, $existingIds);
-
-            $sql = "UPDATE {$tableName} SET " . implode(", ", $setClauses)
-                . " WHERE {$platform->quoteIdentifier($identifier)} IN ({$inPlaceholders})";
-
+            // Execute UPDATE
             $logContext = [
                 self::LOG_METHOD => __FUNCTION__,
                 self::LOG_TABLE => $this->dbTable->getTable(),
-                self::LOG_SQL => $sql,
+                self::LOG_SQL => $sqlData['query'],
                 self::LOG_REQUEST => $records,
             ];
 
             $start = microtime(true);
-            $statement = $adapter->getDriver()->createStatement($sql);
-            $statement->setParameterContainer(new ParameterContainer($parameters));
+            $statement = $adapter->getDriver()->createStatement($sqlData['query']);
+            $statement->setParameterContainer(new ParameterContainer($sqlData['parameters']));
             $result = $statement->execute();
             $end = microtime(true);
 
@@ -838,33 +810,97 @@ class DbTable extends DataStoreAbstract
     }
 
     /**
-     * Select and lock records by IDs for update
+     * Build VALUES ROW UPDATE SQL query with flags for partial updates (Hybrid approach)
      *
-     * @param array $ids
-     * @return array
+     * Uses flag columns to control which columns should be updated for each record.
+     * This allows partial updates where each record updates only its specified columns.
+     *
+     * @param array $recordsMap Map of [id => [column => value, ...]]
+     * @param array $existingIds Array of existing record IDs
+     * @param array $columns List of all columns to update
+     * @param string $identifier Primary key column name
+     * @param mixed $platform Database platform for quoting
+     * @return array ['query' => string, 'parameters' => array]
      */
-    private function selectExistingIdsForUpdate(array $ids): array
-    {
-        $adapter = $this->dbTable->getAdapter();
-        $platform = $adapter->getPlatform();
-        $identifier = $this->getIdentifier();
+    private function buildValuesRowUpdateSql(
+        array $recordsMap,
+        array $existingIds,
+        array $columns,
+        string $identifier,
+        $platform
+    ): array {
+        $tableName = $platform->quoteIdentifier($this->dbTable->getTable());
 
-        $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $sqlString = "SELECT {$platform->quoteIdentifier($identifier)}"
-            . " FROM {$platform->quoteIdentifier($this->dbTable->getTable())}"
-            . " WHERE {$platform->quoteIdentifier($identifier)} IN ({$placeholders})"
-            . " FOR UPDATE";
+        // Build ROW(...) for each record with values and update flags
+        $rows = [];
+        $parameters = [];
 
-        $statement = $adapter->getDriver()->createStatement($sqlString);
-        $statement->setParameterContainer(new ParameterContainer($ids));
-        $result = $statement->execute();
+        foreach ($existingIds as $id) {
+            $rowValues = [$id]; // First value is the ID
+            $rowFlags = [];     // Flags indicating which columns to update
 
-        $selectedIds = [];
-        foreach ($result as $row) {
-            $selectedIds[] = $row[$identifier];
+            // Add values and flags for each column
+            foreach ($columns as $column) {
+                if (isset($recordsMap[$id][$column])) {
+                    // Column is present in this record - update it
+                    $rowValues[] = $recordsMap[$id][$column];
+                    $rowFlags[] = 1;
+                } else {
+                    // Column not present - don't update
+                    $rowValues[] = null;
+                    $rowFlags[] = 0;
+                }
+            }
+
+            // Combine values and flags: ROW(id, val1, val2, ..., flag1, flag2, ...)
+            $allRowData = array_merge($rowValues, $rowFlags);
+            $placeholders = implode(', ', array_fill(0, count($allRowData), '?'));
+            $rows[] = "ROW({$placeholders})";
+
+            // Add parameters in the same order
+            array_push($parameters, ...$allRowData);
         }
 
-        return $selectedIds;
+        // Build column list for VALUES: (id, col1, col2, ..., _update_col1, _update_col2, ...)
+        $valueColumns = [$identifier];
+        $flagColumns = [];
+
+        foreach ($columns as $column) {
+            $valueColumns[] = $column;
+            $flagColumns[] = "_update_{$column}";
+        }
+
+        $allValueColumns = array_merge($valueColumns, $flagColumns);
+        $valueColumnsList = implode(', ', array_map(
+            fn($col) => $platform->quoteIdentifier($col),
+            $allValueColumns
+        ));
+
+        // Build SET clause with CASE WHEN based on flags:
+        // t.col = CASE WHEN v._update_col = 1 THEN v.col ELSE t.col END
+        $setClauses = [];
+        foreach ($columns as $column) {
+            $quotedColumn = $platform->quoteIdentifier($column);
+            $quotedFlagColumn = $platform->quoteIdentifier("_update_{$column}");
+            $setClauses[] = "t.{$quotedColumn} = CASE WHEN v.{$quotedFlagColumn} = 1 THEN v.{$quotedColumn} ELSE t.{$quotedColumn} END";
+        }
+        $setClause = implode(', ', $setClauses);
+
+        // Build final SQL
+        $rowsList = implode(",\n  ", $rows);
+        $quotedIdentifier = $platform->quoteIdentifier($identifier);
+
+        $sql = "UPDATE {$tableName} t\n"
+            . "INNER JOIN (VALUES\n"
+            . "  {$rowsList}\n"
+            . ") AS v({$valueColumnsList})\n"
+            . "ON t.{$quotedIdentifier} = v.{$quotedIdentifier}\n"
+            . "SET {$setClause}";
+
+        return [
+            'query' => $sql,
+            'parameters' => $parameters,
+        ];
     }
 
     /**
