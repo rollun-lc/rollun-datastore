@@ -667,11 +667,10 @@ class DbTable extends DataStoreAbstract
     /**
      * {@inheritdoc}
      *
-     * Update multiple records using VALUES ROW with update flags (Hybrid approach) in single transaction.
+     * Update multiple records using loop of update() calls (Simple approach) in single transaction.
      *
-     * This method implements partial updates where each record can update different columns.
-     * Uses flag columns to control which columns should be updated for each record, preventing
-     * NULL overwrites of columns not specified in the input data.
+     * This method implements partial updates by calling update() for each record in a loop.
+     * Simple, proven approach that reuses existing update() logic.
      *
      * @param array $records Array of records to update, each must contain identifier
      * @return array Array of successfully updated identifiers
@@ -686,104 +685,24 @@ class DbTable extends DataStoreAbstract
             throw new DataStoreException('Collection of arrays expected for multiUpdate');
         }
 
-        $identifier = $this->getIdentifier();
-        $adapter = $this->dbTable->getAdapter();
-        $platform = $adapter->getPlatform();
-
-        // Collect and validate records
-        $recordsMap = []; // [id => [column => value, ...]]
-        $allColumns = []; // Track all columns across all records
-
-        foreach ($records as $key => $record) {
-            // Calculate item number for error messages
-            $itemNumber = is_int($key) ? $key + 1 : $key;
-
-            // Validate each record is an array
-            if (!is_array($record)) {
-                throw new DataStoreException(
-                    "Item {$itemNumber} must be an array, " . gettype($record) . " given"
-                );
-            }
-
-            // Validate: each record must have primary key
-            if (!isset($record[$identifier])) {
-                throw new DataStoreException("Item {$itemNumber} must have primary key");
-            }
-
-            $id = $record[$identifier];
-            $this->checkIdentifierType($id);
-
-            // Collect columns for this record (excluding PK)
-            $recordData = [];
-            foreach ($record as $column => $value) {
-                if ($column !== $identifier) {
-                    // Handle boolean values
-                    if ($value === false) {
-                        $value = 0;
-                    } elseif ($value === true) {
-                        $value = 1;
-                    }
-                    $recordData[$column] = $value;
-                    $allColumns[$column] = true;
-                }
-            }
-
-            $recordsMap[$id] = $recordData;
-        }
-
-        if (empty($recordsMap)) {
-            throw new DataStoreException('No valid records to update');
-        }
-
-        $ids = array_keys($recordsMap);
-        $columns = array_keys($allColumns);
-
         $this->beginTransaction();
 
         try {
-            // Lock records for update and verify they exist
-            $query = new Query();
-            $query->setQuery(new InNode($identifier, $ids));
-            $existingIds = $this->selectIdsForUpdate($query);
+            $updatedIds = [];
 
-            // Check if all records exist (same behavior as update())
-            $missingIds = array_diff($ids, $existingIds);
-            if (!empty($missingIds)) {
-                $missingIdsList = implode(', ', $missingIds);
-                throw new DataStoreException(
-                    "[{$this->dbTable->getTable()}]Can't update items with ids: {$missingIdsList}. Records not found."
-                );
+            foreach ($records as $record) {
+                // Use existing update() method for each record
+                $this->updateItem($record, false);
+                $updatedIds[] = $record[$this->getIdentifier()];
             }
 
-            // Build VALUES ROW UPDATE SQL
-            $sqlData = $this->buildValuesRowUpdateSql($recordsMap, $existingIds, $columns, $identifier, $platform);
+            $this->dbTable->getAdapter()->getDriver()->getConnection()->commit();
 
-            // Execute UPDATE
-            $logContext = [
-                self::LOG_METHOD => __FUNCTION__,
-                self::LOG_TABLE => $this->dbTable->getTable(),
-                self::LOG_SQL => $sqlData['query'],
-                self::LOG_REQUEST => $records,
-            ];
-
-            $start = microtime(true);
-            $statement = $adapter->getDriver()->createStatement($sqlData['query']);
-            $statement->setParameterContainer(new ParameterContainer($sqlData['parameters']));
-            $result = $statement->execute();
-            $end = microtime(true);
-
-            $logContext[self::LOG_TIME] = $this->getRequestTime($start, $end);
-            $logContext[self::LOG_RESPONSE] = $result->getAffectedRows();
-
-            $this->writeLogsIfNeeded($logContext);
-
-            $adapter->getDriver()->getConnection()->commit();
-
-            return $existingIds;
+            return $updatedIds;
         } catch (\Throwable $e) {
-            $adapter->getDriver()->getConnection()->rollback();
+            $this->dbTable->getAdapter()->getDriver()->getConnection()->rollback();
             // https://github.com/laminas/laminas-db/issues/56
-            $adapter->getDriver()->getConnection()->disconnect();
+            $this->dbTable->getAdapter()->getDriver()->getConnection()->disconnect();
 
             $logContext = [
                 self::LOG_METHOD => __FUNCTION__,
