@@ -127,6 +127,29 @@ PostgreSQL,Oracle, IBM DB2, Microsoft Sql Server, PDO и тд.);
 - `Memory` - хранилище в оперативной памяти;
 - `Cacheable` - декоратор вокруг `DataStoresInterface`, который представляет возможность кэширования данных.
 
+###### Явное имя первичного ключа (`identifier`) для DbTable
+
+Если PK в таблице называется не `id` (например `Id` или `pos_id`), задайте явное имя в конфиге сервиса — фабрика прокинет его в `DbTable`, и методы будут использовать это имя вместо дефолтного `id`.
+
+Пример:
+```php
+<?php
+
+use rollun\datastore\DataStore\DbTable;
+use rollun\datastore\DataStore\Factory\DataStoreAbstractFactory;
+use rollun\datastore\DataStore\Factory\DbTableAbstractFactory;
+
+return [
+    DataStoreAbstractFactory::KEY_DATASTORE => [
+        'myDbTable' => [
+            DbTableAbstractFactory::KEY_CLASS => DbTable::class,
+            DbTableAbstractFactory::KEY_TABLE_NAME => 'orders',
+            DbTableAbstractFactory::KEY_IDENTIFIER => 'Id', // имя PK в таблице
+        ],
+    ],
+];
+```
+
 ##### 1. `DbTable` и `SerializedDbTable`
 
 Для того чтобы начать использовать DbTable хранилище нужен
