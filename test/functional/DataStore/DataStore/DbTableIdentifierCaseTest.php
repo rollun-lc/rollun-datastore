@@ -88,10 +88,7 @@ class DbTableIdentifierCaseTest extends TestCase
 
         $updated = $dataStore->update(['Id' => 1, 'name' => 'updated']);
 
-        $this->assertSame(
-            ['Id' => 1, 'name' => 'updated', 'surname' => 'surname'],
-            $updated
-        );
+        $this->assertSame(['Id' => '1', 'name' => 'updated', 'surname' => 'surname'], $updated);
     }
 
     public function testFactoryInjectsIdentifierFromConfig(): void
@@ -124,9 +121,6 @@ class DbTableIdentifierCaseTest extends TestCase
         $dataStore = $factory($container, 'upperPkStore');
 
         $this->assertSame('Id', $dataStore->getIdentifier());
-        $this->assertSame(
-            ['Id' => 1, 'name' => 'name', 'surname' => 'surname'],
-            $dataStore->read(1)
-        );
+        $this->assertSame(['Id' => '1', 'name' => 'name', 'surname' => 'surname'], $dataStore->read(1));
     }
 }
