@@ -56,6 +56,13 @@
       "rollun\\test\\": "test"
     }
   },
+  "config": {
+    "audit": {
+      "ignore": [
+        "PKSA-wws7-mr54-jsny"
+      ]
+    }
+  },
   "extra": {
     "zf": {
       "config-provider": [
