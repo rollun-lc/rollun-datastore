@@ -22,13 +22,17 @@ use rollun\datastore\TableGateway\TableManagerMysql;
 
 class DbTableIdentifierCaseTest extends TestCase
 {
-    private TableManagerMysql $tableManager;
+    /** @var TableManagerMysql */
+    private $tableManager;
 
-    private TableGateway $tableGateway;
+    /** @var TableGateway */
+    private $tableGateway;
 
-    private AdapterInterface $adapter;
+    /** @var AdapterInterface */
+    private $adapter;
 
-    private string $tableName = 'testTablePkCase';
+    /** @var string */
+    private $tableName = 'testTablePkCase';
 
     protected function setUp(): void
     {
@@ -89,7 +93,7 @@ class DbTableIdentifierCaseTest extends TestCase
         $updated = $dataStore->update(['Id' => 1, 'name' => 'updated']);
 
         $this->assertSame(
-            ['Id' => 1, 'name' => 'updated', 'surname' => 'surname'],
+            ['Id' => '1', 'name' => 'updated', 'surname' => 'surname'],
             $updated
         );
     }
@@ -125,7 +129,7 @@ class DbTableIdentifierCaseTest extends TestCase
 
         $this->assertSame('Id', $dataStore->getIdentifier());
         $this->assertSame(
-            ['Id' => 1, 'name' => 'name', 'surname' => 'surname'],
+            ['Id' => '1', 'name' => 'name', 'surname' => 'surname'],
             $dataStore->read(1)
         );
     }
