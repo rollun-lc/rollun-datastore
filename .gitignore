@@ -85,3 +85,12 @@ Temporary Items
 
 data/test
 .phpunit.result.cache
+/.php-cs-fixer.php
+/.npm/
+/.specify/
+/.codex/
+/.claude/
+/.bmad/
+/specs/
+docker-compose.override.yml
+/.gemini
