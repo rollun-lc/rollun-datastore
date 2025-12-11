@@ -9,9 +9,9 @@ declare(strict_types=1);
 
 namespace rollun\test\functional\DataStore\DataStore;
 
-use Laminas\Db\Adapter\AdapterInterface;
-use Laminas\Db\TableGateway\TableGateway;
-use Laminas\ServiceManager\ServiceManager;
+use Zend\Db\Adapter\AdapterInterface;
+use Zend\Db\TableGateway\TableGateway;
+use Zend\ServiceManager\ServiceManager;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
