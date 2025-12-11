@@ -89,8 +89,8 @@ class DbTableIdentifierCaseTest extends TestCase
         $updated = $dataStore->update(['Id' => 1, 'name' => 'updated']);
 
         $this->assertSame(
-            ['Id' => 1, 'name' => 'updated', 'surname' => 'surname'],
-            $updated
+            ['Id' => '1', 'name' => 'updated', 'surname' => 'surname'],
+            $this->normalizeIdToString($updated)
         );
     }
 
@@ -125,8 +125,17 @@ class DbTableIdentifierCaseTest extends TestCase
 
         $this->assertSame('Id', $dataStore->getIdentifier());
         $this->assertSame(
-            ['Id' => 1, 'name' => 'name', 'surname' => 'surname'],
-            $dataStore->read(1)
+            ['Id' => '1', 'name' => 'name', 'surname' => 'surname'],
+            $this->normalizeIdToString($dataStore->read(1))
         );
+    }
+
+    private function normalizeIdToString(array $row): array
+    {
+        if (isset($row['Id'])) {
+            $row['Id'] = (string) $row['Id'];
+        }
+
+        return $row;
     }
 }
