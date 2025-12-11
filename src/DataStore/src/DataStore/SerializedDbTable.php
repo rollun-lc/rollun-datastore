@@ -31,7 +31,7 @@ class SerializedDbTable extends DbTable
      */
     public function __sleep()
     {
-        return ["tableName", "writeLogs"];
+        return ["tableName", "writeLogs", "identifier"];
     }
 
     /**
