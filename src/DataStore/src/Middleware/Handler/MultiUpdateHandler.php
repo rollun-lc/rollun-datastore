@@ -39,39 +39,44 @@ class MultiUpdateHandler extends AbstractHandler
         $rows = $request->getParsedBody();
 
         // Must be non-empty array
-        if (!isset($rows) || !is_array($rows) || empty($rows)) {
+        if (!is_array($rows) || $rows === []) {
             return false;
         }
 
-        // First element must be array (array of records)
-        if (!isset($rows[0])) {
+        // Must be a list (sequential numeric keys starting from 0)
+        if (!$this->isList($rows)) {
             return false;
         }
 
-        // If not array of arrays, not valid
-        if (!is_array($rows[0])) {
-            return false;
-        }
-
-        // Validate all elements are associative arrays
+        // Validate all elements are non-empty associative arrays
         foreach ($rows as $row) {
-            if (!is_array($row)) {
-                return false;
-            }
-
-            // Check if it's associative array (not list)
-            $isAssociative = array_reduce(
-                array_keys($row),
-                fn($carry, $item) => $carry && is_string($item),
-                true
-            );
-
-            if (!$isAssociative) {
+            if (!$this->isNonEmptyAssociativeArray($row)) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * Check if array is a list (sequential numeric keys starting from 0)
+     * Polyfill for array_is_list() which is available in PHP 8.1+
+     */
+    private function isList(array $array): bool
+    {
+        return $array === [] || array_keys($array) === range(0, count($array) - 1);
+    }
+
+    /**
+     * Check if value is a non-empty associative array (not a list)
+     */
+    private function isNonEmptyAssociativeArray(mixed $value): bool
+    {
+        if (!is_array($value) || $value === []) {
+            return false;
+        }
+
+        return !$this->isList($value);
     }
 
     /**
