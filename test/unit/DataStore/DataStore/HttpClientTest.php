@@ -209,29 +209,19 @@ class HttpClientTest extends TestCase
                 null,
                 'Collection of arrays expected for multiUpdate',
             ],
+            'empty array' => [
+                [],
+                'Collection of arrays expected for multiUpdate',
+            ],
+            'contains empty record' => [
+                [['id' => 1, 'name' => 'valid'], []],
+                'Collection of arrays expected for multiUpdate',
+            ],
+            'all empty records' => [
+                [[], []],
+                'Collection of arrays expected for multiUpdate',
+            ],
         ];
-    }
-
-    public function testMultiUpdateAllowsEmptyArray()
-    {
-        $items = [];
-        $url = '';
-
-        $clientMock = $this->createClientMock('PUT', $url);
-        $clientMock->expects($this->once())
-            ->method('setRawBody')
-            ->with(Serializer::jsonSerialize($items));
-
-        $response = $this->createResponse([]);
-        $response->expects($this->once())
-            ->method('isSuccess')
-            ->willReturn(true);
-
-        $clientMock->expects($this->once())
-            ->method('send')
-            ->willReturn($response);
-
-        $this->assertSame([], $this->createObjectForMultiUpdate($clientMock, $url)->multiUpdate($items));
     }
 
     public function testMultiUpdateNotSupported()

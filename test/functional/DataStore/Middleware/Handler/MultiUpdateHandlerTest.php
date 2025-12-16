@@ -56,6 +56,18 @@ class MultiUpdateHandlerTest extends BaseHandlerTest
 
             // Invalid: null body
             'invalid null body' => ['PUT', null, new RqlQuery(''), null, false],
+
+            // Invalid: contains empty array
+            'invalid contains empty array' => ['PUT', [[], ['id' => 1, 'name' => 'test']], new RqlQuery(''), null, false],
+
+            // Invalid: first element is empty array
+            'invalid first element empty' => ['PUT', [[], ['id' => 2, 'name' => 'test']], new RqlQuery(''), null, false],
+
+            // Invalid: all elements are empty arrays
+            'invalid all empty arrays' => ['PUT', [[], []], new RqlQuery(''), null, false],
+
+            // Invalid: associative outer array
+            'invalid associative outer' => ['PUT', ['a' => ['id' => 1, 'name' => 'test']], new RqlQuery(''), null, false],
         ];
     }
 
@@ -79,25 +91,12 @@ class MultiUpdateHandlerTest extends BaseHandlerTest
         $this->assertSame($expected, $handler->canHandle($request));
     }
 
-    /**
-     * @return MultiUpdateHandler
-     */
     protected function createHandler(): MultiUpdateHandler
     {
-        $dataStore = $this->createDataStore();
-        return new MultiUpdateHandler($dataStore);
+        return new MultiUpdateHandler($this->createMock(DataStoresInterface::class));
     }
 
-    public function createDataStore(): DataStoresInterface
-    {
-        $memory = new Memory(['id', 'name', 'value']);
-        for ($i = 1; $i <= 4; $i++) {
-            $memory->create(['id' => $i, 'name' => "name{$i}", 'value' => $i * 10], true);
-        }
-        return $memory;
-    }
-
-    public function testHandleSuccess()
+    public function testHandleSuccessWithMock()
     {
         $records = [
             ['id' => 1, 'name' => 'updated1'],
@@ -121,11 +120,71 @@ class MultiUpdateHandlerTest extends BaseHandlerTest
             ->withAttribute('primaryKeyValue', null);
 
         $response = $handler->process($request, $this->getNullHandler());
-        $this->assertNotNull($response);
+
         $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('application/json', $response->getHeaderLine('Content-Type'));
+
+        $body = json_decode((string) $response->getBody(), true);
+        $this->assertEquals([1, 2], $body);
     }
 
-    private function getNullHandler()
+    public function testHandleSuccessWithRealDataStore()
+    {
+        $memory = new Memory(['id', 'name', 'value']);
+        $memory->create(['id' => 1, 'name' => 'name1', 'value' => 10]);
+        $memory->create(['id' => 2, 'name' => 'name2', 'value' => 20]);
+
+        $handler = new MultiUpdateHandler($memory);
+
+        $records = [
+            ['id' => 1, 'name' => 'updated1'],
+            ['id' => 2, 'value' => 99],
+        ];
+
+        $request = (new ServerRequest())
+            ->withMethod('PUT')
+            ->withParsedBody($records)
+            ->withAttribute('rqlQueryObject', new RqlQuery(''))
+            ->withAttribute('primaryKeyValue', null);
+
+        $response = $handler->process($request, $this->getNullHandler());
+
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $body = json_decode((string) $response->getBody(), true);
+        $this->assertEquals([1, 2], $body);
+
+        // Verify actual data was updated
+        $this->assertEquals('updated1', $memory->read(1)['name']);
+        $this->assertEquals(10, $memory->read(1)['value']); // unchanged
+        $this->assertEquals('name2', $memory->read(2)['name']); // unchanged
+        $this->assertEquals(99, $memory->read(2)['value']);
+    }
+
+    public function testHandleDataStoreException()
+    {
+        /** @var DataStoresInterface|MockObject $dataStore */
+        $dataStore = $this->createMock(HttpClient::class);
+
+        $dataStore->expects($this->once())
+            ->method('multiUpdate')
+            ->willThrowException(new \rollun\datastore\DataStore\DataStoreException('Update failed'));
+
+        $handler = new MultiUpdateHandler($dataStore);
+
+        $request = (new ServerRequest())
+            ->withMethod('PUT')
+            ->withParsedBody([['id' => 1, 'name' => 'test']])
+            ->withAttribute('rqlQueryObject', new RqlQuery(''))
+            ->withAttribute('primaryKeyValue', null);
+
+        $this->expectException(\rollun\datastore\DataStore\DataStoreException::class);
+        $this->expectExceptionMessage('Update failed');
+
+        $handler->process($request, $this->getNullHandler());
+    }
+
+    private function getNullHandler(): \Psr\Http\Server\RequestHandlerInterface
     {
         return new class implements \Psr\Http\Server\RequestHandlerInterface {
             public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface
