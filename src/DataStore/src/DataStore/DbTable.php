@@ -728,6 +728,13 @@ class DbTable extends DataStoreAbstract
             $id = $record[$identifier];
             $this->checkIdentifierType($id);
 
+            // Check for duplicate IDs
+            if (array_key_exists($id, $recordsMap)) {
+                throw new DataStoreException(
+                    "Duplicate primary key '{$id}' found in multiUpdate input. Each record must have unique identifier."
+                );
+            }
+
             // Collect columns for this record (excluding PK)
             $recordData = [];
             foreach ($record as $column => $value) {
@@ -859,7 +866,7 @@ class DbTable extends DataStoreAbstract
 
             // Add values and flags for each column
             foreach ($columns as $column) {
-                if (isset($recordsMap[$id][$column])) {
+                if (array_key_exists($column, $recordsMap[$id])) {
                     // Column is present in this record - update it
                     $rowValues[] = $recordsMap[$id][$column];
                     $rowFlags[] = 1;
