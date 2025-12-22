@@ -84,7 +84,7 @@ class DbTableIdentifierCaseTest extends TestCase
     public function testUpdateSucceedsWhenIdentifierFromConfigMatchesColumnCase(): void
     {
         $this->tableGateway->insert(['Id' => 1, 'name' => 'name', 'surname' => 'surname']);
-        $dataStore = new DbTable($this->tableGateway, false, 'Id');
+        $dataStore = new DbTable($this->tableGateway, false, null, 'Id');
 
         $updated = $dataStore->update(['Id' => 1, 'name' => 'updated']);
 

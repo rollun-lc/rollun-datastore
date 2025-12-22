@@ -82,8 +82,8 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
         return new $requestedClassName(
             $tableGateway,
             $writeLogs,
-            $identifier,
-            $container->get(LoggerInterface::class)
+            $container->get(LoggerInterface::class),
+            $identifier
         );
     }
 
