@@ -76,13 +76,13 @@ class DbTable extends DataStoreAbstract
     public function __construct(
         TableGateway $dbTable,
         bool $writeLogs = false,
-        ?string $identifier = null,
-        ?LoggerInterface $loggerService = null
+        ?LoggerInterface $loggerService = null,
+        ?string $identifier = null
     ) {
         $this->dbTable = $dbTable;
         $this->writeLogs = $writeLogs;
-        $this->identifier = $identifier;
         $this->loggerService = $loggerService ?? new NullLogger();
+        $this->identifier = $identifier;
     }
 
     /**
