@@ -65,17 +65,32 @@ class DbTable extends DataStoreAbstract
     protected $loggerService;
 
     /**
+     * @var string|null
+     */
+    protected $identifier;
+
+    /**
      * DbTable constructor.
      * @param TableGateway $dbTable
      */
     public function __construct(
         TableGateway $dbTable,
         bool $writeLogs = false,
-        ?LoggerInterface $loggerService = null
+        ?LoggerInterface $loggerService = null,
+        ?string $identifier = null
     ) {
         $this->dbTable = $dbTable;
         $this->writeLogs = $writeLogs;
         $this->loggerService = $loggerService ?? new NullLogger();
+        $this->identifier = $identifier;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getIdentifier()
+    {
+        return $this->identifier ?? parent::getIdentifier();
     }
 
     protected function getSqlQueryBuilder()

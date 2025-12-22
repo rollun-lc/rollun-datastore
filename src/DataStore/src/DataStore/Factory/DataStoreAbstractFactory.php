@@ -19,6 +19,7 @@ abstract class DataStoreAbstractFactory extends AbstractFactoryAbstract
     const KEY_DATASTORE = 'dataStore';
 
     const KEY_WRITE_LOGS = 'writeLogs';
+    const KEY_IDENTIFIER = 'identifier';
 
     protected static $KEY_DATASTORE_CLASS = DataStoreAbstract::class;
 

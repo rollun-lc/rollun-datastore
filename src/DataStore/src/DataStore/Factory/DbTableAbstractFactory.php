@@ -42,6 +42,7 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
     public const KEY_TABLE_NAME = 'tableName';
     public const KEY_TABLE_GATEWAY = 'tableGateway';
     public const KEY_DB_ADAPTER = 'dbAdapter';
+    public const KEY_IDENTIFIER = 'identifier';
 
     public static $KEY_DATASTORE_CLASS = DbTable::class;
 
@@ -67,6 +68,7 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
         $requestedClassName = $serviceConfig[self::KEY_CLASS];
         $tableGateway = $this->getTableGateway($container, $serviceConfig, $requestedName);
         $writeLogs = $serviceConfig[DataStoreAbstractFactory::KEY_WRITE_LOGS] ?? false;
+        $identifier = $serviceConfig[self::KEY_IDENTIFIER] ?? null;
 
         if (!is_bool($writeLogs)) {
             throw new ServiceNotCreatedException(
@@ -76,7 +78,12 @@ class DbTableAbstractFactory extends DataStoreAbstractFactory
 
         $this::$KEY_IN_CREATE = 0;
 
-        return new $requestedClassName($tableGateway, $writeLogs, $container->get(LoggerInterface::class));
+        return new $requestedClassName(
+            $tableGateway,
+            $writeLogs,
+            $container->get(LoggerInterface::class),
+            $identifier
+        );
     }
 
     /**
