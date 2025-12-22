@@ -16,9 +16,13 @@ class SerializedDbTable extends DbTable
 {
     protected $tableName;
 
-    public function __construct(TableGateway $dbTable, bool $writeLogs = false, ?LoggerInterface $loggerService = null)
-    {
-        parent::__construct($dbTable, $writeLogs, $loggerService);
+    public function __construct(
+        TableGateway $dbTable,
+        bool $writeLogs = false,
+        ?LoggerInterface $loggerService = null,
+        ?string $identifier = null
+    ) {
+        parent::__construct($dbTable, $writeLogs, $loggerService, $identifier);
         $this->tableName = $this->dbTable->getTable();
     }
 
@@ -27,7 +31,7 @@ class SerializedDbTable extends DbTable
      */
     public function __sleep()
     {
-        return ["tableName", "writeLogs"];
+        return ["tableName", "writeLogs", "identifier"];
     }
 
     /**

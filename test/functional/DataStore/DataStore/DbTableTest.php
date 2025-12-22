@@ -84,7 +84,7 @@ class DbTableTest extends TestCase
         $tableGateway = $tableGateway ?: $this->tableGateway;
 
         if (!is_null($logger)) {
-            return new DbTable($tableGateway, $writeLogs, $logger);
+            return new DbTable($tableGateway, $writeLogs, $logger, null);
         }
 
         return new DbTable($tableGateway, $writeLogs);
