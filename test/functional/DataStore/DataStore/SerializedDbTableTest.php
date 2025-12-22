@@ -111,8 +111,8 @@ class SerializedDbTableTest extends TestCase
         return new SerializedDbTable(
             $tableGateway,
             false,
-            null,
-            $this->getContainer()->get(LoggerInterface::class)
+            $this->getContainer()->get(LoggerInterface::class),
+            null
         );
     }
 }
