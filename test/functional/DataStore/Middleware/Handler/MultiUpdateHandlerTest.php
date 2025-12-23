@@ -18,57 +18,55 @@ use Laminas\Diactoros\ServerRequest;
 class MultiUpdateHandlerTest extends BaseHandlerTest
 {
     /**
-     * @return array
+     * @return \Generator
      */
-    public function canHandleProvider()
+    public function canHandleProvider(): \Generator
     {
-        return [
-            // method, body, rqlQueryObject, primaryKeyValue, expected
+        // method, body, rqlQueryObject, primaryKeyValue, expected
 
-            // Valid PUT request with array of records
-            'valid single record' => ['PUT', [['id' => 1, 'name' => 'test']], new RqlQuery(''), null, true],
+        // Valid PUT request with array of records
+        yield 'valid single record' => ['PUT', [['id' => 1, 'name' => 'test']], new RqlQuery(), null, true];
 
-            // Valid PUT with multiple records
-            'valid multiple records' => ['PUT', [['id' => 1, 'name' => 'a'], ['id' => 2, 'name' => 'b']], new RqlQuery(''), null, true],
+        // Valid PUT with multiple records
+        yield 'valid multiple records' => ['PUT', [['id' => 1, 'name' => 'a'], ['id' => 2, 'name' => 'b']], new RqlQuery(), null, true];
 
-            // Invalid: not PUT
-            'invalid method POST' => ['POST', [['id' => 1, 'name' => 'test']], new RqlQuery(''), null, false],
-            'invalid method PATCH' => ['PATCH', [['id' => 1, 'name' => 'test']], new RqlQuery(''), null, false],
-            'invalid method GET' => ['GET', [['id' => 1, 'name' => 'test']], new RqlQuery(''), null, false],
+        // Invalid: not PUT
+        yield 'invalid method POST' => ['POST', [['id' => 1, 'name' => 'test']], new RqlQuery(), null, false];
+        yield 'invalid method PATCH' => ['PATCH', [['id' => 1, 'name' => 'test']], new RqlQuery(), null, false];
+        yield 'invalid method GET' => ['GET', [['id' => 1, 'name' => 'test']], new RqlQuery(), null, false];
 
-            // Invalid: not array of arrays (single record)
-            'invalid single record' => ['PUT', ['id' => 1, 'name' => 'test'], new RqlQuery(''), null, false],
+        // Invalid: not array of arrays (single record)
+        yield 'invalid single record' => ['PUT', ['id' => 1, 'name' => 'test'], new RqlQuery(), null, false];
 
-            // Invalid: simple array
-            'invalid list array' => ['PUT', [1, 2, 3], new RqlQuery(''), null, false],
+        // Invalid: simple array
+        yield 'invalid list array' => ['PUT', [1, 2, 3], new RqlQuery(), null, false];
 
-            // Invalid: has primaryKeyValue
-            'invalid with primaryKeyValue' => ['PUT', [['id' => 1, 'name' => 'test']], new RqlQuery(''), 123, false],
+        // Invalid: has primaryKeyValue
+        yield 'invalid with primaryKeyValue' => ['PUT', [['id' => 1, 'name' => 'test']], new RqlQuery(), 123, false];
 
-            // Invalid: has non-empty RQL query
-            'invalid with RQL query' => ['PUT', [['id' => 1, 'name' => 'test']], new RqlQuery('eq(name,test)'), null, false],
+        // Invalid: has non-empty RQL query
+        yield 'invalid with RQL query' => ['PUT', [['id' => 1, 'name' => 'test']], new RqlQuery('eq(name,test)'), null, false];
 
-            // Invalid: array contains non-associative array
-            'invalid mixed arrays' => ['PUT', [['id' => 1, 'name' => 'test'], [1, 2, 3]], new RqlQuery(''), null, false],
+        // Invalid: array contains non-associative array
+        yield 'invalid mixed arrays' => ['PUT', [['id' => 1, 'name' => 'test'], [1, 2, 3]], new RqlQuery(), null, false];
 
-            // Invalid: empty array
-            'invalid empty array' => ['PUT', [], new RqlQuery(''), null, false],
+        // Invalid: empty array
+        yield 'invalid empty array' => ['PUT', [], new RqlQuery(), null, false];
 
-            // Invalid: null body
-            'invalid null body' => ['PUT', null, new RqlQuery(''), null, false],
+        // Invalid: null body
+        yield 'invalid null body' => ['PUT', null, new RqlQuery(), null, false];
 
-            // Invalid: contains empty array
-            'invalid contains empty array' => ['PUT', [[], ['id' => 1, 'name' => 'test']], new RqlQuery(''), null, false],
+        // Invalid: contains empty array
+        yield 'invalid contains empty array' => ['PUT', [[], ['id' => 1, 'name' => 'test']], new RqlQuery(), null, false];
 
-            // Invalid: first element is empty array
-            'invalid first element empty' => ['PUT', [[], ['id' => 2, 'name' => 'test']], new RqlQuery(''), null, false],
+        // Invalid: first element is empty array
+        yield 'invalid first element empty' => ['PUT', [[], ['id' => 2, 'name' => 'test']], new RqlQuery(), null, false];
 
-            // Invalid: all elements are empty arrays
-            'invalid all empty arrays' => ['PUT', [[], []], new RqlQuery(''), null, false],
+        // Invalid: all elements are empty arrays
+        yield 'invalid all empty arrays' => ['PUT', [[], []], new RqlQuery(), null, false];
 
-            // Invalid: associative outer array
-            'invalid associative outer' => ['PUT', ['a' => ['id' => 1, 'name' => 'test']], new RqlQuery(''), null, false],
-        ];
+        // Invalid: associative outer array
+        yield 'invalid associative outer' => ['PUT', ['a' => ['id' => 1, 'name' => 'test']], new RqlQuery(), null, false];
     }
 
     /**
