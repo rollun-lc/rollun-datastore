@@ -710,47 +710,10 @@ class DbTable extends DataStoreAbstract
         $allColumns = []; // Track all columns across all records
 
         foreach ($records as $key => $record) {
-            // Calculate item number for error messages
-            $itemNumber = is_int($key) ? $key + 1 : $key;
+            $extracted = $this->validateAndExtractRecordData($record, $key, $identifier, $recordsMap);
 
-            // Validate each record is an array
-            if (!is_array($record)) {
-                throw new DataStoreException(
-                    "Item {$itemNumber} must be an array, " . gettype($record) . " given"
-                );
-            }
-
-            // Validate: each record must have primary key
-            if (!isset($record[$identifier])) {
-                throw new DataStoreException("Item {$itemNumber} must have primary key");
-            }
-
-            $id = $record[$identifier];
-            $this->checkIdentifierType($id);
-
-            // Check for duplicate IDs
-            if (array_key_exists($id, $recordsMap)) {
-                throw new DataStoreException(
-                    "Duplicate primary key '{$id}' found in multiUpdate input. Each record must have unique identifier."
-                );
-            }
-
-            // Collect columns for this record (excluding PK)
-            $recordData = [];
-            foreach ($record as $column => $value) {
-                if ($column !== $identifier) {
-                    // Handle boolean values
-                    if ($value === false) {
-                        $value = 0;
-                    } elseif ($value === true) {
-                        $value = 1;
-                    }
-                    $recordData[$column] = $value;
-                    $allColumns[$column] = true;
-                }
-            }
-
-            $recordsMap[$id] = $recordData;
+            $recordsMap[$extracted['id']] = $extracted['data'];
+            $this->collectUniqueColumns($extracted['data'], $allColumns);
         }
 
         if (empty($recordsMap)) {
@@ -926,6 +889,79 @@ class DbTable extends DataStoreAbstract
             'query' => $sql,
             'parameters' => $parameters,
         ];
+    }
+
+    /**
+     * Validate single record and extract its data
+     *
+     * @param mixed $record Record to validate
+     * @param int|string $key Record key for error messages
+     * @param string $identifier Primary key column name
+     * @param array $recordsMap Existing records map for duplicate check
+     * @return array ['id' => mixed, 'data' => array]
+     * @throws DataStoreException
+     */
+    private function validateAndExtractRecordData(
+        $record,
+        $key,
+        string $identifier,
+        array $recordsMap
+    ): array {
+        $itemNumber = is_int($key) ? $key + 1 : $key;
+
+        // Validate each record is an array
+        if (!is_array($record)) {
+            throw new DataStoreException(
+                "Item {$itemNumber} must be an array, " . gettype($record) . " given"
+            );
+        }
+
+        // Validate: each record must have primary key
+        if (!isset($record[$identifier])) {
+            throw new DataStoreException("Item {$itemNumber} must have primary key");
+        }
+
+        $id = $record[$identifier];
+        $this->checkIdentifierType($id);
+
+        // Check for duplicate IDs
+        if (array_key_exists($id, $recordsMap)) {
+            throw new DataStoreException(
+                "Duplicate primary key '{$id}' found in multiUpdate input. Each record must have unique identifier."
+            );
+        }
+
+        // Extract and normalize column data (excluding PK)
+        $recordData = [];
+        foreach ($record as $column => $value) {
+            if ($column !== $identifier) {
+                // Handle boolean values
+                if ($value === false) {
+                    $value = 0;
+                } elseif ($value === true) {
+                    $value = 1;
+                }
+                $recordData[$column] = $value;
+            }
+        }
+
+        return [
+            'id' => $id,
+            'data' => $recordData,
+        ];
+    }
+
+    /**
+     * Collect unique columns from record data
+     *
+     * @param array $recordData Record column data
+     * @param array &$allColumns Reference to all columns collection
+     */
+    private function collectUniqueColumns(array $recordData, array &$allColumns): void
+    {
+        foreach (array_keys($recordData) as $column) {
+            $allColumns[$column] = true;
+        }
     }
 
     /**
