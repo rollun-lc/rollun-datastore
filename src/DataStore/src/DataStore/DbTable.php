@@ -750,17 +750,13 @@ class DbTable extends DataStoreAbstract
             $result = $statement->execute();
             $end = microtime(true);
 
-            // Log performance metrics
             $logContext = [
                 self::LOG_METHOD => __FUNCTION__,
                 self::LOG_TABLE => $this->dbTable->getTable(),
                 self::LOG_SQL => $sqlData['query'],
                 self::LOG_TIME => $this->getRequestTime($start, $end),
-                self::LOG_REQUEST => count($records) . ' records',
-                self::LOG_RESPONSE => $result->getAffectedRows() . ' updated',
-                'approach' => 'hybrid-flags',
-                'total_columns' => count($columns),
-                'total_parameters' => count($sqlData['parameters']),
+                self::LOG_REQUEST => $records,
+                self::LOG_RESPONSE => $result->getAffectedRows(),
             ];
 
             $this->writeLogsIfNeeded($logContext);
