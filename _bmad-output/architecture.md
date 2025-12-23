@@ -1,62 +1,111 @@
-# Architecture
+---
+stepsCompleted: [1, 2, 3]
+inputDocuments:
+  - _bmad-output/prd.md
+  - _bmad-output/index.md
+  - _bmad-output/project-overview.md
+  - _bmad-output/architecture.previous.md
+  - _bmad-output/source-tree-analysis.md
+  - _bmad-output/component-inventory.md
+  - _bmad-output/development-guide.md
+  - _bmad-output/deployment-guide.md
+  - docs/index.md
+  - docs/datastore-schema.md
+  - docs/datastore_methods.md
+  - docs/request-logs.md
+  - docs/typecasting.md
+  - docs/rql.md
+  - src/DataStore/src/DataStore/Scheme/README.md
+workflowType: 'architecture'
+lastStep: 0
+project_name: 'rollun-datastore'
+user_name: 'Iliya'
+date: '2025-12-23T10:47:26Z'
+---
 
-## Executive Summary
+# Architecture Decision Document
 
-`rollun-datastore` — PHP библиотека для унифицированного доступа к хранилищам данных с RQL-выражениями. Проект организован как модульная библиотека с конфигурацией через Laminas ServiceManager и опциональным HTTP-слоем (middleware) для REST доступа.
+_This document builds collaboratively through step-by-step discovery. Sections are appended as we work through each architectural decision together._
 
-## Technology Stack
+## Project Context Analysis
 
-- **Language:** PHP ^8.0
-- **Dependency Manager:** Composer
-- **Core Framework/Components:** Laminas (ServiceManager, Db, Diactoros, Stratigility), Mezzio (dev)
-- **Testing:** PHPUnit
-- **Tooling:** PHP-CS-Fixer, PHP_CodeSniffer, Rector
-- **Runtime/Infra:** Docker, Docker Compose
+### Requirements Overview
 
-## Architecture Pattern
+**Functional Requirements:**
+- Сохранить обратную совместимость через DataStoreInterface и поведенческие контракты.
+- Обеспечить корректный парсинг RQL и типизацию без double-encoding.
+- MVP: каркас DDD + Clean Architecture с реализацией read для MemoryDataStore.
+- Тесты на уровне модулей для предотвращения регрессий.
+- Краткая документация и инструкция миграции без изменений кода.
 
-- **Style:** Модульная библиотека с DI-контейнером и конфигурацией через ConfigAggregator.
-- **Modules:** DataStore, Repository, Uploader (каждый как отдельный namespace с ConfigProvider).
-- **Entry (optional):** `public/index.php` для HTTP-интеграции.
+**Non-Functional Requirements:**
+- Надежность: отсутствие регрессий в RQL, типизации и поведении запросов.
+- Поддерживаемость: четкие границы модулей.
+- Тестируемость: полное модульное покрытие.
 
-## Data Architecture
+**Scale and Complexity:**
+- Основной домен: backend PHP библиотека.
+- Уровень сложности: низкий.
+- Оценка компонентов: 3 модуля (DataStore, Repository, Uploader) + RQL и типы.
 
-- Для типа проекта *library* отдельная схема БД не фиксируется в коде.
-- Взаимодействие с БД конфигурируется через `config/autoload/db.global.php` и таблицы/гейтвеи в `config/autoload/rollun.datastore.Asset*.php`.
+### Technical Constraints and Dependencies
 
-## API Design
+- PHP 8.x, установка через Composer.
+- Обязательная обратная совместимость DataStoreInterface.
+- Архитектурное требование: DDD + Clean Architecture.
+- MVP ограничен MemoryDataStore read при расширяемой архитектуре.
 
-- API как отдельный сервис не выделен; библиотека предоставляет middleware и обработчики для REST-доступа (DataStore middleware).
-- Протокол запросов описан в существующей документации (см. `docs/datastore_methods.md`).
+### Cross-Cutting Concerns Identified
 
-## Component Overview
+- Обратная совместимость публичных контрактов.
+- Единое поведение RQL и типизации.
+- Тесты по модулям для защиты от регрессий.
+- Документация и миграция синхронизированы с реальным поведением.
 
-- **DataStore:** ядро датастора (RQL, схемы, типы, форматтеры, middleware, table gateways).
-- **Repository:** модельные абстракции, кастинг и репозиторий.
-- **Uploader:** загрузчик и итераторы пакетов.
+## Starter Template Evaluation
 
-## Source Tree (High-Level)
+### Primary Technology Domain
 
-- `src/DataStore/src` — datastore core
-- `src/Repository/src` — repository core
-- `src/Uploader/src` — uploader core
-- `config/` — конфигурация модулей и DI
-- `public/` — опциональный HTTP entry
-- `docs/` — документация
-- `test/` — тесты
+Backend PHP library (Composer package) with Laminas components; optional HTTP layer is not the primary deliverable.
 
-## Development Workflow
+### Starter Options Considered
 
-- `make init` / `make init-8.0` — поднять окружение и установить зависимости
-- `make test` — запустить тесты в контейнере
-- `make lint`, `make fixcs`, `make rector` — качество кода
+- **laminas/laminas-mvc-skeleton**: MVC‑приложение на Laminas. Удобно для app‑проекта, но избыточно для библиотеки.
+- **mezzio/mezzio-skeleton**: PSR‑15 middleware‑приложение. Подходит для HTTP‑слоя, но не для библиотечного ядра.
 
-## Deployment Architecture
+### Selected Starter: None (custom library baseline)
 
-- Docker Compose: nginx + php-fpm + mysql + csfixer
-- Конфиги в `docker/` и `docker-compose*.yml`
+**Rationale for Selection:**
+- Проект — библиотека с DDD/Clean Architecture, а не web‑app.
+- Использование app‑скелета навяжет слои и структуру, не соответствующие целевому продукту.
+- Сохраняем текущую структуру и строим архитектуру модульно внутри библиотеки.
 
-## Testing Strategy
+**Initialization Command:**
 
-- Unit/functional/integration тесты в `test/`
-- Запуск через `composer test` или `make test`
+```bash
+# No starter template. Use existing repository structure.
+# For local setup, use:
+composer install
+```
+
+**Architectural Decisions Provided by Starter:**
+
+**Language & Runtime:**
+- PHP 8.x (existing project constraint)
+
+**Styling Solution:**
+- Not applicable (library)
+
+**Build Tooling:**
+- Composer, existing tooling (CSFixer, Rector, Psalm, PHPStan)
+
+**Testing Framework:**
+- PHPUnit (existing tooling)
+
+**Code Organization:**
+- Module‑oriented library structure (DataStore/Repository/Uploader)
+
+**Development Experience:**
+- Existing Docker/Makefile flows where needed
+
+**Note:** Project initialization is based on the current repository; no create‑project starter is used.
