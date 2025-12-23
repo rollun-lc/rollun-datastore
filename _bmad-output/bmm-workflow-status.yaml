@@ -26,7 +26,7 @@ workflow_status:
   brainstorm-project: skipped
   research: skipped
   product-brief: skipped
-  prd: required
+  prd: "_bmad-output/prd.md"
   create-ux-design: conditional
   create-architecture: recommended
   create-epics-and-stories: required
