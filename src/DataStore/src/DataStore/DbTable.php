@@ -755,7 +755,7 @@ class DbTable extends DataStoreAbstract
                 self::LOG_TABLE => $this->dbTable->getTable(),
                 self::LOG_SQL => $sqlData['query'],
                 self::LOG_TIME => $this->getRequestTime($start, $end),
-                self::LOG_REQUEST => $records,
+                self::LOG_REQUEST => $this->prepareMultiUpdateRequestLog($records),
                 self::LOG_RESPONSE => $result->getAffectedRows(),
             ];
 
@@ -1021,6 +1021,27 @@ class DbTable extends DataStoreAbstract
     private function getRequestTime(float $start, float $end): float
     {
         return round($end - $start, 3);
+    }
+
+    /**
+     * Prepare request log data for multiUpdate with truncation for large batches
+     *
+     * @param array $records
+     * @return array
+     */
+    private function prepareMultiUpdateRequestLog(array $records): array
+    {
+        $totalCount = count($records);
+        $requestLogData = [
+            'count' => $totalCount,
+            'records' => array_slice($records, 0, 5),
+        ];
+
+        if ($totalCount > 5) {
+            $requestLogData['truncated'] = ($totalCount - 5) . ' more records truncated';
+        }
+
+        return $requestLogData;
     }
 
     /**
