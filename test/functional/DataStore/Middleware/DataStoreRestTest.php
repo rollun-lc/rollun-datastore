@@ -22,12 +22,17 @@ class DataStoreRestTest extends TestCase
         $dataStoreMock = $this->getMockBuilder(DataStoresInterface::class)->getMock();
 
         $middlewarePipe = new MiddlewarePipe();
+        $middlewarePipe->pipe(new Handler\HeadHandler($dataStoreMock));
+        $middlewarePipe->pipe(new Handler\DownloadCsvHandler($dataStoreMock));
         $middlewarePipe->pipe(new Handler\QueryHandler($dataStoreMock));
         $middlewarePipe->pipe(new Handler\ReadHandler($dataStoreMock));
+        $middlewarePipe->pipe(new Handler\MultiCreateHandler($dataStoreMock));
+        $middlewarePipe->pipe(new Handler\MultiUpdateHandler($dataStoreMock));
         $middlewarePipe->pipe(new Handler\CreateHandler($dataStoreMock));
         $middlewarePipe->pipe(new Handler\UpdateHandler($dataStoreMock));
         $middlewarePipe->pipe(new Handler\RefreshHandler($dataStoreMock));
         $middlewarePipe->pipe(new Handler\DeleteHandler($dataStoreMock));
+        $middlewarePipe->pipe(new Handler\QueriedUpdateHandler($dataStoreMock));
         $middlewarePipe->pipe(new Handler\ErrorHandler());
 
         //$this->assertAttributeEquals($middlewarePipe, 'middlewarePipe', new DataStoreRest($dataStoreMock));
