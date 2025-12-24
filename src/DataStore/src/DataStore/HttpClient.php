@@ -332,13 +332,7 @@ class HttpClient extends DataStoreAbstract
                 throw new DataStoreException("Can't create items {$responseMessage}");
             }
         } else {
-            $client = $this->initHttpClient(Request::METHOD_POST, $this->url);
-            $result = [];
-            foreach ($records as $record) {
-                $client->setRawBody(Serializer::jsonSerialize($record));
-                $response = self::sendByClient($client);
-                $result[] = Serializer::jsonUnserialize($response->getBody());
-            }
+            throw new DataStoreException('Multi create for this datastore is not implemented.');
         }
 
         return $result;
