@@ -41,14 +41,12 @@ abstract class BaseTest extends FunctionalTestCase
 
     public function testMultiUpdate(): void
     {
-        $updatedRecords = $this->getDataStore()->multiUpdate([
+        $this->expectException(OperationTimedOutException::class);
+
+        $this->getDataStore()->multiUpdate([
             ['id' => 1, 'value' => 'foo'],
             ['id' => 2, 'value' => 'bar'],
         ]);
-
-        // Any exceptions that are thrown while updating records are simply ignored in this method.
-        // Therefore, the best we can do is to check that nothing has been updated.
-        self::assertEmpty($updatedRecords);
     }
 
     public function testQueriedUpdate(): void

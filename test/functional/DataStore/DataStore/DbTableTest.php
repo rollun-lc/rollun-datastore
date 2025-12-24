@@ -49,12 +49,14 @@ class DbTableTest extends TestCase
             'field_type' => 'Varchar',
             'field_params' => [
                 'length' => 255,
+                'nullable' => true,
             ],
         ],
         'surname' => [
             'field_type' => 'Varchar',
             'field_params' => [
                 'length' => 255,
+                'nullable' => true,
             ],
         ],
     ];
@@ -379,6 +381,281 @@ class DbTableTest extends TestCase
             foreach (range(1, 3) as $id) {
                 $this->assertEquals(['id' => $id, 'name' => "n{$id}", 'surname' => "s{$id}"], $this->read($id));
             }
+        }
+    }
+
+    public function testMultiUpdateSuccess()
+    {
+        $object = $this->createObject();
+
+        // Create initial records
+        $initialRecords = [
+            ['id' => 1, 'name' => 'name1', 'surname' => 'surname1'],
+            ['id' => 2, 'name' => 'name2', 'surname' => 'surname2'],
+            ['id' => 3, 'name' => 'name3', 'surname' => 'surname3'],
+        ];
+
+        foreach ($initialRecords as $record) {
+            $object->create($record);
+        }
+
+        // Update multiple records
+        $updateRecords = [
+            ['id' => 1, 'name' => 'updated1', 'surname' => 'updated_surname1'],
+            ['id' => 2, 'name' => 'updated2'],
+            ['id' => 3, 'surname' => 'updated_surname3'],
+        ];
+
+        $ids = $object->multiUpdate($updateRecords);
+
+        sort($ids);
+        $this->assertEquals([1, 2, 3], $ids);
+
+        // Verify updates
+        $this->assertEquals(
+            ['id' => 1, 'name' => 'updated1', 'surname' => 'updated_surname1'],
+            $this->read(1)
+        );
+        $this->assertEquals(
+            ['id' => 2, 'name' => 'updated2', 'surname' => 'surname2'],
+            $this->read(2)
+        );
+        $this->assertEquals(
+            ['id' => 3, 'name' => 'name3', 'surname' => 'updated_surname3'],
+            $this->read(3)
+        );
+    }
+
+    public function testMultiUpdateThrowsExceptionForSingleRecord()
+    {
+        $object = $this->createObject();
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage('Item id must be an array, integer given');
+
+        // Pass single record instead of array of records
+        $object->multiUpdate(['id' => 1, 'name' => 'test']);
+    }
+
+    public function testMultiUpdateThrowsExceptionForInvalidRecord()
+    {
+        $object = $this->createObject();
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage('Item 2 must be an array, string given');
+
+        // Pass array with non-array element
+        $object->multiUpdate([
+            ['id' => 1, 'name' => 'valid'],
+            'invalid_record',
+        ]);
+    }
+
+    /**
+     * @dataProvider multiUpdateEdgeCasesProvider
+     */
+    public function testMultiUpdateEdgeCases(
+        array $initialRecords,
+        array $updateRecords,
+        array $expectedIds,
+        array $verifications,
+        string $description
+    ) {
+        $object = $this->createObject();
+
+        // Create initial records
+        foreach ($initialRecords as $record) {
+            $object->create($record);
+        }
+
+        // Execute multiUpdate
+        $ids = $object->multiUpdate($updateRecords);
+        sort($ids);
+
+        // Verify returned IDs
+        $this->assertEquals($expectedIds, $ids, $description);
+
+        // Verify record states
+        foreach ($verifications as $id => $expectedRecord) {
+            $this->assertEquals($expectedRecord, $this->read($id), "Failed for record ID {$id}: {$description}");
+        }
+    }
+
+    public function multiUpdateEdgeCasesProvider(): array
+    {
+        return [
+            'update single column' => [
+                'initialRecords' => [
+                    ['id' => 1, 'name' => 'name1', 'surname' => 'surname1'],
+                    ['id' => 2, 'name' => 'name2', 'surname' => 'surname2'],
+                ],
+                'updateRecords' => [
+                    ['id' => 1, 'name' => 'updated1'],
+                    ['id' => 2, 'surname' => 'updated_surname2'],
+                ],
+                'expectedIds' => [1, 2],
+                'verifications' => [
+                    1 => ['id' => 1, 'name' => 'updated1', 'surname' => 'surname1'],
+                    2 => ['id' => 2, 'name' => 'name2', 'surname' => 'updated_surname2'],
+                ],
+                'description' => 'Each record updates only its specified columns',
+            ],
+            'update with different columns per record' => [
+                'initialRecords' => [
+                    ['id' => 1, 'name' => 'name1', 'surname' => 'surname1'],
+                    ['id' => 2, 'name' => 'name2', 'surname' => 'surname2'],
+                    ['id' => 3, 'name' => 'name3', 'surname' => 'surname3'],
+                ],
+                'updateRecords' => [
+                    ['id' => 1, 'name' => 'new1'],
+                    ['id' => 2, 'surname' => 'new2'],
+                    ['id' => 3, 'name' => 'new3', 'surname' => 'new3s'],
+                ],
+                'expectedIds' => [1, 2, 3],
+                'verifications' => [
+                    1 => ['id' => 1, 'name' => 'new1', 'surname' => 'surname1'],
+                    2 => ['id' => 2, 'name' => 'name2', 'surname' => 'new2'],
+                    3 => ['id' => 3, 'name' => 'new3', 'surname' => 'new3s'],
+                ],
+                'description' => 'Partial updates work correctly with varying columns',
+            ],
+        ];
+    }
+
+    public function testMultiUpdateRollsBackOnFailure()
+    {
+        $object = $this->createObject();
+
+        $initialRecords = [
+            ['id' => 1, 'name' => 'name1', 'surname' => 'surname1'],
+            ['id' => 2, 'name' => 'name2', 'surname' => 'surname2'],
+        ];
+
+        foreach ($initialRecords as $record) {
+            $object->create($record);
+        }
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage("Can't multi update records");
+
+        try {
+            $object->multiUpdate([
+                ['id' => 1, 'name' => 'updated1'],
+                // Unknown column should make UPDATE fail and trigger rollback
+                ['id' => 2, 'unknown_field' => 'boom'],
+            ]);
+        } finally {
+            $this->assertEquals($initialRecords[0], $this->read(1));
+            $this->assertEquals($initialRecords[1], $this->read(2));
+        }
+    }
+
+    public function testMultiUpdateWithNullValues()
+    {
+        $object = $this->createObject();
+
+        // Create initial records
+        $object->create(['id' => 1, 'name' => 'name1', 'surname' => 'surname1']);
+        $object->create(['id' => 2, 'name' => 'name2', 'surname' => 'surname2']);
+
+        // Update with NULL values
+        $ids = $object->multiUpdate([
+            ['id' => 1, 'name' => null],
+            ['id' => 2, 'surname' => null],
+        ]);
+
+        sort($ids);
+        $this->assertEquals([1, 2], $ids);
+
+        // Verify NULL was set correctly
+        $this->assertEquals(['id' => 1, 'name' => null, 'surname' => 'surname1'], $this->read(1));
+        $this->assertEquals(['id' => 2, 'name' => 'name2', 'surname' => null], $this->read(2));
+    }
+
+    public function testMultiUpdateThrowsExceptionForDuplicateIds()
+    {
+        $object = $this->createObject();
+
+        $object->create(['id' => 1, 'name' => 'name1', 'surname' => 'surname1']);
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage("Duplicate primary key '1' found in multiUpdate input");
+
+        $object->multiUpdate([
+            ['id' => 1, 'name' => 'first'],
+            ['id' => 1, 'name' => 'duplicate'],
+        ]);
+    }
+
+    public function testMultiUpdateThrowsExceptionForNonExistentRecords()
+    {
+        $object = $this->createObject();
+
+        $initialRecords = [
+            ['id' => 1, 'name' => 'name1', 'surname' => 'surname1'],
+            ['id' => 2, 'name' => 'name2', 'surname' => 'surname2'],
+        ];
+
+        foreach ($initialRecords as $record) {
+            $object->create($record);
+        }
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage("Can't update items with ids: 999");
+
+        try {
+            $object->multiUpdate([
+                ['id' => 1, 'name' => 'updated1'],
+                ['id' => 999, 'name' => 'non_existent'],
+            ]);
+        } finally {
+            // Verify rollback - original records unchanged
+            $this->assertEquals($initialRecords[0], $this->read(1));
+            $this->assertEquals($initialRecords[1], $this->read(2));
+        }
+    }
+
+    public function testMultiUpdateThrowsExceptionForRecordWithoutPrimaryKey()
+    {
+        $object = $this->createObject();
+
+        $object->create(['id' => 1, 'name' => 'name1', 'surname' => 'surname1']);
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage('Item 2 must have primary key');
+
+        $object->multiUpdate([
+            ['id' => 1, 'name' => 'valid'],
+            ['name' => 'no_id', 'surname' => 'missing_pk'],
+        ]);
+    }
+
+    public function testMultiUpdateThrowsExceptionForEmptyArray()
+    {
+        $object = $this->createObject();
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage('Collection of arrays expected for multiUpdate');
+
+        $object->multiUpdate([]);
+    }
+
+    public function testMultiUpdateThrowsExceptionWhenNoColumnsToUpdate()
+    {
+        $object = $this->createObject();
+
+        $object->create(['id' => 1, 'name' => 'name1', 'surname' => 'surname1']);
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessageMatches("/Can't multi update records/");
+
+        try {
+            $object->multiUpdate([
+                ['id' => 1],
+            ]);
+        } finally {
+            // Record should remain unchanged when update fails
+            $this->assertEquals(['id' => 1, 'name' => 'name1', 'surname' => 'surname1'], $this->read(1));
         }
     }
 
