@@ -300,21 +300,18 @@ SET t.name = CASE WHEN v._update_name = 1 THEN v.name ELSE t.name END,
 ```
 
 **Ключевые особенности:**
-- **Требуется реализация метода `multiUpdate()`** в DataStore (DbTable реализует)
-- Если метод не реализован, возвращается ошибка 500 с сообщением "Multi update is not supported by this datastore"
-- Все обновления выполняются в **одной атомарной транзакции** БД
-- При любой ошибке выполняется **rollback всей транзакции** (принцип "все или ничего")
-- Записи блокируются через `SELECT ... FOR UPDATE` для предотвращения race conditions
+- MultiUpdateHandler принимает только PUT без `id` в path и без RQL
+- Тело запроса — непустой список объектов (индексы 0..N-1), каждый элемент — непустой ассоциативный массив
+- Если `multiUpdate()` отсутствует в реализации DataStore — 500 с сообщением "Multi update is not supported by this datastore"
+- DbTable выполняет обновление в **одной атомарной транзакции** с `SELECT ... FOR UPDATE` и rollback при ошибке
 - **Partial updates:** каждая запись обновляет только свои указанные поля
 - **NULL значения поддерживаются:** `{"id": 1, "name": null}` установит `name = NULL`
-- Если запись не существует — **выбрасывается исключение** (все или ничего)
+- Если запись не существует — **выбрасывается исключение** (DbTable)
 
-**Валидация входных данных:**
-- Тело запроса должно быть массивом массивов (не одиночная запись)
-- Каждый элемент массива должен быть ассоциативным массивом
+**Валидация входных данных (DbTable):**
 - Каждый элемент **должен содержать primary key**
 - **Дублирующиеся ID запрещены** — будет выброшено исключение
-- Передача невалидных данных вернет ошибку 500
+- ID должен быть `integer`, `double` или `string`
 
 **Обработка ошибок:**
 | HTTP код | Описание | Пример |
@@ -324,7 +321,7 @@ SET t.name = CASE WHEN v._update_name = 1 THEN v.name ELSE t.name END,
 | 500 | Невалидные входные данные | `{"error": "Collection of arrays expected for multiUpdate"}` |
 | 500 | Запись без primary key | `{"error": "Item N must have primary key"}` |
 | 500 | Дублирующийся ID | `{"error": "Duplicate primary key 'X' found in multiUpdate input..."}` |
-| 500 | Запись не найдена | `{"error": "Can't update items with ids: X, Y. Records not found."}` |
+| 500 | Запись не найдена | `{"error": "[table]Can't update items with ids: X, Y. Records not found."}` |
 | 500 | Ошибка подключения к БД | `{"error": "Connection error..."}` (ConnectionException) |
 | 500 | Timeout операции | `{"error": "Operation timed out..."}` (OperationTimedOutException) |
 
