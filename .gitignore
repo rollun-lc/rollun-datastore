@@ -95,3 +95,4 @@ data/test
 docker-compose.override.yml
 /.gemini
 /_bmad
+_bmad-output
