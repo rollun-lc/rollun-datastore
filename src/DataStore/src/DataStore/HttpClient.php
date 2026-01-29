@@ -24,6 +24,9 @@ use Laminas\Http\Response;
 class HttpClient extends DataStoreAbstract
 {
     protected const DATASTORE_IDENTIFIER_HEADER = 'X_DATASTORE_IDENTIFIER';
+    private const MULTI_POLICY_ENV = 'DATASTORE_MULTI_POLICY';
+    private const MULTI_POLICY_STRICT = 'strict';
+    private const MULTI_POLICY_SOFT = 'soft';
 
     /**
      * @var string 'http://example.org'
@@ -331,8 +334,14 @@ class HttpClient extends DataStoreAbstract
                 $responseMessage = $this->createResponseMessage($this->url, Request::METHOD_POST, $response);
                 throw new DataStoreException("Can't create items {$responseMessage}");
             }
+        } elseif ($this->isSoftMultiPolicy()) {
+            // Fallback to best-effort single creates
+            $result = parent::multiCreate($records);
         } else {
-            throw new DataStoreException('Multi create for this datastore is not implemented.');
+            throw new DataStoreException(
+                'Multi create for this datastore is not implemented. ' .
+                'See https://github.com/rollun-lc/rollun-datastore/tree/master/docs/index.md#multi-fallback-policy'
+            );
         }
 
         return $result;
@@ -369,8 +378,14 @@ class HttpClient extends DataStoreAbstract
             }
 
             return $result;
+        } elseif ($this->isSoftMultiPolicy()) {
+            // Fallback to best-effort single updates
+            return parent::multiUpdate($records);
         } else {
-            throw new DataStoreException('Multi update for this datastore is not implemented.');
+            throw new DataStoreException(
+                'Multi update for this datastore is not implemented. ' .
+                'See https://github.com/rollun-lc/rollun-datastore/tree/master/docs/index.md#multi-fallback-policy'
+            );
         }
     }
 
@@ -518,5 +533,12 @@ class HttpClient extends DataStoreAbstract
             );
         }
         return $response;
+    }
+
+    private function isSoftMultiPolicy(): bool
+    {
+        $policy = strtolower(trim((string) getenv(self::MULTI_POLICY_ENV)));
+
+        return $policy === self::MULTI_POLICY_SOFT;
     }
 }
