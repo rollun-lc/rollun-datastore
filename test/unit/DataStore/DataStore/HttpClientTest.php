@@ -133,6 +133,66 @@ class HttpClientTest extends TestCase
         }
     }
 
+    public function testMultiCreateNotSupportedStrict()
+    {
+        $clientMock = $this->getMockBuilder(Client::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $token = $this->createMock(LifeCycleToken::class);
+        $ds = new class ($clientMock, '', ['identifier' => 'id'], $token) extends HttpClient {
+            protected function sendHead()
+            {
+                return [];
+            }
+        };
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage(
+            'Multi create for this datastore is not implemented. ' .
+            'See https://github.com/rollun-lc/rollun-datastore/tree/master/docs/index.md#multi-fallback-policy'
+        );
+
+        $ds->multiCreate([['id' => 1, 'name' => 'test']]);
+    }
+
+    public function testMultiCreateFallbackSoftWhenNotSupported()
+    {
+        $prev = getenv('DATASTORE_MULTI_POLICY');
+        putenv('DATASTORE_MULTI_POLICY=soft');
+
+        try {
+            $clientMock = $this->getMockBuilder(Client::class)
+                ->disableOriginalConstructor()
+                ->getMock();
+
+            $token = $this->createMock(LifeCycleToken::class);
+            $ds = new class ($clientMock, '', ['identifier' => 'id'], $token) extends HttpClient {
+                protected function sendHead()
+                {
+                    return [];
+                }
+                public function create($itemData, $rewriteIfExist = false)
+                {
+                    return $itemData;
+                }
+            };
+
+            $items = [
+                ['id' => 1, 'name' => 'a'],
+                ['id' => 2, 'name' => 'b'],
+            ];
+
+            $this->assertSame([1, 2], $ds->multiCreate($items));
+        } finally {
+            if ($prev === false) {
+                putenv('DATASTORE_MULTI_POLICY');
+            } else {
+                putenv('DATASTORE_MULTI_POLICY=' . $prev);
+            }
+        }
+    }
+
     public function testMultiUpdateSuccessWhenSupported()
     {
         $items = [
@@ -243,8 +303,48 @@ class HttpClientTest extends TestCase
         };
 
         $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessage('Multi update for this datastore is not implemented.');
+        $this->expectExceptionMessage(
+            'Multi update for this datastore is not implemented. ' .
+            'See https://github.com/rollun-lc/rollun-datastore/tree/master/docs/index.md#multi-fallback-policy'
+        );
         $ds->multiUpdate([['id' => 1, 'name' => 'test']]);
+    }
+
+    public function testMultiUpdateFallbackSoftWhenNotSupported()
+    {
+        $prev = getenv('DATASTORE_MULTI_POLICY');
+        putenv('DATASTORE_MULTI_POLICY=soft');
+
+        try {
+            $clientMock = $this->getMockBuilder(Client::class)
+                ->disableOriginalConstructor()
+                ->getMock();
+
+            $token = $this->createMock(LifeCycleToken::class);
+            $ds = new class ($clientMock, '', ['identifier' => 'id'], $token) extends HttpClient {
+                protected function sendHead()
+                {
+                    return [];
+                }
+                public function update($itemData, $createIfAbsent = false)
+                {
+                    return $itemData;
+                }
+            };
+
+            $items = [
+                ['id' => 1, 'name' => 'a'],
+                ['id' => 2, 'name' => 'b'],
+            ];
+
+            $this->assertSame([1, 2], $ds->multiUpdate($items));
+        } finally {
+            if ($prev === false) {
+                putenv('DATASTORE_MULTI_POLICY');
+            } else {
+                putenv('DATASTORE_MULTI_POLICY=' . $prev);
+            }
+        }
     }
 
     public function testCreateSuccess()
