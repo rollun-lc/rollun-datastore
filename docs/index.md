@@ -93,13 +93,15 @@ php -S localhost:9000 -t public public/test.php
 При переходе на версию `rollun/rollun-datastore 6` интерфейс хранилище измениться на `DataStoreInterface`
 (Вам не показалось, интерфейс имеет тоже название только без `s` окончания). Метод `deleteAll` будет удален и будут
 добавлено несколько новых методов (Все выше перечисленные методы уже реализованы в `DataStoreAbstract` и `DbTable`):
-- `multiCreate($records)` - создает несколько новых записей в одной атомарной транзакции. Если запись уже существует,
-она не будет создаваться. При любой ошибке выполняется rollback всей транзакции. Возвращает список идентификаторов
-успешно созданных записей. **Требует реализации метода** в DataStore (не имеет fallback);
-- `multiUpdate($records)` - обновляет несколько существующих записей в одной атомарной транзакции. **Все записи должны
-существовать** — если хотя бы одна запись не найдена, выбрасывается исключение и выполняется rollback всей транзакции
-(принцип "все или ничего"). Возвращает список идентификаторов успешно обновленных записей. **Требует реализации метода**
-в DataStore (не имеет fallback);
+- `multiCreate($records)` - создает несколько новых записей. Для реализаций с нативной поддержкой multiCreate
+(например DbTable) операция атомарная и выполняется в одной транзакции. Если multiCreate не поддерживается, используется
+fallback, политика которого задается `DATASTORE_MULTI_POLICY` (см. ниже). Возвращает список идентификаторов успешно
+созданных записей;
+- `multiUpdate($records)` - обновляет несколько существующих записей. Для реализаций с нативной поддержкой multiUpdate
+(например DbTable) операция атомарная и выполняется в одной транзакции: **все записи должны существовать**, иначе
+исключение и rollback всей транзакции (принцип "все или ничего"). Если multiUpdate не поддерживается, используется
+fallback, политика которого задается `DATASTORE_MULTI_POLICY` (см. ниже). Возвращает список идентификаторов успешно
+обновленных записей;
 - `rewrite($record)` - перезаписывает запись (создает запись, если она не существует или удаляет и создает запись
 если не существует). Возвращает перезаписанную запись;
 - `multiRewrite($records)` - перезаписывает несколько существующих записей. Возвращает список идентификаторов успешно
@@ -108,6 +110,18 @@ php -S localhost:9000 -t public public/test.php
 идентификаторов обновленных записей;
 - `queriedDelete($query Query)` - удаляет записи в соответствии с **RQL** запросом. Возвращает список
 идентификаторов удаленных записей.
+
+<a id="multi-fallback-policy"></a>
+### Политика fallback для multi* (DATASTORE_MULTI_POLICY)
+
+Fallback применяется **только если реализация не поддерживает `multiCreate/multiUpdate`** (или в HttpClient сервер не
+объявил поддержку через `X_MULTI_CREATE/X_MULTI_UPDATE`).
+
+- `DATASTORE_MULTI_POLICY=strict` (по умолчанию): fallback запрещен, выбрасывается `DataStoreException`.
+- `DATASTORE_MULTI_POLICY=soft`: fallback разрешен, выполняется последовательный вызов `create()/update()` для каждого
+элемента. Ошибки отдельных элементов игнорируются (best-effort), возвращается список успешно обработанных идентификаторов.
+
+Если переменная не задана или содержит любое другое значение — используется `strict`.
 
 Так же в новом интерфейсе скорее всего появиться (но еще не утвержден) новый метод `getNext($id)`, 
 который возвращает следующую запись после записи с идентификатором `$id`. Если передать `$id = null` будет возвращена 
@@ -302,7 +316,9 @@ SET t.name = CASE WHEN v._update_name = 1 THEN v.name ELSE t.name END,
 **Ключевые особенности:**
 - MultiUpdateHandler принимает только PUT без `id` в path и без RQL
 - Тело запроса — непустой список объектов (индексы 0..N-1), каждый элемент — непустой ассоциативный массив
-- Если `multiUpdate()` отсутствует в реализации DataStore — 500 с сообщением "Multi update is not supported by this datastore"
+- Если `multiUpdate()` отсутствует в реализации DataStore и политика `DATASTORE_MULTI_POLICY=strict` (по умолчанию) —
+  500 с сообщением "Multi update for this datastore is not implemented. See docs/index.md#multi-fallback-policy".
+  При `DATASTORE_MULTI_POLICY=soft` будет выполнен fallback (best-effort) через последовательные `update()`.
 - DbTable выполняет обновление в **одной атомарной транзакции** с `SELECT ... FOR UPDATE` и rollback при ошибке
 - **Partial updates:** каждая запись обновляет только свои указанные поля
 - **NULL значения поддерживаются:** `{"id": 1, "name": null}` установит `name = NULL`
@@ -317,7 +333,7 @@ SET t.name = CASE WHEN v._update_name = 1 THEN v.name ELSE t.name END,
 | HTTP код | Описание | Пример |
 |----------|----------|--------|
 | 200 | Успешное обновление | `[1, 2, 3]` |
-| 500 | DataStore не поддерживает multiUpdate | `{"error": "Multi update is not supported by this datastore..."}` |
+| 500 | DataStore не поддерживает multiUpdate (strict) | `{"error": "Multi update for this datastore is not implemented. See docs/index.md#multi-fallback-policy"}` |
 | 500 | Невалидные входные данные | `{"error": "Collection of arrays expected for multiUpdate"}` |
 | 500 | Запись без primary key | `{"error": "Item N must have primary key"}` |
 | 500 | Дублирующийся ID | `{"error": "Duplicate primary key 'X' found in multiUpdate input..."}` |
