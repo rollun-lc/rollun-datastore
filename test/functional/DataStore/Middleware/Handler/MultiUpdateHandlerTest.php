@@ -8,6 +8,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use rollun\datastore\DataStore\HttpClient;
 use rollun\datastore\DataStore\Interfaces\DataStoresInterface;
 use rollun\datastore\DataStore\Memory;
+use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\Middleware\Handler\MultiUpdateHandler;
 use rollun\datastore\Rql\RqlQuery;
 use Laminas\Diactoros\ServerRequest;
@@ -180,6 +181,85 @@ class MultiUpdateHandlerTest extends BaseHandlerTest
         $this->expectExceptionMessage('Update failed');
 
         $handler->process($request, $this->getNullHandler());
+    }
+
+    public function testHandleFallbackSoftWhenMultiUpdateNotSupported()
+    {
+        $prev = getenv('DATASTORE_MULTI_POLICY');
+        putenv('DATASTORE_MULTI_POLICY=soft');
+
+        try {
+            $records = [
+                ['id' => 1, 'name' => 'updated1'],
+                ['id' => 2, 'name' => 'updated2'],
+            ];
+
+            /** @var DataStoresInterface|MockObject $dataStore */
+            $dataStore = $this->createMock(DataStoresInterface::class);
+            $dataStore->expects($this->exactly(2))
+                ->method('update')
+                ->withConsecutive([$records[0]], [$records[1]])
+                ->willReturnOnConsecutiveCalls(['id' => 1], ['id' => 2]);
+            $dataStore->method('getIdentifier')->willReturn('id');
+
+            $handler = new MultiUpdateHandler($dataStore);
+
+            $request = (new ServerRequest())
+                ->withMethod('PUT')
+                ->withParsedBody($records)
+                ->withAttribute('rqlQueryObject', new RqlQuery(''))
+                ->withAttribute('primaryKeyValue', null);
+
+            $response = $handler->process($request, $this->getNullHandler());
+
+            $this->assertEquals(200, $response->getStatusCode());
+            $body = json_decode((string) $response->getBody(), true);
+            $this->assertEquals([1, 2], $body);
+        } finally {
+            if ($prev === false) {
+                putenv('DATASTORE_MULTI_POLICY');
+            } else {
+                putenv('DATASTORE_MULTI_POLICY=' . $prev);
+            }
+        }
+    }
+
+    public function testHandleFallbackStrictWhenMultiUpdateNotSupported()
+    {
+        $prev = getenv('DATASTORE_MULTI_POLICY');
+        putenv('DATASTORE_MULTI_POLICY=strict');
+
+        try {
+            $records = [
+                ['id' => 1, 'name' => 'updated1'],
+            ];
+
+            /** @var DataStoresInterface|MockObject $dataStore */
+            $dataStore = $this->createMock(DataStoresInterface::class);
+            $dataStore->expects($this->never())->method('update');
+
+            $handler = new MultiUpdateHandler($dataStore);
+
+            $request = (new ServerRequest())
+                ->withMethod('PUT')
+                ->withParsedBody($records)
+                ->withAttribute('rqlQueryObject', new RqlQuery(''))
+                ->withAttribute('primaryKeyValue', null);
+
+            $this->expectException(DataStoreException::class);
+            $this->expectExceptionMessage(
+                'Multi update is not supported by this datastore. ' .
+                'Please implement the multiUpdate() method or use individual update() calls.'
+            );
+
+            $handler->process($request, $this->getNullHandler());
+        } finally {
+            if ($prev === false) {
+                putenv('DATASTORE_MULTI_POLICY');
+            } else {
+                putenv('DATASTORE_MULTI_POLICY=' . $prev);
+            }
+        }
     }
 
     private function getNullHandler(): \Psr\Http\Server\RequestHandlerInterface

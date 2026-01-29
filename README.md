@@ -38,6 +38,16 @@ http), Memory (для [RAM](https://en.wikipedia.org/wiki/Random-access_memory))
 #### **CSV и LIMIT**
 При экспорте CSV обработчик принудительно снимает/заменяет клиентский `limit(...)` на «без ограничений», поэтому выгружается всё (это поведение реализовано в CSV-хендлере).
 
+#### Политика fallback для multi* (DATASTORE_MULTI_POLICY)
+Fallback применяется **только если реализация не поддерживает `multiCreate/multiUpdate`** (или в HttpClient сервер не
+объявил поддержку через `X_MULTI_CREATE/X_MULTI_UPDATE`).
+
+- `DATASTORE_MULTI_POLICY=strict` (по умолчанию): fallback запрещен, выбрасывается `DataStoreException`.
+- `DATASTORE_MULTI_POLICY=soft`: fallback разрешен, выполняется последовательный вызов `create()/update()` для каждого
+элемента. Ошибки отдельных элементов игнорируются (best-effort), возвращается список успешно обработанных идентификаторов.
+
+Если переменная не задана или содержит любое другое значение — используется `strict`.
+
 #### Атрибут **primaryKeyValue**
 Это атрибут запроса (`$request->getAttribute('primaryKeyValue')`), строковый PK записи, который middleware `ResourceResolver` 
 извлекает из роут-параметра `id` или из последнего сегмента пути `/api/datastore/{resourceName}/{id}` (после `rawurldecode(...)`). 
