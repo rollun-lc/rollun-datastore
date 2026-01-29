@@ -8,7 +8,6 @@ use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\DataStoreException;
-use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
 
 /**
  * Class MultiCreateHandler
@@ -20,6 +19,9 @@ use rollun\datastore\DataStore\Interfaces\DataStoreInterface;
  */
 class MultiCreateHandler extends AbstractHandler
 {
+    private const MULTI_POLICY_ENV = 'DATASTORE_MULTI_POLICY';
+    private const MULTI_POLICY_SOFT = 'soft';
+
     /**
      * @inheritDoc
      */
@@ -69,15 +71,16 @@ class MultiCreateHandler extends AbstractHandler
         // get rows
         $rows = $request->getParsedBody();
 
-        // Strict approach: require multiCreate to be implemented
-        if (!method_exists($this->dataStore, 'multiCreate')) {
+        if (method_exists($this->dataStore, 'multiCreate')) {
+            $result = $this->dataStore->multiCreate($rows);
+        } elseif ($this->isSoftMultiPolicy()) {
+            $result = $this->multiCreateFallback($rows);
+        } else {
             throw new DataStoreException(
                 'Multi create is not supported by this datastore. ' .
                 'Please implement the multiCreate() method or use individual create() calls.'
             );
         }
-
-        $result = $this->dataStore->multiCreate($rows);
 
         return new JsonResponse(
             $result,
@@ -86,5 +89,29 @@ class MultiCreateHandler extends AbstractHandler
                 'Location' => $request->getUri()->getPath(),
             ]
         );
+    }
+
+    private function multiCreateFallback(array $records): array
+    {
+        $ids = [];
+        $identifier = $this->dataStore->getIdentifier();
+
+        foreach ($records as $record) {
+            try {
+                $createdRecord = $this->dataStore->create($record);
+                $ids[] = $createdRecord[$identifier];
+            } catch (\Throwable) {
+                continue;
+            }
+        }
+
+        return $ids;
+    }
+
+    private function isSoftMultiPolicy(): bool
+    {
+        $policy = strtolower(trim((string) getenv(self::MULTI_POLICY_ENV)));
+
+        return $policy === self::MULTI_POLICY_SOFT;
     }
 }

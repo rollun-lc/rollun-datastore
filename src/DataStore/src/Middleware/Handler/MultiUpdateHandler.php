@@ -16,6 +16,9 @@ use rollun\datastore\DataStore\DataStoreException;
  */
 class MultiUpdateHandler extends AbstractHandler
 {
+    private const MULTI_POLICY_ENV = 'DATASTORE_MULTI_POLICY';
+    private const MULTI_POLICY_SOFT = 'soft';
+
     /**
      * {@inheritdoc}
      */
@@ -86,16 +89,41 @@ class MultiUpdateHandler extends AbstractHandler
     {
         $rows = $request->getParsedBody();
 
-        // Strict approach: require multiUpdate to be implemented
-        if (!method_exists($this->dataStore, 'multiUpdate')) {
+        if (method_exists($this->dataStore, 'multiUpdate')) {
+            $result = $this->dataStore->multiUpdate($rows);
+        } elseif ($this->isSoftMultiPolicy()) {
+            $result = $this->multiUpdateFallback($rows);
+        } else {
             throw new DataStoreException(
                 'Multi update is not supported by this datastore. ' .
                 'Please implement the multiUpdate() method or use individual update() calls.'
             );
         }
 
-        $result = $this->dataStore->multiUpdate($rows);
-
         return new JsonResponse($result);
+    }
+
+    private function multiUpdateFallback(array $records): array
+    {
+        $ids = [];
+        $identifier = $this->dataStore->getIdentifier();
+
+        foreach ($records as $record) {
+            try {
+                $updatedRecord = $this->dataStore->update($record);
+                $ids[] = $updatedRecord[$identifier];
+            } catch (\Throwable) {
+                continue;
+            }
+        }
+
+        return $ids;
+    }
+
+    private function isSoftMultiPolicy(): bool
+    {
+        $policy = strtolower(trim((string) getenv(self::MULTI_POLICY_ENV)));
+
+        return $policy === self::MULTI_POLICY_SOFT;
     }
 }
