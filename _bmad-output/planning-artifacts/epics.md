@@ -2,6 +2,8 @@
 stepsCompleted:
   - step-01-validate-prerequisites
   - step-02-design-epics
+  - step-03-create-stories
+  - step-04-final-validation
 inputDocuments:
   - _bmad-output/planning-artifacts/prd.md
   - _bmad-output/planning-artifacts/architecture.md
@@ -113,24 +115,28 @@ Integration teams can migrate from direct Elasticsearch reads to datastore reads
 
 Developer can configure and consume Elasticsearch as a DataStore backend and retrieve records through `read(id)` using existing DI/container patterns.
 
-### Story 1.1: Register ElasticsearchDataStore in DI Container
+### Story 1.1: Initialize Baseline Environment and Verify Existing Test Health
 
 As a backend developer,
-I want ElasticsearchDataStore to be registered and resolvable via existing container config,
-So that services can consume it through standard datastore wiring.
+I want to initialize the project baseline and verify current datastore test health,
+So that adapter implementation starts from a known-good foundation.
+
+**FRs:** FR9, FR10
 
 **Acceptance Criteria:**
 
-**Given** existing project config and service container
-**When** datastore services are loaded
-**Then** `ElasticsearchDataStore` is resolvable by configured service key
-**And** adapter receives `ElasticSearchClient` from container factory, not local client construction
+**Given** the current repository baseline
+**When** dependencies are installed via `composer install`
+**Then** the project initializes without introducing new bootstrap scripts
+**And** a baseline run of relevant existing datastore tests is executed and recorded before adapter changes
 
 ### Story 1.2: Implement `read(id)` Happy Path
 
 As a backend developer,
 I want to call `read(id)` on ElasticsearchDataStore and receive the source payload,
 So that application read flows work through datastore abstraction.
+
+**FRs:** FR1, FR2, FR3, FR11
 
 **Acceptance Criteria:**
 
@@ -144,6 +150,8 @@ So that application read flows work through datastore abstraction.
 As a backend developer,
 I want deterministic behavior for missing documents in `read(id)`,
 So that consumers can handle not-found scenarios predictably.
+
+**FRs:** FR3, FR5
 
 **Acceptance Criteria:**
 
@@ -162,6 +170,8 @@ As a backend developer,
 I want all unsupported datastore operations to return explicit `Not Implemented`,
 So that the adapter behavior is deterministic and safely read-only.
 
+**FRs:** FR6, FR7, FR8
+
 **Acceptance Criteria:**
 
 **Given** ElasticsearchDataStore in MVP scope
@@ -175,6 +185,8 @@ As a support engineer,
 I want read results to preserve full heterogeneous log payload fields,
 So that diagnostic context is not lost.
 
+**FRs:** FR4, FR14
+
 **Acceptance Criteria:**
 
 **Given** documents with variable schema and nested fields
@@ -187,6 +199,8 @@ So that diagnostic context is not lost.
 As a support engineer,
 I want the same datastore read path used by application services and troubleshooting flows,
 So that incident investigation uses one consistent access path.
+
+**FRs:** FR12, FR13
 
 **Acceptance Criteria:**
 
@@ -205,6 +219,8 @@ As a developer,
 I want automated tests for successful and not-found `read(id)` scenarios,
 So that adapter behavior is verifiable and regression-resistant.
 
+**FRs:** FR18, FR19, FR21
+
 **Acceptance Criteria:**
 
 **Given** adapter test suite
@@ -218,6 +234,8 @@ As a developer,
 I want tests that verify unsupported methods always return `Not Implemented`,
 So that read-only contract enforcement is continuously validated.
 
+**FRs:** FR20
+
 **Acceptance Criteria:**
 
 **Given** MVP adapter surface
@@ -230,6 +248,8 @@ So that read-only contract enforcement is continuously validated.
 As an integration developer,
 I want to run existing datastore suites plus new adapter tests and verify migration targets,
 So that we can replace direct ES reads safely.
+
+**FRs:** FR15, FR16, FR17, FR22
 
 **Acceptance Criteria:**
 
