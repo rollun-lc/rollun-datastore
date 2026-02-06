@@ -22,7 +22,7 @@ test: composer-test
 test-8.0: composer-test-8.0
 
 docker-up:
-	docker compose up -d
+	docker compose up -d --build
 
 docker-up-8.0:
 	docker compose -f docker-compose-8.0.yml up -d

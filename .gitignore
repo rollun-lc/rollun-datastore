@@ -90,3 +90,4 @@ data/test
 _bmad
 .codex
 .claude
+docker-compose.override.yml
