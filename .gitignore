@@ -87,6 +87,7 @@ data/test
 .phpunit.result.cache
 /.php-cs-fixer.php
 
+.xxx
 _bmad
 .codex
 .claude
