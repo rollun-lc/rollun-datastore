@@ -195,6 +195,10 @@ class ElasticsearchDataStore extends DataStoreAbstract
 
     public function query(Query $query)
     {
+        if ($this->shouldUseNativeAggregations($query)) {
+            return $this->queryWithNativeAggregations($query);
+        }
+
         if ($this->shouldProcessSelectInMemory($query)) {
             return $this->queryWithInMemorySelect($query);
         }
@@ -636,21 +640,527 @@ class ElasticsearchDataStore extends DataStoreAbstract
         return bin2hex(random_bytes(16));
     }
 
-    private function shouldProcessSelectInMemory(Query $query): bool
+    private function shouldUseNativeAggregations(Query $query): bool
     {
-        $selectNode = $query->getSelect();
-        $hasAggregateSelect = false;
+        $groupFields = $this->extractGroupByFields($query);
+        if ($groupFields !== []) {
+            return true;
+        }
 
-        if ($selectNode !== null) {
-            foreach ($selectNode->getFields() as $field) {
-                if ($field instanceof AggregateFunctionNode) {
-                    $hasAggregateSelect = true;
-                    break;
+        $selectNode = $query->getSelect();
+
+        return $this->hasAggregateSelect($selectNode) && !$this->hasPlainSelectFields($selectNode);
+    }
+
+    private function queryWithNativeAggregations(Query $query): array
+    {
+        $limitNode = $query->getLimit();
+        $limit = $limitNode ? (int) $limitNode->getLimit() : self::LIMIT_INFINITY;
+        $offset = $limitNode ? max(0, (int) $limitNode->getOffset()) : 0;
+
+        if ($limit < 0) {
+            throw new DataStoreException('Query limit must be greater or equal to zero.');
+        }
+
+        if ($limit === 0) {
+            return [];
+        }
+
+        $groupFields = $this->extractGroupByFields($query);
+
+        if ($groupFields !== []) {
+            return $this->queryGroupedAggregations($query, $groupFields, $limit, $offset);
+        }
+
+        return $this->queryMetricAggregations($query, $limit, $offset);
+    }
+
+    /**
+     * @param Query $query
+     * @param string[] $groupFields
+     * @param int $limit
+     * @param int $offset
+     * @return array
+     */
+    private function queryGroupedAggregations(Query $query, array $groupFields, int $limit, int $offset): array
+    {
+        $selectDescriptors = $this->attachMetricAliases(
+            $this->buildSelectDescriptors($query, $groupFields)
+        );
+        $metricAggregations = $this->buildMetricAggregations($selectDescriptors);
+        $groupSources = $this->buildGroupSources($groupFields, $query->getSort());
+
+        $result = [];
+        $remaining = $limit === self::LIMIT_INFINITY ? null : $limit;
+        $skipped = 0;
+        $afterKey = null;
+
+        while (true) {
+            $composite = [
+                'size' => self::SEARCH_BATCH_SIZE,
+                'sources' => $groupSources['sources'],
+            ];
+
+            if ($afterKey !== null) {
+                $composite['after'] = $afterKey;
+            }
+
+            $body = [
+                'size' => 0,
+                'query' => $this->buildSearchQuery($query->getQuery()),
+                'aggs' => [
+                    'groupby' => [
+                        'composite' => $composite,
+                        'aggs' => $metricAggregations,
+                    ],
+                ],
+            ];
+
+            try {
+                $response = $this->client->search([
+                    'index' => $this->index,
+                    'body' => $body,
+                ]);
+            } catch (Missing404Exception) {
+                $this->logger->info('ElasticsearchDataStore query: index not found', [
+                    'index' => $this->index,
+                ]);
+                return [];
+            }
+
+            if (!is_array($response)) {
+                break;
+            }
+
+            $groupBy = $response['aggregations']['groupby'] ?? null;
+            $buckets = is_array($groupBy) ? ($groupBy['buckets'] ?? null) : null;
+
+            if (!is_array($buckets) || $buckets === []) {
+                break;
+            }
+
+            foreach ($buckets as $bucket) {
+                if (!is_array($bucket)) {
+                    continue;
                 }
+
+                if ($skipped < $offset) {
+                    $skipped++;
+                    continue;
+                }
+
+                $result[] = $this->hydrateGroupedResultRow(
+                    $bucket,
+                    $selectDescriptors,
+                    $groupSources['byField']
+                );
+
+                if ($remaining !== null) {
+                    $remaining--;
+                    if ($remaining === 0) {
+                        break 2;
+                    }
+                }
+            }
+
+            $afterKey = is_array($groupBy) ? ($groupBy['after_key'] ?? null) : null;
+
+            if (!is_array($afterKey) || $afterKey === []) {
+                break;
             }
         }
 
-        return $hasAggregateSelect || ($query instanceof RqlQuery && $query->getGroupBy() !== null);
+        return $this->normalizeResultSetShape($result);
+    }
+
+    private function queryMetricAggregations(Query $query, int $limit, int $offset): array
+    {
+        if ($offset > 0) {
+            return [];
+        }
+
+        if ($limit !== self::LIMIT_INFINITY && $limit < 1) {
+            return [];
+        }
+
+        $selectDescriptors = $this->attachMetricAliases(
+            $this->buildSelectDescriptors($query, [])
+        );
+        $metricAggregations = $this->buildMetricAggregations($selectDescriptors);
+
+        if ($metricAggregations === []) {
+            return [];
+        }
+
+        $body = [
+            'size' => 0,
+            'query' => $this->buildSearchQuery($query->getQuery()),
+            'aggs' => $metricAggregations,
+        ];
+
+        try {
+            $response = $this->client->search([
+                'index' => $this->index,
+                'body' => $body,
+            ]);
+        } catch (Missing404Exception) {
+            $this->logger->info('ElasticsearchDataStore query: index not found', [
+                'index' => $this->index,
+            ]);
+            return [];
+        }
+
+        if (!is_array($response)) {
+            return [];
+        }
+
+        $aggregations = $response['aggregations'] ?? null;
+        if (!is_array($aggregations)) {
+            return [];
+        }
+
+        $row = [];
+        foreach ($selectDescriptors as $descriptor) {
+            if (($descriptor['type'] ?? null) !== 'metric') {
+                continue;
+            }
+
+            $label = $descriptor['label'];
+            $row[$label] = $this->extractMetricValue($aggregations, $descriptor);
+        }
+
+        if ($row === []) {
+            return [];
+        }
+
+        return [$row];
+    }
+
+    /**
+     * @param Query $query
+     * @return string[]
+     */
+    private function extractGroupByFields(Query $query): array
+    {
+        if (!$query instanceof RqlQuery || $query->getGroupBy() === null) {
+            return [];
+        }
+
+        $fields = [];
+        foreach ($query->getGroupBy()->getFields() as $field) {
+            if (!is_string($field) || $field === '') {
+                continue;
+            }
+
+            $fields[] = $field;
+        }
+
+        return array_values(array_unique($fields));
+    }
+
+    /**
+     * @param SelectNode|null $selectNode
+     * @return bool
+     */
+    private function hasAggregateSelect(?SelectNode $selectNode): bool
+    {
+        if ($selectNode === null) {
+            return false;
+        }
+
+        foreach ($selectNode->getFields() as $field) {
+            if ($field instanceof AggregateFunctionNode) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param SelectNode|null $selectNode
+     * @return bool
+     */
+    private function hasPlainSelectFields(?SelectNode $selectNode): bool
+    {
+        if ($selectNode === null) {
+            return false;
+        }
+
+        foreach ($selectNode->getFields() as $field) {
+            if (is_string($field) && $field !== '') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function shouldProcessSelectInMemory(Query $query): bool
+    {
+        $selectNode = $query->getSelect();
+
+        if (!$this->hasAggregateSelect($selectNode)) {
+            return false;
+        }
+
+        if ($query instanceof RqlQuery && $query->getGroupBy() !== null) {
+            return false;
+        }
+
+        return $this->hasPlainSelectFields($selectNode);
+    }
+
+    /**
+     * @param Query $query
+     * @param string[] $groupFields
+     * @return array<int,array<string,mixed>>
+     */
+    private function buildSelectDescriptors(Query $query, array $groupFields): array
+    {
+        $selectNode = $query->getSelect();
+
+        if ($selectNode === null) {
+            return array_map(static fn(string $field): array => [
+                'type' => 'group',
+                'field' => $field,
+                'label' => $field,
+            ], $groupFields);
+        }
+
+        $descriptors = [];
+
+        foreach ($selectNode->getFields() as $field) {
+            if ($field instanceof AggregateFunctionNode) {
+                $function = strtolower((string) $field->getFunction());
+                if (!in_array($function, ['count', 'max', 'min', 'sum', 'avg'], true)) {
+                    throw new DataStoreException('Unsupported aggregate function: ' . $field->getFunction());
+                }
+
+                $descriptors[] = [
+                    'type' => 'metric',
+                    'function' => $function,
+                    'field' => (string) $field->getField(),
+                    'label' => $field->__toString(),
+                ];
+                continue;
+            }
+
+            if (!is_string($field) || $field === '') {
+                continue;
+            }
+
+            if ($groupFields !== [] && in_array($field, $groupFields, true)) {
+                $descriptors[] = [
+                    'type' => 'group',
+                    'field' => $field,
+                    'label' => $field,
+                ];
+                continue;
+            }
+
+            if ($groupFields !== []) {
+                $descriptors[] = [
+                    'type' => 'metric',
+                    'function' => 'count',
+                    'field' => $field,
+                    'label' => 'count(' . $field . ')',
+                ];
+            }
+        }
+
+        return $descriptors;
+    }
+
+    /**
+     * @param array<int,array<string,mixed>> $selectDescriptors
+     * @return array<int,array<string,mixed>>
+     */
+    private function attachMetricAliases(array $selectDescriptors): array
+    {
+        $index = 0;
+        foreach ($selectDescriptors as $key => $descriptor) {
+            if (($descriptor['type'] ?? null) !== 'metric') {
+                continue;
+            }
+
+            $selectDescriptors[$key]['alias'] = 'metric_' . $index;
+            $index++;
+        }
+
+        return $selectDescriptors;
+    }
+
+    /**
+     * @param array<int,array<string,mixed>> $selectDescriptors
+     * @return array<string,array>
+     */
+    private function buildMetricAggregations(array $selectDescriptors): array
+    {
+        $aggregations = [];
+
+        foreach ($selectDescriptors as $descriptor) {
+            if (($descriptor['type'] ?? null) !== 'metric') {
+                continue;
+            }
+
+            $alias = $descriptor['alias'] ?? null;
+            if (!is_string($alias) || $alias === '') {
+                continue;
+            }
+
+            $field = (string) ($descriptor['field'] ?? '');
+            $function = (string) ($descriptor['function'] ?? '');
+
+            $aggregations[$alias] = match ($function) {
+                'count' => $field === '_id'
+                    ? ['filter' => ['match_all' => (object) []]]
+                    : ['filter' => ['exists' => ['field' => $field]]],
+                'max' => ['max' => ['field' => $field]],
+                'min' => ['min' => ['field' => $field]],
+                'sum' => ['sum' => ['field' => $field]],
+                'avg' => ['avg' => ['field' => $field]],
+                default => throw new DataStoreException('Unsupported aggregate function: ' . $function),
+            };
+        }
+
+        return $aggregations;
+    }
+
+    /**
+     * @param string[] $groupFields
+     * @param SortNode|null $sortNode
+     * @return array{sources: array<int,array<string,array>>, byField: array<string,string>}
+     */
+    private function buildGroupSources(array $groupFields, ?SortNode $sortNode): array
+    {
+        $directions = [];
+        if ($sortNode !== null) {
+            foreach ($sortNode->getFields() as $field => $direction) {
+                if (!is_string($field) || $field === '') {
+                    continue;
+                }
+
+                $direction = (int) $direction;
+                if ($direction !== SortNode::SORT_ASC && $direction !== SortNode::SORT_DESC) {
+                    throw new DataStoreException('Invalid sort direction: ' . $direction);
+                }
+
+                $directions[$field] = $direction === SortNode::SORT_ASC ? 'asc' : 'desc';
+            }
+        }
+
+        $sources = [];
+        $byField = [];
+
+        foreach ($groupFields as $index => $field) {
+            $sourceName = 'group_' . $index;
+            $byField[$field] = $sourceName;
+            $order = $directions[$field] ?? 'asc';
+
+            $sources[] = [
+                $sourceName => [
+                    'terms' => [
+                        'field' => $field,
+                        'order' => $order,
+                        'missing_bucket' => true,
+                    ],
+                ],
+            ];
+        }
+
+        return [
+            'sources' => $sources,
+            'byField' => $byField,
+        ];
+    }
+
+    /**
+     * @param array $bucket
+     * @param array<int,array<string,mixed>> $selectDescriptors
+     * @param array<string,string> $groupFieldMap
+     * @return array<string,mixed>
+     */
+    private function hydrateGroupedResultRow(array $bucket, array $selectDescriptors, array $groupFieldMap): array
+    {
+        $key = $bucket['key'] ?? [];
+        if (!is_array($key)) {
+            $key = [];
+        }
+
+        $row = [];
+
+        foreach ($selectDescriptors as $descriptor) {
+            $type = $descriptor['type'] ?? null;
+            $label = (string) ($descriptor['label'] ?? '');
+
+            if ($label === '') {
+                continue;
+            }
+
+            if ($type === 'group') {
+                $field = (string) ($descriptor['field'] ?? '');
+                $sourceName = $groupFieldMap[$field] ?? null;
+                $row[$label] = is_string($sourceName) ? ($key[$sourceName] ?? null) : null;
+                continue;
+            }
+
+            if ($type === 'metric') {
+                $row[$label] = $this->extractMetricValue($bucket, $descriptor);
+            }
+        }
+
+        return $row;
+    }
+
+    /**
+     * @param array<string,mixed> $aggregationContainer
+     * @param array<string,mixed> $descriptor
+     * @return mixed
+     */
+    private function extractMetricValue(array $aggregationContainer, array $descriptor): mixed
+    {
+        $alias = $descriptor['alias'] ?? null;
+        if (!is_string($alias) || $alias === '') {
+            return null;
+        }
+
+        $aggregation = $aggregationContainer[$alias] ?? null;
+        if (!is_array($aggregation)) {
+            return null;
+        }
+
+        $function = (string) ($descriptor['function'] ?? '');
+        if ($function === 'count') {
+            return (int) ($aggregation['doc_count'] ?? 0);
+        }
+
+        return $aggregation['value'] ?? null;
+    }
+
+    /**
+     * @param array<int,array<string,mixed>> $result
+     * @return array<int,array<string,mixed>>
+     */
+    private function normalizeResultSetShape(array $result): array
+    {
+        $itemField = [];
+        foreach ($result as &$item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $keys = array_keys($item);
+            $diff = array_diff($keys, $itemField);
+            $itemField = array_merge($itemField, $diff);
+            $diff = array_diff($itemField, $keys);
+
+            foreach ($diff as $field) {
+                $item[$field] = null;
+            }
+        }
+
+        return $result;
     }
 
     private function queryWithInMemorySelect(Query $query): array
@@ -686,23 +1196,7 @@ class ElasticsearchDataStore extends DataStoreAbstract
 
         $result = array_slice($result, $offset, $limit === self::LIMIT_INFINITY ? null : $limit);
 
-        $itemField = [];
-        foreach ($result as &$item) {
-            if (!is_array($item)) {
-                continue;
-            }
-
-            $keys = array_keys($item);
-            $diff = array_diff($keys, $itemField);
-            $itemField = array_merge($itemField, $diff);
-            $diff = array_diff($itemField, $keys);
-
-            foreach ($diff as $field) {
-                $item[$field] = null;
-            }
-        }
-
-        return $result;
+        return $this->normalizeResultSetShape($result);
     }
 
     /**
