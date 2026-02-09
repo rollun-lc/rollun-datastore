@@ -9,10 +9,12 @@ declare(strict_types=1);
 namespace rollun\datastore\DataStore;
 
 use Elasticsearch\Client;
+use Elasticsearch\Common\Exceptions\Conflict409Exception;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use rollun\datastore\DataStore\Interfaces\ReadInterface;
+use rollun\datastore\Rql\Node\AggregateFunctionNode;
+use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\DataType\Glob;
 use Xiag\Rql\Parser\Node\AbstractQueryNode;
 use Xiag\Rql\Parser\Node\LimitNode;
@@ -23,9 +25,10 @@ use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
 
-class ElasticsearchDataStore implements ReadInterface
+class ElasticsearchDataStore extends DataStoreAbstract
 {
     private const SEARCH_BATCH_SIZE = 500;
+    private const REFRESH_POLICY = 'wait_for';
 
     public function __construct(
         private readonly Client $client,
@@ -38,6 +41,117 @@ class ElasticsearchDataStore implements ReadInterface
     public function getIdentifier()
     {
         return $this->identifier;
+    }
+
+    public function create($itemData, $rewriteIfExist = false)
+    {
+        $record = $this->normalizeRecordData($itemData);
+        $id = $this->extractIdentifierFromRecord($record, true);
+        $body = $this->buildDocumentBody($record, $id);
+
+        $params = [
+            'index' => $this->index,
+            'id' => (string) $id,
+            'body' => $body,
+            'refresh' => self::REFRESH_POLICY,
+        ];
+
+        if (!$rewriteIfExist) {
+            $params['op_type'] = 'create';
+        }
+
+        try {
+            $this->client->index($params);
+        } catch (Conflict409Exception $exception) {
+            throw new DataStoreException("Item with id '{$id}' already exist", 0, $exception);
+        } catch (\Throwable $exception) {
+            throw new DataStoreException("Can't insert item with id = {$id}", 0, $exception);
+        }
+
+        return $this->read($id);
+    }
+
+    public function update($itemData, $createIfAbsent = false)
+    {
+        $record = $this->normalizeRecordData($itemData);
+        $identifier = $this->getIdentifier();
+
+        if (!array_key_exists($identifier, $record)) {
+            throw new DataStoreException('Item must has primary key');
+        }
+
+        $id = $record[$identifier];
+        $this->checkIdentifierType($id);
+
+        $storedRecord = $this->read($id);
+        if ($storedRecord === null && !$createIfAbsent) {
+            throw new DataStoreException("[{$this->index}]Can't update item with id = {$id}");
+        }
+
+        $recordForStore = $storedRecord === null ? $record : array_merge($storedRecord, $record);
+
+        try {
+            $this->client->index([
+                'index' => $this->index,
+                'id' => (string) $id,
+                'body' => $this->buildDocumentBody($recordForStore, $id),
+                'refresh' => self::REFRESH_POLICY,
+            ]);
+        } catch (\Throwable $exception) {
+            throw new DataStoreException("Can't update item with id = {$id}", 0, $exception);
+        }
+
+        return $this->read($id);
+    }
+
+    public function delete($id)
+    {
+        $this->checkIdentifierType($id);
+        $record = $this->read($id);
+
+        if ($record === null) {
+            return null;
+        }
+
+        try {
+            $this->client->delete([
+                'index' => $this->index,
+                'id' => (string) $id,
+                'refresh' => self::REFRESH_POLICY,
+            ]);
+        } catch (Missing404Exception) {
+            return null;
+        } catch (\Throwable $exception) {
+            throw new DataStoreException("Can't delete item with id = {$id}", 0, $exception);
+        }
+
+        return $record;
+    }
+
+    public function deleteAll()
+    {
+        try {
+            $response = $this->client->deleteByQuery([
+                'index' => $this->index,
+                'body' => [
+                    'query' => [
+                        'match_all' => (object) [],
+                    ],
+                ],
+                'refresh' => true,
+                'conflicts' => 'proceed',
+            ]);
+        } catch (Missing404Exception) {
+            return 0;
+        } catch (\Throwable $exception) {
+            throw new DataStoreException("Can't delete all items from index '{$this->index}'", 0, $exception);
+        }
+
+        if (!is_array($response)) {
+            return 0;
+        }
+
+        return (int) ($response['deleted'] ?? 0);
     }
 
     public function read($id)
@@ -81,6 +195,10 @@ class ElasticsearchDataStore implements ReadInterface
 
     public function query(Query $query)
     {
+        if ($this->shouldProcessSelectInMemory($query)) {
+            return $this->queryWithInMemorySelect($query);
+        }
+
         $limitNode = $query->getLimit();
         $limit = $limitNode ? (int) $limitNode->getLimit() : self::LIMIT_INFINITY;
         $offset = $limitNode ? max(0, (int) $limitNode->getOffset()) : 0;
@@ -211,7 +329,7 @@ class ElasticsearchDataStore implements ReadInterface
         return new \ArrayIterator($this->query(new Query()));
     }
 
-    protected function checkIdentifierType($id): void
+    protected function checkIdentifierType($id)
     {
         $idType = gettype($id);
 
@@ -283,6 +401,10 @@ class ElasticsearchDataStore implements ReadInterface
      */
     private function appendSortTieBreaker(array $sort): array
     {
+        if ($sort === [] && $this->identifier !== '_id') {
+            $sort[] = [$this->identifier => 'asc'];
+        }
+
         foreach ($sort as $sortPart) {
             if (isset($sortPart['_id'])) {
                 return $sort;
@@ -442,6 +564,145 @@ class ElasticsearchDataStore implements ReadInterface
         $globProperty->setAccessible(false);
 
         return (string) $value;
+    }
+
+    /**
+     * @param mixed $record
+     * @return array
+     */
+    private function normalizeRecordData(mixed $record): array
+    {
+        if (is_array($record)) {
+            return $record;
+        }
+
+        if ($record instanceof \ArrayObject) {
+            return $record->getArrayCopy();
+        }
+
+        if (is_object($record)) {
+            $data = get_object_vars($record);
+            if (is_array($data)) {
+                return $data;
+            }
+        }
+
+        throw new DataStoreException('Item data must be an array or object with public properties.');
+    }
+
+    /**
+     * @param array $record
+     * @param bool $allowGenerate
+     * @return int|float|string
+     */
+    private function extractIdentifierFromRecord(array &$record, bool $allowGenerate): int|float|string
+    {
+        $identifier = $this->getIdentifier();
+        $id = $record[$identifier] ?? null;
+
+        if ($id === null || $id === '') {
+            if (!$allowGenerate) {
+                throw new DataStoreException('Item must has primary key');
+            }
+
+            $id = $this->generateIdentifier();
+            $record[$identifier] = $id;
+        }
+
+        $this->checkIdentifierType($id);
+
+        return $id;
+    }
+
+    /**
+     * @param array $record
+     * @param int|float|string $id
+     * @return array
+     */
+    private function buildDocumentBody(array $record, int|float|string $id): array
+    {
+        if ($this->identifier === '_id') {
+            unset($record['_id']);
+            return $record;
+        }
+
+        $record[$this->identifier] = $id;
+
+        return $record;
+    }
+
+    private function generateIdentifier(): string
+    {
+        return bin2hex(random_bytes(16));
+    }
+
+    private function shouldProcessSelectInMemory(Query $query): bool
+    {
+        $selectNode = $query->getSelect();
+        $hasAggregateSelect = false;
+
+        if ($selectNode !== null) {
+            foreach ($selectNode->getFields() as $field) {
+                if ($field instanceof AggregateFunctionNode) {
+                    $hasAggregateSelect = true;
+                    break;
+                }
+            }
+        }
+
+        return $hasAggregateSelect || ($query instanceof RqlQuery && $query->getGroupBy() !== null);
+    }
+
+    private function queryWithInMemorySelect(Query $query): array
+    {
+        $limitNode = $query->getLimit();
+        $limit = $limitNode ? (int) $limitNode->getLimit() : self::LIMIT_INFINITY;
+        $offset = $limitNode ? max(0, (int) $limitNode->getOffset()) : 0;
+
+        if ($limit < 0) {
+            throw new DataStoreException('Query limit must be greater or equal to zero.');
+        }
+
+        if ($limit === 0) {
+            return [];
+        }
+
+        $rawQuery = new Query();
+        if ($query->getQuery() !== null) {
+            $rawQuery->setQuery($query->getQuery());
+        }
+        if ($query->getSort() !== null) {
+            $rawQuery->setSort($query->getSort());
+        }
+        $rawQuery->setLimit(new LimitNode(self::LIMIT_INFINITY, 0));
+
+        $data = $this->query($rawQuery);
+
+        if ($query instanceof RqlQuery && $query->getGroupBy() !== null) {
+            $result = $this->queryGroupBy($data, $query);
+        } else {
+            $result = $this->querySelect($data, $query);
+        }
+
+        $result = array_slice($result, $offset, $limit === self::LIMIT_INFINITY ? null : $limit);
+
+        $itemField = [];
+        foreach ($result as &$item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $keys = array_keys($item);
+            $diff = array_diff($keys, $itemField);
+            $itemField = array_merge($itemField, $diff);
+            $diff = array_diff($itemField, $keys);
+
+            foreach ($diff as $field) {
+                $item[$field] = null;
+            }
+        }
+
+        return $result;
     }
 
     /**
