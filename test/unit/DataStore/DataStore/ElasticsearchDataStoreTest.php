@@ -8,9 +8,12 @@
 namespace rollun\test\unit\DataStore\DataStore;
 
 use Elasticsearch\Client;
+use Elasticsearch\Common\Exceptions\Conflict409Exception;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\ElasticsearchDataStore;
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
 use Xiag\Rql\Parser\Node\LimitNode;
@@ -21,9 +24,227 @@ use Xiag\Rql\Parser\Query;
 
 class ElasticsearchDataStoreTest extends TestCase
 {
-    private function createObject(Client $client, LoggerInterface $logger = null): ElasticsearchDataStore
+    private function createObject(
+        Client $client,
+        LoggerInterface $logger = null,
+        string $identifier = ReadInterface::DEF_ID
+    ): ElasticsearchDataStore {
+        $logger ??= new NullLogger();
+
+        return new ElasticsearchDataStore($client, 'test-index', $identifier, $logger);
+    }
+
+    public function testCreateGeneratesIdentifierWhenMissing(): void
     {
-        return new ElasticsearchDataStore($client, 'test-index', ReadInterface::DEF_ID, $logger);
+        $capturedId = null;
+
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('index')
+            ->with($this->callback(function (array $params) use (&$capturedId): bool {
+                $this->assertSame('test-index', $params['index']);
+                $this->assertSame('create', $params['op_type']);
+                $this->assertSame('wait_for', $params['refresh']);
+                $this->assertArrayHasKey('id', $params);
+                $this->assertNotSame('', $params['id']);
+                $this->assertSame($params['id'], $params['body']['id']);
+                $capturedId = $params['id'];
+
+                return true;
+            }))
+            ->willReturn(['result' => 'created']);
+
+        $client->expects($this->once())
+            ->method('get')
+            ->with($this->callback(function (array $params) use (&$capturedId): bool {
+                return $params['index'] === 'test-index' && $params['id'] === $capturedId;
+            }))
+            ->willReturnCallback(static function () use (&$capturedId): array {
+                return [
+                    '_id' => $capturedId,
+                    '_source' => [
+                        'id' => $capturedId,
+                        'message' => 'hello',
+                    ],
+                ];
+            });
+
+        $store = $this->createObject($client);
+
+        $created = $store->create(['message' => 'hello']);
+        $this->assertSame($capturedId, $created['id']);
+        $this->assertSame('hello', $created['message']);
+    }
+
+    public function testCreateThrowsExceptionWhenRecordExists(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('index')
+            ->willThrowException(new Conflict409Exception('conflict'));
+
+        $store = $this->createObject($client);
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage("Item with id 'doc-1' already exist");
+
+        $store->create(['id' => 'doc-1', 'message' => 'hello']);
+    }
+
+    public function testCreateWithMetaIdentifierExcludesIdFromSource(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('index')
+            ->with($this->callback(function (array $params): bool {
+                $this->assertSame('doc-1', $params['id']);
+                $this->assertArrayNotHasKey('_id', $params['body']);
+                $this->assertSame('hello', $params['body']['message']);
+
+                return true;
+            }))
+            ->willReturn(['result' => 'created']);
+
+        $client->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                '_id' => 'doc-1',
+                '_source' => [
+                    'message' => 'hello',
+                ],
+            ]);
+
+        $store = $this->createObject($client, null, '_id');
+        $created = $store->create(['_id' => 'doc-1', 'message' => 'hello']);
+
+        $this->assertSame('doc-1', $created['_id']);
+    }
+
+    public function testUpdateThrowsExceptionWhenPrimaryKeyMissing(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->never())
+            ->method('index');
+
+        $store = $this->createObject($client);
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage('Item must has primary key');
+
+        $store->update(['message' => 'hello']);
+    }
+
+    public function testUpdateThrowsExceptionWhenItemIsAbsent(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('get')
+            ->willThrowException(new Missing404Exception('missing'));
+
+        $store = $this->createObject($client);
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessage("[test-index]Can't update item with id = doc-1");
+
+        $store->update(['id' => 'doc-1', 'message' => 'hello']);
+    }
+
+    public function testUpdateMergesStoredAndIncomingFields(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnOnConsecutiveCalls(
+                [
+                    '_id' => 'doc-1',
+                    '_source' => [
+                        'id' => 'doc-1',
+                        'message' => 'hello',
+                        'level' => 'info',
+                    ],
+                ],
+                [
+                    '_id' => 'doc-1',
+                    '_source' => [
+                        'id' => 'doc-1',
+                        'message' => 'hello',
+                        'level' => 'error',
+                    ],
+                ]
+            );
+
+        $client->expects($this->once())
+            ->method('index')
+            ->with($this->callback(function (array $params): bool {
+                $this->assertSame('doc-1', $params['id']);
+                $this->assertSame('hello', $params['body']['message']);
+                $this->assertSame('error', $params['body']['level']);
+                $this->assertSame('doc-1', $params['body']['id']);
+
+                return true;
+            }))
+            ->willReturn(['result' => 'updated']);
+
+        $store = $this->createObject($client);
+
+        $updated = $store->update([
+            'id' => 'doc-1',
+            'level' => 'error',
+        ]);
+
+        $this->assertSame('doc-1', $updated['id']);
+        $this->assertSame('error', $updated['level']);
+        $this->assertSame('hello', $updated['message']);
+    }
+
+    public function testDeleteReturnsDeletedRecord(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                '_id' => 'doc-1',
+                '_source' => [
+                    'id' => 'doc-1',
+                    'message' => 'hello',
+                ],
+            ]);
+
+        $client->expects($this->once())
+            ->method('delete')
+            ->with([
+                'index' => 'test-index',
+                'id' => 'doc-1',
+                'refresh' => 'wait_for',
+            ])
+            ->willReturn(['result' => 'deleted']);
+
+        $store = $this->createObject($client);
+        $deleted = $store->delete('doc-1');
+
+        $this->assertSame('doc-1', $deleted['id']);
+        $this->assertSame('hello', $deleted['message']);
+    }
+
+    public function testDeleteAllReturnsDeletedItemsCount(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('deleteByQuery')
+            ->with($this->callback(function (array $params): bool {
+                $this->assertSame('test-index', $params['index']);
+                $this->assertTrue($params['refresh']);
+                $this->assertSame('proceed', $params['conflicts']);
+
+                return true;
+            }))
+            ->willReturn([
+                'deleted' => 7,
+            ]);
+
+        $store = $this->createObject($client);
+
+        $this->assertSame(7, $store->deleteAll());
     }
 
     public function testReadInjectsIdentifierFromElasticId(): void
