@@ -16,6 +16,7 @@ use Psr\Log\NullLogger;
 use rollun\datastore\DataStore\DataStoreException;
 use rollun\datastore\DataStore\ElasticsearchDataStore;
 use rollun\datastore\DataStore\Interfaces\ReadInterface;
+use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Node\SelectNode;
@@ -395,5 +396,110 @@ class ElasticsearchDataStoreTest extends TestCase
         $store = $this->createObject($client);
 
         $this->assertSame(25, $store->count());
+    }
+
+    public function testQueryWithAggregateSelectUsesNativeAggregations(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('search')
+            ->with($this->callback(function (array $params): bool {
+                $this->assertSame('test-index', $params['index']);
+                $this->assertSame(0, $params['body']['size']);
+                $this->assertArrayHasKey('metric_0', $params['body']['aggs']);
+                $this->assertArrayHasKey('metric_1', $params['body']['aggs']);
+                $this->assertSame(
+                    ['exists' => ['field' => 'id']],
+                    $params['body']['aggs']['metric_0']['filter']
+                );
+                $this->assertSame(
+                    ['field' => 'id'],
+                    $params['body']['aggs']['metric_1']['max']
+                );
+
+                return true;
+            }))
+            ->willReturn([
+                'aggregations' => [
+                    'metric_0' => ['doc_count' => 3],
+                    'metric_1' => ['value' => 3],
+                    'metric_2' => ['value' => 1],
+                    'metric_3' => ['value' => 6],
+                    'metric_4' => ['value' => 2],
+                ],
+            ]);
+
+        $store = $this->createObject($client);
+        $result = $store->query(
+            new RqlQuery('select(count(id),max(id),min(id),sum(id),avg(id))')
+        );
+
+        $this->assertEquals([
+            [
+                'count(id)' => 3,
+                'max(id)' => 3,
+                'min(id)' => 1,
+                'sum(id)' => 6,
+                'avg(id)' => 2,
+            ],
+        ], $result);
+    }
+
+    public function testQueryWithGroupByUsesCompositeAggregation(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('search')
+            ->with($this->callback(function (array $params): bool {
+                $this->assertSame('test-index', $params['index']);
+                $this->assertSame(0, $params['body']['size']);
+                $this->assertArrayHasKey('groupby', $params['body']['aggs']);
+
+                $groupByAgg = $params['body']['aggs']['groupby'];
+                $this->assertArrayHasKey('composite', $groupByAgg);
+                $this->assertArrayHasKey('aggs', $groupByAgg);
+                $this->assertCount(2, $groupByAgg['composite']['sources']);
+                $this->assertArrayHasKey('metric_0', $groupByAgg['aggs']);
+                $this->assertSame(
+                    ['exists' => ['field' => 'id']],
+                    $groupByAgg['aggs']['metric_0']['filter']
+                );
+
+                return true;
+            }))
+            ->willReturn([
+                'aggregations' => [
+                    'groupby' => [
+                        'buckets' => [
+                            [
+                                'key' => [
+                                    'group_0' => 'n1',
+                                    'group_1' => 's1',
+                                ],
+                                'doc_count' => 2,
+                                'metric_0' => ['doc_count' => 2],
+                            ],
+                            [
+                                'key' => [
+                                    'group_0' => 'n1',
+                                    'group_1' => 's2',
+                                ],
+                                'doc_count' => 1,
+                                'metric_0' => ['doc_count' => 1],
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+        $store = $this->createObject($client);
+        $result = $store->query(
+            new RqlQuery('select(name,surname,id)&groupby(name,surname)')
+        );
+
+        $this->assertEquals([
+            ['name' => 'n1', 'surname' => 's1', 'count(id)' => 2],
+            ['name' => 'n1', 'surname' => 's2', 'count(id)' => 1],
+        ], $result);
     }
 }

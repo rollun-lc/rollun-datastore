@@ -12,6 +12,7 @@ use Elasticsearch\ClientBuilder;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
 use rollun\datastore\DataStore\DataStoreAbstract;
 use rollun\datastore\DataStore\ElasticsearchDataStore;
+use rollun\datastore\Rql\RqlQuery;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
 use Xiag\Rql\Parser\Query;
@@ -102,6 +103,61 @@ class ElasticsearchDataStoreTest extends BaseDataStoreTest
         $this->assertCount(1, $byId);
         $this->assertSame($id1, $byId[0]['id']);
         $this->assertSame($message1, $byId[0]['message']);
+    }
+
+    public function testGroupBySupportsCountAndMetrics(): void
+    {
+        $this->indexLog(210001, 'svc-a', 'msg-a-1', 'INFO');
+        $this->indexLog(210002, 'svc-a', 'msg-a-2', 'INFO');
+        $this->indexLog(210003, 'svc-b', 'msg-b-1', 'ERROR');
+        $this->indexLog(210004, 'svc-b', 'msg-b-2', 'ERROR');
+        $this->indexLog(210005, 'svc-b', 'msg-b-3', 'ERROR');
+
+        $result = $this->store->query(
+            new RqlQuery('select(service,count(id),max(id),min(id),sum(id),avg(id))&groupby(service)')
+        );
+
+        $byService = [];
+        foreach ($result as $row) {
+            $byService[$row['service']] = $row;
+        }
+
+        $this->assertArrayHasKey('svc-a', $byService);
+        $this->assertArrayHasKey('svc-b', $byService);
+
+        $this->assertSame(2, $byService['svc-a']['count(id)']);
+        $this->assertEquals(210002, $byService['svc-a']['max(id)']);
+        $this->assertEquals(210001, $byService['svc-a']['min(id)']);
+        $this->assertEquals(420003, $byService['svc-a']['sum(id)']);
+        $this->assertEquals(210001.5, $byService['svc-a']['avg(id)']);
+
+        $this->assertSame(3, $byService['svc-b']['count(id)']);
+        $this->assertEquals(210005, $byService['svc-b']['max(id)']);
+        $this->assertEquals(210003, $byService['svc-b']['min(id)']);
+        $this->assertEquals(630012, $byService['svc-b']['sum(id)']);
+        $this->assertEquals(210004, $byService['svc-b']['avg(id)']);
+    }
+
+    public function testGroupByConvertsNonGroupedFieldToCount(): void
+    {
+        $this->store->create(['id' => 220001, 'name' => 'n1', 'surname' => 's1']);
+        $this->store->create(['id' => 220002, 'name' => 'n1', 'surname' => 's1']);
+        $this->store->create(['id' => 220003, 'name' => 'n1', 'surname' => 's2']);
+
+        $result = $this->store->query(
+            new RqlQuery('select(name,surname,id)&groupby(name,surname)')
+        );
+
+        $counts = [];
+        foreach ($result as $row) {
+            $this->assertArrayNotHasKey('id', $row);
+            $this->assertArrayHasKey('count(id)', $row);
+
+            $counts[$row['name'] . ':' . $row['surname']] = $row['count(id)'];
+        }
+
+        $this->assertSame(2, $counts['n1:s1']);
+        $this->assertSame(1, $counts['n1:s2']);
     }
 
     private function indexLog(int $id, string $service, string $message, string $level): void

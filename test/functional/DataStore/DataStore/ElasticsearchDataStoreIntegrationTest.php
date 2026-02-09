@@ -8,6 +8,7 @@ use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
 use rollun\datastore\DataStore\ElasticsearchDataStore;
+use rollun\datastore\Rql\RqlQuery;
 use rollun\test\functional\FunctionalTestCase;
 use Xiag\Rql\Parser\Node\LimitNode;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator\EqNode;
@@ -98,23 +99,79 @@ class ElasticsearchDataStoreIntegrationTest extends FunctionalTestCase
         $this->assertSame($expectedIds, $actualIds);
     }
 
-    private function indexLog(string $id, string $service, string $message, string $level): void
+    public function testGroupByAndAggregateWithRealElastic(): void
+    {
+        $suffix = strtolower(bin2hex(random_bytes(6)));
+        $service = 'it-group-' . $suffix;
+
+        $this->indexLog('it-gb-' . $suffix . '-1', $service, 'group-msg-a', 'info', [
+            'test_run' => $suffix,
+            'test_number' => 10,
+        ]);
+        $this->indexLog('it-gb-' . $suffix . '-2', $service, 'group-msg-b', 'info', [
+            'test_run' => $suffix,
+            'test_number' => 30,
+        ]);
+        $this->indexLog('it-gb-' . $suffix . '-3', $service, 'group-msg-c', 'error', [
+            'test_run' => $suffix,
+            'test_number' => 7,
+        ]);
+
+        $query = new RqlQuery(
+            'eq(test_run,' . $suffix . ')' .
+            '&select(level.keyword,count(_id),max(test_number),min(test_number),sum(test_number),avg(test_number))' .
+            '&groupby(level.keyword)'
+        );
+
+        $result = $this->store->query($query);
+        $this->assertCount(2, $result);
+
+        $byLevel = [];
+        foreach ($result as $row) {
+            $byLevel[$row['level.keyword']] = $row;
+        }
+
+        $this->assertArrayHasKey('info', $byLevel);
+        $this->assertArrayHasKey('error', $byLevel);
+
+        $this->assertSame(2, $byLevel['info']['count(_id)']);
+        $this->assertEquals(30, $byLevel['info']['max(test_number)']);
+        $this->assertEquals(10, $byLevel['info']['min(test_number)']);
+        $this->assertEquals(40, $byLevel['info']['sum(test_number)']);
+        $this->assertEquals(20, $byLevel['info']['avg(test_number)']);
+
+        $this->assertSame(1, $byLevel['error']['count(_id)']);
+        $this->assertEquals(7, $byLevel['error']['max(test_number)']);
+        $this->assertEquals(7, $byLevel['error']['min(test_number)']);
+        $this->assertEquals(7, $byLevel['error']['sum(test_number)']);
+        $this->assertEquals(7, $byLevel['error']['avg(test_number)']);
+    }
+
+    private function indexLog(
+        string $id,
+        string $service,
+        string $message,
+        string $level,
+        array $extraBody = []
+    ): void
     {
         $this->createdIds[] = $id;
+
+        $body = array_merge([
+            '@timestamp' => gmdate('Y-m-d\TH:i:s\Z'),
+            'level' => $level,
+            'service' => $service,
+            'message' => $message,
+            'context' => [
+                'source' => __CLASS__,
+                'tag' => 'integration-test',
+            ],
+        ], $extraBody);
 
         $this->client->index([
             'index' => self::INDEX_NAME,
             'id' => $id,
-            'body' => [
-                '@timestamp' => gmdate('Y-m-d\TH:i:s\Z'),
-                'level' => $level,
-                'service' => $service,
-                'message' => $message,
-                'context' => [
-                    'source' => __CLASS__,
-                    'tag' => 'integration-test',
-                ],
-            ],
+            'body' => $body,
             'refresh' => 'wait_for',
         ]);
     }
