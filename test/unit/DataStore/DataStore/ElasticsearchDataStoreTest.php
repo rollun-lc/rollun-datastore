@@ -379,6 +379,40 @@ class ElasticsearchDataStoreTest extends TestCase
         $this->assertSame([], $store->query(new Query()));
     }
 
+    public function testQueryWithoutLimitIsCappedByDefaultQueryLimit(): void
+    {
+        $client = $this->createMock(Client::class);
+
+        $batch = [];
+        for ($i = 1; $i <= 500; $i++) {
+            $batch[] = [
+                '_id' => (string) $i,
+                '_source' => ['id' => $i],
+                'sort' => [$i],
+            ];
+        }
+
+        $client->expects($this->exactly(20))
+            ->method('search')
+            ->with($this->callback(function (array $params): bool {
+                $this->assertSame('test-index', $params['index']);
+                $this->assertSame(500, $params['body']['size']);
+                $this->assertArrayHasKey('query', $params['body']);
+                return true;
+            }))
+            ->willReturn([
+                'hits' => [
+                    'hits' => $batch,
+                ],
+            ]);
+
+        $store = $this->createObject($client);
+
+        $result = $store->query(new Query());
+
+        $this->assertCount(10000, $result);
+    }
+
     public function testCountReturnsValueFromElasticResponse(): void
     {
         $client = $this->createMock(Client::class);
@@ -698,6 +732,24 @@ class ElasticsearchDataStoreTest extends TestCase
                 ],
             ],
         ], $actualQuery);
+    }
+
+    public function testQueryBuildsMatchAllForEmptyQueryObject(): void
+    {
+        $actualQuery = $this->captureBuiltQuery(new Query());
+
+        $this->assertCount(1, $actualQuery);
+        $this->assertArrayHasKey('match_all', $actualQuery);
+        $this->assertIsObject($actualQuery['match_all']);
+    }
+
+    public function testQueryBuildsMatchAllForEmptyRqlString(): void
+    {
+        $actualQuery = $this->captureBuiltQuery(new RqlQuery(''));
+
+        $this->assertCount(1, $actualQuery);
+        $this->assertArrayHasKey('match_all', $actualQuery);
+        $this->assertIsObject($actualQuery['match_all']);
     }
 
     /**

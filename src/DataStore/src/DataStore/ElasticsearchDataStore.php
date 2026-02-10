@@ -24,6 +24,7 @@ use Xiag\Rql\Parser\Query;
 class ElasticsearchDataStore extends DataStoreAbstract
 {
     private const SEARCH_BATCH_SIZE = 500;
+    private const DEFAULT_QUERY_LIMIT = 10000;
     private const REFRESH_POLICY = 'wait_for';
     private readonly RqlToElasticsearchDslAdapter $rqlToElasticsearchDslAdapter;
 
@@ -207,7 +208,7 @@ class ElasticsearchDataStore extends DataStoreAbstract
         }
 
         $limitNode = $query->getLimit();
-        $limit = $limitNode ? (int) $limitNode->getLimit() : self::LIMIT_INFINITY;
+        $limit = $this->resolveLimit($limitNode);
         $offset = $limitNode ? max(0, (int) $limitNode->getOffset()) : 0;
 
         if ($limit < 0) {
@@ -508,7 +509,7 @@ class ElasticsearchDataStore extends DataStoreAbstract
     private function queryWithNativeAggregations(Query $query): array
     {
         $limitNode = $query->getLimit();
-        $limit = $limitNode ? (int) $limitNode->getLimit() : self::LIMIT_INFINITY;
+        $limit = $this->resolveLimit($limitNode);
         $offset = $limitNode ? max(0, (int) $limitNode->getOffset()) : 0;
 
         if ($limit < 0) {
@@ -1019,7 +1020,7 @@ class ElasticsearchDataStore extends DataStoreAbstract
     private function queryWithInMemorySelect(Query $query): array
     {
         $limitNode = $query->getLimit();
-        $limit = $limitNode ? (int) $limitNode->getLimit() : self::LIMIT_INFINITY;
+        $limit = $this->resolveLimit($limitNode);
         $offset = $limitNode ? max(0, (int) $limitNode->getOffset()) : 0;
 
         if ($limit < 0) {
@@ -1091,5 +1092,14 @@ class ElasticsearchDataStore extends DataStoreAbstract
         $needToTake = $remaining ?? self::SEARCH_BATCH_SIZE;
 
         return max(1, min(self::SEARCH_BATCH_SIZE, $needToSkip + $needToTake));
+    }
+
+    private function resolveLimit(?LimitNode $limitNode): int
+    {
+        if ($limitNode === null) {
+            return self::DEFAULT_QUERY_LIMIT;
+        }
+
+        return (int) $limitNode->getLimit();
     }
 }

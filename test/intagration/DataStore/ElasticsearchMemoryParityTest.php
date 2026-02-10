@@ -94,6 +94,14 @@ class ElasticsearchMemoryParityTest extends TestCase
     public function providerRqlParityCases(): array
     {
         return [
+            'empty_rql_returns_all' => [[
+                'input' => '',
+                'expected' => $this->idRows([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
+            ]],
+            'empty_filter_with_limit_offset' => [[
+                'input' => 'select(id)&sort(id)&limit(4,3)',
+                'expected' => $this->idRows([4, 5, 6, 7]),
+            ]],
             'eq' => [[
                 'input' => 'eq(service,auth)&select(id)&sort(id)',
                 'expected' => $this->idRows([1, 2, 9]),
