@@ -10,6 +10,7 @@ namespace rollun\test\unit\DataStore\DataStore;
 use Elasticsearch\Client;
 use Elasticsearch\Common\Exceptions\Conflict409Exception;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
+use Elasticsearch\Namespaces\IndicesNamespace;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -501,5 +502,256 @@ class ElasticsearchDataStoreTest extends TestCase
             ['name' => 'n1', 'surname' => 's1', 'count(id)' => 2],
             ['name' => 'n1', 'surname' => 's2', 'count(id)' => 1],
         ], $result);
+    }
+
+    /**
+     * @dataProvider providerScalarOperators
+     */
+    public function testQueryBuildsScalarOperators(string $rql, array $expectedQuery): void
+    {
+        $actualQuery = $this->captureBuiltQuery(new RqlQuery($rql));
+        $this->assertSame($expectedQuery, $actualQuery);
+    }
+
+    public function providerScalarOperators(): array
+    {
+        return [
+            'eq' => [
+                'eq(service,auth)',
+                ['term' => ['service' => 'auth']],
+            ],
+            'ne' => [
+                'ne(status,closed)',
+                ['bool' => ['must_not' => [['term' => ['status' => 'closed']]]]],
+            ],
+            'gt' => [
+                'gt(retries,3)',
+                ['range' => ['retries' => ['gt' => 3]]],
+            ],
+            'ge' => [
+                'ge(score,8.8)',
+                ['range' => ['score' => ['gte' => 8.8]]],
+            ],
+            'lt' => [
+                'lt(score,4.5)',
+                ['range' => ['score' => ['lt' => 4.5]]],
+            ],
+            'le' => [
+                'le(retries,1)',
+                ['range' => ['retries' => ['lte' => 1]]],
+            ],
+            'like' => [
+                'like(service,a*)',
+                ['wildcard' => ['service' => ['value' => 'a*']]],
+            ],
+            'alike' => [
+                'alike(service,A*)',
+                ['wildcard' => ['service' => ['value' => 'A*', 'case_insensitive' => true]]],
+            ],
+            'contains' => [
+                'contains(message,fail)',
+                ['wildcard' => ['message' => ['value' => '*fail*']]],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider providerArrayOperators
+     */
+    public function testQueryBuildsArrayOperators(string $rql, array $expectedQuery): void
+    {
+        $actualQuery = $this->captureBuiltQuery(new RqlQuery($rql));
+        $this->assertSame($expectedQuery, $actualQuery);
+    }
+
+    public function providerArrayOperators(): array
+    {
+        return [
+            'in' => [
+                'in(owner,(alice,bob))',
+                ['terms' => ['owner' => ['alice', 'bob']]],
+            ],
+            'out' => [
+                'out(region,(us,eu))',
+                ['bool' => ['must_not' => [['terms' => ['region' => ['us', 'eu']]]]]],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider providerBinaryOperators
+     */
+    public function testQueryBuildsBinaryOperators(string $rql, array $expectedQuery): void
+    {
+        $actualQuery = $this->captureBuiltQuery(new RqlQuery($rql));
+        $this->assertSame($expectedQuery, $actualQuery);
+    }
+
+    public function providerBinaryOperators(): array
+    {
+        return [
+            'eqn' => [
+                'eqn(flag)',
+                ['bool' => ['must_not' => [['exists' => ['field' => 'flag']]]]],
+            ],
+            'eqt' => [
+                'eqt(flag)',
+                ['term' => ['flag' => true]],
+            ],
+            'eqf' => [
+                'eqf(flag)',
+                ['term' => ['flag' => false]],
+            ],
+        ];
+    }
+
+    public function testQueryBuildsIeForBooleanField(): void
+    {
+        $query = new RqlQuery('ie(flag)');
+        $mapping = [
+            'flag' => ['type' => 'boolean'],
+        ];
+
+        $actualQuery = $this->captureBuiltQuery($query, $mapping);
+
+        $this->assertSame([
+            'bool' => [
+                'should' => [
+                    ['bool' => ['must_not' => [['exists' => ['field' => 'flag']]]]],
+                    ['term' => ['flag' => false]],
+                ],
+                'minimum_should_match' => 1,
+            ],
+        ], $actualQuery);
+    }
+
+    public function testQueryBuildsIeForKeywordField(): void
+    {
+        $query = new RqlQuery('ie(comment)');
+        $mapping = [
+            'comment' => ['type' => 'keyword'],
+        ];
+
+        $actualQuery = $this->captureBuiltQuery($query, $mapping);
+
+        $this->assertSame([
+            'bool' => [
+                'should' => [
+                    ['bool' => ['must_not' => [['exists' => ['field' => 'comment']]]]],
+                    ['term' => ['comment' => '']],
+                ],
+                'minimum_should_match' => 1,
+            ],
+        ], $actualQuery);
+    }
+
+    public function testQueryBuildsNestedLogicOperators(): void
+    {
+        $rql = 'and('
+            . 'or(eq(service,auth),eq(service,billing)),'
+            . 'not(or(eq(level,ERROR),out(region,(us)))),'
+            . 'ie(flag)'
+            . ')';
+
+        $mapping = [
+            'flag' => ['type' => 'boolean'],
+        ];
+
+        $actualQuery = $this->captureBuiltQuery(new RqlQuery($rql), $mapping);
+
+        $this->assertSame([
+            'bool' => [
+                'must' => [
+                    [
+                        'bool' => [
+                            'should' => [
+                                ['term' => ['service' => 'auth']],
+                                ['term' => ['service' => 'billing']],
+                            ],
+                            'minimum_should_match' => 1,
+                        ],
+                    ],
+                    [
+                        'bool' => [
+                            'must_not' => [
+                                [
+                                    'bool' => [
+                                        'should' => [
+                                            ['term' => ['level' => 'ERROR']],
+                                            ['bool' => ['must_not' => [['terms' => ['region' => ['us']]]]]],
+                                        ],
+                                        'minimum_should_match' => 1,
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    [
+                        'bool' => [
+                            'should' => [
+                                ['bool' => ['must_not' => [['exists' => ['field' => 'flag']]]]],
+                                ['term' => ['flag' => false]],
+                            ],
+                            'minimum_should_match' => 1,
+                        ],
+                    ],
+                ],
+            ],
+        ], $actualQuery);
+    }
+
+    /**
+     * @param Query $query
+     * @param array<string,array<string,string>>|null $mappingProperties
+     * @return array
+     */
+    private function captureBuiltQuery(Query $query, ?array $mappingProperties = null): array
+    {
+        $capturedQuery = [];
+        $query->setLimit(new LimitNode(1, 0));
+
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('search')
+            ->with($this->callback(function (array $params) use (&$capturedQuery): bool {
+                $capturedQuery = $params['body']['query'] ?? [];
+                return true;
+            }))
+            ->willReturn([
+                'hits' => [
+                    'hits' => [
+                        [
+                            '_id' => 'doc-1',
+                            '_source' => ['id' => 'doc-1'],
+                            'sort' => ['doc-1'],
+                        ],
+                    ],
+                ],
+            ]);
+
+        if ($mappingProperties === null) {
+            $client->expects($this->never())->method('indices');
+        } else {
+            $indicesNamespace = $this->createMock(IndicesNamespace::class);
+            $indicesNamespace->expects($this->once())
+                ->method('getMapping')
+                ->with(['index' => 'test-index'])
+                ->willReturn([
+                    'test-index' => [
+                        'mappings' => [
+                            'properties' => $mappingProperties,
+                        ],
+                    ],
+                ]);
+
+            $client->expects($this->once())
+                ->method('indices')
+                ->willReturn($indicesNamespace);
+        }
+
+        $store = $this->createObject($client);
+        $store->query($query);
+
+        return $capturedQuery;
     }
 }

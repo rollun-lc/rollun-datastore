@@ -13,14 +13,10 @@ use Elasticsearch\Common\Exceptions\Conflict409Exception;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use rollun\datastore\DataStore\Elasticsearch\RqlToElasticsearchDslAdapter;
 use rollun\datastore\Rql\Node\AggregateFunctionNode;
 use rollun\datastore\Rql\RqlQuery;
-use Xiag\Rql\Parser\DataType\Glob;
-use Xiag\Rql\Parser\Node\AbstractQueryNode;
 use Xiag\Rql\Parser\Node\LimitNode;
-use Xiag\Rql\Parser\Node\Query\AbstractArrayOperatorNode;
-use Xiag\Rql\Parser\Node\Query\AbstractLogicOperatorNode;
-use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
 use Xiag\Rql\Parser\Node\SelectNode;
 use Xiag\Rql\Parser\Node\SortNode;
 use Xiag\Rql\Parser\Query;
@@ -29,6 +25,7 @@ class ElasticsearchDataStore extends DataStoreAbstract
 {
     private const SEARCH_BATCH_SIZE = 500;
     private const REFRESH_POLICY = 'wait_for';
+    private readonly RqlToElasticsearchDslAdapter $rqlToElasticsearchDslAdapter;
 
     public function __construct(
         private readonly Client $client,
@@ -36,6 +33,12 @@ class ElasticsearchDataStore extends DataStoreAbstract
         private readonly string $identifier = self::DEF_ID,
         private readonly LoggerInterface $logger = new NullLogger()
     ) {
+        $this->rqlToElasticsearchDslAdapter = new RqlToElasticsearchDslAdapter(
+            $this->client,
+            $this->index,
+            $this->identifier,
+            $this->logger
+        );
     }
 
     public function getIdentifier()
@@ -221,7 +224,7 @@ class ElasticsearchDataStore extends DataStoreAbstract
         );
 
         $baseBody = [
-            'query' => $this->buildSearchQuery($query->getQuery()),
+            'query' => $this->rqlToElasticsearchDslAdapter->convert($query->getQuery()),
             'sort' => $sort,
         ];
 
@@ -421,156 +424,6 @@ class ElasticsearchDataStore extends DataStoreAbstract
     }
 
     /**
-     * @param AbstractQueryNode|null $queryNode
-     * @return array
-     */
-    private function buildSearchQuery(?AbstractQueryNode $queryNode): array
-    {
-        if ($queryNode === null) {
-            return ['match_all' => (object) []];
-        }
-
-        if ($queryNode instanceof AbstractLogicOperatorNode) {
-            $queries = [];
-            foreach ($queryNode->getQueries() as $childQuery) {
-                $queries[] = $this->buildSearchQuery($childQuery);
-            }
-
-            if ($queries === []) {
-                return ['match_all' => (object) []];
-            }
-
-            return match ($queryNode->getNodeName()) {
-                'and' => ['bool' => ['must' => $queries]],
-                'or' => ['bool' => ['should' => $queries, 'minimum_should_match' => 1]],
-                'not' => ['bool' => ['must_not' => $queries]],
-                default => throw new DataStoreException('The Logic Operator not supported: ' . $queryNode->getNodeName()),
-            };
-        }
-
-        if ($queryNode instanceof AbstractArrayOperatorNode) {
-            $field = $queryNode->getField();
-            $values = array_map([$this, 'normalizeFieldValue'], $queryNode->getValues());
-            $inQuery = $this->buildTermsQuery($field, $values);
-
-            return match ($queryNode->getNodeName()) {
-                'in' => $inQuery,
-                'out' => ['bool' => ['must_not' => [$inQuery]]],
-                default => throw new DataStoreException('The Array Operator not supported: ' . $queryNode->getNodeName()),
-            };
-        }
-
-        if ($queryNode instanceof AbstractScalarOperatorNode) {
-            $field = $queryNode->getField();
-            $value = $this->normalizeFieldValue($queryNode->getValue());
-            $scalarNodeName = $queryNode->getNodeName();
-
-            return match ($scalarNodeName) {
-                'eq' => $this->buildTermQuery($field, $value),
-                'ne' => ['bool' => ['must_not' => [$this->buildTermQuery($field, $value)]]],
-                'gt' => ['range' => [$field => ['gt' => $value]]],
-                'ge' => ['range' => [$field => ['gte' => $value]]],
-                'lt' => ['range' => [$field => ['lt' => $value]]],
-                'le' => ['range' => [$field => ['lte' => $value]]],
-                'like', 'alike' => ['wildcard' => [$field => ['value' => $this->toWildcardPattern($queryNode->getValue())]]],
-                'contains' => ['wildcard' => [$field => ['value' => $this->toWildcardPattern($queryNode->getValue(), true)]]],
-                default => throw new DataStoreException('The Scalar Operator not supported: ' . $scalarNodeName),
-            };
-        }
-
-        throw new DataStoreException('The Node type not supported: ' . $queryNode->getNodeName());
-    }
-
-    private function buildTermQuery(string $field, mixed $value): array
-    {
-        if ($field !== $this->identifier) {
-            return ['term' => [$field => $value]];
-        }
-
-        return [
-            'bool' => [
-                'should' => [
-                    ['term' => [$field => $value]],
-                    ['ids' => ['values' => [(string) $value]]],
-                ],
-                'minimum_should_match' => 1,
-            ],
-        ];
-    }
-
-    /**
-     * @param string $field
-     * @param array $values
-     * @return array
-     */
-    private function buildTermsQuery(string $field, array $values): array
-    {
-        if ($field !== $this->identifier) {
-            return ['terms' => [$field => $values]];
-        }
-
-        $ids = array_map(static fn($value) => (string) $value, $values);
-
-        return [
-            'bool' => [
-                'should' => [
-                    ['terms' => [$field => $values]],
-                    ['ids' => ['values' => $ids]],
-                ],
-                'minimum_should_match' => 1,
-            ],
-        ];
-    }
-
-    /**
-     * @param mixed $value
-     * @return mixed
-     */
-    private function normalizeFieldValue(mixed $value): mixed
-    {
-        if ($value instanceof \DateTimeInterface) {
-            return $value->format(DATE_ATOM);
-        }
-
-        if ($value instanceof Glob) {
-            return rawurldecode($this->extractGlobValue($value));
-        }
-
-        return $value;
-    }
-
-    /**
-     * @param mixed $value
-     * @param bool $contains
-     * @return string
-     */
-    private function toWildcardPattern(mixed $value, bool $contains = false): string
-    {
-        $pattern = $value instanceof Glob
-            ? $this->extractGlobValue($value)
-            : (string) $this->normalizeFieldValue($value);
-
-        $pattern = rawurldecode($pattern);
-
-        if ($contains && !str_contains($pattern, '*') && !str_contains($pattern, '?')) {
-            $pattern = '*' . $pattern . '*';
-        }
-
-        return $pattern;
-    }
-
-    private function extractGlobValue(Glob $glob): string
-    {
-        $reflection = new \ReflectionClass($glob);
-        $globProperty = $reflection->getProperty('glob');
-        $globProperty->setAccessible(true);
-        $value = $globProperty->getValue($glob);
-        $globProperty->setAccessible(false);
-
-        return (string) $value;
-    }
-
-    /**
      * @param mixed $record
      * @return array
      */
@@ -707,7 +560,7 @@ class ElasticsearchDataStore extends DataStoreAbstract
 
             $body = [
                 'size' => 0,
-                'query' => $this->buildSearchQuery($query->getQuery()),
+                'query' => $this->rqlToElasticsearchDslAdapter->convert($query->getQuery()),
                 'aggs' => [
                     'groupby' => [
                         'composite' => $composite,
@@ -794,7 +647,7 @@ class ElasticsearchDataStore extends DataStoreAbstract
 
         $body = [
             'size' => 0,
-            'query' => $this->buildSearchQuery($query->getQuery()),
+            'query' => $this->rqlToElasticsearchDslAdapter->convert($query->getQuery()),
             'aggs' => $metricAggregations,
         ];
 
