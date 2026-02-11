@@ -370,7 +370,7 @@ class ElasticsearchDataStoreTest extends TestCase
         $logger->expects($this->once())
             ->method('info')
             ->with(
-                'ElasticsearchDataStore query: index not found',
+                'ElasticsearchQueryBuilder query: index not found',
                 ['index' => 'test-index']
             );
 
