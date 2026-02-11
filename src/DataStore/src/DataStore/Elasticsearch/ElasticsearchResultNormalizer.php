@@ -19,7 +19,7 @@ namespace rollun\datastore\DataStore\Elasticsearch;
  * - Extracting metric values from aggregations
  * - Normalizing result set shape (ensuring all rows have same fields)
  */
-class ElasticsearchResultNormalizer
+final class ElasticsearchResultNormalizer
 {
     public function __construct(
         private readonly string $identifier = 'id'

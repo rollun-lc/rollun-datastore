@@ -27,7 +27,7 @@ use Xiag\Rql\Parser\Query;
  *
  * Analogous to SqlQueryBuilder handling of GROUP BY and aggregate functions.
  */
-class ElasticsearchAggregationBuilder
+final class ElasticsearchAggregationBuilder
 {
     public function __construct()
     {

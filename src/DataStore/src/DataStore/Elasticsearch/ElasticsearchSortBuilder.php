@@ -22,7 +22,7 @@ use Xiag\Rql\Parser\Node\SortNode;
  *
  * Analogous to SqlQueryBuilder::setSelectOrder()
  */
-class ElasticsearchSortBuilder
+final class ElasticsearchSortBuilder
 {
     public function __construct(
         private readonly string $identifier = 'id'

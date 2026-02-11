@@ -30,7 +30,7 @@ use Xiag\Rql\Parser\Query;
  * - ElasticsearchResultNormalizer: Result normalization
  * - RqlToElasticsearchDslAdapter: Condition building (analogous to SqlConditionBuilder)
  */
-class ElasticsearchDataStore extends DataStoreAbstract
+final class ElasticsearchDataStore extends DataStoreAbstract
 {
     private const REFRESH_POLICY = 'wait_for';
 

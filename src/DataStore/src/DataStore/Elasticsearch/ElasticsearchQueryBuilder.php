@@ -33,7 +33,7 @@ use Xiag\Rql\Parser\Query;
  * - Determining query type (regular/aggregation/in-memory)
  * - Executing batch queries for pagination
  */
-class ElasticsearchQueryBuilder
+final class ElasticsearchQueryBuilder
 {
     private const SEARCH_BATCH_SIZE = 500;
     private const DEFAULT_QUERY_LIMIT = 10000;

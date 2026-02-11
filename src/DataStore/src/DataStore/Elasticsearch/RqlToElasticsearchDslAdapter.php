@@ -16,7 +16,7 @@ use Xiag\Rql\Parser\Node\Query\AbstractArrayOperatorNode;
 use Xiag\Rql\Parser\Node\Query\AbstractLogicOperatorNode;
 use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
 
-class RqlToElasticsearchDslAdapter
+final class RqlToElasticsearchDslAdapter
 {
     /** @var array<string,string>|null */
     private ?array $fieldTypeCache = null;
