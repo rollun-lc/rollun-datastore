@@ -554,13 +554,53 @@ class ElasticsearchDataStoreTest extends TestCase
                 'eq(service,auth)',
                 ['term' => ['service' => 'auth']],
             ],
+            'eq with string: prefix' => [
+                'eq(code,string:108693)',
+                ['term' => ['code' => '108693']],
+            ],
+            'eq with string: leading zeros' => [
+                'eq(code,string:01)',
+                ['term' => ['code' => '01']],
+            ],
+            'eq with integer: prefix (non-identifier field)' => [
+                'eq(count,integer:123)',
+                ['term' => ['count' => 123]],
+            ],
+            'eq with integer: on identifier field uses dual strategy' => [
+                'eq(id,integer:123)',
+                [
+                    'bool' => [
+                        'should' => [
+                            ['term' => ['id' => 123]],
+                            ['ids' => ['values' => ['123']]],
+                        ],
+                        'minimum_should_match' => 1,
+                    ],
+                ],
+            ],
+            'eq with float: prefix' => [
+                'eq(price,float:123)',
+                ['term' => ['price' => 123.0]],
+            ],
             'ne' => [
                 'ne(status,closed)',
                 ['bool' => ['must_not' => [['term' => ['status' => 'closed']]]]],
             ],
+            'ne with string: prefix' => [
+                'ne(code,string:00123)',
+                ['bool' => ['must_not' => [['term' => ['code' => '00123']]]]],
+            ],
             'gt' => [
                 'gt(retries,3)',
                 ['range' => ['retries' => ['gt' => 3]]],
+            ],
+            'gt with integer: prefix' => [
+                'gt(count,integer:100)',
+                ['range' => ['count' => ['gt' => 100]]],
+            ],
+            'gt with float: prefix' => [
+                'gt(price,float:99.99)',
+                ['range' => ['price' => ['gt' => 99.99]]],
             ],
             'ge' => [
                 'ge(score,8.8)',
@@ -578,6 +618,10 @@ class ElasticsearchDataStoreTest extends TestCase
                 'like(service,a*)',
                 ['wildcard' => ['service' => ['value' => 'a*']]],
             ],
+            'like with string: prefix' => [
+                'like(code,string:A*)',
+                ['wildcard' => ['code' => ['value' => 'A*']]],
+            ],
             'alike' => [
                 'alike(service,A*)',
                 ['wildcard' => ['service' => ['value' => 'A*', 'case_insensitive' => true]]],
@@ -585,6 +629,10 @@ class ElasticsearchDataStoreTest extends TestCase
             'contains' => [
                 'contains(message,fail)',
                 ['wildcard' => ['message' => ['value' => '*fail*']]],
+            ],
+            'contains with string: prefix' => [
+                'contains(message,string:error)',
+                ['wildcard' => ['message' => ['value' => '*error*']]],
             ],
         ];
     }
@@ -605,9 +653,41 @@ class ElasticsearchDataStoreTest extends TestCase
                 'in(owner,(alice,bob))',
                 ['terms' => ['owner' => ['alice', 'bob']]],
             ],
+            'in with mixed types' => [
+                'in(tag,(2,float:3,string:004,boolean:1))',
+                ['terms' => ['tag' => [2, 3.0, '004', true]]],
+            ],
+            'in with string: prefix' => [
+                'in(code,(string:01,string:02,string:03))',
+                ['terms' => ['code' => ['01', '02', '03']]],
+            ],
+            'in with integer: prefix (non-identifier field)' => [
+                'in(count,(integer:1,integer:2,integer:3))',
+                ['terms' => ['count' => [1, 2, 3]]],
+            ],
+            'in with integer: on identifier field uses dual strategy' => [
+                'in(id,(integer:1,integer:2,integer:3))',
+                [
+                    'bool' => [
+                        'should' => [
+                            ['terms' => ['id' => [1, 2, 3]]],
+                            ['ids' => ['values' => ['1', '2', '3']]],
+                        ],
+                        'minimum_should_match' => 1,
+                    ],
+                ],
+            ],
+            'in with float: prefix' => [
+                'in(price,(float:1.5,float:2.5,float:3.5))',
+                ['terms' => ['price' => [1.5, 2.5, 3.5]]],
+            ],
             'out' => [
                 'out(region,(us,eu))',
                 ['bool' => ['must_not' => [['terms' => ['region' => ['us', 'eu']]]]]],
+            ],
+            'out with string: prefix' => [
+                'out(code,(string:01,string:02))',
+                ['bool' => ['must_not' => [['terms' => ['code' => ['01', '02']]]]]],
             ],
         ];
     }

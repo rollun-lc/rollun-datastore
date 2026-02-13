@@ -160,6 +160,177 @@ class ElasticsearchDataStoreTest extends BaseDataStoreTest
         $this->assertSame(1, $counts['n1:s2']);
     }
 
+    /**
+     * Data provider for type prefix tests
+     * Format: [rqlQuery, expectedResults]
+     */
+    public function typeHintingDataProvider(): \Generator
+    {
+        // String type tests
+        yield 'eq with string: explicit prefix' => [
+            'eq(code,string:01)',
+            [['id' => 310001, 'code' => '01']],
+        ];
+        yield 'eq with string: preserves leading zeros' => [
+            'eq(code,string:001)',
+            [['id' => 310003, 'code' => '001']],
+        ];
+        yield 'in with string: multiple values' => [
+            'in(code,(string:01,string:02))',
+            [['id' => 310001, 'code' => '01'], ['id' => 310002, 'code' => '02']],
+        ];
+
+        // Integer type tests
+        yield 'eq with integer: on count field' => [
+            'eq(count,integer:5)',
+            [['id' => 310001, 'count' => 5]],
+        ];
+        yield 'gt with integer: comparison' => [
+            'gt(count,integer:5)',
+            [['id' => 310002, 'count' => 10], ['id' => 310003, 'count' => 7]],
+        ];
+        yield 'ge with integer: comparison' => [
+            'ge(count,integer:7)',
+            [['id' => 310002, 'count' => 10], ['id' => 310003, 'count' => 7]],
+        ];
+        yield 'lt with integer: comparison' => [
+            'lt(count,integer:10)',
+            [['id' => 310001, 'count' => 5], ['id' => 310003, 'count' => 7]],
+        ];
+        yield 'le with integer: comparison' => [
+            'le(count,integer:7)',
+            [['id' => 310001, 'count' => 5], ['id' => 310003, 'count' => 7]],
+        ];
+
+        // Float type tests
+        yield 'eq with float: exact match' => [
+            'eq(price,float:10.5)',
+            [['id' => 310001, 'price' => 10.5]],
+        ];
+        yield 'gt with float: comparison' => [
+            'gt(price,float:15)',
+            [['id' => 310002, 'price' => 20.0], ['id' => 310003, 'price' => 15.75]],
+        ];
+        yield 'ge with float: comparison' => [
+            'ge(price,float:15.75)',
+            [['id' => 310002, 'price' => 20.0], ['id' => 310003, 'price' => 15.75]],
+        ];
+        yield 'lt with float: comparison' => [
+            'lt(price,float:20)',
+            [['id' => 310001, 'price' => 10.5], ['id' => 310003, 'price' => 15.75]],
+        ];
+        yield 'le with float: comparison' => [
+            'le(price,float:15.75)',
+            [['id' => 310001, 'price' => 10.5], ['id' => 310003, 'price' => 15.75]],
+        ];
+
+        // Boolean type tests
+        yield 'eq with boolean:1 (true)' => [
+            'eq(active,boolean:1)',
+            [['id' => 310001, 'active' => true], ['id' => 310003, 'active' => true]],
+        ];
+        yield 'eq with boolean:0 (false)' => [
+            'eq(active,boolean:0)',
+            [['id' => 310002, 'active' => false]],
+        ];
+        yield 'ne with boolean:1 (not true)' => [
+            'ne(active,boolean:1)',
+            [['id' => 310002, 'active' => false]],
+        ];
+
+        // Mixed types in in() operator
+        yield 'in with mixed types' => [
+            'in(count,(5,integer:7,float:10))',
+            [['id' => 310001, 'count' => 5], ['id' => 310002, 'count' => 10], ['id' => 310003, 'count' => 7]],
+        ];
+    }
+
+    /**
+     * @dataProvider typeHintingDataProvider
+     * Test queries with type prefixes (string:, integer:, float:, boolean:)
+     */
+    public function testQueryWithTypeHinting(string $rqlQuery, array $expectedResults): void
+    {
+        // Create test data
+        $this->store->create(['id' => 310001, 'code' => '01', 'price' => 10.5, 'count' => 5, 'active' => true]);
+        $this->store->create(['id' => 310002, 'code' => '02', 'price' => 20.0, 'count' => 10, 'active' => false]);
+        $this->store->create(['id' => 310003, 'code' => '001', 'price' => 15.75, 'count' => 7, 'active' => true]);
+
+        $result = $this->store->query(new RqlQuery($rqlQuery));
+
+        $this->assertCount(count($expectedResults), $result, "Query: {$rqlQuery}");
+
+        // Sort both arrays by id for comparison
+        usort($result, static fn($a, $b) => $a['id'] <=> $b['id']);
+        usort($expectedResults, static fn($a, $b) => $a['id'] <=> $b['id']);
+
+        foreach ($expectedResults as $index => $expected) {
+            foreach ($expected as $key => $value) {
+                $this->assertArrayHasKey($key, $result[$index], "Missing key '{$key}' in result for query: {$rqlQuery}");
+
+                if (is_float($value)) {
+                    $this->assertEquals($value, $result[$index][$key], "Value mismatch for '{$key}' in query: {$rqlQuery}", 0.001);
+                } else {
+                    $this->assertSame($value, $result[$index][$key], "Value mismatch for '{$key}' in query: {$rqlQuery}");
+                }
+            }
+        }
+    }
+
+    public function testQueryWithTypePrefixesSupportsStringIntegerAndFloat(): void
+    {
+        // Create test data with numeric and string codes
+        $this->store->create(['id' => 310001, 'code' => '01', 'price' => 10.5, 'count' => 5]);
+        $this->store->create(['id' => 310002, 'code' => '02', 'price' => 20.0, 'count' => 10]);
+        $this->store->create(['id' => 310003, 'code' => '001', 'price' => 15.75, 'count' => 7]);
+
+        // Test string: prefix - should match exact string '01'
+        $result = $this->store->query(new RqlQuery('eq(code,string:01)'));
+        $this->assertCount(1, $result);
+        $this->assertSame('01', $result[0]['code']);
+        $this->assertSame(310001, $result[0]['id']);
+
+        // Test integer: prefix on id field (uses dual strategy)
+        $result = $this->store->query(new RqlQuery('eq(id,integer:310002)'));
+        $this->assertCount(1, $result);
+        $this->assertSame(310002, $result[0]['id']);
+
+        // Test integer: prefix on count field
+        $result = $this->store->query(new RqlQuery('ge(count,integer:7)'));
+        $this->assertCount(2, $result);
+        $counts = array_column($result, 'count');
+        sort($counts);
+        $this->assertSame([7, 10], $counts);
+
+        // Test float: prefix
+        $result = $this->store->query(new RqlQuery('gt(price,float:15)'));
+        $this->assertCount(2, $result);
+        $prices = array_column($result, 'price');
+        sort($prices);
+        $this->assertEquals([15.75, 20.0], $prices);
+
+        // Test in() with string: prefix
+        $result = $this->store->query(new RqlQuery('in(code,(string:01,string:02))'));
+        $this->assertCount(2, $result);
+        $codes = array_column($result, 'code');
+        sort($codes);
+        $this->assertSame(['01', '02'], $codes);
+
+        // Test in() with integer: prefix on identifier field (uses dual strategy)
+        $result = $this->store->query(new RqlQuery('in(id,(integer:310001,integer:310003))'));
+        $this->assertCount(2, $result);
+        $ids = array_column($result, 'id');
+        sort($ids);
+        $this->assertSame([310001, 310003], $ids);
+
+        // Test mixed types in in() operator
+        $result = $this->store->query(new RqlQuery('in(count,(5,integer:7,float:10))'));
+        $this->assertCount(3, $result);
+        $counts = array_column($result, 'count');
+        sort($counts);
+        $this->assertSame([5, 7, 10], $counts);
+    }
+
     private function indexLog(int $id, string $service, string $message, string $level): void
     {
         $idAsString = (string) $id;
