@@ -16,6 +16,18 @@ use Xiag\Rql\Parser\Node\Query\AbstractArrayOperatorNode;
 use Xiag\Rql\Parser\Node\Query\AbstractLogicOperatorNode;
 use Xiag\Rql\Parser\Node\Query\AbstractScalarOperatorNode;
 
+/**
+ * Converts RQL query nodes to Elasticsearch DSL query format.
+ *
+ * This class is responsible for:
+ * - Converting RQL logical operators (and, or, not) to bool queries
+ * - Converting RQL comparison operators (eq, ne, gt, lt, etc.) to term/range queries
+ * - Converting RQL array operators (in, out) to terms queries
+ * - Handling field type-aware queries (null checks, empty checks)
+ * - Caching field type mappings from Elasticsearch index
+ *
+ * Analogous to SqlConditionBuilder in SQL DataStore.
+ */
 final class RqlToElasticsearchDslAdapter
 {
     /** @var array<string,string>|null */
@@ -29,12 +41,21 @@ final class RqlToElasticsearchDslAdapter
     ) {
     }
 
+    /**
+     * Convert RQL query node to Elasticsearch DSL query.
+     *
+     * @param AbstractQueryNode|null $queryNode RQL query node to convert
+     * @return array Elasticsearch query in DSL format
+     * @throws DataStoreException
+     */
     public function convert(?AbstractQueryNode $queryNode): array
     {
+        // No filter = match all documents
         if ($queryNode === null) {
             return ['match_all' => (object) []];
         }
 
+        // Handle logical operators: and, or, not
         if ($queryNode instanceof AbstractLogicOperatorNode) {
             $queries = [];
             foreach ($queryNode->getQueries() as $childQuery) {
@@ -45,6 +66,7 @@ final class RqlToElasticsearchDslAdapter
                 return ['match_all' => (object) []];
             }
 
+            // Convert to bool query with appropriate clause
             return match ($queryNode->getNodeName()) {
                 'and' => ['bool' => ['must' => $queries]],
                 'or' => ['bool' => ['should' => $queries, 'minimum_should_match' => 1]],
@@ -155,11 +177,17 @@ final class RqlToElasticsearchDslAdapter
     }
 
     /**
-     * @return array<string,string>
+     * Load field type mappings from Elasticsearch index.
+     *
+     * Queries Elasticsearch for index mapping and flattens nested field types
+     * into a simple field_name => type map for quick lookup.
+     *
+     * @return array<string,string> Map of field names to their Elasticsearch types
      */
     private function loadFieldTypeCache(): array
     {
         try {
+            // Fetch index mapping from Elasticsearch
             $mappingResponse = $this->client->indices()->getMapping([
                 'index' => $this->index,
             ]);
@@ -177,6 +205,7 @@ final class RqlToElasticsearchDslAdapter
             return [];
         }
 
+        // Extract properties from response (handle both index name and first key)
         $indexMapping = $mappingResponse[$this->index]['mappings']['properties'] ?? null;
 
         if (!is_array($indexMapping)) {
@@ -190,6 +219,7 @@ final class RqlToElasticsearchDslAdapter
             return [];
         }
 
+        // Flatten nested field types into simple map
         $result = [];
         $this->flattenFieldTypes($indexMapping, '', $result);
 
@@ -197,9 +227,16 @@ final class RqlToElasticsearchDslAdapter
     }
 
     /**
-     * @param array<string,mixed> $properties
-     * @param string $prefix
-     * @param array<string,string> $result
+     * Recursively flatten nested Elasticsearch field mappings into a flat map.
+     *
+     * Handles:
+     * - Nested objects (properties)
+     * - Multi-fields (fields)
+     * - Dot notation for nested paths (user.name, address.city)
+     *
+     * @param array<string,mixed> $properties Elasticsearch properties mapping
+     * @param string $prefix Current path prefix for nested fields
+     * @param array<string,string> $result Output map (field path => type)
      * @return void
      */
     private function flattenFieldTypes(array $properties, string $prefix, array &$result): void
@@ -209,28 +246,43 @@ final class RqlToElasticsearchDslAdapter
                 continue;
             }
 
+            // Build dot-separated path for nested fields
             $path = $prefix === '' ? $name : $prefix . '.' . $name;
 
+            // Store field type if present
             if (isset($node['type']) && is_string($node['type']) && $node['type'] !== '') {
                 $result[$path] = $node['type'];
             }
 
+            // Recurse into nested object properties
             if (isset($node['properties']) && is_array($node['properties'])) {
                 $this->flattenFieldTypes($node['properties'], $path, $result);
             }
 
+            // Recurse into multi-fields (e.g., text field with keyword subfield)
             if (isset($node['fields']) && is_array($node['fields'])) {
                 $this->flattenFieldTypes($node['fields'], $path, $result);
             }
         }
     }
 
+    /**
+     * Build term query for exact match.
+     *
+     * For identifier field, search both in _source field and _id.
+     * This handles cases where identifier is stored in both places.
+     *
+     * @param string $field Field name
+     * @param mixed $value Value to match
+     * @return array Elasticsearch term/ids query
+     */
     private function buildTermQuery(string $field, mixed $value): array
     {
         if ($field !== $this->identifier) {
             return ['term' => [$field => $value]];
         }
 
+        // For identifier field, match either _source field or _id
         return [
             'bool' => [
                 'should' => [
@@ -243,9 +295,14 @@ final class RqlToElasticsearchDslAdapter
     }
 
     /**
-     * @param string $field
-     * @param array $values
-     * @return array
+     * Build terms query for matching multiple values (IN operator).
+     *
+     * For identifier field, search both in _source field and _id.
+     * This handles cases where identifier is stored in both places.
+     *
+     * @param string $field Field name
+     * @param array $values Values to match
+     * @return array Elasticsearch terms/ids query
      */
     private function buildTermsQuery(string $field, array $values): array
     {
@@ -253,6 +310,7 @@ final class RqlToElasticsearchDslAdapter
             return ['terms' => [$field => $values]];
         }
 
+        // For identifier field, match either _source field or _id
         $ids = array_map(static fn($value) => (string) $value, $values);
 
         return [

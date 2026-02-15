@@ -136,7 +136,7 @@ final class ElasticsearchAggregationBuilder
     {
         $selectNode = $query->getSelect();
 
-        // If no SELECT specified, return group fields as-is
+        // If no SELECT specified with GROUP BY, return all group fields
         if ($selectNode === null) {
             return array_map(static fn(string $field): array => [
                 'type' => 'group',
@@ -148,7 +148,7 @@ final class ElasticsearchAggregationBuilder
         $descriptors = [];
 
         foreach ($selectNode->getFields() as $field) {
-            // Handle aggregate functions
+            // Handle aggregate functions: count(), sum(), avg(), min(), max()
             if ($field instanceof AggregateFunctionNode) {
                 $function = strtolower((string) $field->getFunction());
                 if (!in_array($function, ['count', 'max', 'min', 'sum', 'avg'], true)) {
@@ -159,17 +159,17 @@ final class ElasticsearchAggregationBuilder
                     'type' => 'metric',
                     'function' => $function,
                     'field' => (string) $field->getField(),
-                    'label' => $field->__toString(),
+                    'label' => $field->__toString(), // e.g., "count(status)"
                 ];
                 continue;
             }
 
-            // Handle plain field names
+            // Handle plain field names (non-aggregate)
             if (!is_string($field) || $field === '') {
                 continue;
             }
 
-            // If field is in GROUP BY, add it as group field
+            // If field is in GROUP BY, include it as grouping dimension
             if ($groupFields !== [] && in_array($field, $groupFields, true)) {
                 $descriptors[] = [
                     'type' => 'group',
@@ -179,7 +179,9 @@ final class ElasticsearchAggregationBuilder
                 continue;
             }
 
-            // If we have GROUP BY but field is not in it, convert to count(field)
+            // If field is NOT in GROUP BY but we have grouping, convert to count(field)
+            // This handles invalid SQL-like: SELECT name FROM ... GROUP BY category
+            // Converts 'name' to 'count(name)' to make it valid aggregation
             if ($groupFields !== []) {
                 $descriptors[] = [
                     'type' => 'metric',
@@ -241,10 +243,12 @@ final class ElasticsearchAggregationBuilder
             $field = (string) ($descriptor['field'] ?? '');
             $function = (string) ($descriptor['function'] ?? '');
 
+            // Build Elasticsearch aggregation based on function type
             $aggregations[$alias] = match ($function) {
+                // count() uses filter + exists (or match_all for identifier)
                 'count' => $field === $this->identifier
-                    ? ['filter' => ['match_all' => (object) []]]
-                    : ['filter' => ['exists' => ['field' => $field]]],
+                    ? ['filter' => ['match_all' => (object) []]] // count(*) equivalent
+                    : ['filter' => ['exists' => ['field' => $field]]], // count non-null values
                 'max' => ['max' => ['field' => $field]],
                 'min' => ['min' => ['field' => $field]],
                 'sum' => ['sum' => ['field' => $field]],

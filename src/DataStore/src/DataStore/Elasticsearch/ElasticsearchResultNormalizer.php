@@ -142,7 +142,9 @@ final class ElasticsearchResultNormalizer
     {
         $allFields = [];
 
-        // Collect all unique field names across all rows
+        // First pass: collect all unique field names across all rows
+        // This is needed because aggregation results may have different fields per row
+        // (e.g., when grouping by nullable fields or when some metrics are missing)
         foreach ($result as &$item) {
             if (!is_array($item)) {
                 continue;
@@ -153,7 +155,8 @@ final class ElasticsearchResultNormalizer
             $allFields = array_merge($allFields, $diff);
         }
 
-        // Ensure each row has all fields (with null for missing ones)
+        // Second pass: ensure each row has all fields (with null for missing ones)
+        // This ensures consistent structure for all rows in the result set
         foreach ($result as &$item) {
             if (!is_array($item)) {
                 continue;
@@ -162,7 +165,7 @@ final class ElasticsearchResultNormalizer
             $diff = array_diff($allFields, array_keys($item));
 
             foreach ($diff as $field) {
-                $item[$field] = null;
+                $item[$field] = null; // Fill missing fields with null
             }
         }
 

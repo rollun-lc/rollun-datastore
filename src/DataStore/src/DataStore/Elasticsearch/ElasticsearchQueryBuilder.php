@@ -114,10 +114,11 @@ final class ElasticsearchQueryBuilder
         }
 
         $result = [];
-        $skipped = 0;
+        $skipped = 0; // Track how many documents we've skipped for offset
         $remaining = $limit === DataStoreAbstract::LIMIT_INFINITY ? null : $limit;
-        $searchAfter = null;
+        $searchAfter = null; // Cursor for search_after pagination
 
+        // Fetch results in batches using search_after for deep pagination
         while (true) {
             $batchSize = $this->calculateBatchSize($remaining, $offset, $skipped);
 
@@ -128,6 +129,7 @@ final class ElasticsearchQueryBuilder
             $body = $baseBody;
             $body['size'] = $batchSize;
 
+            // Use search_after for pagination (more efficient than offset)
             if ($searchAfter !== null) {
                 $body['search_after'] = $searchAfter;
             }
@@ -159,6 +161,7 @@ final class ElasticsearchQueryBuilder
                     continue;
                 }
 
+                // Skip documents until we reach the offset
                 if ($skipped < $offset) {
                     $skipped++;
                     continue;
@@ -166,19 +169,21 @@ final class ElasticsearchQueryBuilder
 
                 $result[] = $this->resultNormalizer->normalizeSearchHit($hit, $selectFields);
 
+                // Decrement remaining count and stop if limit reached
                 if ($remaining !== null) {
                     $remaining--;
                     if ($remaining === 0) {
-                        break 2;
+                        break 2; // Exit both foreach and while loops
                     }
                 }
             }
 
+            // Extract sort values from last hit for next batch (search_after cursor)
             $lastHit = end($hits);
             $lastSort = is_array($lastHit) ? ($lastHit['sort'] ?? null) : null;
 
             if (!is_array($lastSort)) {
-                break;
+                break; // No more pages available
             }
 
             $searchAfter = $lastSort;
@@ -241,15 +246,17 @@ final class ElasticsearchQueryBuilder
 
         $result = [];
         $remaining = $limit === DataStoreAbstract::LIMIT_INFINITY ? null : $limit;
-        $skipped = 0;
-        $afterKey = null;
+        $skipped = 0; // Track how many groups we've skipped for offset
+        $afterKey = null; // Cursor for composite aggregation pagination
 
+        // Fetch grouped results in batches using composite aggregation
         while (true) {
             $composite = [
                 'size' => self::SEARCH_BATCH_SIZE,
-                'sources' => $groupSources['sources'],
+                'sources' => $groupSources['sources'], // GROUP BY fields
             ];
 
+            // Use after_key for pagination through groups
             if ($afterKey !== null) {
                 $composite['after'] = $afterKey;
             }
@@ -480,20 +487,29 @@ final class ElasticsearchQueryBuilder
     /**
      * Calculate batch size for pagination.
      *
+     * Determines optimal batch size considering:
+     * - How many documents still need to be skipped (offset)
+     * - How many documents still need to be fetched (limit)
+     * - Maximum batch size limit (SEARCH_BATCH_SIZE)
+     *
      * @param int|null $remaining Remaining records to fetch (null = unlimited)
-     * @param int $offset Total offset
+     * @param int $offset Total offset requested
      * @param int $skipped Already skipped records
-     * @return int Batch size for next request
+     * @return int Batch size for next request (0 = done)
      */
     private function calculateBatchSize(?int $remaining, int $offset, int $skipped): int
     {
         if ($remaining === 0) {
-            return 0;
+            return 0; // Limit reached, no more documents needed
         }
 
+        // Calculate how many more documents to skip
         $needToSkip = max(0, $offset - $skipped);
+
+        // Calculate how many documents to take (respecting limit or default batch size)
         $needToTake = $remaining ?? self::SEARCH_BATCH_SIZE;
 
+        // Fetch enough to skip + take, but cap at max batch size
         return max(1, min(self::SEARCH_BATCH_SIZE, $needToSkip + $needToTake));
     }
 

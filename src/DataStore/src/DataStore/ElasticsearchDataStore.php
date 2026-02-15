@@ -65,9 +65,10 @@ final class ElasticsearchDataStore extends DataStoreAbstract
             'index' => $this->index,
             'id' => (string) $id,
             'body' => $body,
-            'refresh' => self::REFRESH_POLICY,
+            'refresh' => self::REFRESH_POLICY, // Wait for index refresh to make document searchable
         ];
 
+        // If not rewriting, use 'create' op_type to fail on duplicate
         if (!$rewriteIfExist) {
             $params['op_type'] = 'create';
         }
@@ -80,6 +81,7 @@ final class ElasticsearchDataStore extends DataStoreAbstract
             throw new DataStoreException("Can't insert item with id = {$id}", 0, $exception);
         }
 
+        // Return created document with all fields
         return $this->read($id);
     }
 
@@ -95,11 +97,13 @@ final class ElasticsearchDataStore extends DataStoreAbstract
         $id = $record[$identifier];
         $this->checkIdentifierType($id);
 
+        // Read existing document to merge with new data
         $storedRecord = $this->read($id);
         if ($storedRecord === null && !$createIfAbsent) {
             throw new DataStoreException("[{$this->index}]Can't update item with id = {$id}");
         }
 
+        // Merge new fields with existing document (partial update)
         $recordForStore = $storedRecord === null ? $record : array_merge($storedRecord, $record);
 
         try {
@@ -107,12 +111,13 @@ final class ElasticsearchDataStore extends DataStoreAbstract
                 'index' => $this->index,
                 'id' => (string) $id,
                 'body' => $this->buildDocumentBody($recordForStore, $id),
-                'refresh' => self::REFRESH_POLICY,
+                'refresh' => self::REFRESH_POLICY, // Wait for index refresh
             ]);
         } catch (\Throwable $exception) {
             throw new DataStoreException("Can't update item with id = {$id}", 0, $exception);
         }
 
+        // Return updated document with all fields
         return $this->read($id);
     }
 
@@ -193,6 +198,7 @@ final class ElasticsearchDataStore extends DataStoreAbstract
             return null;
         }
 
+        // Inject identifier if not present in _source (e.g., when identifier is '_id')
         if (!array_key_exists($this->identifier, $record)) {
             $record[$this->identifier] = $id;
         }
@@ -309,17 +315,25 @@ final class ElasticsearchDataStore extends DataStoreAbstract
     }
 
     /**
-     * @param array $record
-     * @param int|float|string $id
-     * @return array
+     * Build Elasticsearch document body for indexing.
+     *
+     * Handles special case where identifier is '_id':
+     * - If identifier is '_id', remove it from _source (stored in _id field)
+     * - Otherwise, keep identifier in _source for querying
+     *
+     * @param array $record Document data
+     * @param int|float|string $id Document identifier
+     * @return array Document body for Elasticsearch
      */
     private function buildDocumentBody(array $record, int|float|string $id): array
     {
+        // If identifier is '_id', don't store it in _source
         if ($this->identifier === '_id') {
             unset($record['_id']);
             return $record;
         }
 
+        // Ensure identifier field is present in _source
         $record[$this->identifier] = $id;
 
         return $record;

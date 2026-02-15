@@ -66,27 +66,33 @@ final class ElasticsearchSortBuilder
     /**
      * Append tie-breaker to sort array for stable pagination.
      *
-     * Elasticsearch search_after requires stable sort order.
+     * Elasticsearch search_after requires stable sort order (no ties in sort values).
      * We add identifier field and configurable tie-breaker field if not already present.
      *
-     * @param array[] $sort
-     * @return array[]
+     * Tie-breaker ensures consistent ordering across pages, preventing:
+     * - Duplicate documents in results
+     * - Skipped documents between pages
+     *
+     * @param array[] $sort Existing sort clauses
+     * @return array[] Sort with tie-breaker appended
      */
     public function appendSortTieBreaker(array $sort): array
     {
-        // If no sort specified and identifier is not tie-breaker, add identifier as primary sort
+        // If no sort specified and identifier differs from tie-breaker,
+        // add identifier as primary sort for predictable ordering
         if ($sort === [] && $this->identifier !== $this->tieBreakerField) {
             $sort[] = [$this->identifier => 'asc'];
         }
 
-        // Check if tie-breaker is already in sort
+        // Check if tie-breaker is already present in sort
         foreach ($sort as $sortPart) {
             if (isset($sortPart[$this->tieBreakerField])) {
-                return $sort;
+                return $sort; // Tie-breaker already present
             }
         }
 
-        // Add tie-breaker as final sort field
+        // Add tie-breaker as final sort field to ensure stable ordering
+        // Usually this is '_id' which is always unique in Elasticsearch
         $sort[] = [$this->tieBreakerField => 'asc'];
 
         return $sort;
