@@ -1203,4 +1203,135 @@ class ElasticsearchDataStoreTest extends TestCase
         $this->assertSame(32, strlen($capturedId));
         $this->assertMatchesRegularExpression('/^[0-9a-f]{32}$/', $capturedId);
     }
+
+    // ========================================
+    // Invalid RQL Type Prefix Tests
+    // ========================================
+
+    /**
+     * Edge case: Invalid type prefix in RQL query should throw exception.
+     */
+    public function testQueryWithInvalidTypeThrowsException(): void
+    {
+        $client = $this->createMock(Client::class);
+        $store = $this->createObject($client);
+
+        $this->expectException(\Xiag\Rql\Parser\Exception\SyntaxErrorException::class);
+        $this->expectExceptionMessage('Unknown type "faketype"');
+
+        // RQL parser should reject unknown type prefixes
+        $store->query(new \rollun\datastore\Rql\RqlQuery('eq(field,faketype:123)'));
+    }
+
+    /**
+     * Edge case: Invalid type prefix "unknowntype" should throw exception.
+     */
+    public function testQueryWithUnknownTypeThrowsException(): void
+    {
+        $client = $this->createMock(Client::class);
+        $store = $this->createObject($client);
+
+        $this->expectException(\Xiag\Rql\Parser\Exception\SyntaxErrorException::class);
+        $this->expectExceptionMessage('Unknown type "unknowntype"');
+
+        $store->query(new \rollun\datastore\Rql\RqlQuery('eq(price,unknowntype:100)'));
+    }
+
+    /**
+     * Edge case: Invalid type prefix "wrongtype" in in() operator.
+     */
+    public function testQueryWithInvalidTypeInArrayOperatorThrowsException(): void
+    {
+        $client = $this->createMock(Client::class);
+        $store = $this->createObject($client);
+
+        $this->expectException(\Xiag\Rql\Parser\Exception\SyntaxErrorException::class);
+        $this->expectExceptionMessage('Unknown type "wrongtype"');
+
+        $store->query(new \rollun\datastore\Rql\RqlQuery('in(status,(wrongtype:1,wrongtype:2))'));
+    }
+
+    /**
+     * Edge case: Invalid type prefix in gt() operator.
+     */
+    public function testQueryWithInvalidTypeInRangeOperatorThrowsException(): void
+    {
+        $client = $this->createMock(Client::class);
+        $store = $this->createObject($client);
+
+        $this->expectException(\Xiag\Rql\Parser\Exception\SyntaxErrorException::class);
+        $this->expectExceptionMessage('Unknown type "badtype"');
+
+        $store->query(new \rollun\datastore\Rql\RqlQuery('gt(score,badtype:50)'));
+    }
+
+    /**
+     * Edge case: Misspelled valid type should throw exception.
+     */
+    public function testQueryWithMisspelledTypeThrowsException(): void
+    {
+        $client = $this->createMock(Client::class);
+        $store = $this->createObject($client);
+
+        $this->expectException(\Xiag\Rql\Parser\Exception\SyntaxErrorException::class);
+        // Testing common typos
+        $this->expectExceptionMessage('Unknown type "strin"');
+
+        $store->query(new \rollun\datastore\Rql\RqlQuery('eq(name,strin:value)'));
+    }
+
+    /**
+     * Edge case: Empty type prefix should throw exception.
+     */
+    public function testQueryWithEmptyTypeThrowsException(): void
+    {
+        $client = $this->createMock(Client::class);
+        $store = $this->createObject($client);
+
+        $this->expectException(\Xiag\Rql\Parser\Exception\SyntaxErrorException::class);
+
+        // Empty type like ":123" should be rejected
+        $store->query(new \rollun\datastore\Rql\RqlQuery('eq(field,:123)'));
+    }
+
+    /**
+     * Edge case: Case sensitivity - "String" vs "string".
+     */
+    public function testQueryWithIncorrectCaseTypeThrowsException(): void
+    {
+        $client = $this->createMock(Client::class);
+        $store = $this->createObject($client);
+
+        $this->expectException(\Xiag\Rql\Parser\Exception\SyntaxErrorException::class);
+        $this->expectExceptionMessage('Unknown type "String"');
+
+        // Type prefixes are case-sensitive
+        $store->query(new \rollun\datastore\Rql\RqlQuery('eq(field,String:value)'));
+    }
+
+    /**
+     * Edge case: Numeric type name.
+     */
+    public function testQueryWithNumericTypeNameThrowsException(): void
+    {
+        $client = $this->createMock(Client::class);
+        $store = $this->createObject($client);
+
+        $this->expectException(\Xiag\Rql\Parser\Exception\SyntaxErrorException::class);
+
+        $store->query(new \rollun\datastore\Rql\RqlQuery('eq(field,123type:value)'));
+    }
+
+    /**
+     * Edge case: Special characters in type name.
+     */
+    public function testQueryWithSpecialCharactersInTypeThrowsException(): void
+    {
+        $client = $this->createMock(Client::class);
+        $store = $this->createObject($client);
+
+        $this->expectException(\Xiag\Rql\Parser\Exception\SyntaxErrorException::class);
+
+        $store->query(new \rollun\datastore\Rql\RqlQuery('eq(field,fake-type:value)'));
+    }
 }
