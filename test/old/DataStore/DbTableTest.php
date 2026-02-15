@@ -40,13 +40,13 @@ class DbTableTest extends AbstractTest
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
-     * @param string $dataStoreName
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    protected function setUp($dataStoreName = "testDbTable")
+    protected function setUp(): void
     {
         parent::setUp();
+        $dataStoreName = "testDbTable";
         $this->dbTableName = $this->config[$dataStoreName]['tableName'];
         $this->adapter = $this->container->get('db');
         $this->object = $this->container->get($dataStoreName);
