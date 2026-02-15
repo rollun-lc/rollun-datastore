@@ -443,8 +443,8 @@ class ElasticsearchDataStoreTest extends TestCase
                 $this->assertSame(0, $params['body']['size']);
                 $this->assertArrayHasKey('metric_0', $params['body']['aggs']);
                 $this->assertArrayHasKey('metric_1', $params['body']['aggs']);
-                $this->assertSame(
-                    ['exists' => ['field' => 'id']],
+                $this->assertEquals( // Use assertEquals instead of assertSame for object comparison
+                    ['match_all' => (object) []], // id is the identifier by default
                     $params['body']['aggs']['metric_0']['filter']
                 );
                 $this->assertSame(
@@ -495,8 +495,8 @@ class ElasticsearchDataStoreTest extends TestCase
                 $this->assertArrayHasKey('aggs', $groupByAgg);
                 $this->assertCount(2, $groupByAgg['composite']['sources']);
                 $this->assertArrayHasKey('metric_0', $groupByAgg['aggs']);
-                $this->assertSame(
-                    ['exists' => ['field' => 'id']],
+                $this->assertEquals( // Use assertEquals instead of assertSame for object comparison
+                    ['match_all' => (object) []], // id is the identifier by default
                     $groupByAgg['aggs']['metric_0']['filter']
                 );
 
@@ -885,5 +885,322 @@ class ElasticsearchDataStoreTest extends TestCase
         $store->query($query);
 
         return $capturedQuery;
+    }
+
+    // ========================================
+    // Additional Edge Case Tests
+    // ========================================
+
+    /**
+     * Edge case: Create with ArrayObject input.
+     */
+    public function testCreateWithArrayObjectInput(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('index')
+            ->with($this->callback(function (array $params): bool {
+                $this->assertSame('test-data', $params['body']['message']);
+                return true;
+            }));
+
+        $client->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                '_id' => 'doc-1',
+                '_source' => ['id' => 'doc-1', 'message' => 'test-data'],
+            ]);
+
+        $store = $this->createObject($client);
+        $data = new \ArrayObject(['id' => 'doc-1', 'message' => 'test-data']);
+        $result = $store->create($data);
+
+        $this->assertSame('doc-1', $result['id']);
+    }
+
+    /**
+     * Edge case: Update with ArrayObject input.
+     */
+    public function testUpdateWithArrayObjectInput(): void
+    {
+        $client = $this->createMock(Client::class);
+
+        $client->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnOnConsecutiveCalls(
+                ['_id' => 'doc-1', '_source' => ['id' => 'doc-1', 'message' => 'old']],
+                ['_id' => 'doc-1', '_source' => ['id' => 'doc-1', 'message' => 'new']]
+            );
+
+        $client->expects($this->once())
+            ->method('index')
+            ->with($this->callback(function (array $params): bool {
+                $this->assertSame('new', $params['body']['message']);
+                return true;
+            }));
+
+        $store = $this->createObject($client);
+        $data = new \ArrayObject(['id' => 'doc-1', 'message' => 'new']);
+        $result = $store->update($data);
+
+        $this->assertSame('new', $result['message']);
+    }
+
+    /**
+     * Edge case: Create with stdClass object.
+     */
+    public function testCreateWithStdClassObject(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('index')
+            ->with($this->callback(function (array $params): bool {
+                $this->assertSame('object-data', $params['body']['message']);
+                return true;
+            }));
+
+        $client->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                '_id' => 'doc-1',
+                '_source' => ['id' => 'doc-1', 'message' => 'object-data'],
+            ]);
+
+        $store = $this->createObject($client);
+        $data = (object) ['id' => 'doc-1', 'message' => 'object-data'];
+        $result = $store->create($data);
+
+        $this->assertSame('doc-1', $result['id']);
+    }
+
+    /**
+     * Edge case: Create with empty string ID (should generate new ID).
+     */
+    public function testCreateWithEmptyStringIdGeneratesNewId(): void
+    {
+        $capturedId = null;
+
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('index')
+            ->with($this->callback(function (array $params) use (&$capturedId): bool {
+                $capturedId = $params['id'];
+                $this->assertNotSame('', $capturedId);
+                $this->assertIsString($capturedId);
+                return true;
+            }));
+
+        $client->expects($this->once())
+            ->method('get')
+            ->willReturnCallback(static function () use (&$capturedId): array {
+                return [
+                    '_id' => $capturedId,
+                    '_source' => ['id' => $capturedId, 'message' => 'test'],
+                ];
+            });
+
+        $store = $this->createObject($client);
+        $result = $store->create(['id' => '', 'message' => 'test']);
+
+        $this->assertNotSame('', $result['id']);
+    }
+
+    /**
+     * Edge case: Delete non-existent document (idempotent).
+     */
+    public function testDeleteNonExistentDocumentReturnsNull(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('get')
+            ->willThrowException(new Missing404Exception());
+
+        $store = $this->createObject($client);
+        $result = $store->delete('non-existent-id');
+
+        $this->assertNull($result);
+    }
+
+    /**
+     * Edge case: Delete twice (idempotency check).
+     */
+    public function testDeleteTwiceIsIdempotent(): void
+    {
+        $client = $this->createMock(Client::class);
+
+        // First delete
+        $client->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnOnConsecutiveCalls(
+                ['_id' => 'doc-1', '_source' => ['id' => 'doc-1']],
+                $this->throwException(new Missing404Exception())
+            );
+
+        $client->expects($this->once())
+            ->method('delete')
+            ->willReturn(['result' => 'deleted']);
+
+        $store = $this->createObject($client);
+
+        $result1 = $store->delete('doc-1');
+        $this->assertIsArray($result1);
+
+        $result2 = $store->delete('doc-1');
+        $this->assertNull($result2);
+    }
+
+    /**
+     * Edge case: deleteAll when response is not array.
+     */
+    public function testDeleteAllWithNonArrayResponseReturnsZero(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('deleteByQuery')
+            ->willReturn('invalid response');
+
+        $store = $this->createObject($client);
+        $result = $store->deleteAll();
+
+        $this->assertSame(0, $result);
+    }
+
+    /**
+     * Edge case: deleteAll when response has no 'deleted' key.
+     */
+    public function testDeleteAllWithMissingDeletedKeyReturnsZero(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('deleteByQuery')
+            ->willReturn(['other_key' => 'value']);
+
+        $store = $this->createObject($client);
+        $result = $store->deleteAll();
+
+        $this->assertSame(0, $result);
+    }
+
+    /**
+     * Edge case: count when response is not array.
+     */
+    public function testCountWithNonArrayResponseReturnsZero(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('count')
+            ->willReturn('invalid');
+
+        $store = $this->createObject($client);
+        $result = $store->count();
+
+        $this->assertSame(0, $result);
+    }
+
+    /**
+     * Edge case: count when response has no 'count' key.
+     */
+    public function testCountWithMissingCountKeyReturnsZero(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('count')
+            ->willReturn(['other_key' => 'value']);
+
+        $store = $this->createObject($client);
+        $result = $store->count();
+
+        $this->assertSame(0, $result);
+    }
+
+    /**
+     * Edge case: read when _source is not array.
+     */
+    public function testReadWithNonArraySourceReturnsNull(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('get')
+            ->willReturn(['_id' => 'doc-1', '_source' => 'invalid']);
+
+        $store = $this->createObject($client);
+        $result = $store->read('doc-1');
+
+        $this->assertNull($result);
+    }
+
+    /**
+     * Edge case: read when response is not array.
+     */
+    public function testReadWithNonArrayResponseReturnsNull(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('get')
+            ->willReturn('invalid response');
+
+        $store = $this->createObject($client);
+        $result = $store->read('doc-1');
+
+        $this->assertNull($result);
+    }
+
+    /**
+     * Edge case: Identifier with float/double type.
+     */
+    public function testCreateWithFloatIdentifier(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method('index')
+            ->with($this->callback(function (array $params): bool {
+                $this->assertSame('123.45', $params['id']);
+                return true;
+            }));
+
+        $client->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                '_id' => '123.45',
+                '_source' => ['id' => 123.45, 'message' => 'test'],
+            ]);
+
+        $store = $this->createObject($client);
+        $result = $store->create(['id' => 123.45, 'message' => 'test']);
+
+        $this->assertSame(123.45, $result['id']);
+    }
+
+    /**
+     * Edge case: Generated identifier length and format.
+     */
+    public function testGeneratedIdentifierHasCorrectLength(): void
+    {
+        $client = $this->createMock(Client::class);
+
+        $capturedId = null;
+        $client->expects($this->once())
+            ->method('index')
+            ->with($this->callback(function (array $params) use (&$capturedId): bool {
+                $capturedId = $params['id'];
+                return true;
+            }));
+
+        $client->expects($this->once())
+            ->method('get')
+            ->willReturnCallback(static function () use (&$capturedId): array {
+                return [
+                    '_id' => $capturedId,
+                    '_source' => ['id' => $capturedId],
+                ];
+            });
+
+        $store = $this->createObject($client);
+        $store->create(['message' => 'test']);
+
+        // Generated ID from bin2hex(random_bytes(16)) should be 32 hex characters
+        $this->assertIsString($capturedId);
+        $this->assertSame(32, strlen($capturedId));
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{32}$/', $capturedId);
     }
 }

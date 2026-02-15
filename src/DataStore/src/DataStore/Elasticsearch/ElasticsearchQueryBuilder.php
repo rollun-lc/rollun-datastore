@@ -56,7 +56,7 @@ final class ElasticsearchQueryBuilder
             $this->logger
         );
         $this->sortBuilder = new ElasticsearchSortBuilder($this->identifier);
-        $this->aggregationBuilder = new ElasticsearchAggregationBuilder();
+        $this->aggregationBuilder = new ElasticsearchAggregationBuilder($this->identifier);
         $this->resultNormalizer = new ElasticsearchResultNormalizer($this->identifier);
     }
 

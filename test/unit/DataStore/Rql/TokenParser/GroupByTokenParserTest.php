@@ -1,131 +1,79 @@
 <?php
 
+declare(strict_types=1);
+
+/**
+ * @copyright Copyright © 2014 Rollun LC (http://rollun.com/)
+ * @license LICENSE.md New BSD License
+ */
+
 namespace rollun\test\unit\DataStore\Rql\TokenParser;
 
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject;
 use rollun\datastore\Rql\Node\GroupbyNode;
 use rollun\datastore\Rql\TokenParser\GroupbyTokenParser;
-use Xiag\Rql\Parser\Token;
+use Xiag\Rql\Parser\Exception\SyntaxErrorException;
+use Xiag\Rql\Parser\Lexer;
 use Xiag\Rql\Parser\TokenStream;
 
-class GroupByTokenParserTest extends TestCase
+class GroupbyTokenParserTest extends TestCase
 {
-    protected function createObject()
+    private function createTokenStream(string $rql): TokenStream
     {
-        return new GroupByTokenParser();
+        $lexer = new Lexer();
+        return $lexer->tokenize($rql);
     }
 
-    public function dataProvider()
+    public function testParseSingleField(): void
     {
-        return [
-            [
-                ['a'],
-                ['a', 'b'],
-                ['a', 'b', 'c'],
-            ],
-        ];
+        $tokenStream = $this->createTokenStream('groupby(category)');
+        $parser = new GroupbyTokenParser();
+
+        $this->assertTrue($parser->supports($tokenStream));
+        $node = $parser->parse($tokenStream);
+
+        $this->assertInstanceOf(GroupbyNode::class, $node);
+        $this->assertSame(['category'], $node->getFields());
     }
 
-    /**
-     * @dataProvider dataProvider
-     * @param array $fields
-     */
-    public function testParse($fields)
+    public function testParseMultipleFields(): void
     {
-        $node = new GroupbyNode($fields);
-        $tokenStream = $this->getMockTokenStream($fields);
-        $this->assertEquals($this->createObject()->parse($tokenStream), $node);
+        $tokenStream = $this->createTokenStream('groupby(category,brand,status)');
+        $parser = new GroupbyTokenParser();
+
+        $this->assertTrue($parser->supports($tokenStream));
+        $node = $parser->parse($tokenStream);
+
+        $this->assertInstanceOf(GroupbyNode::class, $node);
+        $this->assertSame(['category', 'brand', 'status'], $node->getFields());
     }
 
-    public function testSupportTrue()
+    public function testSupportsReturnsTrueForGroupby(): void
     {
-        /** @var TokenStream|PHPUnit_Framework_MockObject_MockObject $tokenStream */
-        $tokenStream = $this->getMockBuilder(TokenStream::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['test'])
-            ->getMock();
+        $tokenStream = $this->createTokenStream('groupby(field)');
+        $parser = new GroupbyTokenParser();
 
-        $tokenStream->expects($this->once())->method('test')->will($this->returnValue(true));
-
-        $tokenParser = $this->createObject();
-        $this->assertTrue($tokenParser->supports($tokenStream));
+        $this->assertTrue($parser->supports($tokenStream));
     }
 
-    public function testSupportFalse()
+    public function testSupportsReturnsFalseForOtherOperators(): void
     {
-        /** @var TokenStream|PHPUnit_Framework_MockObject_MockObject $tokenStream */
-        $tokenStream = $this->getMockBuilder(TokenStream::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['test'])
-            ->getMock();
+        $tokenStream = $this->createTokenStream('select(field)');
+        $parser = new GroupbyTokenParser();
 
-        $tokenStream->expects($this->once())->method('test')->will($this->returnValue(false));
-
-        $tokenParser = $this->createObject();
-        $this->assertFalse($tokenParser->supports($tokenStream));
+        $this->assertFalse($parser->supports($tokenStream));
     }
 
     /**
-     * @param array $fields
-     * @return PHPUnit_Framework_MockObject_MockObject|TokenStream
+     * Edge case: Field names with underscores.
      */
-    protected function getMockTokenStream($fields)
+    public function testParseFieldsWithUnderscores(): void
     {
-        $position = 0;
+        $tokenStream = $this->createTokenStream('groupby(user_id,product_category)');
+        $parser = new GroupbyTokenParser();
 
-        /** @var Token[] $fieldTokens */
-        $fieldTokens = [];
+        $node = $parser->parse($tokenStream);
 
-        /** @var TokenStream|PHPUnit_Framework_MockObject_MockObject $tokenStream */
-        $tokenStream = $this->getMockBuilder(TokenStream::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['expect', 'nextIf'])
-            ->getMock();
-
-        $tokenStream
-            ->expects($this->at($position++))
-            ->method('expect')
-            ->with($this->equalTo(Token::T_OPERATOR), $this->equalTo('groupby'))
-            ->will($this->returnValue(new Token(Token::T_OPERATOR, '', 0)));
-
-        $this->insertSimpleToken($tokenStream, Token::T_OPEN_PARENTHESIS, $position++);
-
-        foreach ($fields as $field) {
-            $fieldTokens[] = new Token(Token::T_STRING, $field, 0);
-        }
-
-        while (count($fieldTokens)) {
-            $fieldToken = array_shift($fieldTokens);
-            $tokenStream
-                ->expects($this->at($position++))
-                ->method('expect')
-                ->with($this->equalTo($fieldToken->getType()))
-                ->will($this->returnValue($fieldToken));
-
-            $tokenStream
-                ->expects($this->at($position++))
-                ->method('nextIf')
-                ->with($this->equalTo(Token::T_COMMA))
-                ->will($this->returnValue(count($fieldTokens)));
-        }
-
-        $this->insertSimpleToken($tokenStream, Token::T_CLOSE_PARENTHESIS, $position);
-
-        return $tokenStream;
-    }
-
-    /**
-     * @param PHPUnit_Framework_MockObject_MockObject $tokenStream
-     * @param $type
-     * @param $position
-     */
-    protected function insertSimpleToken(&$tokenStream, $type, $position)
-    {
-        $tokenStream
-            ->expects($this->at($position))
-            ->method('expect')
-            ->with($this->equalTo($type))
-            ->will($this->returnValue(new Token($type, '', 0)));
+        $this->assertSame(['user_id', 'product_category'], $node->getFields());
     }
 }

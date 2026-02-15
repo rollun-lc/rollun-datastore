@@ -309,6 +309,258 @@ class RqlToElasticsearchDslAdapterTest extends TestCase
         ], $adapter->convert($this->queryNode('in(id,(1,2,3))')));
     }
 
+    // ========================================
+    // Edge Case Tests
+    // ========================================
+
+    /**
+     * Edge case: Wildcard pattern that already contains wildcards with contains().
+     */
+    public function testConvertContainsWithExistingWildcards(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->never())->method('indices');
+
+        $adapter = $this->createAdapter($client);
+        $result = $adapter->convert($this->queryNode('contains(message,*error*)'));
+
+        // Should not add additional wildcards if already present
+        $expected = ['wildcard' => ['message' => ['value' => '*error*']]];
+
+        $this->assertSame($expected, $result);
+    }
+
+    /**
+     * Edge case: like() with question mark wildcard.
+     */
+    public function testConvertLikeWithQuestionMarkWildcard(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->never())->method('indices');
+
+        $adapter = $this->createAdapter($client);
+        $result = $adapter->convert($this->queryNode('like(code,AB?)'));
+
+        $expected = ['wildcard' => ['code' => ['value' => 'AB?']]];
+
+        $this->assertSame($expected, $result);
+    }
+
+    /**
+     * Edge case: Nested field mapping with dots.
+     */
+    public function testConvertIeForNestedField(): void
+    {
+        $client = $this->createMock(Client::class);
+        $indices = $this->createMock(IndicesNamespace::class);
+        $indices->expects($this->once())
+            ->method('getMapping')
+            ->with(['index' => 'test-index'])
+            ->willReturn([
+                'test-index' => [
+                    'mappings' => [
+                        'properties' => [
+                            'user' => [
+                                'properties' => [
+                                    'profile' => [
+                                        'properties' => [
+                                            'bio' => ['type' => 'text'],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+        $client->expects($this->once())->method('indices')->willReturn($indices);
+
+        $adapter = $this->createAdapter($client);
+        $result = $adapter->convert($this->queryNode('ie(user.profile.bio)'));
+
+        $expected = [
+            'bool' => [
+                'should' => [
+                    ['bool' => ['must_not' => [['exists' => ['field' => 'user.profile.bio']]]]],
+                    ['term' => ['user.profile.bio' => '']],
+                ],
+                'minimum_should_match' => 1,
+            ],
+        ];
+
+        $this->assertSame($expected, $result);
+    }
+
+    /**
+     * Edge case: Field with .keyword suffix in mapping.
+     */
+    public function testConvertWithKeywordField(): void
+    {
+        $client = $this->createMock(Client::class);
+        $indices = $this->createMock(IndicesNamespace::class);
+        $indices->expects($this->once())
+            ->method('getMapping')
+            ->with(['index' => 'test-index'])
+            ->willReturn([
+                'test-index' => [
+                    'mappings' => [
+                        'properties' => [
+                            'name' => [
+                                'type' => 'text',
+                                'fields' => [
+                                    'keyword' => ['type' => 'keyword'],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+        $client->expects($this->once())->method('indices')->willReturn($indices);
+
+        $adapter = $this->createAdapter($client);
+        $result = $adapter->convert($this->queryNode('ie(name.keyword)'));
+
+        $expected = [
+            'bool' => [
+                'should' => [
+                    ['bool' => ['must_not' => [['exists' => ['field' => 'name.keyword']]]]],
+                    ['term' => ['name.keyword' => '']],
+                ],
+                'minimum_should_match' => 1,
+            ],
+        ];
+
+        $this->assertSame($expected, $result);
+    }
+
+    /**
+     * Edge case: Mapping response with no properties.
+     */
+    public function testConvertIeWithEmptyMapping(): void
+    {
+        $client = $this->createMock(Client::class);
+        $indices = $this->createMock(IndicesNamespace::class);
+        $indices->expects($this->once())
+            ->method('getMapping')
+            ->with(['index' => 'test-index'])
+            ->willReturn([
+                'test-index' => [
+                    'mappings' => [],
+                ],
+            ]);
+        $client->expects($this->once())->method('indices')->willReturn($indices);
+
+        $adapter = $this->createAdapter($client);
+        $result = $adapter->convert($this->queryNode('ie(unknown_field)'));
+
+        // Without field type info, should only check null
+        $expected = [
+            'bool' => [
+                'should' => [
+                    ['bool' => ['must_not' => [['exists' => ['field' => 'unknown_field']]]]],
+                ],
+                'minimum_should_match' => 1,
+            ],
+        ];
+
+        $this->assertSame($expected, $result);
+    }
+
+    /**
+     * Edge case: Identifier field with in() containing single value.
+     */
+    public function testConvertIdentifierInWithSingleValue(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->never())->method('indices');
+
+        $adapter = $this->createAdapter($client, 'id');
+        $result = $adapter->convert($this->queryNode('in(id,(42))'));
+
+        $expected = [
+            'bool' => [
+                'should' => [
+                    ['terms' => ['id' => [42]]],
+                    ['ids' => ['values' => ['42']]],
+                ],
+                'minimum_should_match' => 1,
+            ],
+        ];
+
+        $this->assertSame($expected, $result);
+    }
+
+    /**
+     * Edge case: Multiple nested logic operators.
+     */
+    public function testConvertDeeplyNestedLogicOperators(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->never())->method('indices');
+
+        $adapter = $this->createAdapter($client);
+        $rql = 'and(or(and(eq(a,1),eq(b,2)),eq(c,3)),eq(d,4))';
+        $result = $adapter->convert($this->queryNode($rql));
+
+        $expected = [
+            'bool' => [
+                'must' => [
+                    [
+                        'bool' => [
+                            'should' => [
+                                [
+                                    'bool' => [
+                                        'must' => [
+                                            ['term' => ['a' => 1]],
+                                            ['term' => ['b' => 2]],
+                                        ],
+                                    ],
+                                ],
+                                ['term' => ['c' => 3]],
+                            ],
+                            'minimum_should_match' => 1,
+                        ],
+                    ],
+                    ['term' => ['d' => 4]],
+                ],
+            ],
+        ];
+
+        $this->assertSame($expected, $result);
+    }
+
+    /**
+     * Edge case: Range operators with negative numbers.
+     */
+    public function testConvertRangeOperatorsWithNegativeNumbers(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->never())->method('indices');
+
+        $adapter = $this->createAdapter($client);
+        $result = $adapter->convert($this->queryNode('gt(temperature,-10)'));
+
+        $expected = ['range' => ['temperature' => ['gt' => -10]]];
+
+        $this->assertSame($expected, $result);
+    }
+
+    /**
+     * Edge case: Range operators with zero.
+     */
+    public function testConvertRangeOperatorsWithZero(): void
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects($this->never())->method('indices');
+
+        $adapter = $this->createAdapter($client);
+        $result = $adapter->convert($this->queryNode('ge(count,0)'));
+
+        $expected = ['range' => ['count' => ['gte' => 0]]];
+
+        $this->assertSame($expected, $result);
+    }
+
     private function createAdapter(Client $client, string $identifier = '_id'): RqlToElasticsearchDslAdapter
     {
         return new RqlToElasticsearchDslAdapter($client, 'test-index', $identifier, new NullLogger());

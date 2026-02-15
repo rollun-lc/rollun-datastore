@@ -99,7 +99,7 @@ final class RqlToElasticsearchDslAdapter
         $field = $queryNode->getField();
         $nodeName = $queryNode->getNodeName();
 
-        if ($field === '_id') {
+        if ($field === $this->identifier) {
             return match ($nodeName) {
                 'eqn', 'eqt', 'eqf', 'ie' => ['match_none' => (object) []],
                 default => throw new DataStoreException('The Binary Operator not supported: ' . $nodeName),

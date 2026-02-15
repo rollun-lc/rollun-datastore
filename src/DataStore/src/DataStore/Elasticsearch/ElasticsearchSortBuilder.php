@@ -17,7 +17,7 @@ use Xiag\Rql\Parser\Node\SortNode;
  *
  * This class is responsible for:
  * - Converting SortNode to Elasticsearch sort array
- * - Adding tie-breaker (_id) for stable pagination with search_after
+ * - Adding configurable tie-breaker field for stable pagination with search_after
  * - Handling sort direction (ASC/DESC)
  *
  * Analogous to SqlQueryBuilder::setSelectOrder()
@@ -25,7 +25,8 @@ use Xiag\Rql\Parser\Node\SortNode;
 final class ElasticsearchSortBuilder
 {
     public function __construct(
-        private readonly string $identifier = 'id'
+        private readonly string $identifier = 'id',
+        private readonly string $tieBreakerField = '_id'
     ) {
     }
 
@@ -66,27 +67,27 @@ final class ElasticsearchSortBuilder
      * Append tie-breaker to sort array for stable pagination.
      *
      * Elasticsearch search_after requires stable sort order.
-     * We add identifier field and _id as tie-breakers if not already present.
+     * We add identifier field and configurable tie-breaker field if not already present.
      *
      * @param array[] $sort
      * @return array[]
      */
     public function appendSortTieBreaker(array $sort): array
     {
-        // If no sort specified and identifier is not _id, add identifier as primary sort
-        if ($sort === [] && $this->identifier !== '_id') {
+        // If no sort specified and identifier is not tie-breaker, add identifier as primary sort
+        if ($sort === [] && $this->identifier !== $this->tieBreakerField) {
             $sort[] = [$this->identifier => 'asc'];
         }
 
-        // Check if _id is already in sort
+        // Check if tie-breaker is already in sort
         foreach ($sort as $sortPart) {
-            if (isset($sortPart['_id'])) {
+            if (isset($sortPart[$this->tieBreakerField])) {
                 return $sort;
             }
         }
 
-        // Add _id as final tie-breaker
-        $sort[] = ['_id' => 'asc'];
+        // Add tie-breaker as final sort field
+        $sort[] = [$this->tieBreakerField => 'asc'];
 
         return $sort;
     }

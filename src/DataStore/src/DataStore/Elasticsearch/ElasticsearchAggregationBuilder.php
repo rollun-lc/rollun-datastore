@@ -29,8 +29,9 @@ use Xiag\Rql\Parser\Query;
  */
 final class ElasticsearchAggregationBuilder
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly string $identifier = 'id'
+    ) {
     }
 
     /**
@@ -241,7 +242,7 @@ final class ElasticsearchAggregationBuilder
             $function = (string) ($descriptor['function'] ?? '');
 
             $aggregations[$alias] = match ($function) {
-                'count' => $field === '_id'
+                'count' => $field === $this->identifier
                     ? ['filter' => ['match_all' => (object) []]]
                     : ['filter' => ['exists' => ['field' => $field]]],
                 'max' => ['max' => ['field' => $field]],

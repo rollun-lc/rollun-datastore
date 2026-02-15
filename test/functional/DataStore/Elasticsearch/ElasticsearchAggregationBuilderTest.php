@@ -333,21 +333,21 @@ class ElasticsearchAggregationBuilderTest extends TestCase
      */
     public function buildMetricAggregationsProvider(): \Generator
     {
-        yield 'count aggregation' => [
+        yield 'count aggregation on identifier field (id)' => [
             [
                 ['type' => 'metric', 'function' => 'count', 'field' => 'id', 'alias' => 'metric_0'],
             ],
             [
-                'metric_0' => ['filter' => ['exists' => ['field' => 'id']]],
+                'metric_0' => ['filter' => ['match_all' => (object) []]], // id is the identifier by default
             ],
         ];
 
-        yield 'count on _id field' => [
+        yield 'count on non-identifier field' => [
             [
-                ['type' => 'metric', 'function' => 'count', 'field' => '_id', 'alias' => 'metric_0'],
+                ['type' => 'metric', 'function' => 'count', 'field' => 'status', 'alias' => 'metric_0'],
             ],
             [
-                'metric_0' => ['filter' => ['match_all' => (object) []]],
+                'metric_0' => ['filter' => ['exists' => ['field' => 'status']]],
             ],
         ];
 
@@ -394,7 +394,7 @@ class ElasticsearchAggregationBuilderTest extends TestCase
                 ['type' => 'metric', 'function' => 'sum', 'field' => 'amount', 'alias' => 'metric_2'],
             ],
             [
-                'metric_0' => ['filter' => ['exists' => ['field' => 'id']]],
+                'metric_0' => ['filter' => ['match_all' => (object) []]], // id is the identifier
                 'metric_1' => ['max' => ['field' => 'price']],
                 'metric_2' => ['sum' => ['field' => 'amount']],
             ],
@@ -510,5 +510,289 @@ class ElasticsearchAggregationBuilderTest extends TestCase
         $this->expectExceptionMessage('Invalid sort direction: 99');
 
         $builder->buildGroupSources($groupFields, $sortNode);
+    }
+
+    // ========================================
+    // Edge Case Tests
+    // ========================================
+
+    /**
+     * Edge case: Empty groupFields array.
+     */
+    public function testBuildGroupSourcesWithEmptyGroupFields(): void
+    {
+        $builder = $this->createBuilder();
+        $result = $builder->buildGroupSources([], null);
+
+        $expected = [
+            'sources' => [],
+            'byField' => [],
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Edge case: buildMetricAggregations with empty alias should skip.
+     */
+    public function testBuildMetricAggregationsSkipsEmptyAlias(): void
+    {
+        $selectDescriptors = [
+            ['type' => 'metric', 'function' => 'sum', 'field' => 'price', 'alias' => ''],
+            ['type' => 'metric', 'function' => 'count', 'field' => 'status', 'alias' => 'metric_0'],
+        ];
+
+        $builder = $this->createBuilder();
+        $result = $builder->buildMetricAggregations($selectDescriptors);
+
+        $expected = [
+            'metric_0' => ['filter' => ['exists' => ['field' => 'status']]],
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Edge case: buildMetricAggregations with missing alias should skip.
+     */
+    public function testBuildMetricAggregationsSkipsMissingAlias(): void
+    {
+        $selectDescriptors = [
+            ['type' => 'metric', 'function' => 'sum', 'field' => 'price'],
+            ['type' => 'metric', 'function' => 'count', 'field' => 'status', 'alias' => 'metric_0'],
+        ];
+
+        $builder = $this->createBuilder();
+        $result = $builder->buildMetricAggregations($selectDescriptors);
+
+        $expected = [
+            'metric_0' => ['filter' => ['exists' => ['field' => 'status']]],
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Edge case: count() on identifier field uses match_all.
+     */
+    public function testBuildMetricAggregationsCountOnIdentifierUsesMatchAll(): void
+    {
+        $selectDescriptors = [
+            ['type' => 'metric', 'function' => 'count', 'field' => 'id', 'alias' => 'metric_0'],
+        ];
+
+        $builder = $this->createBuilder();
+        $result = $builder->buildMetricAggregations($selectDescriptors);
+
+        $expected = [
+            'metric_0' => ['filter' => ['match_all' => (object) []]],
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Edge case: count() on _id field (common Elasticsearch identifier).
+     */
+    public function testBuildMetricAggregationsCountOnElasticsearchIdField(): void
+    {
+        $selectDescriptors = [
+            ['type' => 'metric', 'function' => 'count', 'field' => '_id', 'alias' => 'metric_0'],
+        ];
+
+        $builder = new ElasticsearchAggregationBuilder('_id'); // _id as identifier
+        $result = $builder->buildMetricAggregations($selectDescriptors);
+
+        $expected = [
+            'metric_0' => ['filter' => ['match_all' => (object) []]], // Should use match_all
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Edge case: count() on non-identifier field uses exists filter.
+     */
+    public function testBuildMetricAggregationsCountOnNonIdentifierUsesExists(): void
+    {
+        $selectDescriptors = [
+            ['type' => 'metric', 'function' => 'count', 'field' => 'status', 'alias' => 'metric_0'],
+        ];
+
+        $builder = $this->createBuilder(); // identifier='id'
+        $result = $builder->buildMetricAggregations($selectDescriptors);
+
+        $expected = [
+            'metric_0' => ['filter' => ['exists' => ['field' => 'status']]], // Should use exists
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Edge case: attachMetricAliases with no metrics.
+     */
+    public function testAttachMetricAliasesWithNoMetrics(): void
+    {
+        $selectDescriptors = [
+            ['type' => 'group', 'field' => 'category', 'label' => 'category'],
+        ];
+
+        $builder = $this->createBuilder();
+        $result = $builder->attachMetricAliases($selectDescriptors);
+
+        $expected = [
+            ['type' => 'group', 'field' => 'category', 'label' => 'category'],
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Edge case: attachMetricAliases increments index correctly.
+     */
+    public function testAttachMetricAliasesIncrementsIndexCorrectly(): void
+    {
+        $selectDescriptors = [
+            ['type' => 'group', 'field' => 'category', 'label' => 'category'],
+            ['type' => 'metric', 'function' => 'sum', 'field' => 'price', 'label' => 'total'],
+            ['type' => 'metric', 'function' => 'count', 'field' => 'id', 'label' => 'count'],
+            ['type' => 'group', 'field' => 'brand', 'label' => 'brand'],
+            ['type' => 'metric', 'function' => 'avg', 'field' => 'rating', 'label' => 'avg_rating'],
+        ];
+
+        $builder = $this->createBuilder();
+        $result = $builder->attachMetricAliases($selectDescriptors);
+
+        $expected = [
+            ['type' => 'group', 'field' => 'category', 'label' => 'category'],
+            ['type' => 'metric', 'function' => 'sum', 'field' => 'price', 'label' => 'total', 'alias' => 'metric_0'],
+            ['type' => 'metric', 'function' => 'count', 'field' => 'id', 'label' => 'count', 'alias' => 'metric_1'],
+            ['type' => 'group', 'field' => 'brand', 'label' => 'brand'],
+            ['type' => 'metric', 'function' => 'avg', 'field' => 'rating', 'label' => 'avg_rating', 'alias' => 'metric_2'],
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Edge case: buildSelectDescriptors skips empty string fields with groupFields.
+     */
+    public function testBuildSelectDescriptorsSkipsEmptyStringFields(): void
+    {
+        $query = new Query();
+        $query->setSelect(new SelectNode(['name', '', 'price']));
+        $groupFields = ['name', 'price'];
+
+        $builder = $this->createBuilder();
+        $result = $builder->buildSelectDescriptors($query, $groupFields);
+
+        $expected = [
+            ['type' => 'group', 'field' => 'name', 'label' => 'name'],
+            ['type' => 'group', 'field' => 'price', 'label' => 'price'],
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Edge case: buildGroupSources with sort on non-grouped field.
+     */
+    public function testBuildGroupSourcesWithSortOnNonGroupedField(): void
+    {
+        $groupFields = ['category', 'brand'];
+        $sortNode = new SortNode([
+            'category' => SortNode::SORT_ASC,
+            'price' => SortNode::SORT_DESC, // Not in groupFields
+            'brand' => SortNode::SORT_DESC,
+        ]);
+
+        $builder = $this->createBuilder();
+        $result = $builder->buildGroupSources($groupFields, $sortNode);
+
+        $expected = [
+            'sources' => [
+                [
+                    'group_0' => [
+                        'terms' => [
+                            'field' => 'category',
+                            'order' => 'asc',
+                            'missing_bucket' => true,
+                        ],
+                    ],
+                ],
+                [
+                    'group_1' => [
+                        'terms' => [
+                            'field' => 'brand',
+                            'order' => 'desc',
+                            'missing_bucket' => true,
+                        ],
+                    ],
+                ],
+            ],
+            'byField' => [
+                'category' => 'group_0',
+                'brand' => 'group_1',
+            ],
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
+
+
+    /**
+     * Edge case: buildSelectDescriptors with all aggregate functions.
+     */
+    public function testBuildSelectDescriptorsWithAllAggregateFunctions(): void
+    {
+        $query = new Query();
+        $query->setSelect(new SelectNode([
+            new AggregateFunctionNode('count', 'id'),
+            new AggregateFunctionNode('sum', 'price'),
+            new AggregateFunctionNode('avg', 'rating'),
+            new AggregateFunctionNode('min', 'weight'),
+            new AggregateFunctionNode('max', 'height'),
+        ]));
+
+        $builder = $this->createBuilder();
+        $descriptors = $builder->buildSelectDescriptors($query, []);
+
+        $this->assertCount(5, $descriptors);
+        $this->assertEquals('count', $descriptors[0]['function']);
+        $this->assertEquals('sum', $descriptors[1]['function']);
+        $this->assertEquals('avg', $descriptors[2]['function']);
+        $this->assertEquals('min', $descriptors[3]['function']);
+        $this->assertEquals('max', $descriptors[4]['function']);
+    }
+
+    /**
+     * Edge case: buildMetricAggregations for all metric types.
+     */
+    public function testBuildMetricAggregationsForAllMetricTypes(): void
+    {
+        $selectDescriptors = [
+            ['type' => 'metric', 'function' => 'count', 'field' => 'id', 'alias' => 'metric_0'],
+            ['type' => 'metric', 'function' => 'sum', 'field' => 'price', 'alias' => 'metric_1'],
+            ['type' => 'metric', 'function' => 'avg', 'field' => 'rating', 'alias' => 'metric_2'],
+            ['type' => 'metric', 'function' => 'min', 'field' => 'weight', 'alias' => 'metric_3'],
+            ['type' => 'metric', 'function' => 'max', 'field' => 'height', 'alias' => 'metric_4'],
+        ];
+
+        $builder = $this->createBuilder();
+        $result = $builder->buildMetricAggregations($selectDescriptors);
+
+        $this->assertArrayHasKey('metric_0', $result);
+        $this->assertArrayHasKey('metric_1', $result);
+        $this->assertArrayHasKey('metric_2', $result);
+        $this->assertArrayHasKey('metric_3', $result);
+        $this->assertArrayHasKey('metric_4', $result);
+
+        // Count on 'id' (identifier) uses match_all
+        $this->assertEquals(['filter' => ['match_all' => (object) []]], $result['metric_0']);
+        $this->assertEquals(['sum' => ['field' => 'price']], $result['metric_1']);
+        $this->assertEquals(['avg' => ['field' => 'rating']], $result['metric_2']);
+        $this->assertEquals(['min' => ['field' => 'weight']], $result['metric_3']);
+        $this->assertEquals(['max' => ['field' => 'height']], $result['metric_4']);
     }
 }
