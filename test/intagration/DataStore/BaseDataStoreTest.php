@@ -270,6 +270,132 @@ abstract class BaseDataStoreTest extends TestCase
         ]);
     }
 
+    /**
+     * @return array<string, array{0: array<int, array<string, mixed>>, 1: string, 2: array<int, array<string, mixed>>}>
+     */
+    public function rqlQueryDataProvider(): array
+    {
+        $defaultDataSet = [
+            ['id' => 1, 'name' => 'name1', 'surname' => 'surname1'],
+            ['id' => 2, 'name' => 'name2', 'surname' => 'surname2'],
+            ['id' => 3, 'name' => 'name3', 'surname' => 'surname3'],
+            ['id' => 4, 'name' => 'name4', 'surname' => 'surname4'],
+            ['id' => 5, 'name' => 'name5', 'surname' => 'surname5'],
+        ];
+
+        return [
+            'eq_with_select_and_sort' => [
+                $defaultDataSet,
+                'eq(name,name3)&select(id,name,surname)&sort(id)',
+                [
+                    ['id' => 3, 'name' => 'name3', 'surname' => 'surname3'],
+                ],
+            ],
+            'and_not_range_filter' => [
+                $defaultDataSet,
+                'and(ge(id,2),le(id,5),not(eq(id,4)))&select(id)&sort(id)',
+                [
+                    ['id' => 2],
+                    ['id' => 3],
+                    ['id' => 5],
+                ],
+            ],
+            'limit_with_offset' => [
+                $defaultDataSet,
+                'select(id,name,surname)&sort(id)&limit(2,2)',
+                [
+                    ['id' => 3, 'name' => 'name3', 'surname' => 'surname3'],
+                    ['id' => 4, 'name' => 'name4', 'surname' => 'surname4'],
+                ],
+            ],
+            'glob_filters' => [
+                $defaultDataSet,
+                'and(like(name,name*),like(surname,*surname*))&select(id)&sort(id)',
+                [
+                    ['id' => 1],
+                    ['id' => 2],
+                    ['id' => 3],
+                    ['id' => 4],
+                    ['id' => 5],
+                ],
+            ],
+            'aggregate_functions' => [
+                $defaultDataSet,
+                'select(count(id),max(id),min(id),sum(id),avg(id))',
+                [
+                    [
+                        'count(id)' => 5,
+                        'max(id)' => 5,
+                        'min(id)' => 1,
+                        'sum(id)' => 15,
+                        'avg(id)' => 3,
+                    ],
+                ],
+            ],
+            'groupby_default_count' => [
+                [
+                    ['id' => 1, 'name' => 'name1', 'surname' => 'groupA'],
+                    ['id' => 2, 'name' => 'name2', 'surname' => 'groupA'],
+                    ['id' => 3, 'name' => 'name3', 'surname' => 'groupB'],
+                ],
+                'select(surname,count(id))&groupby(surname)&sort(surname)',
+                [
+                    ['surname' => 'groupA', 'count(id)' => 2],
+                    ['surname' => 'groupB', 'count(id)' => 1],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider rqlQueryDataProvider
+     *
+     * @param array<int, array<string, mixed>> $seedData
+     * @param array<int, array<string, mixed>> $expectedItems
+     */
+    public function testRqlDataProviderCasesSuccess(array $seedData, string $rql, array $expectedItems): void
+    {
+        $object = $this->createObject();
+
+        foreach ($seedData as $item) {
+            $item[$object->getIdentifier()] = $this->identifierToType($item[$object->getIdentifier()]);
+            $object->create($item);
+        }
+
+        $items = $object->query(new RqlQuery($rql));
+
+        $this->assertEquals(
+            $expectedItems,
+            $this->normalizeRowsToExpectedShape($items, $expectedItems),
+            "Unexpected result for RQL query '{$rql}'"
+        );
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $result
+     * @param array<int, array<string, mixed>> $expected
+     * @return array<int, array<string, mixed>>
+     */
+    private function normalizeRowsToExpectedShape(array $result, array $expected): array
+    {
+        if ($expected === []) {
+            return $result;
+        }
+
+        $expectedKeys = array_keys($expected[0]);
+        $normalized = [];
+
+        foreach ($result as $row) {
+            $normalizedRow = [];
+            foreach ($expectedKeys as $key) {
+                $normalizedRow[$key] = $row[$key] ?? null;
+            }
+            $normalized[] = $normalizedRow;
+        }
+
+        return $normalized;
+    }
+
     public function testQueryWithLimitAndOffsetSuccess()
     {
         $rqlQuery = new RqlQuery();

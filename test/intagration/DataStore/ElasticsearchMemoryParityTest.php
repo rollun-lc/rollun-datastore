@@ -24,7 +24,6 @@ class ElasticsearchMemoryParityTest extends TestCase
     private static ?Client $sharedClient = null;
     private static ?string $sharedIndexName = null;
     private static bool $sharedInitialized = false;
-    private static bool $sharedUnavailable = false;
 
     private Memory $memoryDataStore;
     private ElasticsearchDataStore $elasticsearchDataStore;
@@ -34,10 +33,6 @@ class ElasticsearchMemoryParityTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        if (self::$sharedUnavailable) {
-            $this->markTestSkipped('Elasticsearch is unavailable for parity test.');
-        }
 
         if (!self::$sharedInitialized) {
             $this->initializeSharedDataStores();
@@ -64,7 +59,6 @@ class ElasticsearchMemoryParityTest extends TestCase
         self::$sharedClient = null;
         self::$sharedIndexName = null;
         self::$sharedInitialized = false;
-        self::$sharedUnavailable = false;
     }
 
     /**
@@ -388,8 +382,7 @@ class ElasticsearchMemoryParityTest extends TestCase
         $client = $this->buildClient();
 
         if (!$this->isClientReachable($client)) {
-            self::$sharedUnavailable = true;
-            $this->markTestSkipped('Elasticsearch is unavailable for parity test.');
+            self::fail('Elasticsearch is unavailable for parity test.');
         }
 
         self::$sharedClient = $client;

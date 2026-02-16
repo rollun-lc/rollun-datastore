@@ -37,7 +37,7 @@ class ElasticsearchDataStoreTest extends BaseDataStoreTest
         if ($this->isClientReachable($containerClient)) {
             $this->client = $containerClient;
         } else {
-            $this->client = $this->buildReachableClientOrSkip();
+            $this->client = $this->buildReachableClientOrFail();
         }
 
         $this->ensureIndexExists();
@@ -395,7 +395,7 @@ class ElasticsearchDataStoreTest extends BaseDataStoreTest
         $this->createdIds = [];
     }
 
-    private function buildReachableClientOrSkip(): Client
+    private function buildReachableClientOrFail(): Client
     {
         $hosts = array_values(array_unique(array_filter([
             getenv('ELASTIC_HOST_1') ?: null,
@@ -412,7 +412,7 @@ class ElasticsearchDataStoreTest extends BaseDataStoreTest
             }
         }
 
-        $this->markTestSkipped('Elasticsearch is unavailable for integration test on all known hosts.');
+        self::fail('Elasticsearch is unavailable for integration test on all known hosts.');
     }
 
     private function isClientReachable(Client $client): bool
