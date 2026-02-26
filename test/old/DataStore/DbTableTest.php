@@ -44,7 +44,7 @@ class DbTableTest extends AbstractTest
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    protected function setUp($dataStoreName = "testDbTable")
+    protected function setUp($dataStoreName = "testDbTable"): void
     {
         parent::setUp();
         $this->dbTableName = $this->config[$dataStoreName]['tableName'];
