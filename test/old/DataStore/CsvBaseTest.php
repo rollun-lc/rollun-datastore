@@ -30,7 +30,13 @@ class CsvBaseTest extends AbstractTest
 
     protected function tearDown(): void
     {
-        unlink($this->filename);
+        try {
+            if (is_file($this->filename)) {
+                unlink($this->filename);
+            }
+        } finally {
+            parent::tearDown();
+        }
     }
 
     protected function _initObject($data = null)
