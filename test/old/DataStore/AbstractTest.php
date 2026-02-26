@@ -7,6 +7,7 @@
 namespace rollun\test\old\DataStore;
 
 use DateTime;
+use Laminas\Db\Adapter\AdapterInterface;
 use Psr\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node\AlikeGlobNode;
@@ -1356,5 +1357,22 @@ abstract class AbstractTest extends TestCase
     {
         $this->container = include './config/container.php';
         $this->config = $this->container->get('config')['dataStore'];
+    }
+
+    protected function tearDown(): void
+    {
+        try {
+            if (isset($this->container) && $this->container->has('db')) {
+                $dbAdapter = $this->container->get('db');
+                if ($dbAdapter instanceof AdapterInterface) {
+                    $dbAdapter->getDriver()->getConnection()->disconnect();
+                }
+            }
+        } catch (\Throwable $e) {
+            // Do not hide test assertions with cleanup failures.
+        } finally {
+            $this->object = null;
+            $this->container = null;
+        }
     }
 }
