@@ -27,7 +27,8 @@
     "laminas/laminas-db": "^2.13.4",
     "laminas/laminas-diactoros": "^2.8.0",
     "laminas/laminas-stratigility": "^3.5.0",
-    "ajgl/csv-rfc": "^0.4.0"
+    "ajgl/csv-rfc": "^0.4.0",
+    "rollun-com/rollun-installer": "^5.0.0"
   },
   "require-dev": {
     "ext-mysqli": "*",
@@ -69,5 +70,10 @@
     "code-beautiful": "phpcbf .",
     "server": "php -S 0.0.0.0:8000 -t public public/index.php",
     "rector": "rector process --dry-run"
+  },
+  "config": {
+    "allow-plugins": {
+      "rollun-com/rollun-installer": true
+    }
   }
 }
