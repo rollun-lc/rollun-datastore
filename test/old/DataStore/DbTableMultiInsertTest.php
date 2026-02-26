@@ -15,7 +15,7 @@ class DbTableMultiInsertTest extends DbTableTest
     /** @var  TableGateway */
     protected $dbTable;
 
-    protected function setUp($dataStoreName = "testDbTableMultiInsert")
+    protected function setUp($dataStoreName = "testDbTableMultiInsert"): void
     {
         $this->container = include './config/container.php';
         $this->config = $this->container->get('config')['dataStore'];
