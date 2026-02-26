@@ -5,16 +5,8 @@
          colors="true">
 
     <testsuites>
-        <testsuite name="unit">
-            <directory>./test/unit</directory>
-        </testsuite>
-
-        <testsuite name="functional">
-            <directory>./test/functional</directory>
-        </testsuite>
-
-        <testsuite name="intagration">
-            <directory>./test/intagration</directory>
+        <testsuite name="old">
+            <directory>./test/old</directory>
         </testsuite>
     </testsuites>
 
