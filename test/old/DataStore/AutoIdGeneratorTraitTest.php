@@ -79,12 +79,11 @@ class AutoIdGeneratorTraitTest extends TestCase
         $this->assertEquals($id, $item[$this->object->getIdentifier()]);
     }
 
-    /**
-     * @expectedException \rollun\datastore\DataStore\DataStoreException
-     * @expectedExceptionMessage Can't generate id.
-     */
     public function testCantGenerateIdDataStoreException()
     {
+        $this->expectException(\rollun\datastore\DataStore\DataStoreException::class);
+        $this->expectExceptionMessage("Can't generate id.");
+
         $len = pow(strlen($this->idCharSet), $this->idLength) + 10;
         for ($i = 0; $i < $len; $i++) {
             $this->object->create(
