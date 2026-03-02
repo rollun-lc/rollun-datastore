@@ -467,7 +467,7 @@ abstract class AbstractTest extends TestCase
     {
         $this->_initObject();
         $query = new Query();
-        $sortNode = new Node\SortNode(['id' => '1']);
+        $sortNode = new Node\SortNode(['id' => Node\SortNode::SORT_ASC]);
         $query->setSort($sortNode);
         $queryArray = $this->object->query($query);
         for ($index = 0; $index < count($this->_itemsArrayDelault); $index++) {
@@ -482,7 +482,7 @@ abstract class AbstractTest extends TestCase
     {
         $this->_initObject();
         $query = new Query();
-        $sortNode = new Node\SortNode(['anotherId' => '1']);
+        $sortNode = new Node\SortNode(['anotherId' => Node\SortNode::SORT_ASC]);
         $query->setSort($sortNode);
         $queryArray = $this->object->query($query);
         $this->assertEquals(
@@ -499,7 +499,7 @@ abstract class AbstractTest extends TestCase
     {
         $this->_initObject();
         $query = new Query();
-        $sortNode = new Node\SortNode(['id' => '-1']);
+        $sortNode = new Node\SortNode(['id' => Node\SortNode::SORT_DESC]);
         $query->setSort($sortNode);
         $queryArray = $this->object->query($query);
         $this->assertEquals(
@@ -516,7 +516,7 @@ abstract class AbstractTest extends TestCase
     {
         $this->_initObject();
         $query = new Query();
-        $sortNode = new Node\SortNode(['fString' => '-1', 'fFloat' => 1, 'anotherId' => '-1']);
+        $sortNode = new Node\SortNode(['fString' => Node\SortNode::SORT_DESC, 'fFloat' => Node\SortNode::SORT_ASC, 'anotherId' => Node\SortNode::SORT_DESC]);
         $query->setSort($sortNode);
         $queryArray = $this->object->query($query);
         $this->assertEquals(
@@ -672,7 +672,7 @@ abstract class AbstractTest extends TestCase
             'fString', 'val2'
         );
         $query->setQuery($eqNode1);
-        $sortNode = new Node\SortNode(['id' => '1']);
+        $sortNode = new Node\SortNode(['id' => Node\SortNode::SORT_ASC]);
         $query->setSort($sortNode);
         $selectNode = new Node\SelectNode(['fFloat']);
         $query->setSelect($selectNode);
