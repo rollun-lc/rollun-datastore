@@ -20,6 +20,9 @@ return [
         'password' => getenv('DB_PASS'),
         'hostname' => getenv('DB_HOST'),
         'port' => getenv('DB_PORT') ?: 3306,
+        'driver_options' => [
+            PDO::ATTR_PERSISTENT => true,
+        ],
         'adapters' => [
             'db.pdo.wrong-connection' => [
                 'driver' => 'Pdo_Mysql',
