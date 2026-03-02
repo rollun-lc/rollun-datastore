@@ -84,6 +84,7 @@ class DbTableAbstractFactoryTest extends TestCase
         } finally {
             $this->adapter = null;
             $this->container = null;
+            gc_collect_cycles();
         }
     }
 }

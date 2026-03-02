@@ -1373,6 +1373,7 @@ abstract class AbstractTest extends TestCase
         } finally {
             $this->object = null;
             $this->container = null;
+            gc_collect_cycles();
         }
     }
 }

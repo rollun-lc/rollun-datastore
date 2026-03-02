@@ -59,6 +59,7 @@ class TableManagerMysqlFactoryTest extends TestCase
             // Do not hide test assertions with cleanup failures.
         } finally {
             $this->container = null;
+            gc_collect_cycles();
         }
     }
 
