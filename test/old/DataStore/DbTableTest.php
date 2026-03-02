@@ -44,7 +44,7 @@ class DbTableTest extends AbstractTest
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    protected function setUp($dataStoreName = "testDbTable")
+    protected function setUp($dataStoreName = "testDbTable"): void
     {
         parent::setUp();
         $this->dbTableName = $this->config[$dataStoreName]['tableName'];
@@ -58,10 +58,14 @@ class DbTableTest extends AbstractTest
      */
     protected function tearDown(): void
     {
-        $quoteTableName = $this->adapter->platform->quoteIdentifier($this->dbTableName);
-        $deleteStatementStr = "DROP TABLE IF EXISTS " . $quoteTableName;
-        $deleteStatement = $this->adapter->query($deleteStatementStr);
-        $deleteStatement->execute();
+        try {
+            $quoteTableName = $this->adapter->platform->quoteIdentifier($this->dbTableName);
+            $deleteStatementStr = "DROP TABLE IF EXISTS " . $quoteTableName;
+            $deleteStatement = $this->adapter->query($deleteStatementStr);
+            $deleteStatement->execute();
+        } finally {
+            parent::tearDown();
+        }
     }
 
     /**

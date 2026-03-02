@@ -16,6 +16,10 @@
         <testsuite name="intagration">
             <directory>./test/intagration</directory>
         </testsuite>
+
+        <testsuite name="old">
+            <directory>./test/old</directory>
+        </testsuite>
     </testsuites>
 
     <php>

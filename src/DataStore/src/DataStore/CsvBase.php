@@ -70,7 +70,9 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     public function getHeaders(): void
     {
         $this->enableReadMode();
-        $this->columns = $this->file->fgetcsv($this->csvDelimiter);
+        $this->file->rewind();
+        $headers = $this->file->fgetcsv($this->csvDelimiter);
+        $this->columns = ($headers === false || $headers === [null]) ? [] : $headers;
         $this->releaseLocks();
     }
 
@@ -449,6 +451,15 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      */
     protected function createNewItem($itemData)
     {
+        if ($this->columns === []) {
+            // Allow creating first row in an empty csv file by deriving columns from payload.
+            $this->columns = array_values(
+                array_unique(
+                    array_merge([$this->getIdentifier()], array_keys($itemData))
+                )
+            );
+        }
+
         $item = array_flip($this->columns);
 
         foreach ($item as $key => $value) {

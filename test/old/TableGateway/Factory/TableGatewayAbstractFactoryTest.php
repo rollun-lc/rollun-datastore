@@ -10,6 +10,7 @@ use Psr\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\TableGateway\Factory\TableGatewayAbstractFactory;
 use Laminas\Db\Adapter\Adapter;
+use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
 
 /**
@@ -45,6 +46,21 @@ class TableGatewayAbstractFactoryTest extends TestCase
         $this->container = include './config/container.php';
         $this->object = new TableGatewayAbstractFactory();
         $this->adapter = $this->container->get('db');
+    }
+
+    protected function tearDown(): void
+    {
+        try {
+            if (isset($this->adapter) && $this->adapter instanceof AdapterInterface) {
+                $this->adapter->getDriver()->getConnection()->disconnect();
+            }
+        } catch (\Throwable $e) {
+            // Do not hide test assertions with cleanup failures.
+        } finally {
+            $this->adapter = null;
+            $this->container = null;
+            gc_collect_cycles();
+        }
     }
 
     public function testTableGatewayAbstractFactory__canCreateIfTableAbsent()

@@ -10,6 +10,7 @@ use Psr\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore;
 use Laminas\Db\Adapter\Adapter;
+use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
 
 /**
@@ -56,9 +57,8 @@ class DbTableAbstractFactoryTest extends TestCase
         $createStatement = $this->adapter->query($createStatementStr);
         $createStatement->execute();
 
-        $container = include 'config/container.php';
         $requestedName = 'testDbTable';
-        $result = $this->object->canCreate($container, $requestedName);
+        $result = $this->object->canCreate($this->container, $requestedName);
         $this->assertSame(true, $result);
     }
 
@@ -68,9 +68,23 @@ class DbTableAbstractFactoryTest extends TestCase
         $createStatement = $this->adapter->query($createStatementStr);
         $createStatement->execute();
 
-        $container = include 'config/container.php';
         $requestedName = 'testDbTable';
-        $result = $this->object->__invoke($container, $requestedName);
+        $result = $this->object->__invoke($this->container, $requestedName);
         $this->assertSame('rollun\datastore\DataStore\DbTable', get_class($result));
+    }
+
+    protected function tearDown(): void
+    {
+        try {
+            if (isset($this->adapter) && $this->adapter instanceof AdapterInterface) {
+                $this->adapter->getDriver()->getConnection()->disconnect();
+            }
+        } catch (\Throwable $e) {
+            // Do not hide test assertions with cleanup failures.
+        } finally {
+            $this->adapter = null;
+            $this->container = null;
+            gc_collect_cycles();
+        }
     }
 }

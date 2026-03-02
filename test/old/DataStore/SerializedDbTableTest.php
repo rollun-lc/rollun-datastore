@@ -52,10 +52,14 @@ class SerializedDbTableTest extends AbstractTest
      */
     protected function tearDown(): void
     {
-        $quoteTableName = $this->adapter->platform->quoteIdentifier($this->dbTableName);
-        $deleteStatementStr = "DROP TABLE IF EXISTS " . $quoteTableName;
-        $deleteStatement = $this->adapter->query($deleteStatementStr);
-        $deleteStatement->execute();
+        try {
+            $quoteTableName = $this->adapter->platform->quoteIdentifier($this->dbTableName);
+            $deleteStatementStr = "DROP TABLE IF EXISTS " . $quoteTableName;
+            $deleteStatement = $this->adapter->query($deleteStatementStr);
+            $deleteStatement->execute();
+        } finally {
+            parent::tearDown();
+        }
     }
 
     /**

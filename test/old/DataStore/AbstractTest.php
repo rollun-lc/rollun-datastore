@@ -7,6 +7,7 @@
 namespace rollun\test\old\DataStore;
 
 use DateTime;
+use Laminas\Db\Adapter\AdapterInterface;
 use Psr\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\Rql\Node\AlikeGlobNode;
@@ -466,7 +467,7 @@ abstract class AbstractTest extends TestCase
     {
         $this->_initObject();
         $query = new Query();
-        $sortNode = new Node\SortNode(['id' => '1']);
+        $sortNode = new Node\SortNode(['id' => Node\SortNode::SORT_ASC]);
         $query->setSort($sortNode);
         $queryArray = $this->object->query($query);
         for ($index = 0; $index < count($this->_itemsArrayDelault); $index++) {
@@ -481,7 +482,7 @@ abstract class AbstractTest extends TestCase
     {
         $this->_initObject();
         $query = new Query();
-        $sortNode = new Node\SortNode(['anotherId' => '1']);
+        $sortNode = new Node\SortNode(['anotherId' => Node\SortNode::SORT_ASC]);
         $query->setSort($sortNode);
         $queryArray = $this->object->query($query);
         $this->assertEquals(
@@ -498,7 +499,7 @@ abstract class AbstractTest extends TestCase
     {
         $this->_initObject();
         $query = new Query();
-        $sortNode = new Node\SortNode(['id' => '-1']);
+        $sortNode = new Node\SortNode(['id' => Node\SortNode::SORT_DESC]);
         $query->setSort($sortNode);
         $queryArray = $this->object->query($query);
         $this->assertEquals(
@@ -515,7 +516,7 @@ abstract class AbstractTest extends TestCase
     {
         $this->_initObject();
         $query = new Query();
-        $sortNode = new Node\SortNode(['fString' => '-1', 'fFloat' => 1, 'anotherId' => '-1']);
+        $sortNode = new Node\SortNode(['fString' => Node\SortNode::SORT_DESC, 'fFloat' => Node\SortNode::SORT_ASC, 'anotherId' => Node\SortNode::SORT_DESC]);
         $query->setSort($sortNode);
         $queryArray = $this->object->query($query);
         $this->assertEquals(
@@ -671,7 +672,7 @@ abstract class AbstractTest extends TestCase
             'fString', 'val2'
         );
         $query->setQuery($eqNode1);
-        $sortNode = new Node\SortNode(['id' => '1']);
+        $sortNode = new Node\SortNode(['id' => Node\SortNode::SORT_ASC]);
         $query->setSort($sortNode);
         $selectNode = new Node\SelectNode(['fFloat']);
         $query->setSelect($selectNode);
@@ -1356,5 +1357,23 @@ abstract class AbstractTest extends TestCase
     {
         $this->container = include './config/container.php';
         $this->config = $this->container->get('config')['dataStore'];
+    }
+
+    protected function tearDown(): void
+    {
+        try {
+            if (isset($this->container) && $this->container->has('db')) {
+                $dbAdapter = $this->container->get('db');
+                if ($dbAdapter instanceof AdapterInterface) {
+                    $dbAdapter->getDriver()->getConnection()->disconnect();
+                }
+            }
+        } catch (\Throwable $e) {
+            // Do not hide test assertions with cleanup failures.
+        } finally {
+            $this->object = null;
+            $this->container = null;
+            gc_collect_cycles();
+        }
     }
 }

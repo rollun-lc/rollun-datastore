@@ -10,6 +10,7 @@ use Psr\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\TableGateway\TableManagerMysql;
 use Laminas\Db\Adapter\Adapter;
+use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
 
 /**
@@ -47,7 +48,19 @@ class TableManagerMysqlFactoryTest extends TestCase
      */
     protected function tearDown(): void
     {
-
+        try {
+            if (isset($this->container) && $this->container->has('db')) {
+                $dbAdapter = $this->container->get('db');
+                if ($dbAdapter instanceof AdapterInterface) {
+                    $dbAdapter->getDriver()->getConnection()->disconnect();
+                }
+            }
+        } catch (\Throwable $e) {
+            // Do not hide test assertions with cleanup failures.
+        } finally {
+            $this->container = null;
+            gc_collect_cycles();
+        }
     }
 
     public function testTableGatewayAbstractFactory__canCreateIfTableAbsent()
