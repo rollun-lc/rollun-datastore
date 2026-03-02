@@ -148,6 +148,9 @@ class CsvBaseTest extends AbstractTest
         $this->assertEquals(2, $item['id']);
 
         $iterator->next();
+        $item = $iterator->current();
+        $this->assertEquals(3, $item['id']);
+
         $iterator->next();
         $item = $iterator->current();
         $this->assertEquals(4, $item['id']);
