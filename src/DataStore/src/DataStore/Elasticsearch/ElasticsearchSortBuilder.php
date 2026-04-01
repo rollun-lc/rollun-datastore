@@ -26,7 +26,7 @@ final class ElasticsearchSortBuilder
 {
     public function __construct(
         private readonly string $identifier = 'id',
-        private readonly string $tieBreakerField = '_id'
+        private readonly string $tieBreakerField = '_doc'
     ) {
     }
 
@@ -79,8 +79,10 @@ final class ElasticsearchSortBuilder
     public function appendSortTieBreaker(array $sort): array
     {
         // If no sort specified and identifier differs from tie-breaker,
-        // add identifier as primary sort for predictable ordering
-        if ($sort === [] && $this->identifier !== $this->tieBreakerField) {
+        // add identifier as primary sort for predictable ordering.
+        // Skip _id as primary sort — it lacks doc_values in ES 7.x and causes
+        // extremely slow fielddata builds on large indices.
+        if ($sort === [] && $this->identifier !== $this->tieBreakerField && $this->identifier !== '_id') {
             $sort[] = [$this->identifier => 'asc'];
         }
 
