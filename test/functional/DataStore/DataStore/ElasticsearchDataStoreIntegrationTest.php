@@ -153,8 +153,7 @@ class ElasticsearchDataStoreIntegrationTest extends FunctionalTestCase
         string $message,
         string $level,
         array $extraBody = []
-    ): void
-    {
+    ): void {
         $this->createdIds[] = $id;
 
         $body = array_merge([
