@@ -93,8 +93,10 @@ final class ElasticsearchSortBuilder
             }
         }
 
-        // Add tie-breaker as final sort field to ensure stable ordering
-        // Usually this is '_id' which is always unique in Elasticsearch
+        // Add tie-breaker as final sort field to ensure stable ordering.
+        // Default is '_doc' (Lucene segment order) — fast and requires no fielddata.
+        // Avoid '_id' as tie-breaker: it lacks doc_values in ES 7.x and causes
+        // extremely slow fielddata builds on large indices.
         $sort[] = [$this->tieBreakerField => 'asc'];
 
         return $sort;
