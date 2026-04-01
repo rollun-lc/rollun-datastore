@@ -325,7 +325,7 @@ class ElasticsearchDataStoreTest extends TestCase
                 $this->assertSame(['id', 'message'], $params['body']['_source']);
                 $this->assertSame([
                     ['id' => 'asc'],
-                    ['_id' => 'asc'],
+                    ['_doc' => 'asc'],
                 ], $params['body']['sort']);
                 $this->assertArrayHasKey('query', $params['body']);
 
