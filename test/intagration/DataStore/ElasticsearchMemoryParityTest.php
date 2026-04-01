@@ -49,8 +49,7 @@ class ElasticsearchMemoryParityTest extends TestCase
         if (self::$sharedClient !== null && self::$sharedIndexName !== null) {
             try {
                 self::$sharedClient->indices()->delete(['index' => self::$sharedIndexName]);
-            } catch (Missing404Exception) {
-            } catch (\Throwable) {
+            } catch (Missing404Exception|\Throwable) {
             }
         }
 

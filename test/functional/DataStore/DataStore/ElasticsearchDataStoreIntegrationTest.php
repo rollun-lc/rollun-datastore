@@ -162,7 +162,7 @@ class ElasticsearchDataStoreIntegrationTest extends FunctionalTestCase
             'service' => $service,
             'message' => $message,
             'context' => [
-                'source' => __CLASS__,
+                'source' => self::class,
                 'tag' => 'integration-test',
             ],
         ], $extraBody);
@@ -184,8 +184,7 @@ class ElasticsearchDataStoreIntegrationTest extends FunctionalTestCase
                     'id' => $id,
                     'refresh' => 'wait_for',
                 ]);
-            } catch (Missing404Exception) {
-            } catch (\Throwable) {
+            } catch (Missing404Exception|\Throwable) {
             }
         }
 

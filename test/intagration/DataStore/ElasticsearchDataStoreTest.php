@@ -269,7 +269,7 @@ class ElasticsearchDataStoreTest extends BaseDataStoreTest
                 $this->assertArrayHasKey($key, $result[$index], "Missing key '{$key}' in result for query: {$rqlQuery}");
 
                 if (is_float($value)) {
-                    $this->assertEquals($value, $result[$index][$key], "Value mismatch for '{$key}' in query: {$rqlQuery}", 0.001);
+                    $this->assertEquals($value, $result[$index][$key], "Value mismatch for '{$key}' in query: {$rqlQuery}");
                 } else {
                     $this->assertSame($value, $result[$index][$key], "Value mismatch for '{$key}' in query: {$rqlQuery}");
                 }
@@ -346,7 +346,7 @@ class ElasticsearchDataStoreTest extends BaseDataStoreTest
                 'service' => $service,
                 'message' => $message,
                 'context' => [
-                    'source' => __CLASS__,
+                    'source' => self::class,
                     'tag' => 'integration-test',
                 ],
             ],
@@ -387,8 +387,7 @@ class ElasticsearchDataStoreTest extends BaseDataStoreTest
                     'id' => $id,
                     'refresh' => 'wait_for',
                 ]);
-            } catch (Missing404Exception) {
-            } catch (\Throwable) {
+            } catch (Missing404Exception|\Throwable) {
             }
         }
 
