@@ -97,7 +97,7 @@ class ElasticsearchSortBuilderTest extends TestCase
 
         $expected = [
             ['id' => 'asc'],
-            ['_id' => 'asc'],
+            ['_doc' => 'asc'],
         ];
 
         $this->assertSame($expected, $result);
@@ -109,13 +109,13 @@ class ElasticsearchSortBuilderTest extends TestCase
         $result = $builder->appendSortTieBreaker([]);
 
         $expected = [
-            ['_id' => 'asc'],
+            ['_doc' => 'asc'],
         ];
 
         $this->assertSame($expected, $result);
     }
 
-    public function testAppendSortTieBreakerAdds_idWhenNotPresent(): void
+    public function testAppendSortTieBreakerAdds_docWhenNotPresent(): void
     {
         $builder = new ElasticsearchSortBuilder();
         $sort = [
@@ -128,18 +128,18 @@ class ElasticsearchSortBuilderTest extends TestCase
         $expected = [
             ['name' => 'asc'],
             ['price' => 'desc'],
-            ['_id' => 'asc'],
+            ['_doc' => 'asc'],
         ];
 
         $this->assertSame($expected, $result);
     }
 
-    public function testAppendSortTieBreakerDoesNotAdd_idWhenAlreadyPresent(): void
+    public function testAppendSortTieBreakerDoesNotAdd_docWhenAlreadyPresent(): void
     {
         $builder = new ElasticsearchSortBuilder();
         $sort = [
             ['name' => 'asc'],
-            ['_id' => 'asc'],
+            ['_doc' => 'asc'],
             ['price' => 'desc'],
         ];
 
@@ -157,7 +157,7 @@ class ElasticsearchSortBuilderTest extends TestCase
 
         $expected = [
             ['name' => 'asc'],
-            ['_id' => 'asc'],
+            ['_doc' => 'asc'],
         ];
 
         $this->assertSame($expected, $result);
@@ -679,7 +679,7 @@ class ElasticsearchSortBuilderTest extends TestCase
 
         $expected = [
             ['name' => 'asc'],
-            ['_id' => 'asc'],
+            ['_doc' => 'asc'],
         ];
 
         $this->assertSame($expected, $result);
