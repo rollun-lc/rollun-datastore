@@ -31,8 +31,7 @@ final class ElasticsearchAggregationBuilder
 {
     public function __construct(
         private readonly string $identifier = 'id'
-    ) {
-    }
+    ) {}
 
     /**
      * Check if query should use native Elasticsearch aggregations.

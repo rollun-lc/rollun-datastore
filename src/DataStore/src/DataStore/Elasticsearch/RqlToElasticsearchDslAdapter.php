@@ -38,8 +38,7 @@ final class RqlToElasticsearchDslAdapter
         private readonly string $index,
         private readonly string $identifier,
         private readonly LoggerInterface $logger = new NullLogger()
-    ) {
-    }
+    ) {}
 
     /**
      * Convert RQL query node to Elasticsearch DSL query.

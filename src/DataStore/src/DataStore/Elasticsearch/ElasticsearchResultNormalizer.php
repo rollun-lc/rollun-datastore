@@ -23,8 +23,7 @@ final class ElasticsearchResultNormalizer
 {
     public function __construct(
         private readonly string $identifier = 'id'
-    ) {
-    }
+    ) {}
 
     /**
      * Normalize a single search hit to standard record format.

@@ -27,8 +27,7 @@ final class ElasticsearchSortBuilder
     public function __construct(
         private readonly string $identifier = 'id',
         private readonly string $tieBreakerField = '_doc'
-    ) {
-    }
+    ) {}
 
     /**
      * Build Elasticsearch sort array from RQL SortNode.
