@@ -32,10 +32,14 @@ class ElasticsearchDataStoreTest extends BaseDataStoreTest
         parent::setUp();
 
         global $container;
-        $containerClient = $container->get('ElasticSearchClient');
 
-        if ($this->isClientReachable($containerClient)) {
-            $this->client = $containerClient;
+        if ($container->has('ElasticSearchClient')) {
+            $containerClient = $container->get('ElasticSearchClient');
+            if ($this->isClientReachable($containerClient)) {
+                $this->client = $containerClient;
+            } else {
+                $this->client = $this->buildReachableClientOrFail();
+            }
         } else {
             $this->client = $this->buildReachableClientOrFail();
         }

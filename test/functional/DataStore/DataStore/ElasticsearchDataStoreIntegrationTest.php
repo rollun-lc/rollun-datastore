@@ -29,12 +29,14 @@ class ElasticsearchDataStoreIntegrationTest extends FunctionalTestCase
         parent::setUp();
 
         $container = $this->getContainer();
-        $containerClient = $container->get('ElasticSearchClient');
 
-        if ($this->isClientReachable($containerClient)) {
-            $this->client = $containerClient;
-            $this->store = $container->get('ElasticLogDataStore');
-            return;
+        if ($container->has('ElasticSearchClient') && $container->has('ElasticLogDataStore')) {
+            $containerClient = $container->get('ElasticSearchClient');
+            if ($this->isClientReachable($containerClient)) {
+                $this->client = $containerClient;
+                $this->store = $container->get('ElasticLogDataStore');
+                return;
+            }
         }
 
         $this->client = $this->buildReachableClientOrSkip();
