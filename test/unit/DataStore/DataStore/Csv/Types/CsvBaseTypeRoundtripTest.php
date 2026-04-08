@@ -53,19 +53,15 @@ final class CsvBaseTypeRoundtripTest extends TestCase
 
     public function testNullValueRoundTrip(): void
     {
-        // NOTE: deliberately NO startCapturingDeprecations here.
-        // CsvBase::getTrueRow (CsvBase.php:520) calls strlen($item) on $item
-        // that has just been set to null in the previous if-branch — this
-        // emits a PHP 8.1 "Passing null to strlen()" deprecation. The data
-        // contract (null round-trips) works; the deprecation is a separate
-        // bug to fix in the merge.
-        // TODO(merge): fix CsvBase::getTrueRow to skip null items before strlen().
+        $this->startCapturingDeprecations();
 
         $csv = new CsvBase($this->filename, ',');
         $csv->create(['id' => 1, 'value' => null, 'note' => 'ok']);
 
         $row = $csv->read(1);
         self::assertNull($row['value']);
+
+        $this->assertNoDeprecationsCaptured();
     }
 
     public function testEmptyStringRoundTrip(): void
@@ -83,8 +79,7 @@ final class CsvBaseTypeRoundtripTest extends TestCase
 
     public function testNullAndEmptyStringAreDistinguishable(): void
     {
-        // NOTE: see testNullValueRoundTrip — same strlen(null) deprecation
-        // path. Data contract works, deprecation is merge-pending.
+        $this->startCapturingDeprecations();
 
         $csv = new CsvBase($this->filename, ',');
         $csv->create(['id' => 1, 'value' => null, 'note' => 'null-row']);
@@ -92,6 +87,8 @@ final class CsvBaseTypeRoundtripTest extends TestCase
 
         self::assertNull($csv->read(1)['value']);
         self::assertSame('', $csv->read(2)['value']);
+
+        $this->assertNoDeprecationsCaptured();
     }
 
     public function testTrueRoundTripsAsIntOne(): void

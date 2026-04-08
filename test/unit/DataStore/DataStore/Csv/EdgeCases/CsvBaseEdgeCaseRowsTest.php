@@ -7,6 +7,7 @@ namespace rollun\test\unit\DataStore\DataStore\Csv\EdgeCases;
 use Ajgl\Csv\Rfc\CsvRfcUtils;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\CsvBase;
+use rollun\datastore\DataStore\DataStoreException;
 use rollun\test\unit\DataStore\DataStore\Csv\Support\AssertsNoDeprecationsTrait;
 use RuntimeException;
 
@@ -90,47 +91,39 @@ final class CsvBaseEdgeCaseRowsTest extends TestCase
 
     public function testReadRowWithFewerColumnsThanHeader(): void
     {
-        self::markTestSkipped(
-            'merge-pending: CsvBase::getTrueRow uses array_combine, which throws '
-            . 'ValueError in PHP 8.0+ when value count != key count. A ragged-short '
-            . 'row currently produces an unhandled fatal. Decision needed: return '
-            . 'null silently, fill missing fields with null, or throw a typed '
-            . 'DataStoreException with row context.',
-        );
-
         $this->writeBytes("id,name,note\n1,onlyone\n");
 
         $csv = new CsvBase($this->filename, ',');
-        // Document the desired contract here once decided.
-        self::assertNull($csv->read(1));
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessageMatches('/Malformed CSV row .+ 2 fields, expected 3 columns/');
+
+        $csv->read(1);
     }
 
     public function testReadRowWithMoreColumnsThanHeader(): void
     {
-        self::markTestSkipped(
-            'merge-pending: same array_combine ValueError trap as the short-row case. '
-            . 'Decision needed: drop extras, throw, or expand the column set.',
-        );
-
         $this->writeBytes("id,name\n1,foo,extra\n");
 
         $csv = new CsvBase($this->filename, ',');
-        self::assertEquals(['id' => 1, 'name' => 'foo'], $csv->read(1));
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessageMatches('/Malformed CSV row .+ 3 fields, expected 2 columns/');
+
+        $csv->read(1);
     }
 
     public function testReadCompletelyEmptyFile(): void
     {
-        self::markTestSkipped(
-            'merge-pending: CsvBase::__construct calls getHeaders() which calls '
-            . 'fgetcsv() on an empty file. Behavior on a 0-byte file is currently '
-            . 'undefined. Decision needed: should an empty file be valid (lazy '
-            . 'header materialization) or rejected with a clear error?',
-        );
+        $this->startCapturingDeprecations();
 
         $this->writeBytes('');
 
         $csv = new CsvBase($this->filename, ',');
         self::assertSame(0, $csv->count());
+        self::assertNull($csv->read(1));
+
+        $this->assertNoDeprecationsCaptured();
     }
 
     private function writeBytes(string $content): void

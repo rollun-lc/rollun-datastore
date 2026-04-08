@@ -73,34 +73,16 @@ final class CsvBaseQuotedFieldsTest extends TestCase
         $this->assertNoDeprecationsCaptured();
     }
 
-    public function testReadFieldWithLegacyBackslashEscape(): void
-    {
-        self::markTestSkipped(
-            'merge-pending: CsvBase configures fgetcsv with empty escape (RFC mode), '
-            . 'so legacy backslash-escaped files written by native fputcsv default '
-            . 'cannot be parsed. Decision needed: support legacy format via auto-detect, '
-            . 'or document one-way migration. See merge plan §B.',
-        );
-
-        $csv = new CsvBase(__DIR__ . '/legacy_backslash_quote.csv', ',');
-
-        self::assertEquals(
-            ['id' => 1, 'name' => 'foo "bar" baz', 'note' => 'ok'],
-            $csv->read(1),
-        );
-    }
+    // testReadFieldWithLegacyBackslashEscape removed in M14: legacy
+    // backslash-escaped CSV files (written by pre-merge CsvBase via native
+    // fputcsv default escape) are no longer supported. Files with literal
+    // " characters in fields written by older versions must be migrated
+    // before reading — see bin/migrate-csv-escape.php.
+    // The corresponding fixture legacy_backslash_quote.csv is also removed.
 
     public function testReadFieldWithEmbeddedLf(): void
     {
-        self::markTestSkipped(
-            'merge-pending: CsvBase opens its SplFileObject with DROP_NEW_LINE '
-            . '(CsvBase.php:363). That flag strips newlines from row terminators '
-            . 'AND from inside quoted fields, so an embedded \n in a "..." value '
-            . 'is silently lost on read. Run with the fixture verifies the value '
-            . 'comes back as "line1line2" instead of "line1\nline2". '
-            . 'Merge plan: drop DROP_NEW_LINE and handle row terminator trimming '
-            . 'manually, OR switch to ajgl/csv-rfc on the read side too.',
-        );
+        $this->startCapturingDeprecations();
 
         $csv = new CsvBase(__DIR__ . '/embedded_lf_in_field.csv', ',');
 
@@ -108,14 +90,17 @@ final class CsvBaseQuotedFieldsTest extends TestCase
             ['id' => 1, 'name' => "line1\nline2", 'note' => 'ok'],
             $csv->read(1),
         );
+        self::assertEquals(
+            ['id' => 2, 'name' => 'plain', 'note' => 'ok'],
+            $csv->read(2),
+        );
+
+        $this->assertNoDeprecationsCaptured();
     }
 
     public function testReadFieldWithEmbeddedCrlf(): void
     {
-        self::markTestSkipped(
-            'merge-pending: same DROP_NEW_LINE bug as testReadFieldWithEmbeddedLf. '
-            . 'CRLF inside a quoted field is also stripped. CsvBase.php:363.',
-        );
+        $this->startCapturingDeprecations();
 
         $csv = new CsvBase(__DIR__ . '/embedded_crlf_in_field.csv', ',');
 
@@ -123,6 +108,12 @@ final class CsvBaseQuotedFieldsTest extends TestCase
             ['id' => 1, 'name' => "line1\r\nline2", 'note' => 'ok'],
             $csv->read(1),
         );
+        self::assertEquals(
+            ['id' => 2, 'name' => 'plain', 'note' => 'ok'],
+            $csv->read(2),
+        );
+
+        $this->assertNoDeprecationsCaptured();
     }
 
     // ----------------------------------------------------------------------
@@ -144,49 +135,38 @@ final class CsvBaseQuotedFieldsTest extends TestCase
 
     public function testWriteThenReadFieldWithEmbeddedLf(): void
     {
-        self::markTestSkipped(
-            'merge-pending: native fputcsv writes the embedded \n correctly into '
-            . 'a quoted field, but CsvBase reads it back through SplFileObject '
-            . 'with DROP_NEW_LINE (CsvBase.php:363) which strips that \n. The '
-            . 'round-trip therefore corrupts the value. Same root cause as '
-            . 'testReadFieldWithEmbeddedLf.',
-        );
+        $this->startCapturingDeprecations();
 
         $csv = $this->makeEmptyCsv(['id', 'name', 'note']);
         $csv->create($input = ['id' => 1, 'name' => "line1\nline2", 'note' => 'ok']);
 
         self::assertEquals($input, $csv->read(1));
+
+        $this->assertNoDeprecationsCaptured();
     }
 
     public function testWriteThenReadFieldWithDoubleQuote(): void
     {
-        self::markTestSkipped(
-            'merge-pending: write path goes through native fputcsv (PHP-default \\\\ escape), '
-            . 'read path goes through fgetcsv with escape: "" (RFC mode). '
-            . 'Round-trip on a value containing literal " is asymmetric and corrupts data. '
-            . 'Merge plan: route writes through ajgl/csv-rfc strPutCsv (RFC "" escape).',
-        );
+        $this->startCapturingDeprecations();
 
         $csv = $this->makeEmptyCsv(['id', 'name', 'note']);
         $csv->create($input = ['id' => 1, 'name' => 'foo "bar" baz', 'note' => 'ok']);
 
         self::assertEquals($input, $csv->read(1));
+
+        $this->assertNoDeprecationsCaptured();
     }
 
     public function testWriteThenReadFieldWithEmbeddedCrlf(): void
     {
-        self::markTestSkipped(
-            'merge-pending: native fputcsv writes \r\n inside quoted fields verbatim, '
-            . 'but the file row terminator is \n, so CRLF inside a field is '
-            . 'indistinguishable from a row break in some readers. '
-            . 'Merge plan: prepareFieldsBeforeAdd-style normalization (\r\n → \n) '
-            . 'inside field values before writing, ported from rollun-files.',
-        );
+        $this->startCapturingDeprecations();
 
         $csv = $this->makeEmptyCsv(['id', 'name', 'note']);
         $csv->create($input = ['id' => 1, 'name' => "line1\r\nline2", 'note' => 'ok']);
 
         self::assertEquals($input, $csv->read(1));
+
+        $this->assertNoDeprecationsCaptured();
     }
 
     // ----------------------------------------------------------------------

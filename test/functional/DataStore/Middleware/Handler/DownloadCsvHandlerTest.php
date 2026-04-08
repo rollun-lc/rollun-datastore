@@ -128,12 +128,7 @@ final class DownloadCsvHandlerTest extends TestCase
 
     public function testHandleEscapesFieldContainingDoubleQuoteRfcStyle(): void
     {
-        self::markTestSkipped(
-            'merge-pending: DownloadCsvHandler::handle() hardcodes ESCAPE_CHAR = \\\\ '
-            . 'and calls native fputcsv with that escape, producing \" instead of '
-            . 'RFC 4180 "" doubling. Merge plan: route the handler through '
-            . 'ajgl/csv-rfc strPutCsv (same writer the merged CsvBase will use).',
-        );
+        $this->startCapturingDeprecations();
 
         $dbTable = $this->mockDbTable([
             [['1', 'foo "bar" baz']],
@@ -144,6 +139,8 @@ final class DownloadCsvHandlerTest extends TestCase
         $body = (string) $response->getBody();
 
         self::assertSame("1,\"foo \"\"bar\"\" baz\"\n", $body);
+
+        $this->assertNoDeprecationsCaptured();
     }
 
     public function testHandleHandlesFieldWithEmbeddedNewline(): void

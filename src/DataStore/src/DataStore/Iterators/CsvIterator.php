@@ -38,7 +38,8 @@ class CsvIterator implements \Iterator
 
         $this->splFileObject = new \SplFileObject($filename);
         $this->splFileObject->setFlags(\SplFileObject::READ_CSV);
-        $this->splFileObject->setCsvControl($dataStore->getCsvDelimiter());
+        // escape: '' = RFC 4180 mode, symmetric with CsvBase::getFile().
+        $this->splFileObject->setCsvControl($dataStore->getCsvDelimiter(), '"', '');
 
         $this->dataStore = $dataStore;
 
@@ -86,7 +87,7 @@ class CsvIterator implements \Iterator
     /**
      * {@inheritdoc}
      */
-    public function rewind()
+    public function rewind(): void
     {
         $this->splFileObject->rewind();
         $this->splFileObject->current();
@@ -96,7 +97,7 @@ class CsvIterator implements \Iterator
     /**
      * {@inheritdoc}
      */
-    public function key()
+    public function key(): mixed
     {
         return $this->splFileObject->key();
     }
@@ -104,7 +105,7 @@ class CsvIterator implements \Iterator
     /**
      * {@inheritdoc}
      */
-    public function next()
+    public function next(): void
     {
         if ($this->splFileObject->key() === 0) {
             $this->rewind();
@@ -116,7 +117,7 @@ class CsvIterator implements \Iterator
     /**
      * {@inheritdoc}
      */
-    public function current()
+    public function current(): mixed
     {
         if ($this->splFileObject->key() === 0) {
             $this->rewind();
@@ -140,7 +141,7 @@ class CsvIterator implements \Iterator
      * Finally it sets the file pointer one byte back and returns true.
      * {@inheritdoc}
      */
-    public function valid()
+    public function valid(): bool
     {
         if (!$this->splFileObject->valid()) {
             return false;

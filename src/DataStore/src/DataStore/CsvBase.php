@@ -64,6 +64,14 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     }
 
     /**
+     * UTF-8 byte order mark. Excel-Win and several other CSV producers add
+     * this to the start of the file. Without stripping, the first column
+     * header becomes "\xEF\xBB\xBFid" instead of "id" and breaks every
+     * subsequent column lookup.
+     */
+    private const UTF8_BOM = "\xEF\xBB\xBF";
+
+    /**
      * Sets the column headings
      * @throws DataStoreException
      */
@@ -72,7 +80,20 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
         $this->enableReadMode();
         $this->file->rewind();
         $headers = $this->file->fgetcsv($this->csvDelimiter);
-        $this->columns = ($headers === false || $headers === [null]) ? [] : $headers;
+
+        if ($headers === false || $headers === [null]) {
+            $this->columns = [];
+        } else {
+            // Strip leading UTF-8 BOM from the first column header if present.
+            if (isset($headers[0])
+                && is_string($headers[0])
+                && str_starts_with($headers[0], self::UTF8_BOM)
+            ) {
+                $headers[0] = substr($headers[0], strlen(self::UTF8_BOM));
+            }
+            $this->columns = $headers;
+        }
+
         $this->releaseLocks();
     }
 
@@ -230,21 +251,32 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
 
         // Count rows
         $count = $this->count();
-        $tmpFile = tempnam("/tmp", uniqid() . '.tmp');
+
+        // Build the replacement file as a sibling so rename(2) stays on the
+        // same filesystem and is POSIX-atomic. /tmp may be a different fs.
+        $tmpFile = tempnam(dirname($this->filename), 'csv_');
         $tempHandler = fopen($tmpFile, 'w');
 
         // Write the headings only and right away closes file
-        fputcsv($tempHandler, $this->columns, $this->csvDelimiter);
+        // escape: '' = RFC 4180 mode ("" doubling, no \" backslash escape)
+        fputcsv($tempHandler, $this->columns, $this->csvDelimiter, '"', '');
         fclose($tempHandler);
 
-        // Changes the original file to a temporary one.
+        // Preserve original file mode across the atomic replace.
+        $originalMode = @fileperms($this->filename);
+        if ($originalMode !== false) {
+            @chmod($tmpFile, $originalMode & 0777);
+        }
+
+        // Atomic replace.
         if (!rename($tmpFile, $this->filename)) {
-            throw new DataStoreException("Failed to write the results to a file.");
+            @unlink($tmpFile);
+            throw new DataStoreException("Failed to atomically replace {$this->filename}");
         }
 
         $this->releaseLocks();
 
-        // After we rename file, SplFileObject still refers to old file, so we clear it
+        // After rename, SplFileObject still refers to the orphaned old inode.
         unset($this->file);
         $this->file = null;
 
@@ -260,24 +292,30 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      */
     protected function flush($item, bool $delete = false): void
     {
-        // Create and open temporary file for writing
-        $tmpFile = tempnam(sys_get_temp_dir(), uniqid() . '.tmp');
+        // Build the replacement file as a sibling of the destination so the
+        // final rename(2) stays on the same filesystem and is POSIX-atomic.
+        // Cross-fs renames degrade to copy+delete and lose atomicity.
+        $tmpFile = tempnam(dirname($this->filename), 'csv_');
         $tempHandler = fopen($tmpFile, 'w');
 
-        // Write headings
-        fputcsv($tempHandler, $this->columns, $this->csvDelimiter);
+        // Write headings — escape: '' = RFC 4180 mode
+        fputcsv($tempHandler, $this->columns, $this->csvDelimiter, '"', '');
 
         $identifier = $this->getIdentifier();
         $inserted = false;
+        $prevId = null; // tracked for shouldInsertItemBefore() hook
 
         foreach ($this->file as $index => $row) {
             // First row is headers.
             // If file has newline at the end than last line will be false (if no SplFileObject::READ_AHEAD flag).
-            if ($index === 0 || $row === false) {
+            if ($index === 0 || $row === false || $row === [null]) {
                 continue;
             }
 
             $row = $this->getTrueRow($row);
+            if ($row === null) {
+                continue;
+            }
 
             // Check an identifier; if equals and it doesn't need to delete - inserts new item
             if ($item[$identifier] == $row[$identifier]) {
@@ -286,26 +324,68 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
                 }
                 // anyway marks row as inserted
                 $inserted = true;
+            } elseif (
+                !$inserted
+                && !$delete
+                && $this->shouldInsertItemBefore($item, $row, $identifier, $prevId)
+            ) {
+                // Subclass-controlled in-order insertion (CsvIntId uses this
+                // to keep the file sorted by integer id).
+                $this->writeRow($tempHandler, $item);
+                $this->writeRow($tempHandler, $row);
+                $inserted = true;
             } else {
                 // Just it inserts row from source-file (copying)
                 $this->writeRow($tempHandler, $row);
             }
+
+            $prevId = $row[$identifier];
         }
 
         // If the same item was not found and changed inserts the new item as the last row in the file
-        if (!$inserted) {
+        if (!$inserted && !$delete) {
             $this->writeRow($tempHandler, $item);
         }
 
         fclose($tempHandler);
 
-        // Copies the temporary file to original.
-        if (!copy($tmpFile, $this->filename)) {
-            unlink($tmpFile);
-            throw new DataStoreException("Failed to write the results to a file.");
+        // Preserve original file mode across the atomic replace.
+        $originalMode = @fileperms($this->filename);
+        if ($originalMode !== false) {
+            @chmod($tmpFile, $originalMode & 0777);
         }
 
-        unlink($tmpFile);
+        // Atomic replace via rename(2). Same-filesystem guaranteed by tempnam
+        // in dirname() above.
+        if (!rename($tmpFile, $this->filename)) {
+            @unlink($tmpFile);
+            throw new DataStoreException("Failed to atomically replace {$this->filename}");
+        }
+
+        // After rename, the open SplFileObject still refers to the orphaned
+        // old inode. Drop it so subsequent operations re-open the new file.
+        unset($this->file);
+        $this->file = null;
+    }
+
+    /**
+     * Hook for subclasses to control in-order insertion during flush().
+     *
+     * Called once per source-file row that does NOT match the item's id and
+     * has not yet been inserted. Return true to write the item BEFORE the
+     * current row (and continue copying the rest of the file).
+     *
+     * Default: false (no in-order insertion; new items are appended).
+     * CsvIntId overrides this to maintain ascending-id order.
+     *
+     * @param array       $item       the item being created/updated
+     * @param array       $row        the current source-file row
+     * @param string      $identifier the primary key column name
+     * @param mixed|null  $prevId     id of the previously written row, or null at file start
+     */
+    protected function shouldInsertItemBefore(array $item, array $row, string $identifier, mixed $prevId): bool
+    {
+        return false;
     }
 
     /**
@@ -358,9 +438,13 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
         }
 
 
-        // A blank line in a CSV file will be returned as an array comprising a single null field unless using
-        // SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE, in which case empty lines are skipped.
-        $this->file->setFlags(SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE | SplFileObject::READ_CSV);
+        // READ_CSV alone — DROP_NEW_LINE was previously included, but it
+        // also strips embedded \n / \r\n inside quoted fields, corrupting
+        // multi-line values (e.g. "line1\nline2" was being read as
+        // "line1line2"). SKIP_EMPTY only works in combination with
+        // READ_AHEAD which we do not set, so it's effectively a no-op here;
+        // we filter [null] rows defensively in the iteration paths instead.
+        $this->file->setFlags(SplFileObject::READ_CSV);
         $this->file->setCsvControl($this->csvDelimiter, escape: '');
 
         return $this->file;
@@ -436,9 +520,19 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
 
             $row = $this->getTrueRow($row);
 
-            if ($row && $row[$this->getIdentifier()] == $id) {
+            // Skip blank/spurious rows (getTrueRow returns null for [null]
+            // and false-like inputs); only stop on a matching id.
+            if ($row === null) {
+                continue;
+            }
+
+            if ($row[$this->getIdentifier()] == $id) {
                 break;
             }
+
+            // Reset so the function returns null if we exit the loop without
+            // a match (otherwise the last non-matching row would leak out).
+            $row = null;
         }
 
         return $row;
@@ -481,12 +575,15 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
     {
         $this->enableReadMode();
 
-        // Not zero because first row is headers
+        // Start at -1 because the first iterated row is the header.
+        // Clamped at the end so a 0-byte file (no header, no data) reports 0
+        // instead of -1.
         $count = -1;
 
         foreach ($this->file as $row) {
             // If file has newline at the end than last line will be false (if no SplFileObject::READ_AHEAD flag).
-            if ($row === false) {
+            // [null] is the SplFileObject representation of an empty line.
+            if ($row === false || $row === [null]) {
                 continue;
             }
             $count++;
@@ -494,7 +591,7 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
 
         $this->releaseLocks();
 
-        return $count;
+        return max(0, $count);
     }
 
     /**
@@ -505,34 +602,57 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
      */
     public function getTrueRow($row)
     {
-        if ($row) {
-            array_walk(
-                $row,
-                function (&$item, $key): void {
-                    if ('' === $item) {
-                        $item = null;
-                    }
-
-                    if ($item === '""') {
-                        $item = '';
-                    }
-
-                    $isZeroFirstString = strlen($item) > 1 && str_starts_with($item, "0");
-
-                    if (is_numeric($item) && !$isZeroFirstString) {
-                        if (intval($item) == $item) {
-                            $item = intval($item);
-                        } else {
-                            $item = floatval($item);
-                        }
-                    }
-                }
-            );
-
-            return array_combine($this->columns, $row);
+        // [null] is what SplFileObject::READ_CSV emits for an empty line
+        // (since we no longer set DROP_NEW_LINE). Treat it as no-row.
+        if (!$row || $row === [null]) {
+            return null;
         }
 
-        return null;
+        // Ragged-row guard. array_combine() throws an untyped PHP ValueError
+        // on length mismatch — convert to a typed DataStoreException with
+        // enough context to debug the malformed file.
+        $expectedCount = count($this->columns);
+        $actualCount = count($row);
+        if ($actualCount !== $expectedCount) {
+            throw new DataStoreException(sprintf(
+                "Malformed CSV row in '%s': %d fields, expected %d columns. Row: %s",
+                $this->filename,
+                $actualCount,
+                $expectedCount,
+                json_encode($row, JSON_UNESCAPED_UNICODE),
+            ));
+        }
+
+        array_walk(
+            $row,
+            function (&$item, $key): void {
+                if ('' === $item) {
+                    $item = null;
+                }
+
+                if ($item === '""') {
+                    $item = '';
+                }
+
+                // Null short-circuits the rest of the coercion. strlen()
+                // and str_starts_with() emit PHP 8.1+ deprecations on null.
+                if ($item === null) {
+                    return;
+                }
+
+                $isZeroFirstString = strlen($item) > 1 && str_starts_with($item, "0");
+
+                if (is_numeric($item) && !$isZeroFirstString) {
+                    if (intval($item) == $item) {
+                        $item = intval($item);
+                    } else {
+                        $item = floatval($item);
+                    }
+                }
+            }
+        );
+
+        return array_combine($this->columns, $row);
     }
 
     /**
@@ -560,7 +680,9 @@ class CsvBase extends DataStoreAbstract implements DataSourceInterface
                 }
             }
         );
-        fputcsv($fHandler, $row, $this->csvDelimiter);
+        // escape: '' = RFC 4180 mode ("" doubling, no \" backslash escape).
+        // Symmetric with the read path, which uses setCsvControl(escape: '').
+        fputcsv($fHandler, $row, $this->csvDelimiter, '"', '');
     }
 
     /**

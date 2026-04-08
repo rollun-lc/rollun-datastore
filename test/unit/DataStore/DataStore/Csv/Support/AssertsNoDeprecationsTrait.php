@@ -30,15 +30,12 @@ trait AssertsNoDeprecationsTrait
      * declaration / framework-level deprecations that the trait should not
      * surface as test failures.
      *
+     * Empty by default. Previously held a filter for CsvIterator missing
+     * return types — fixed in M1, no longer needed.
+     *
      * @var string[]
      */
-    private array $ignoredDeprecationPatterns = [
-        // CsvIterator does not declare PHP 8.1 return types on its Iterator
-        // methods. Emitted at class declaration time, not by any CSV operation.
-        // The merge will fix this by adding proper return types (or
-        // #[\ReturnTypeWillChange] attributes) to CsvIterator.
-        '/^Return type of .+ should either be compatible with /',
-    ];
+    private array $ignoredDeprecationPatterns = [];
 
     /**
      * @after

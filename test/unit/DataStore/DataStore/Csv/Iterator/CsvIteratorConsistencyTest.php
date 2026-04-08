@@ -56,13 +56,7 @@ final class CsvIteratorConsistencyTest extends TestCase
 
     public function testReadAndIteratorAgreeOnRowWithEmbeddedQuote(): void
     {
-        self::markTestSkipped(
-            'merge-pending: CsvBase::read() uses fgetcsv with empty escape (RFC), '
-            . 'while CsvIterator opens its own SplFileObject in '
-            . 'Iterators/CsvIterator.php:39-41 with default \\ escape. '
-            . 'On a field containing a literal ", the two read paths return '
-            . 'different values. Merge plan: unify the two read paths.',
-        );
+        $this->startCapturingDeprecations();
 
         $csv = $this->makeEmptyCsv(['id', 'name']);
         $csv->create(['id' => 1, 'name' => 'foo "bar" baz']);
@@ -71,20 +65,13 @@ final class CsvIteratorConsistencyTest extends TestCase
         $viaIterator = $this->firstRowFromIterator($csv);
 
         self::assertEquals($viaRead, $viaIterator);
+
+        $this->assertNoDeprecationsCaptured();
     }
 
     public function testReadAndIteratorAgreeOnRowWithEmbeddedNewline(): void
     {
-        self::markTestSkipped(
-            'merge-pending: CsvBase::read() opens SplFileObject with DROP_NEW_LINE '
-            . '(CsvBase.php:363), which strips the embedded \n inside a quoted '
-            . 'field, returning "line1line2" instead of "line1\nline2". '
-            . 'CsvIterator opens its own SplFileObject WITHOUT DROP_NEW_LINE '
-            . '(Iterators/CsvIterator.php:40), so it returns the correct '
-            . '"line1\nline2". The two read paths therefore disagree on any '
-            . 'multi-line value. Merge plan: drop DROP_NEW_LINE in CsvBase, '
-            . 'unify the two read paths through ajgl/csv-rfc.',
-        );
+        $this->startCapturingDeprecations();
 
         $csv = $this->makeEmptyCsv(['id', 'name']);
         $csv->create(['id' => 1, 'name' => "line1\nline2"]);
@@ -93,6 +80,8 @@ final class CsvIteratorConsistencyTest extends TestCase
         $viaIterator = $this->firstRowFromIterator($csv);
 
         self::assertEquals($viaRead, $viaIterator);
+
+        $this->assertNoDeprecationsCaptured();
     }
 
     private function firstRowFromIterator(CsvBase $csv): ?array

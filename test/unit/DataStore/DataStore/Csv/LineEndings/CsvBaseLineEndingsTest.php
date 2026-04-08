@@ -63,9 +63,12 @@ final class CsvBaseLineEndingsTest extends TestCase
     public function testReadCrOnly(): void
     {
         self::markTestSkipped(
-            'merge-pending: PHP 8.1+ removed auto_detect_line_endings; '
-            . 'fgetcsv treats \r as part of field content. '
-            . 'Merge plan: add a stream filter or pre-normalize \r → \n on file open.',
+            'unsupported: Classic Mac (pre-OS X) CR-only line endings are not '
+            . 'supported. PHP 8.1+ removed auto_detect_line_endings, and fgetcsv '
+            . 'treats \r as part of field content. Implementing a stream filter '
+            . 'is significant code for a vanishingly rare format. Documented in '
+            . 'docs/index.md — users with CR-only files should pre-convert with '
+            . "tr '\\r' '\\n' < in.csv > out.csv before passing to CsvBase.",
         );
 
         $csv = new CsvBase(__DIR__ . '/cr_only.csv', ',');
@@ -88,29 +91,26 @@ final class CsvBaseLineEndingsTest extends TestCase
 
     public function testReadWithBomLf(): void
     {
-        self::markTestSkipped(
-            'merge-pending: UTF-8 BOM not stripped on read; first column header '
-            . 'becomes "\xEF\xBB\xBFid" instead of "id". '
-            . 'Merge plan: detect BOM in CsvBase::getHeaders and strip from first column name.',
-        );
+        $this->startCapturingDeprecations();
 
         $csv = new CsvBase(__DIR__ . '/with_bom_lf.csv', ',');
 
         self::assertSame(3, $csv->count());
         self::assertEquals(self::EXPECTED_ROWS, $this->collectAll($csv));
+
+        $this->assertNoDeprecationsCaptured();
     }
 
     public function testReadWithBomCrlf(): void
     {
-        self::markTestSkipped(
-            'merge-pending: UTF-8 BOM not stripped on read (same as testReadWithBomLf, '
-            . 'just verifies BOM handling is independent of line ending convention).',
-        );
+        $this->startCapturingDeprecations();
 
         $csv = new CsvBase(__DIR__ . '/with_bom_crlf.csv', ',');
 
         self::assertSame(3, $csv->count());
         self::assertEquals(self::EXPECTED_ROWS, $this->collectAll($csv));
+
+        $this->assertNoDeprecationsCaptured();
     }
 
     /**

@@ -20,7 +20,10 @@ class DownloadCsvHandler extends AbstractHandler
     public const HEADER = 'download';
     public const DELIMITER = ',';
     public const ENCLOSURE = '"';
-    public const ESCAPE_CHAR = '\\';
+    // Empty escape selects RFC 4180 mode in PHP fputcsv: embedded enclosures
+    // are doubled ("") instead of backslash-escaped (\"). Symmetric with the
+    // CsvBase read/write path which is also RFC mode.
+    public const ESCAPE_CHAR = '';
     public const LIMIT = 8000;
 
     /**

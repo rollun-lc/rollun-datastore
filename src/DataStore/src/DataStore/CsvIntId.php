@@ -26,78 +26,29 @@ class CsvIntId extends CsvBase
     }
 
     /**
-     * {@inheritdoc}
+     * Auto-sort hook: insert the new item before the first row whose id is
+     * greater. CsvBase::flush handles the rest of the rewrite/atomic replace
+     * machinery.
      */
-    protected function flush($item, bool $delete = false): void
+    protected function shouldInsertItemBefore(array $item, array $row, string $identifier, mixed $prevId): bool
     {
-        // Create and open temporary file for writing
-        $tmpFile = tempnam(sys_get_temp_dir(), uniqid() . '.tmp');
-        $tempHandler = fopen($tmpFile, 'w');
-
-        // Write headings
-        fputcsv($tempHandler, $this->columns, $this->csvDelimiter);
-        $identifier = $this->getIdentifier();
-        $inserted = false;
-        $prevId = -1;
-
-        foreach ($this->file as $index => $row) {
-            // First row is headers.
-            // If file has newline at the end than last line will be false (if no SplFileObject::READ_AHEAD flag).
-            if ($index === 0 || $row === false) {
-                continue;
-            }
-
-            $row = $this->getTrueRow($row);
-
-            // Check an identifier; if equals and it doesn't need to delete - inserts new item
-            if ($item[$identifier] == $row[$identifier]) {
-                if (!$delete) {
-                    $this->writeRow($tempHandler, $item);
-                }
-
-                // anyway marks row as inserted
-                $inserted = true;
-            } elseif ($item[$identifier] > $prevId && $item[$identifier] < $row[$identifier]) {
-                // inserting with auto sorting
-
-                if (!$delete) {
-                    $this->writeRow($tempHandler, $item);
-                }
-
-                $this->writeRow($tempHandler, $row);
-                $inserted = true;
-            } else {
-                $this->writeRow($tempHandler, $row);
-            }
-
-            $prevId = min($item[$identifier], $row[$identifier]);
-        }
-
-        // If the same item was not found and changed it inserts the new item as the last row in the file
-        if (!$inserted) {
-            $this->writeRow($tempHandler, $item);
-        }
-
-        fclose($tempHandler);
-
-        // Copies the original file to a temporary one.
-        if (!copy($tmpFile, $this->filename)) {
-            unlink($tmpFile);
-            throw new DataStoreException("Failed to write the results to a file.");
-        }
-
-        unlink($tmpFile);
+        return ($prevId === null || $item[$identifier] > $prevId)
+            && $item[$identifier] < $row[$identifier];
     }
 
     /**
-     * @return null|string
+     * Returns last_data_row_id + 1, or 1 on a header-only / empty file.
+     *
+     * @return int
      * @throws DataStoreException
      */
     protected function generatePrimaryKey()
     {
         $this->getFile();
-        $id = null;
+        $this->file->rewind();
+        static::skipColumnHeaders($this->file);
 
+        $id = null;
         while (!$this->file->eof()) {
             $row = $this->getTrueRow($this->file->fgetcsv($this->csvDelimiter));
 
