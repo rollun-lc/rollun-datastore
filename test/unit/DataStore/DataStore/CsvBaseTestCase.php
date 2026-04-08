@@ -7,6 +7,7 @@
 
 namespace rollun\test\unit\DataStore\DataStore;
 
+use Ajgl\Csv\Rfc\CsvRfcUtils;
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\CsvBase;
 use rollun\datastore\DataStore\DataStoreException;
@@ -642,10 +643,9 @@ abstract class CsvBaseTestCase extends TestCase
         $result = [];
 
         if (($handle = fopen($this->filename, 'r')) !== false) {
-            $columns = fgetcsv($handle, 1000, $delimiter);
-            flock($handle, LOCK_SH | LOCK_EX);
+            $columns = CsvRfcUtils::fGetCsv($handle, 1000, $delimiter);
 
-            while (($data = fgetcsv($handle, 1000, $delimiter)) !== false) {
+            while (($data = CsvRfcUtils::fGetCsv($handle, 1000, $delimiter)) !== false) {
                 if (intval($data[0]) === intval($id)) {
                     for ($i = 0; $i < count($columns); $i++) {
                         $result[$columns[$i]] = $data[$i];
@@ -664,10 +664,9 @@ abstract class CsvBaseTestCase extends TestCase
         $result = [];
 
         if (($handle = fopen($this->filename, 'r')) !== false) {
-            $columns = fgetcsv($handle, 1000, $this->getDelimiter());
-            flock($handle, LOCK_SH | LOCK_EX);
+            $columns = CsvRfcUtils::fGetCsv($handle, 1000, $this->getDelimiter());
 
-            while (($data = fgetcsv($handle, 1000, $this->getDelimiter())) !== false) {
+            while (($data = CsvRfcUtils::fGetCsv($handle, 1000, $this->getDelimiter())) !== false) {
                 for ($i = 0; $i < count($columns); $i++) {
                     $item[$columns[$i]] = $data[$i];
                 }
@@ -686,8 +685,12 @@ abstract class CsvBaseTestCase extends TestCase
     protected function create($items): void
     {
         if (($handle = fopen($this->filename, 'a')) !== false) {
-            flock($handle, LOCK_SH | LOCK_EX);
-            fputcsv($handle, $items, $this->getDelimiter());
+            // Native fputcsv stringifies non-string fields (int id etc.).
+            // CsvRfcUtils::fPutCsv does not — it crashes inside strpos() on
+            // non-string values. Pass escape: '' for PHP 8.4 forward compat;
+            // for the simple ASCII test data we seed here, the byte output is
+            // identical to RFC mode anyway.
+            fputcsv($handle, $items, $this->getDelimiter(), '"', '');
             fclose($handle);
         }
     }
