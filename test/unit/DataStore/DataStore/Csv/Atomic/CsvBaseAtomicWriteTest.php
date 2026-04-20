@@ -102,9 +102,9 @@ final class CsvBaseAtomicWriteTest extends TestCase
         $csv = new CsvBase($this->filename, ',');
         $csv->update(['id' => 2, 'name' => 'updated']);
 
-        self::assertEquals(['id' => 1, 'name' => 'foo'],     $csv->read(1));
+        self::assertEquals(['id' => 1, 'name' => 'foo'], $csv->read(1));
         self::assertEquals(['id' => 2, 'name' => 'updated'], $csv->read(2));
-        self::assertEquals(['id' => 3, 'name' => 'baz'],     $csv->read(3));
+        self::assertEquals(['id' => 3, 'name' => 'baz'], $csv->read(3));
 
         $this->assertNoDeprecationsCaptured();
     }

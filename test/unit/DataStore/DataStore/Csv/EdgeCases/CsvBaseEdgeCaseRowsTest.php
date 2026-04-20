@@ -96,7 +96,7 @@ final class CsvBaseEdgeCaseRowsTest extends TestCase
         $csv = new CsvBase($this->filename, ',');
 
         $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessageMatches('/Malformed CSV row .+ 2 fields, expected 3 columns/');
+        $this->expectExceptionMessageMatches('/Malformed CSV row:.* 2 fields, expected 3 columns/');
 
         $csv->read(1);
     }
@@ -108,7 +108,7 @@ final class CsvBaseEdgeCaseRowsTest extends TestCase
         $csv = new CsvBase($this->filename, ',');
 
         $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessageMatches('/Malformed CSV row .+ 3 fields, expected 2 columns/');
+        $this->expectExceptionMessageMatches('/Malformed CSV row:.* 3 fields, expected 2 columns/');
 
         $csv->read(1);
     }

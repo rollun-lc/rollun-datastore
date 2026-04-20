@@ -108,7 +108,7 @@ final class CsvBaseUtf8RoundtripTest extends TestCase
         $csv->update(['id' => 1, 'name' => 'новое']);
 
         $row = $csv->read(1);
-        self::assertSame('новое',  $row['name']);
+        self::assertSame('новое', $row['name']);
         self::assertSame('хорошо', $row['note']);
 
         $this->assertNoDeprecationsCaptured();
