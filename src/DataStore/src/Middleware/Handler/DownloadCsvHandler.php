@@ -53,13 +53,19 @@ class DownloadCsvHandler extends AbstractHandler
         $fileName = explode("/", $request->getUri()->getPath());
         $fileName = array_pop($fileName) . '.csv';
 
-        /** @var Query $rqlQuery */
-        $rqlQuery = $request->getAttribute('rqlQueryObject');
+        // Clone the RQL query before mutating it — the caller's object is
+        // shared middleware state, and writing our own limit/offset into it
+        // would leak pagination state back out to whoever dispatched the
+        // request (cache, subsequent handlers, retries, etc).
+        /** @var Query $callerQuery */
+        $callerQuery = $request->getAttribute('rqlQueryObject');
+        $rqlQuery = clone $callerQuery;
 
         // create csv file
         $file = fopen('php://temp', 'w');
 
         $offset = 0;
+        $headerWritten = false;
 
         $items = [1];
         while (count($items) > 0) {
@@ -67,6 +73,13 @@ class DownloadCsvHandler extends AbstractHandler
             $items = $dataStore->query($rqlQuery);
 
             foreach ($items as $line) {
+                if (!$headerWritten) {
+                    // Emit column names on the first data row we see. Rows
+                    // are associative arrays keyed by column name, so the
+                    // header is array_keys() of the first non-empty batch.
+                    fputcsv($file, array_keys($line), self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
+                    $headerWritten = true;
+                }
                 fputcsv($file, $line, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
             }
 

@@ -7,6 +7,8 @@ namespace rollun\test\functional\DataStore\Middleware\Handler;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Diactoros\Uri;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use rollun\datastore\DataStore\CsvBase;
 use rollun\datastore\Middleware\Handler\DownloadCsvHandler;
 use rollun\datastore\DataStore\DbTable;
@@ -60,9 +62,12 @@ final class DownloadCsvHandlerTest extends TestCase
 
     public function testHandleBuildsCsvAndSetsHeaders(): void
     {
+        // DataStoreInterface::query() returns rows as associative arrays
+        // keyed by column name — the handler uses array_keys() of the first
+        // row to emit the CSV column header.
         $dbTable = $this->mockDbTable([
-            [[1, 'a'], [2, 'b']],
-            [[3, 'c'], [4, 'd']],
+            [['id' => 1, 'name' => 'a'], ['id' => 2, 'name' => 'b']],
+            [['id' => 3, 'name' => 'c'], ['id' => 4, 'name' => 'd']],
             [],
         ]);
 
@@ -84,29 +89,100 @@ final class DownloadCsvHandlerTest extends TestCase
         self::assertStringContainsString('filename=orders.csv', $cd);
 
         $csv = (string) $response->getBody();
-        self::assertSame("1,a\n2,b\n3,c\n4,d\n", $csv);
+        self::assertSame("id,name\n1,a\n2,b\n3,c\n4,d\n", $csv);
         self::assertSame((string) strlen($csv), $response->getHeaderLine('Content-Length'));
     }
 
-    public function testHandleMutatesOriginalRqlLimit(): void
+    public function testHandleEmitsHeaderRowOnFirstBatchOnly(): void
     {
+        // Two batches — header appears exactly once, before the first row.
+        $dbTable = $this->mockDbTable([
+            [['id' => 1, 'name' => 'first']],
+            [['id' => 2, 'name' => 'second']],
+            [],
+        ]);
+
+        $response = $this->makeHandler($dbTable)->handle($this->csvRequest());
+        $body = (string) $response->getBody();
+
+        self::assertSame("id,name\n1,first\n2,second\n", $body);
+        self::assertSame(1, substr_count($body, "id,name\n"));
+    }
+
+    public function testHandleOmitsHeaderWhenNoRowsAreReturned(): void
+    {
+        // Empty dataset → empty body. We can't fabricate a header without at
+        // least one row to infer the column names from.
         $dbTable = $this->mockDbTable([[]]);
-        $handler = $this->makeHandler($dbTable);
+
+        $response = $this->makeHandler($dbTable)->handle($this->csvRequest());
+
+        self::assertSame('', (string) $response->getBody());
+    }
+
+    public function testHandleDoesNotMutateCallerRqlQuery(): void
+    {
+        // Mutating the caller's Query object would leak pagination state back
+        // into shared middleware — the handler must work on a clone.
+        $dbTable = $this->mockDbTable([[['id' => 1, 'name' => 'x']], []]);
+
+        $query = new Query();
+        $originalLimit = $query->getLimit(); // null
+
+        (new class ($dbTable) extends DownloadCsvHandler {
+            public function __construct($ds)
+            {
+                $this->dataStore = $ds;
+            }
+        })->handle(
+            (new ServerRequest())
+                ->withMethod('GET')
+                ->withUri(new Uri('https://example.com/orders'))
+                ->withHeader('download', 'csv')
+                ->withAttribute('rqlQueryObject', $query),
+        );
+
+        self::assertSame($originalLimit, $query->getLimit());
+    }
+
+    public function testHandleOverridesClonedQueryLimit(): void
+    {
+        // The handler still sets its own pagination limit, but it does so on
+        // a CLONE of the caller's query (see testHandleDoesNotMutateCaller-
+        // RqlQuery). Here we verify the clone IS paginated with LIMIT/0.
+        $dbTable = $this->mockDbTable([[]]);
+        $handler = new class ($dbTable) extends DownloadCsvHandler {
+            public ?LimitNode $observedLimit = null;
+
+            public function __construct($ds)
+            {
+                $this->dataStore = $ds;
+            }
+
+            public function handle(ServerRequestInterface $request): ResponseInterface
+            {
+                $response = parent::handle($request);
+                /** @var Query $caller */
+                $caller = $request->getAttribute('rqlQueryObject');
+                $this->observedLimit = $caller->getLimit();
+                return $response;
+            }
+        };
 
         $query = new Query();
         $query->setLimit(new LimitNode(10, 30));
 
-        $req = (new ServerRequest())
-            ->withMethod('GET')
-            ->withUri(new Uri('https://example.com/orders'))
-            ->withHeader('download', 'csv')
-            ->withAttribute('rqlQueryObject', $query);
+        $handler->handle(
+            (new ServerRequest())
+                ->withMethod('GET')
+                ->withUri(new Uri('https://example.com/orders'))
+                ->withHeader('download', 'csv')
+                ->withAttribute('rqlQueryObject', $query),
+        );
 
-        $handler->handle($req);
-
-        $limit = $query->getLimit();
-        self::assertSame(DownloadCsvHandler::LIMIT, $limit->getLimit());
-        self::assertSame(0, $limit->getOffset());
+        // The caller's query must be untouched.
+        self::assertSame(10, $handler->observedLimit->getLimit());
+        self::assertSame(30, $handler->observedLimit->getOffset());
     }
 
     public function testHandleEscapesFieldContainingDelimiter(): void
@@ -114,14 +190,14 @@ final class DownloadCsvHandlerTest extends TestCase
         $this->startCapturingDeprecations();
 
         $dbTable = $this->mockDbTable([
-            [['1', 'a,b,c']],
+            [['id' => '1', 'name' => 'a,b,c']],
             [],
         ]);
 
         $response = $this->makeHandler($dbTable)->handle($this->csvRequest());
         $body = (string) $response->getBody();
 
-        self::assertSame("1,\"a,b,c\"\n", $body);
+        self::assertSame("id,name\n1,\"a,b,c\"\n", $body);
 
         $this->assertNoDeprecationsCaptured();
     }
@@ -131,14 +207,14 @@ final class DownloadCsvHandlerTest extends TestCase
         $this->startCapturingDeprecations();
 
         $dbTable = $this->mockDbTable([
-            [['1', 'foo "bar" baz']],
+            [['id' => '1', 'name' => 'foo "bar" baz']],
             [],
         ]);
 
         $response = $this->makeHandler($dbTable)->handle($this->csvRequest());
         $body = (string) $response->getBody();
 
-        self::assertSame("1,\"foo \"\"bar\"\" baz\"\n", $body);
+        self::assertSame("id,name\n1,\"foo \"\"bar\"\" baz\"\n", $body);
 
         $this->assertNoDeprecationsCaptured();
     }
@@ -148,7 +224,7 @@ final class DownloadCsvHandlerTest extends TestCase
         $this->startCapturingDeprecations();
 
         $dbTable = $this->mockDbTable([
-            [['1', "line1\nline2"]],
+            [['id' => '1', 'name' => "line1\nline2"]],
             [],
         ]);
 
@@ -157,7 +233,7 @@ final class DownloadCsvHandlerTest extends TestCase
 
         // fputcsv quotes the value when it contains a newline. The exact byte
         // shape (\n vs \r\n inside the field) is what we are locking down here.
-        self::assertSame("1,\"line1\nline2\"\n", $body);
+        self::assertSame("id,name\n1,\"line1\nline2\"\n", $body);
 
         $this->assertNoDeprecationsCaptured();
     }
@@ -167,7 +243,7 @@ final class DownloadCsvHandlerTest extends TestCase
         $this->startCapturingDeprecations();
 
         $dbTable = $this->mockDbTable([
-            [['1', 'Привет мир']],
+            [['id' => '1', 'name' => 'Привет мир']],
             [],
         ]);
 
@@ -175,11 +251,10 @@ final class DownloadCsvHandlerTest extends TestCase
         $body = (string) $response->getBody();
 
         // Lock down byte-exact preservation of the Cyrillic content. Whether
-        // PHP's fputcsv decides to wrap the field in "..." is implementation-
-        // specific (and observed to vary across PHP versions for fields with
-        // non-ASCII bytes). The contract we care about is "no encoding loss".
+        // PHP's fputcsv wraps the field in "..." is implementation-specific
+        // across PHP versions for fields with non-ASCII bytes.
         self::assertStringContainsString('Привет мир', $body);
-        self::assertStringStartsWith('1,', $body);
+        self::assertStringStartsWith("id,name\n1,", $body);
 
         $this->assertNoDeprecationsCaptured();
     }
