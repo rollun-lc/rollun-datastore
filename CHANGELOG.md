@@ -54,8 +54,19 @@ in the separate `rollun-files` package. Full updated contract:
 - `Iterators\CsvIterator` and `CsvBase::read` now use the same RFC escape mode,
   so they return identical values for any well-formed input. Previously the
   iterator and the direct read path diverged on quoted fields.
-- `DownloadCsvHandler` writes files in RFC mode too (was hardcoded to legacy
-  backslash escape via `ESCAPE_CHAR = '\\'`).
+- `DownloadCsvHandler` writes files in RFC mode too. **BC note:** the public
+  constant `DownloadCsvHandler::ESCAPE_CHAR` changed value from `'\\'` to
+  `''` (empty string selects PHP's RFC 4180 fputcsv mode). Consumers reading
+  this constant to drive their own `fputcsv()` calls will get different byte
+  output for fields that contain literal `"` characters.
+- `DownloadCsvHandler` now emits a CSV header row (column names) before the
+  first data row. Previously the output had no header, which was unusable
+  in Excel / Google Sheets. The header is derived from `array_keys()` of
+  the first row returned by the underlying datastore. Callers that
+  post-processed the header-less output must update their parsers.
+- `DownloadCsvHandler` no longer mutates the caller's RQL query object. It
+  clones the query before setting its own pagination limit, so middleware
+  sharing the same query across handlers is no longer polluted.
 - 0-byte CSV files are handled gracefully (`count()` returns `0` instead of
   `-1`; `read()` returns `null`).
 - `CsvIntId::generatePrimaryKey` rewinds explicitly and skips the header,
@@ -86,3 +97,59 @@ Run `php bin/migrate-csv-escape.php <file.csv>` once per legacy CSV file that
 contains literal `"` characters in any field. Supports `--delimiter=,` and
 `--dry-run`. The script writes the converted content atomically and preserves
 the original file's mode.
+
+**Operator note:** the migration script does not have an automated test
+suite. For small deployments (10-20 files), manual verification via
+`--dry-run` followed by an inspect-diff workflow is recommended:
+
+```bash
+# 1. Count rows that need migration (those containing literal quotes).
+php bin/migrate-csv-escape.php data/file.csv --dry-run
+
+# 2. Migrate, preserving a backup for sanity comparison.
+cp data/file.csv data/file.csv.bak
+php bin/migrate-csv-escape.php data/file.csv
+
+# 3. Spot-check: the row count must match, and reads via the new CsvBase
+#    must produce the same logical content as reads via the old reader on
+#    the backup.
+```
+
+### Known limitations (12.0.0)
+
+These are deliberate non-goals for this release, documented so operators know
+what to avoid:
+
+- **Multi-process concurrent writers to the same CSV file.** The new atomic
+  `rename(2)`-based flush protects against crash mid-write but does NOT
+  guarantee strict cross-process write serialization, because POSIX `flock`
+  is attached to the inode, and `rename()` swaps the inode. In practice this
+  is only observable if multiple long-running processes (e.g. cron + web
+  workers) write the same file simultaneously — the standard PHP-FPM
+  per-request lifecycle is unaffected. If you need strict cross-process
+  serialization, add an external lockfile at the application layer. A
+  lockfile-based serialization hook in CsvBase itself is planned for a
+  future minor release if demand emerges.
+
+- **CSV injection / formula injection in exported files.** Cells whose
+  value begins with `=`, `+`, `-`, `@`, `\t`, or `\r` are interpreted as
+  formulas when the CSV is opened in Excel / LibreOffice / Google Sheets
+  (OWASP "CSV Injection", CWE-1236). `CsvBase` and `DownloadCsvHandler`
+  do not sanitize on ingest or export. If you serve CSV downloads to
+  untrusted users (public URLs, unauthenticated endpoints, sharing
+  outside your organization), add a pre-export sanitizer at your
+  application layer that prefixes such cells with a single quote.
+  Within-team and authenticated-internal use cases are considered
+  in-scope for the current design.
+
+- **Classic Mac (CR-only) line endings** are explicitly unsupported —
+  PHP 8.1+ removed `auto_detect_line_endings` and our reader is built on
+  `fgetcsv`. Pre-convert with `tr '\r' '\n' < in.csv > out.csv`.
+
+- **Encodings other than UTF-8.** Pre-convert via `iconv` or
+  `mb_convert_encoding` before opening the file with `CsvBase`.
+
+- **Unbounded response size in `DownloadCsvHandler`.** Exports stream
+  through `php://temp` (spills to disk >2 MB) with no row-count cap. For
+  datasets in the millions of rows, add a row budget at the routing /
+  handler layer.

@@ -262,8 +262,14 @@ var_dump($csvBase->read(1)); // ['id' => 1, 'name' => 'foo']
 ###### Ragged rows
 
 Если фактическое количество полей в строке не совпадает с количеством столбцов,
-`getTrueRow()` бросает `DataStoreException` с контентом строки и счётчиками. Это
-явная ошибка — раньше PHP бросал untyped `ValueError` из `array_combine`.
+`getTrueRow()` бросает `DataStoreException` с числом полученных и ожидаемых
+колонок (без содержимого строки — во избежание утечки PII в логи). Это явная
+ошибка — раньше PHP бросал untyped `ValueError` из `array_combine`.
+
+Как следствие, `read()`, `count()`, `update()`, `delete()` и итерация падают
+на первой битой строке. Файл в этот момент не модифицируется (rename до
+исключения не доходит), так что достаточно исправить источник данных и
+повторить операцию.
 
 ###### `CsvIntId` — отсортированный целочисленный PK
 
@@ -271,11 +277,42 @@ var_dump($csvBase->read(1)); // ['id' => 1, 'name' => 'foo']
 был отсортирован по PK ASC. Конструктор валидирует этот инвариант через
 `checkIntegrityData()` и бросает `DataStoreException` на несортированном файле.
 Вставка нового item происходит в правильную позицию, чтобы сохранить порядок —
-это поведение управляется хуком `shouldInsertItemBefore` (можно переопределить
-для других схем сортировки).
+это поведение управляется хуком `shouldInsertItemBefore` (см. ниже).
 
 `generatePrimaryKey()` возвращает `last_id + 1`, или `1` для пустого/header-only
 файла.
+
+###### `shouldInsertItemBefore` — точка расширения для сортировки
+
+`CsvBase` вызывает метод-хук один раз на каждую строку, которая не совпадает с
+id вставляемого item'а (пока вставка ещё не произошла). Возвращение `true`
+означает «записать новый item в результирующий файл ПЕРЕД текущей строкой».
+Поведение по умолчанию (`CsvBase::shouldInsertItemBefore`) всегда возвращает
+`false` — item дописывается в конец. `CsvIntId` переопределяет хук для
+поддержки возрастающего int-PK.
+
+Сигнатура:
+```php
+protected function shouldInsertItemBefore(
+    array $item,
+    array $row,
+    string $identifier,
+    mixed $prevId       // null для первой строки; иначе id предыдущей обработанной
+): bool
+```
+
+Если вам нужен, например, лексикографический порядок или порядок по другому
+полю — унаследуйтесь от `CsvBase` и переопределите хук:
+
+```php
+class AlphabeticalCsv extends CsvBase
+{
+    protected function shouldInsertItemBefore(array $item, array $row, string $id, mixed $prevId): bool
+    {
+        return strcmp($item['name'], $row['name']) < 0;
+    }
+}
+```
 
 ###### Миграция со старого формата (legacy backslash escape)
 
