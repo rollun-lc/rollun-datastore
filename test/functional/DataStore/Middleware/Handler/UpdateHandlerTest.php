@@ -16,7 +16,7 @@ class UpdateHandlerTest extends BaseHandlerTest
 {
     protected function createObject(DataStoresInterface $dataStore = null)
     {
-        return new UpdateHandler(is_null($dataStore) ? $this->createDataStoreEmptyMock() : $dataStore);
+        return new UpdateHandler($dataStore ?? $this->createDataStoreEmptyMock());
     }
 
     public function methodProvider()

@@ -202,39 +202,138 @@ var_dump($dbTable->read(1)); // ['id' => '1', 'name' => 'foo']
 
 ##### 2. `CsvBase`
 
-Для работы з CsvBase нужно указать путь к существующему файлу (или имя файла, который находиться в временной системной
-папке) и разделитель.
-
-Пример:
+Для работы с `CsvBase` нужно указать путь к существующему файлу (или имя файла,
+который находится во временной системной папке) и разделитель.
 
 ```php
 <?php
 
 use rollun\datastore\DataStore\CsvBase;
 
-error_reporting(E_ALL ^ E_USER_DEPRECATED ^ E_DEPRECATED);
-
-chdir(dirname(__DIR__));
 require 'vendor/autoload.php';
 
 $filename = tempnam(sys_get_temp_dir(), 'csv');
 
-// Add header row
+// Заголовки записываются один раз — при первом open(), либо вручную:
 $file = fopen($filename, 'w');
-fputcsv($file, ['id', 'name']);
+fputcsv($file, ['id', 'name'], ',', '"', ''); // escape: '' = RFC 4180
 fclose($file);
 
-// Create datastore
 $csvBase = new CsvBase($filename, ',');
 
-// Create record
-$csvBase->create([
-    'id' => '1',
-    'value' => 'name'
-]);
+$csvBase->create(['id' => 1, 'name' => 'foo']);
 
-var_dump($csvBase->read(1)); // ['id' => '1', 'name' => 'foo']
+var_dump($csvBase->read(1)); // ['id' => 1, 'name' => 'foo']
 ```
+
+###### Формат файла
+
+Начиная с 12.0.0 `CsvBase` придерживается **RFC 4180** на чтение и на запись:
+
+| Аспект | Поведение |
+|---|---|
+| **Эскейп кавычек** | RFC `""` (удвоение). Пишет и читает только этот формат. |
+| **Разделитель строк (write)** | `\n` (LF). |
+| **Разделитель строк (read)** | LF, CRLF, и смешанные LF/CRLF в одном файле. **CR-only** (старый Mac до OS X) **не поддерживается** — pre-конвертировать через `tr '\r' '\n' < in.csv > out.csv`. |
+| **Embedded newline в quoted поле** | Сохраняется byte-exact в обе стороны. `"line1\nline2"` и `"line1\r\nline2"` корректно читаются и пишутся. |
+| **UTF-8 BOM** | Автоматически срубается с первого заголовка колонки на чтении (Excel-Win и многие другие генераторы добавляют BOM). |
+| **Кодировка** | Только UTF-8. Файлы в Windows-1251, ISO-8859 и т.п. должны быть pre-конвертированы (`iconv` / `mb_convert_encoding`) перед открытием. |
+| **Атомарность записи** | Все мутации (`create`, `update`, `delete`, `deleteAll`) идут через sibling-temp + `rename(2)`. На POSIX это атомарно, если файл и его директория на одной FS. Перерыв процесса посреди записи не повреждает оригинал. Mode оригинала сохраняется. |
+| **Конкурентность** | `flock(LOCK_SH)` на чтении, `flock(LOCK_EX)` на записи, retry с timeout. |
+| **Пустой файл (0 байт)** | Принимается. `count() === 0`, `read($id) === null`. Первый `create()` инициализирует столбцы из payload. |
+
+###### Контракт типов в строках
+
+`CsvBase::getTrueRow()` приводит значения при чтении (см. также
+[typecasting.md](typecasting.md#csvbase-round-trip)):
+
+| В файле | На выходе `read()` |
+|---|---|
+| пустое поле (`,,`) | `null` |
+| `""` (две литеральных кавычки) | `''` (пустая строка) |
+| `42` | `42` (`int`) |
+| `3.14` | `3.14` (`float`) |
+| `0123` (ведущий ноль) | `'0123'` (`string` — для ZIP, телефонов) |
+| любое другое строковое значение | строка как есть |
+
+При записи `true → 1`, `false → 0`, `'' → ""` (сохраняется как удвоенная кавычка,
+чтобы на read отличить от `null`).
+
+###### Ragged rows
+
+Если фактическое количество полей в строке не совпадает с количеством столбцов,
+`getTrueRow()` бросает `DataStoreException` с числом полученных и ожидаемых
+колонок (без содержимого строки — во избежание утечки PII в логи). Это явная
+ошибка — раньше PHP бросал untyped `ValueError` из `array_combine`.
+
+Как следствие, `read()`, `count()`, `update()`, `delete()` и итерация падают
+на первой битой строке. Файл в этот момент не модифицируется (rename до
+исключения не доходит), так что достаточно исправить источник данных и
+повторить операцию.
+
+###### `CsvIntId` — отсортированный целочисленный PK
+
+Подкласс `CsvBase`, который требует, чтобы первичный ключ был `int` и чтобы файл
+был отсортирован по PK ASC. Конструктор валидирует этот инвариант через
+`checkIntegrityData()` и бросает `DataStoreException` на несортированном файле.
+Вставка нового item происходит в правильную позицию, чтобы сохранить порядок —
+это поведение управляется хуком `shouldInsertItemBefore` (см. ниже).
+
+`generatePrimaryKey()` возвращает `last_id + 1`, или `1` для пустого/header-only
+файла.
+
+###### `shouldInsertItemBefore` — точка расширения для сортировки
+
+`CsvBase` вызывает метод-хук один раз на каждую строку, которая не совпадает с
+id вставляемого item'а (пока вставка ещё не произошла). Возвращение `true`
+означает «записать новый item в результирующий файл ПЕРЕД текущей строкой».
+Поведение по умолчанию (`CsvBase::shouldInsertItemBefore`) всегда возвращает
+`false` — item дописывается в конец. `CsvIntId` переопределяет хук для
+поддержки возрастающего int-PK.
+
+Сигнатура:
+```php
+protected function shouldInsertItemBefore(
+    array $item,
+    array $row,
+    string $identifier,
+    mixed $prevId       // null для первой строки; иначе id предыдущей обработанной
+): bool
+```
+
+Если вам нужен, например, лексикографический порядок или порядок по другому
+полю — унаследуйтесь от `CsvBase` и переопределите хук:
+
+```php
+class AlphabeticalCsv extends CsvBase
+{
+    protected function shouldInsertItemBefore(array $item, array $row, string $id, mixed $prevId): bool
+    {
+        return strcmp($item['name'], $row['name']) < 0;
+    }
+}
+```
+
+###### Миграция со старого формата (legacy backslash escape)
+
+Версии до 12.0.0 писали CSV через нативный `fputcsv` с PHP-default escape `\\`,
+получая `"foo \"bar\" baz"`. Новый reader работает в RFC-режиме и интерпретирует
+`\"` как литеральный `\` + закрывающую кавычку — старые файлы с литеральными
+кавычками внутри полей читаются мангленно.
+
+Для миграции есть одноразовый скрипт:
+
+```bash
+# Сначала прогон без записи — посмотреть, сколько строк затронет:
+php bin/migrate-csv-escape.php data/items.csv --dry-run
+
+# И сама конвертация (атомарно, mode оригинала сохраняется):
+php bin/migrate-csv-escape.php data/items.csv
+```
+
+Поддерживается `--delimiter=,` для не-default разделителей. Файлы, в которых
+никогда не было литеральных `"` в значениях, мигрировать не нужно — их байты
+идентичны RFC-формату.
 
 ##### 3. `HttpClient`
 
@@ -1034,34 +1133,11 @@ class DataStoreMasterListener extends AbstractAspectListener
 }
 ```
 
-#### FileObject
-Библиотека предоставляет объект (расширяет SplFileObject) для работы с файлами. Преимущества данного объекта в том, что здесь реализованы блокировки файлов, что существенно упростят работу.
-Пример использования:
-```php
-<?php
-use rollun\files\FileObject;
-
-$fileObject = new FileObject('some-file.csv');
-$fileObject->fwriteWithCheck('012345');
-$fileObject->moveSubStr(3, 1);
-$fileObject->fseek(0);
-$actual = $fileObject->fread(100); // '0345'
-``` 
-Для более подробного изучения ознакомьтесь с юнит [тестами](../test/unit/Files/FileObject).
-
-#### CsvFileObject, CsvFileObjectWithPrKey
-Библиотека предоставляет объекты для работы с csv файлами. CsvFileObjectWithPrKey работает с файлами используя разные стратегии. По умолчанию используется стратегия бинарного поиска, что в разы ускоряет поиск нужной нам строки.
-Пример использования:
-```php
-<?php
-use rollun\files\Csv\CsvFileObjectWithPrKey;
-
-$fileObject = new CsvFileObjectWithPrKey('some-file.csv');
-$result = $fileObject->getRowById('1'); // array
-
-``` 
-Для более подробного изучения ознакомьтесь с юнит [тестами](../test/unit/Files/CsvFileObject).
-
-До версии "6.6.1" есть баг в классе CsvBinaryStrategy (которы отвечает за бинарный поиск), из-за которой некорректно 
-работал поиск (если запускать его больше одного раза) и добавление новых строк. Причина в том, что после поиска не
-обнулялось поле $uniqueIterations и влияло на результаты следующих поисков. 
+<!--
+  Sections "FileObject" and "CsvFileObject / CsvFileObjectWithPrKey" were
+  removed in 12.0.0. Both classes lived in the rollun-files package, which was
+  split out from rollun-datastore in 11.0.0. The CSV functionality (RFC 4180
+  compliance, BOM handling, embedded-newline support, atomicity) is now
+  consolidated in CsvBase / CsvIntId — see "##### 2. CsvBase" above.
+-->
+ 
