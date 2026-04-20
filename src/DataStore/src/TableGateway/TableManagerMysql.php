@@ -402,7 +402,7 @@ class TableManagerMysql
      */
     protected function create($tableName, $tableConfig = null)
     {
-        $tableConfig = is_null($tableConfig) ? $tableName : $tableConfig;
+        $tableConfig ??= $tableName;
         $createTable = $this->createCreateTable($tableName, $this->getTableConfig($tableConfig));
         $sql = $this->getCreateTableSql($createTable);
 

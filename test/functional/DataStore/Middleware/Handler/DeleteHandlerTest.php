@@ -16,7 +16,7 @@ class DeleteHandlerTest extends BaseHandlerTest
 {
     protected function createObject(DataStoresInterface $dataStore = null)
     {
-        return new DeleteHandler(is_null($dataStore) ? $this->createDataStoreEmptyMock() : $dataStore);
+        return new DeleteHandler($dataStore ?? $this->createDataStoreEmptyMock());
     }
 
     public function methodProvider()

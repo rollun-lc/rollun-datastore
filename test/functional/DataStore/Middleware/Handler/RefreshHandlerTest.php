@@ -20,7 +20,7 @@ class RefreshHandlerTest extends BaseHandlerTest
 {
     protected function createObject(DataStoresInterface $dataStore = null)
     {
-        return new RefreshHandler(is_null($dataStore) ? $this->createDataStoreEmptyMock() : $dataStore);
+        return new RefreshHandler($dataStore ?? $this->createDataStoreEmptyMock());
     }
 
     public function methodProvider()
