@@ -335,6 +335,31 @@ php bin/migrate-csv-escape.php data/items.csv
 никогда не было литеральных `"` в значениях, мигрировать не нужно — их байты
 идентичны RFC-формату.
 
+###### Структура тестов
+
+Тесты на CSV в `test/unit/DataStore/DataStore/Csv/` сгруппированы по тому, что
+именно проверяет каждый набор. Это позволяет при правке кода прогнать только
+релевантную группу.
+
+| Папка / namespace | Что проверяет | Идёт через write-путь датастора? |
+| --- | --- | --- |
+| `Csv\Import\LineEndings` | Парсинг готовых файлов с разными переводами строк (LF, CRLF, mixed, BOM+LF, BOM+CRLF). Чистый импорт. | нет |
+| `Csv\Import\LineBreak` | Парсинг файлов с/без `\n` на последней строке. Чистый импорт. | нет |
+| `Csv\Import\EdgeCases` | Граничные случаи парсера: header-only / пустой файл / blank line / ragged row. Байты пишутся напрямую через `file_put_contents`. | нет |
+| `Csv\Quoted` | Кавычки и escape: read-фикстуры (delimiter в поле, RFC `""`, embedded LF/CRLF) **и** write→read round-trip для тех же сценариев. | да (round-trip) |
+| `Csv\Encoding` | UTF-8 round-trip (Кириллица, CJK, 4-байтовые emoji), включая update-цикл. | да (round-trip) |
+| `Csv\Types` | Контракт приведения типов: `null` ↔ пустая ячейка, `''` ↔ `""""`, `bool` → `int`, числовые строки, leading-zero. | да (round-trip) |
+| `Csv\Iterator` | Согласованность `read()` и `getIterator()` — обе ветки должны отдавать одинаковые значения. | да (round-trip) |
+| `Csv\Atomic` | Атомарность `flush()`: rename(2), сохранение файлового mode, отсутствие tmp-мусора. | да (поведение) |
+| `Csv\IntId` | Поведение `CsvIntId`: вставка с сохранением сортировки, `generatePrimaryKey`, `checkIntegrityData`. | да (поведение) |
+| `Csv\Factory` | DI-фабрика `CsvAbstractFactory`. | — |
+| `Csv\Support` | `AssertsNoDeprecationsTrait` — общая инфраструктура для всех групп. | — |
+
+Правило разделения: набор попадает в `Csv\Import\*`, только если он читает
+байты, которые сам не клал через датастор (read-фикстура или `file_put_contents`).
+Всё, что хотя бы один тест в файле прогоняет через `$csv->create()` /
+`$csv->update()` / `$csv->delete()`, остаётся снаружи `Import\*`.
+
 ##### 3. `HttpClient`
 
 Для работы с HttpClient нужен [Zend\Http\Client](https://framework.zend.com/manual/2.4/en/modules/zend.http.client.html)

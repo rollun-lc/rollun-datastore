@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace rollun\test\unit\DataStore\DataStore\Csv\LineEndings;
+namespace rollun\test\unit\DataStore\DataStore\Csv\Import\LineEndings;
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\CsvBase;

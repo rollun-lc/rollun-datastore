@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace rollun\test\unit\DataStore\DataStore\Csv\EdgeCases;
+namespace rollun\test\unit\DataStore\DataStore\Csv\Import\EdgeCases;
 
 use Ajgl\Csv\Rfc\CsvRfcUtils;
 use PHPUnit\Framework\TestCase;

@@ -1,6 +1,6 @@
 <?php
 
-namespace rollun\test\unit\DataStore\DataStore\Csv\LineBreak;
+namespace rollun\test\unit\DataStore\DataStore\Csv\Import\LineBreak;
 
 use PHPUnit\Framework\TestCase;
 use rollun\datastore\DataStore\CsvBase;
