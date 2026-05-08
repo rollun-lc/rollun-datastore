@@ -16,7 +16,7 @@ class ReadHandlerTest extends BaseHandlerTest
 {
     protected function createObject(DataStoresInterface $dataStore = null)
     {
-        return new ReadHandler(is_null($dataStore) ? $this->createDataStoreEmptyMock() : $dataStore);
+        return new ReadHandler($dataStore ?? $this->createDataStoreEmptyMock());
     }
 
     public function methodProvider()

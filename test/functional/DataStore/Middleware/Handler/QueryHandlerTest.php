@@ -21,7 +21,7 @@ class QueryHandlerTest extends BaseHandlerTest
 {
     protected function createObject(DataStoresInterface $dataStore = null)
     {
-        return new QueryHandler(is_null($dataStore) ? $this->createDataStoreEmptyMock() : $dataStore);
+        return new QueryHandler($dataStore ?? $this->createDataStoreEmptyMock());
     }
 
     public function methodProvider()
