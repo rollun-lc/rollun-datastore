@@ -68,6 +68,7 @@
     "code-sniffer": "phpcs .",
     "code-beautiful": "phpcbf .",
     "server": "php -S 0.0.0.0:8000 -t public public/index.php",
-    "rector": "rector process --dry-run"
+    "rector": "rector process --dry-run",
+    "rector-fix": "rector process"
   }
 }
