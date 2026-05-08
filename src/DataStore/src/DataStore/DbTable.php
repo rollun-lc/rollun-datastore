@@ -708,11 +708,18 @@ class DbTable extends DataStoreAbstract
         // Collect and validate records
         $recordsMap = []; // [id => [column => value, ...]]
         $allColumns = []; // Track all columns across all records
+        // Keep an ordered list of original IDs separately. Cannot rely on
+        // array_keys($recordsMap): PHP normalizes canonical numeric-string keys
+        // to int, which then renders unquoted in IN-clauses and lets MySQL
+        // implicit-cast varchar PKs to numbers (matching unintended siblings
+        // like '49956-2' for input '49956').
+        $ids = [];
 
         foreach ($records as $key => $record) {
             $extracted = $this->validateAndExtractRecordData($record, $key, $identifier, $recordsMap);
 
             $recordsMap[$extracted['id']] = $extracted['data'];
+            $ids[] = $extracted['id'];
             $this->collectUniqueColumns($extracted['data'], $allColumns);
         }
 
@@ -720,8 +727,17 @@ class DbTable extends DataStoreAbstract
             throw new DataStoreException('No valid records to update');
         }
 
-        $ids = array_keys($recordsMap);
         $columns = array_keys($allColumns);
+
+        // Reject input where every record only contains the PK and no other
+        // columns to update. Without this guard buildValuesRowUpdateSql()
+        // produces an UPDATE with an empty SET clause and the server returns
+        // a syntax error, which then surfaces as an opaque DataStoreException.
+        if (empty($columns)) {
+            throw new DataStoreException(
+                "[{$this->dbTable->getTable()}]No columns to update — every record contained only the primary key."
+            );
+        }
 
         $this->beginTransaction();
 
@@ -737,6 +753,26 @@ class DbTable extends DataStoreAbstract
                 $missingIdsList = implode(', ', $missingIds);
                 throw new DataStoreException(
                     "[{$this->dbTable->getTable()}]Can't update items with ids: {$missingIdsList}. Records not found."
+                );
+            }
+
+            // Symmetric invariant: array_diff is one-sided and only detects
+            // missing IDs, not phantoms. Most common trigger of a phantom is
+            // a caller passing an int for a varchar PK (or any path that lets
+            // an int value reach the IN-clause): SqlConditionBuilder renders
+            // ints unquoted, MySQL implicit-casts the varchar column to a
+            // number, and rows whose PK numeric-prefix matches are returned
+            // as well (e.g. input 49956 matches both '49956' and '49956-2').
+            // Collation-driven phantoms (PAD SPACE, case-insensitive) cannot
+            // produce this on a real PK column because the unique constraint
+            // itself uses the column collation, so collation-equal rows
+            // cannot coexist — listed only for completeness.
+            if (count($existingIds) !== count($ids)) {
+                throw new DataStoreException(
+                    "[{$this->dbTable->getTable()}]Lock-select returned more rows than requested. "
+                    . "Likely cause: numeric implicit-coercion in WHERE (e.g. int value compared "
+                    . "against varchar PK) matched unintended sibling rows. "
+                    . "Requested " . count($ids) . ", got " . count($existingIds) . "."
                 );
             }
 
@@ -820,6 +856,22 @@ class DbTable extends DataStoreAbstract
         $parameters = [];
 
         foreach ($existingIds as $id) {
+            // Defensive guard: under realistic driver behavior this branch is
+            // unreachable after the count-invariant in multiUpdate(). PHP's
+            // array_key_exists performs symmetric coercion between canonical
+            // numeric-strings and ints, so $recordsMap[int(49956)] is found
+            // by lookup '49956' and vice versa. The guard exists only to
+            // convert any future structural mismatch (driver returning a
+            // type the key cannot resolve, e.g. float for a non-truncatable
+            // value) into a clear exception instead of `array_key_exists()
+            // ... null given` TypeError on the next line.
+            if (!array_key_exists($id, $recordsMap)) {
+                throw new DataStoreException(
+                    "[{$this->dbTable->getTable()}]Inconsistent state: id '{$id}' returned by "
+                    . "SELECT FOR UPDATE but not present in input map."
+                );
+            }
+
             $rowValues = [$id]; // First value is the ID
             $rowFlags = [];     // Flags indicating which columns to update
 
