@@ -647,7 +647,10 @@ class DbTableTest extends TestCase
         $object->create(['id' => 1, 'name' => 'name1', 'surname' => 'surname1']);
 
         $this->expectException(DataStoreException::class);
-        $this->expectExceptionMessageMatches("/Can't multi update records/");
+        // The early guard rejects PK-only input before any SQL is built,
+        // producing a specific message instead of a server-side syntax error
+        // surfaced via the generic "Can't multi update records" wrapper.
+        $this->expectExceptionMessageMatches('/No columns to update/');
 
         try {
             $object->multiUpdate([
@@ -657,6 +660,133 @@ class DbTableTest extends TestCase
             // Record should remain unchanged when update fails
             $this->assertEquals(['id' => 1, 'name' => 'name1', 'surname' => 'surname1'], $this->read(1));
         }
+    }
+
+    /**
+     * Recreate the test table with a VARCHAR primary key named `sku`.
+     * Used by the multiUpdate regression tests below — the default fixture
+     * has an INT PK which cannot reproduce the numeric-prefix sibling bug.
+     */
+    private function recreateTableWithVarcharPk(): TableGateway
+    {
+        $config = [
+            'sku' => [
+                'field_type' => 'Varchar',
+                'field_params' => [
+                    'length' => 64,
+                    'nullable' => false,
+                ],
+                'field_primary_key' => true,
+            ],
+            'name' => [
+                'field_type' => 'Varchar',
+                'field_params' => [
+                    'length' => 255,
+                    'nullable' => true,
+                ],
+            ],
+        ];
+
+        if ($this->mysqlManager->hasTable($this->tableName)) {
+            $this->mysqlManager->deleteTable($this->tableName);
+        }
+        $this->mysqlManager->createTable($this->tableName, $config);
+
+        $adapter = $this->container->get('db');
+        $this->tableGateway = new TableGateway($this->tableName, $adapter);
+        return $this->tableGateway;
+    }
+
+    /**
+     * Read a row by its varchar `sku` PK directly through TableGateway.
+     */
+    private function readBySku(string $sku): ?array
+    {
+        $resultSet = $this->tableGateway->select(['sku' => $sku]);
+        $result = $resultSet->toArray();
+        return count($result) ? $result[0] : null;
+    }
+
+    /**
+     * Canonical regression for the multiUpdate sibling-row bug.
+     *
+     * Before the fix: PHP coerced the canonical numeric-string array key
+     * '49956' to int(49956); the int reached the IN-clause unquoted; MySQL
+     * implicit-cast the varchar column and matched both '49956' and '49956-2';
+     * the build loop then crashed reading $recordsMap['49956-2'] which did
+     * not exist.
+     *
+     * After the fix: $ids preserves the caller's string type, the IN-clause
+     * is rendered quoted, MySQL does an exact string compare, and only the
+     * intended row is updated.
+     */
+    public function testMultiUpdateOnVarcharPkDoesNotTouchNumericPrefixSibling(): void
+    {
+        $this->recreateTableWithVarcharPk();
+        $this->tableGateway->insert(['sku' => '49956',   'name' => 'orig-A']);
+        $this->tableGateway->insert(['sku' => '49956-2', 'name' => 'orig-B']);
+
+        $object = new DbTable($this->tableGateway, false, null, 'sku');
+        $ids = $object->multiUpdate([
+            ['sku' => '49956', 'name' => 'updated-A'],
+        ]);
+
+        $this->assertSame(['49956'], $ids);
+        $this->assertSame('updated-A', $this->readBySku('49956')['name']);
+        $this->assertSame('orig-B', $this->readBySku('49956-2')['name']);
+    }
+
+    /**
+     * Locks in the count-invariant guard introduced as part of the fix.
+     *
+     * If a caller passes an integer for a varchar PK while a numeric-prefix
+     * sibling row exists, the SqlConditionBuilder still renders the int
+     * unquoted (the int-passthrough in prepareFieldValue is intentionally
+     * left untouched in this hotfix to avoid a wider blast radius). MySQL
+     * then matches the sibling. multiUpdate must detect the phantom and
+     * fail loud, rolling back the transaction without touching either row.
+     *
+     * If a future "optimization" drops the count check this test catches it.
+     */
+    public function testMultiUpdateRollsBackWhenIntCallerCausesPhantomMatch(): void
+    {
+        $this->recreateTableWithVarcharPk();
+        $this->tableGateway->insert(['sku' => '49956',   'name' => 'orig-A']);
+        $this->tableGateway->insert(['sku' => '49956-2', 'name' => 'orig-B']);
+
+        $object = new DbTable($this->tableGateway, false, null, 'sku');
+
+        $this->expectException(DataStoreException::class);
+        $this->expectExceptionMessageMatches('/Lock-select returned more rows/');
+
+        try {
+            $object->multiUpdate([
+                ['sku' => 49956, 'name' => 'should-not-apply'],
+            ]);
+        } finally {
+            $this->assertSame('orig-A', $this->readBySku('49956')['name']);
+            $this->assertSame('orig-B', $this->readBySku('49956-2')['name']);
+        }
+    }
+
+    /**
+     * Non-canonical numeric-string PKs (leading zero, etc.) were never
+     * affected by PHP's int-coercion of array keys — '00100' stays as a
+     * string key. The fix reshuffled how $ids is collected; this test
+     * confirms it did not accidentally regress that path.
+     */
+    public function testMultiUpdateOnVarcharPkPreservesLeadingZeroId(): void
+    {
+        $this->recreateTableWithVarcharPk();
+        $this->tableGateway->insert(['sku' => '00100', 'name' => 'orig']);
+
+        $object = new DbTable($this->tableGateway, false, null, 'sku');
+        $ids = $object->multiUpdate([
+            ['sku' => '00100', 'name' => 'updated'],
+        ]);
+
+        $this->assertSame(['00100'], $ids);
+        $this->assertSame('updated', $this->readBySku('00100')['name']);
     }
 
     public function testWriteLog()
