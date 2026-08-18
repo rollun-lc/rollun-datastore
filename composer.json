@@ -24,7 +24,7 @@
     "rollun-com/rollun-logger": "^8.0.0",
     "laminas/laminas-http": "^2.15.1",
     "laminas/laminas-servicemanager": "^3.10",
-    "laminas/laminas-eventmanager": "^3.14",
+    "laminas/laminas-eventmanager": "^3.11",
     "laminas/laminas-db": "^2.13.4",
     "laminas/laminas-diactoros": "^2.8.0",
     "laminas/laminas-stratigility": "^3.5.0",
